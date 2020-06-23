@@ -17,6 +17,7 @@ class CreateLdCourseLiveChildsTable extends Migration
         Schema::create('ld_course_live_childs', function (Blueprint $table) {
             //字段设置部分
             $table->increments('id')->comment('自增id');
+            $table->integer('class_id')->default(0)->comment('课次ID');
             $table->integer('live_id')->default(0)->comment('直播ID');
             $table->integer('admin_id')->default(0)->comment('操作员id');
             $table->string('course_name' , 255)->default('')->comment('课程名称');
@@ -60,7 +61,7 @@ class CreateLdCourseLiveChildsTable extends Migration
             $table->engine  = 'InnoDB';
         });
         //设置表注释
-        DB::statement("alter table `ld_course_live_childs` comment '课程直播表'");
+        DB::statement("alter table `ld_course_live_childs` comment '课次欢拓关联表'");
     }
 
     /**
