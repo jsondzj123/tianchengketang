@@ -33,13 +33,13 @@ class CoursesubjectController extends Controller {
        if(!isset($data) || empty($data)){
            return response()->json(['code' => 201 , 'msg' => '参数有误']);
        }
-       if(isset($data['subject_name']) || empty($data['subject_name'])){
+       if(!isset($data['subject_name']) || empty($data['subject_name'])){
            return response()->json(['code' => 202 , 'msg' => '学科名称不能为空']);
        }
-       if(isset($data['description']) || empty($data['description'])){
+       if(!isset($data['description']) || empty($data['description'])){
            return response()->json(['code' => 202 , 'msg' => '学科描述不能为空']);
        }
-       if(isset($data['subject_cover']) || empty($data['subject_cover'])){
+       if(!isset($data['subject_cover']) || empty($data['subject_cover'])){
            return response()->json(['code' => 202 , 'msg' => '学科封面不能为空']);
        }
        $add = CouresSubject::subjectAdd($user_id,$school_id,$data);
