@@ -374,10 +374,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('exitDelForId', 'ArticletypeController@exitDelForId');//文章分类删除
         $router->post('exitTypeForId', 'ArticletypeController@exitTypeForId');//文章分类修改
         $router->post('OnelistType', 'ArticletypeController@OnelistType');//单条查询
-        $router->post('ceshi', 'ArticletypeController@ceshi');//ceshi
-
-
-
     });
     //订单&支付模块(szw)
     $router->group(['prefix' => 'order'], function () use ($router) {

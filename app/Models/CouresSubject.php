@@ -19,32 +19,22 @@ class CouresSubject extends Model {
          * @param  ctime   2020/6/24 10:44
          * return  array
          */
-    public static function subjectList($id,$school_status = 1,$school_id = 1){
+    public static function subjectList($school_status = 1,$school_id = 1){
         $where['is_del'] = 0;
         $where['parent_id'] = 0;
        if($school_status != 1){
            $where['school_id'] = $school_id;
        }
-       if($id != 0){
-           $one =self::select('id','subject_name','description','is_open')
-               ->where($where)
-               ->get();
-           $two = self::select('id','subject_name','description','is_open')
-               ->where(['parent_id'=>$id,'is_del'=>0])->get();
-           $list['one'] = $one;
-           $list['two'] = $two;
-           return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
-       }else{
-           $list =self::select('id','subject_name','description','is_open')
-               ->where($where)
-               ->get();
-           foreach ($list as $k=>&$v){
-               $sun = self::select('id','subject_name','is_open')
-                   ->where(['parent_id'=>$v['id']])->get();
-               $v['subset'] = $sun;
-           }
-           return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
+       $list =self::select('id','subject_name','description','is_open')
+           ->where($where)
+           ->orderByDesc('id')
+           ->get();
+       foreach ($list as $k=>&$v){
+           $sun = self::select('id','subject_name','is_open')
+               ->where(['parent_id'=>$v['id'],'is_del'=>0])->get();
+           $v['subset'] = $sun;
        }
+       return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
     }
     //添加
     public static function subjectAdd($user_id,$school_id,$data){
@@ -78,11 +68,7 @@ class CouresSubject extends Model {
     }
     //删除
     public static function subjectDel($user_id,$data){
-        $find = self::where(['id'=>$data['id']])->first();
-        if($find['is_del'] == 1){
-            return ['code' => 200 , 'msg' => '已删除'];
-        }
-        $del = self::where(['id'=>$data['id']])->update(['is_del'=>1]);
+        $del = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
         if($del){
             //添加日志操作
             AdminLog::insertAdminLog([
@@ -150,5 +136,17 @@ class CouresSubject extends Model {
         }else{
             return ['code' => 202 , 'msg' => '修改失败'];
         }
+    }
+    //课程模块 条件显示
+    public static function couresWhere($id = 0){
+        $one = self::where(['is_del'=>0,'parent_id'=>0])->orderByDesc('id')->get();
+        if($id == 0){
+            $two = self::where(['is_del'=>0,'parent_id'=>$one[0]['id']])->orderByDesc('id')->get();
+        }else{
+            $two = self::where(['is_del'=>0,'parent_id'=>$id])->orderByDesc('id')->get();
+        }
+        $list['one'] = $one;
+        $list['two'] = $two;
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
     }
 }
