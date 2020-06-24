@@ -21,6 +21,7 @@ class CouresSubject extends Model {
          */
     public static function subjectList($school_status,$school_id){
         $where['is_del'] = 0;
+        $where['parent_id'] = 0;
            if($school_status != 1){
                $where['school_id'] = $school_id;
            }
@@ -42,6 +43,7 @@ class CouresSubject extends Model {
             return ['code' => 203 , 'msg' => '此学科大类已存在'];
         }
         $add = self::insert(['admin_id' => $user_id,
+                          'parent_id' => $data['parent_id'],
                           'school_id' => $school_id,
                           'subject_name' => $data['subject_name'],
                           'subject_cover' => $data['subject_cover'],

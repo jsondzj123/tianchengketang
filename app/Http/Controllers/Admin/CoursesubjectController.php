@@ -42,6 +42,9 @@ class CoursesubjectController extends Controller {
        if(!isset($data['subject_cover']) || empty($data['subject_cover'])){
            return response()->json(['code' => 202 , 'msg' => '学科封面不能为空']);
        }
+       if(!isset($data['parent_id']) || empty($data['parent_id'])){
+           $data['parent_id'] = 0;
+       }
        $add = CouresSubject::subjectAdd($user_id,$school_id,$data);
        return response()->json($add);
    }
