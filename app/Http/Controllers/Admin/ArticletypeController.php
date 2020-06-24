@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Articletype;
+use App\Models\CouresSubject;
 
 class ArticletypeController extends Controller {
     /*

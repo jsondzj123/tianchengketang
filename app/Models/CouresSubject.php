@@ -19,20 +19,23 @@ class CouresSubject extends Model {
          * @param  ctime   2020/6/24 10:44
          * return  array
          */
-    public static function subjectList($school_status,$school_id){
+    public static function subjectList($id,$school_status = 1,$school_id = 1){
         $where['is_del'] = 0;
         $where['parent_id'] = 0;
-           if($school_status != 1){
-               $where['school_id'] = $school_id;
-           }
-           $list =self::select('id','subject_name','description','is_open')
-               ->where($where)
-               ->get();
-           foreach ($list as $k=>&$v){
-                $sun = self::select('id','subject_name','is_open')
-                    ->where(['parent_id'=>$v['id']])->get();
-                $v['subset'] = $sun;
-           }
+       if($school_status != 1){
+           $where['school_id'] = $school_id;
+       }
+       if($id != 0){
+           $where['id'] = $id;
+       }
+       $list =self::select('id','subject_name','description','is_open')
+           ->where($where)
+           ->get();
+       foreach ($list as $k=>&$v){
+            $sun = self::select('id','subject_name','is_open')
+                ->where(['parent_id'=>$v['id']])->get();
+            $v['subset'] = $sun;
+       }
         return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
     }
     //添加
