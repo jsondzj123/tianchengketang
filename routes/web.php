@@ -348,6 +348,15 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
         $router->get('export', 'CommonController@doExportExamLog'); //导入导出demo
     });
+    //学科模块（重构）（szw）
+    $router->group(['prefix' => 'coursesubject'], function () use ($router) {
+        $router->post('subjectList', 'CoursesubjectController@subjectList');//学科列表
+        $router->post('subjectAdd', 'CoursesubjectController@subjectAdd');//学科添加
+        $router->post('subjectDel', 'CoursesubjectController@subjectDel');//学科删除
+        $router->post('subjectOnes', 'CoursesubjectController@subjectOnes');//学科单条信息
+        $router->post('subjectUpdate', 'CoursesubjectController@subjectUpdate');//学科修改
+        $router->post('subjectForStatus', 'CoursesubjectController@subjectForStatus');//学科状态修改
+    });
     //运营模块(szw)
     $router->group(['prefix' => 'article'], function () use ($router) {
         /*------------文章模块---------------------*/
