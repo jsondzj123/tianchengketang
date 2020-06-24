@@ -61,7 +61,7 @@ class CoursesubjectController extends Controller {
        if(!isset($data) || empty($data)){
            return response()->json(['code' => 201 , 'msg' => '参数有误']);
        }
-       if(isset($data['id']) || empty($data['id'])){
+       if(!isset($data['id']) || empty($data['id'])){
            return response()->json(['code' => 202 , 'msg' => 'id不能为空']);
        }
        $del = CouresSubject::subjectDel($user_id,$data);
@@ -78,7 +78,7 @@ class CoursesubjectController extends Controller {
        if(!isset($data) || empty($data)){
            return response()->json(['code' => 201 , 'msg' => '参数有误']);
        }
-       if(isset($data['id']) || empty($data['id'])){
+       if(!isset($data['id']) || empty($data['id'])){
            return response()->json(['code' => 202 , 'msg' => 'id不能为空']);
        }
        $find = CouresSubject::subjectOnes($data);
@@ -112,7 +112,7 @@ class CoursesubjectController extends Controller {
        if(!isset($data) || empty($data)){
            return response()->json(['code' => 201 , 'msg' => '参数有误']);
        }
-       if(isset($data['id']) || empty($data['id'])){
+       if(!isset($data['id']) || empty($data['id'])){
            return response()->json(['code' => 202 , 'msg' => 'id不能为空']);
        }
        $up = CouresSubject::subjectForStatus($user_id,$data);

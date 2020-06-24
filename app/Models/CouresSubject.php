@@ -98,6 +98,7 @@ class CouresSubject extends Model {
     }
     //修改
     public static function subjectUpdate($user_id,$data){
+        $data['update_at'] = date('Y-m-d H:i:s');
         $update = self::where(['id'=>$data['id']])->update($data);
         if($update){
             //添加日志操作
@@ -122,7 +123,7 @@ class CouresSubject extends Model {
             return ['code' => 202 , 'msg' => '无此信息'];
         }
         $status = $find['is_open'] == 1?0:1;
-        $up = self::where(['id'=>$data['id']])->update(['is_open'=>$status]);
+        $up = self::where(['id'=>$data['id']])->update(['is_open'=>$status,'update_at'=>date('Y-m-d H:i:s')]);
         if($up){
             //添加日志操作
             AdminLog::insertAdminLog([
