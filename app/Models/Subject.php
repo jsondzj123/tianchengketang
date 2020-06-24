@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 class Subject extends Model {
 
     //指定别的表名
-    public $table = 'ld_subjects';
+    public $table = 'ld_course_subject';
 
 	protected $fillable = [
         'id',
@@ -16,7 +16,7 @@ class Subject extends Model {
         'name',
         'cover',
         'description',
-        'status', 
+        'status',
     ];
 
     protected $hidden = [
