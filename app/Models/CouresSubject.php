@@ -26,17 +26,25 @@ class CouresSubject extends Model {
            $where['school_id'] = $school_id;
        }
        if($id != 0){
-           $where['id'] = $id;
+           $one =self::select('id','subject_name','description','is_open')
+               ->where($where)
+               ->get();
+           $two = self::select('id','subject_name','description','is_open')
+               ->where(['parent_id'=>$id,'is_del'=>0])->get();
+           $list['one'] = $one;
+           $list['two'] = $two;
+           return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
+       }else{
+           $list =self::select('id','subject_name','description','is_open')
+               ->where($where)
+               ->get();
+           foreach ($list as $k=>&$v){
+               $sun = self::select('id','subject_name','is_open')
+                   ->where(['parent_id'=>$v['id']])->get();
+               $v['subset'] = $sun;
+           }
+           return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
        }
-       $list =self::select('id','subject_name','description','is_open')
-           ->where($where)
-           ->get();
-       foreach ($list as $k=>&$v){
-            $sun = self::select('id','subject_name','is_open')
-                ->where(['parent_id'=>$v['id']])->get();
-            $v['subset'] = $sun;
-       }
-        return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
     }
     //添加
     public static function subjectAdd($user_id,$school_id,$data){

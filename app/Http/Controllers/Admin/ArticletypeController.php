@@ -140,4 +140,8 @@ class ArticletypeController extends Controller {
         }
         return response()->json(['code' => 200 , 'msg' => '导入成功']);
     }
+    public function ceshi(){
+        $list = CouresSubject::subjectList(8);
+        return response()->json($list);
+    }
 }
