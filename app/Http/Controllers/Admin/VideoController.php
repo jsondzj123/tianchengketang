@@ -53,42 +53,13 @@ class VideoController extends Controller {
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'subject_id' => 'required',
-            'category' => 'required',
-            'url' => 'required',
-            'mt_video_id' => 'required',
-            'mt_video_name' => 'required',
-            'mt_duration' => 'required',
-            'course_id' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return $this->response($validator->errors()->first(), 202);
+        //获取提交的参数
+        try{
+            $data = Video::AddVideo(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
-        $subjectIds = json_decode($request->input('subject_id'), true);
-        $user = CurrentAdmin::user();
-        try {
-            $video = Video::create([
-                        'admin_id' => intval($user->id),
-                        'name' => $request->input('name'),
-                        'category' => $request->input('category'),
-                        'url' => $request->input('url'),
-                        'size' => $request->input('size') ?: 0,
-                        'mt_video_id' => $request->input('mt_video_id') ?: 0,
-                        'mt_video_name' => $request->input('mt_video_name') ?: NULL,
-                        'mt_url' => $request->input('mt_url') ?: NULL,
-                        'mt_duration' => $request->input('mt_duration') ?: 0,
-                        'course_id' => $request->input('course_id') ?: 0,
-                    ]);
-            if(!empty($subjectIds)){
-                $video->subjects()->attach($subjectIds);
-            }
-        } catch (Exception $e) {
-            Log::error('创建失败:'.$e->getMessage());
-            return $this->response($e->getMessage(), 500);
-        }
-        return $this->response('创建成功');
     }
 
     /**
@@ -99,31 +70,12 @@ class VideoController extends Controller {
      * @return json
      */
     public function update(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return $this->response($validator->errors()->first(), 202);
+        try{
+            $list = Video::updateVideo(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
-        $subjectIds = json_decode($request->input('subject_id'), true);
-        try {
-            $video = Video::findOrFail($request->input('id'));
-            $video->name = $request->input('name') ?: $video->name;
-            $video->category = $request->input('category') ?: $video->category;
-            $video->url = $request->input('url') ?: $video->url;
-            $video->size = $request->input('size') ?: $video->size;
-            $video->mt_video_id = $request->input('mt_video_id') ?: $video->mt_video_id;
-            $video->mt_video_name = $request->input('mt_video_name') ?: $video->mt_video_name;
-            $video->mt_url = $request->input('mt_url') ?: $video->mt_url;
-            $video->mt_duration = $request->input('mt_duration') ?: $video->mt_duration;
-            $video->course_id = $request->input('course_id') ?: $video->course_id;
-            $video->save();
-            $video->subjects()->sync($subjectIds);
-        } catch (Exception $e) {
-            Log::error('修改失败' . $e->getMessage());
-            return $this->response("修改成功");
-        }
-        return $this->response("修改成功");
     }
 
 
@@ -173,7 +125,6 @@ class VideoController extends Controller {
         $options = [
             'course' => [
                 'start_time' => date("Y-m-d H:i",strtotime("-1 day")),
-                //'end_time' => date("Y-m-d H:i",strtotime("-1 day")),
             ] ,
         ];
         $res = $MTCloud->videoGetUploadUrl(1, 2, $request->input('title'), $request->input('video_md5'), $options);

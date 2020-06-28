@@ -14,7 +14,7 @@ class Video extends Model {
      *
      * @var array
      */
-    /*
+        /*
          * @param  获取录播资源列表
          * @param  parent_id   所属学科id
          * @param  resource_type   资源类型
@@ -197,6 +197,154 @@ class Video extends Model {
                 return ['code' => 200 , 'msg' => '删除成功'];
             }else{
                 return ['code' => 202 , 'msg' => '删除失败'];
+            }
+        }
+
+        /*
+         * @param  添加录播资源
+         * @param  parent_id   所属学科id
+         * @param  resource_type   资源类型
+         * @param  nature   资源属性
+         * @param  status   资源状态
+         * @param  resource_name   资源名称
+         * @param  id   资源id
+         * @param  author  zzk
+         * @param  ctime   2020/6/28
+         * return  array
+         */
+        public static function AddVideo($data){
+            //判断大类id
+            if(empty($data['parent_id']) || !isset($data['parent_id'])){
+                return ['code' => 201 , 'msg' => '请正确选择大类'];
+            }
+            //判断小类id
+            if(empty($data['child_id']) || !isset($data['child_id'])){
+                return ['code' => 201 , 'msg' => '请正确选择小类'];
+            }
+            //判断课程id
+            if(empty($data['course_id']) || !isset($data['course_id'])){
+                return ['code' => 201 , 'msg' => '课程id不能为空'];
+            }
+            //判断欢拓视频id
+            if(empty($data['mt_video_id']) || !isset($data['mt_video_id'])){
+                return ['code' => 201 , 'msg' => '欢拓视频id不能为空'];
+            }
+            //判断资源名称
+            if(empty($data['resource_name']) || !isset($data['resource_name'])){
+                return ['code' => 201 , 'msg' => '资源名称不能为空'];
+            }
+            //判断资源类型
+            if(empty($data['resource_type']) || !isset($data['resource_type'])){
+                return ['code' => 201 , 'msg' => '资源类型不能为空'];
+            }
+            //判断视频时长
+            if(empty($data['mt_duration']) || !isset($data['mt_duration'])){
+                return ['code' => 201 , 'msg' => '视频时长不能为空'];
+            }
+            //判断资源url
+            if(empty($data['resource_url']) || !isset($data['resource_url'])){
+                return ['code' => 201 , 'msg' => '资源url不能为空'];
+            }
+            //判断资源大小
+            if(empty($data['resource_size']) || !isset($data['resource_size'])){
+                return ['code' => 201 , 'msg' => '资源大小不能为空'];
+            }
+            //缓存查出用户id和分校id
+            $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+            $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+
+            //nature资源属性
+            $data['nature'] = 0;
+            $data['create_at'] = date('Y-m-d H:i:s');
+            $data['update_at'] = date('Y-m-d H:i:s');
+            $add = self::insert($data);
+            if($add){
+                //添加日志操作
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $data['admin_id']  ,
+                    'module_name'    =>  'Video' ,
+                    'route_url'      =>  'admin/Video/add' ,
+                    'operate_method' =>  'insert' ,
+                    'content'        =>  '新增数据'.json_encode($data) ,
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                return ['code' => 200 , 'msg' => '添加成功'];
+            }else{
+                return ['code' => 202 , 'msg' => '添加失败'];
+            }
+        }
+/*
+         * @param  更新录播资源
+         * @param  id 资源id
+         * @param  parent_id   所属学科id
+         * @param  resource_type   资源类型
+         * @param  nature   资源属性
+         * @param  status   资源状态
+         * @param  resource_name   资源名称
+         * @param  id   资源id
+         * @param  author  zzk
+         * @param  ctime   2020/6/28
+         * return  array
+         */
+        public static function updateVideo($data){
+            //判断大类id
+            if(empty($data['parent_id']) || !isset($data['parent_id'])){
+                return ['code' => 201 , 'msg' => '请正确选择大类'];
+            }
+            //判断小类id
+            if(empty($data['child_id']) || !isset($data['child_id'])){
+                return ['code' => 201 , 'msg' => '请正确选择小类'];
+            }
+            //判断课程id
+            if(empty($data['course_id']) || !isset($data['course_id'])){
+                return ['code' => 201 , 'msg' => '课程id不能为空'];
+            }
+            //判断欢拓视频id
+            if(empty($data['mt_video_id']) || !isset($data['mt_video_id'])){
+                return ['code' => 201 , 'msg' => '欢拓视频id不能为空'];
+            }
+            //判断资源名称
+            if(empty($data['resource_name']) || !isset($data['resource_name'])){
+                return ['code' => 201 , 'msg' => '资源名称不能为空'];
+            }
+            //判断资源类型
+            if(empty($data['resource_type']) || !isset($data['resource_type'])){
+                return ['code' => 201 , 'msg' => '资源类型不能为空'];
+            }
+            //判断视频时长
+            if(empty($data['mt_duration']) || !isset($data['mt_duration'])){
+                return ['code' => 201 , 'msg' => '视频时长不能为空'];
+            }
+            //判断资源url
+            if(empty($data['resource_url']) || !isset($data['resource_url'])){
+                return ['code' => 201 , 'msg' => '资源url不能为空'];
+            }
+            //判断资源大小
+            if(empty($data['resource_size']) || !isset($data['resource_size'])){
+                return ['code' => 201 , 'msg' => '资源大小不能为空'];
+            }
+            $id = $data['id'];
+            unset($data['id']);
+            //获取后端的操作员id
+            $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+            $data['admin_id'] = $admin_id;
+            $data['update_at'] = date('Y-m-d H:i:s');
+            $res = self::where(['id'=>$id])->update($data);
+            if($res){
+                //添加日志操作
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $admin_id  ,
+                    'module_name'    =>  'Video' ,
+                    'route_url'      =>  'admin/updateVideo' ,
+                    'operate_method' =>  'update' ,
+                    'content'        =>  '修改id'.$id.'的内容,'.json_encode($data),
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                return ['code' => 200 , 'msg' => '更新成功'];
+            }else{
+                return ['code' => 202 , 'msg' => '更新失败'];
             }
         }
 
