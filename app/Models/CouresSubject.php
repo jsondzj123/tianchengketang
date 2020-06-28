@@ -145,8 +145,8 @@ class CouresSubject extends Model {
         }else{
             $two = self::where(['is_del'=>0,'parent_id'=>$id])->orderByDesc('id')->get();
         }
-        $list['one'] = $one;
-        $list['two'] = $two;
+        $list['bigsubject'] = $one;
+        $list['littlesubject'] = $two;
         return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
     }
 }

@@ -357,6 +357,17 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('subjectUpdate', 'CoursesubjectController@subjectUpdate');//学科修改
         $router->post('subjectForStatus', 'CoursesubjectController@subjectForStatus');//学科状态修改
     });
+    //课程模块（重构）（szw）
+    $router->group(['prefix' => 'course'], function () use ($router) {
+        $router->post('coursesubject', 'CourseController@coursesubject');//学科列表
+
+        $router->post('courseList', 'CourseController@courseList');//课程列表
+        $router->post('courseAdd', 'CourseController@courseAdd');//课程添加
+        $router->post('courseDel', 'CourseController@courseDel');//课程删除
+        $router->post('courseFirst', 'CourseController@courseFirst');//课程单条信息
+        $router->post('courseUpdate', 'CourseController@courseUpdate');//课程修改
+        $router->post('courseRecommend', 'CourseController@courseRecommend');//课程推荐
+    });
     //运营模块(szw)
     $router->group(['prefix' => 'article'], function () use ($router) {
         /*------------文章模块---------------------*/
