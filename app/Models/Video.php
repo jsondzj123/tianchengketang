@@ -115,7 +115,7 @@ class Video extends Model {
             if(empty($data['id'])){
                 return ['code' => 201 , 'msg' => '录播资源id不合法' , 'data' => []];
             }
-            $one = self::where("is_del",0)->where("id",$data['id'])->first()->toArray();
+            $one = self::where("is_del",0)->where("id",$data['id'])->first();
             return ['code' => 200 , 'msg' => '获取录播资源列表成功' , 'data' => $one];
 
         }
