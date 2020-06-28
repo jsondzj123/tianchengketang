@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Tools\CurrentAdmin;
 use App\Models\AdminLog;
 use Illuminate\Support\Facades\DB;
+use App\Models\CouresSubject;
 class SchoolController extends Controller {
   
      /*
@@ -566,8 +567,27 @@ class SchoolController extends Controller {
             if ($validator->fails()) {
                 return response()->json(json_decode($validator->errors()->first(),1));
             }
-            $result = School::getSchoolLessonList(self::$accept_data);
+            $result = School::getSchoolLessonList(self::$accept_data['school_id']);
             return response()->json($result);
     }
+    /*
+     * @param  description 获取分校课程大小学科
+     * @param  参数说明       body包含以下参数[
+     *      'id'=>学科id
+     * ]
+     * @param author    lys
+     * @param ctime     2020-05-11
+     */
+     public function getSubjectByid(){
+            $validator = Validator::make(self::$accept_data, 
+                ['id' => 'required|integer'],
+                School::message());
+            if ($validator->fails()) {
+                return response()->json(json_decode($validator->errors()->first(),1));
+            }
+            $result = School::getSubjectByid(self::$accept_data['id']);
+            return response()->json($result);
+    }
+
 
 }

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 use App\Models\Teacher;
 use App\Models\Admin;
+use App\Models\CouresSubject;
 use App\Tools\CurrentAdmin;
 class School extends Model {
     //指定别的表名
@@ -182,7 +183,37 @@ class School extends Model {
                         ]
             ];
             return $arr;
-    }  
+    } 
+
+    /*
+     * @param  获取分校课程列表
+     * @param  author  lys
+     * @param  ctime   2020/6/24
+     * return  array
+     */ 
+    public static function getSchoolLessonList($school_id){
+        if(empty($school_id) || $school_id <=0){
+            return ['code'=>201,'msg'=>'数据为空或数据有误'];
+        }
+       $subjectArr = CouresSubject::where(['school_id'=>$school_id,'parent_id'=>0,'is_open'=>0,'is_del'=>0])->get();
+       
+       dd($subjectArr);
+    }
+
+    /*
+     * @param  查询学科小类
+     * @param  author  lys
+     * @param  ctime   2020/6/24
+     * return  array
+     */ 
+    public function getSubjectByPid($pid){
+        $subjectArr = CouresSubject::where(['parent_id'=>$pid,'is_open'=>0,'is_del'=>0])->get();
+        if($subjectArr){
+            return ['code'=>201,'msg'=>'数据不存在'];
+        }
+        return ['code'=>200,'msg'=>'获取列表成功','data'=>$subjectArr];
+    }
+
 }
 
 
