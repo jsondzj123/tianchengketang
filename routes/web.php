@@ -374,9 +374,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('exitDelForId', 'ArticletypeController@exitDelForId');//文章分类删除
         $router->post('exitTypeForId', 'ArticletypeController@exitTypeForId');//文章分类修改
         $router->post('OnelistType', 'ArticletypeController@OnelistType');//单条查询
-
-
-
     });
     //订单&支付模块(szw)
     $router->group(['prefix' => 'order'], function () use ($router) {
@@ -454,8 +451,23 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getAdminById', 'SchoolController@postAdminById');                      //获取分校超级管理用户信息（编辑） √√
         $router->post('doAdminUpdate', 'SchoolController@doAdminUpdate');                    //编辑分校超级管理用户信息   √√  +1
         $router->post('getSchoolTeacherList', 'SchoolController@getSchoolTeacherList');      //获取分校讲师列表  √√√  5.11
+
+        $router->post('getLessonList', 'SchoolController@getSchoolLessonList');      //获取分校课程列表
+
     });
     //end 网校系统     lys
+
+    //课程模块（重构）【公开课】（lys）
+    $router->group(['prefix' => 'opencourse'], function () use ($router) {
+        $router->post('getList', 'OpenCourseController@getList');//公开课添加 
+        $router->post('doInsertOpenCourse', 'OpenCourseController@doInsertOpenCourse');//公开课添加
+        $router->post('doUpdateRecomend', 'OpenCourseController@doUpdateRecomend');//是否推荐
+        $router->post('doUpdateStatus', 'OpenCourseController@doUpdateStatus');//修改状态
+        $router->post('doUpdateDel', 'OpenCourseController@doUpdateDel');//是否删除
+        $router->post('getOpenLessById', 'OpenCourseController@getOpenLessById');//修改(获取)
+        $router->post('doOpenLessById', 'OpenCourseController@doOpenLessById');//修改
+    });
+ 
 });
 /*****************end**********************/
 
