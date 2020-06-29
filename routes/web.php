@@ -367,6 +367,16 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseFirst', 'CourseController@courseFirst');//课程单条信息
         $router->post('courseUpdate', 'CourseController@courseUpdate');//课程修改
         $router->post('courseRecommend', 'CourseController@courseRecommend');//课程推荐
+
+        //录播课程
+        $router->post('chapterList', 'CourseController@chapterList');//章/节列表
+        $router->post('chapterAdd', 'CourseController@chapterAdd');//章添加
+        $router->post('chapterDel', 'CourseController@chapterDel');//章/节删除
+        $router->post('chapterUpdate', 'CourseController@chapterUpdate');//章修改
+        $router->post('sectionFirst', 'CourseController@sectionFirst');//节详情
+        $router->post('sectionAdd', 'CourseController@sectionAdd');//节添加
+        $router->post('sectionUpdate', 'CourseController@sectionUpdate');//节修改
+        $router->post('sectionDataDel', 'CourseController@sectionDataDel');//节资料删除
     });
     //运营模块(szw)
     $router->group(['prefix' => 'article'], function () use ($router) {
@@ -470,7 +480,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
     //课程模块（重构）【公开课】（lys）
     $router->group(['prefix' => 'opencourse'], function () use ($router) {
-        $router->post('getList', 'OpenCourseController@getList');//公开课添加 
+        $router->post('getList', 'OpenCourseController@getList');//公开课添加
         $router->post('doInsertOpenCourse', 'OpenCourseController@doInsertOpenCourse');//公开课添加
         $router->post('doUpdateRecomend', 'OpenCourseController@doUpdateRecomend');//是否推荐
         $router->post('doUpdateStatus', 'OpenCourseController@doUpdateStatus');//修改状态
@@ -478,7 +488,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getOpenLessById', 'OpenCourseController@getOpenLessById');//修改(获取)
         $router->post('doOpenLessById', 'OpenCourseController@doOpenLessById');//修改
     });
- 
+
 });
 /*****************end**********************/
 

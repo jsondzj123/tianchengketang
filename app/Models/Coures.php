@@ -30,11 +30,11 @@ class Coures extends Model {
             }
             //学科大类
             if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
-                $query->where('parent_id',$data['school_id']);
+                $query->where('parent_id',$data['coursesubjectOne']);
             }
             //学科小类
             if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
-                $query->where('child_id',$data['school_id']);
+                $query->where('child_id',$data['coursesubjectTwo']);
             }
             //状态
             if(!empty($data['status']) && $data['status'] != ''){
@@ -114,11 +114,8 @@ class Coures extends Model {
         if(empty($data) || !isset($data)){
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
-        if(!isset($data['parent_id']) || empty($data['parent_id'])){
-            return ['code' => 201 , 'msg' => '请选择学科大类'];
-        }
-        if(!isset($data['child_id']) || empty($data['child_id'])){
-            return ['code' => 201 , 'msg' => '请选择学科大类'];
+        if(!isset($data['parent']) || empty($data['parent'])){
+            return ['code' => 201 , 'msg' => '请选择学科'];
         }
         if(!isset($data['title']) || empty($data['title'])){
             return ['code' => 201 , 'msg' => '学科名称不能为空'];
@@ -148,11 +145,12 @@ class Coures extends Model {
         $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
         DB::beginTransaction();
         //入课程表  课程授课表 课程讲师表
+
         $couser = self::insertGetId([
             'admin_id' => $user_id,
             'school_id' => $school_id,
-            'parent_id' => $data['parent_id'],
-            'child_id' => $data['child_id'],
+            'parent_id' => $data['parent'][0],
+            'child_id' => isset($data['parent'][1])?$data['parent'][1]:0,
             'title' => $data['title'],
             'keywords' => isset($data['keywords'])?$data['keywords']:'',
             'cover' => $data['cover'],
@@ -164,15 +162,13 @@ class Coures extends Model {
             'introduce' => $data['introduce'],
         ]);
         if($couser){
-            $method = explode(',',$data['method']);
-            foreach ($method as $k=>$v){
+            foreach ($data['method'] as $k=>$v){
                  Couresmethod::insert([
                     'course_id' => $couser,
                     'method_id' => $v
                 ]);
             }
-            $teacher = explode(',',$data['teacher']);
-            foreach ($teacher as $k=>$v){
+            foreach ($data['teacher'] as $k=>$v){
                  Couresteacher::insert([
                     'course_id' => $couser,
                     'teacher_id' => $v
@@ -255,6 +251,7 @@ class Coures extends Model {
         //修改 课程表 课程授课表 课程讲师表
         $cousermethod = isset($data['method'])?$data['method']:'';
         $couserteacher = isset($data['teacher'])?$data['teacher']:'';
+        unset($data['/admin/course/courseUpdate']);
         unset($data['method']);
         unset($data['teacher']);
         self::where(['id'=>$data['id']])->update($data);

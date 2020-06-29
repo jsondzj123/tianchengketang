@@ -96,6 +96,7 @@ class CouresSubject extends Model {
     //修改
     public static function subjectUpdate($user_id,$data){
         $data['update_at'] = date('Y-m-d H:i:s');
+        unset($data['/admin/coursesubject/subjectUpdate']);
         $update = self::where(['id'=>$data['id']])->update($data);
         if($update){
             //添加日志操作
