@@ -25,23 +25,20 @@ class OpenCourse extends Model {
             'page.integer'   => json_encode(['code'=>'202','msg'=>'页码类型不合法']),
             'limit.required' => json_encode(['code'=>'201','msg'=>'显示条数不能为空']),
             'limit.integer'  => json_encode(['code'=>'202','msg'=>'显示条数类型不合法']),
-            'parent_id.required' => json_encode(['code'=>'201','msg'=>'一级学科标识不能为空']),
-            'parent_id.integer'  => json_encode(['code'=>'202','msg'=>'一级学科标识不合法']),
-            'child_id.required' => json_encode(['code'=>'201','msg'=>'二级学科标识不能为空']),
-            'child_id.integer'  => json_encode(['code'=>'202','msg'=>'二级学科标识类型不合法']),
+            'subject.required' => json_encode(['code'=>'201','msg'=>'学科标识不能为空']),
             'title.required' => json_encode(['code'=>'201','msg'=>'课程标题不能为空']),
             // 'name.unique' => json_encode(['code'=>'205','msg'=>'学校名称已存在']),
             'keywords.required' => json_encode(['code'=>'201','msg'=>'课程关键字不能为空']),
             'cover.required' => json_encode(['code'=>'201','msg'=>'课程封面不能为空']),
-            'start_at.required' => json_encode(['code'=>'201','msg'=>'开始时间不能为空']),
-            'end_at.required' => json_encode(['code'=>'201','msg'=>'结束时间不能为空']),
-            'username.unique' => json_encode(['code'=>'205','msg'=>'账号已存在']),
+            'time.required' => json_encode(['code'=>'201','msg'=>'开课时间段不能为空']),
             'is_barrage.required' => json_encode(['code'=>'201','msg'=>'弹幕ID不能为空']),
             'is_barrage.integer' => json_encode(['code'=>'202','msg'=>'弹幕ID不合法']),
             'live_type.required' => json_encode(['code'=>'201','msg'=>'直播类型不能为空']),
             'live_type.integer' => json_encode(['code'=>'202','msg'=>'直播类型不合法']),
             'edu_teacher_id.required'  => json_encode(['code'=>'201','msg'=>'教务标识不能为空']),
             'lect_teacher_id.required'  => json_encode(['code'=>'201','msg'=>'讲师标识不能为空']),
+            'subject.required'  => json_encode(['code'=>'201','msg'=>'学科不能为空']),
+            'introduce.required'  => json_encode(['code'=>'201','msg'=>'课程简介不能为空']),
         ];
     }
 
@@ -74,9 +71,9 @@ class OpenCourse extends Model {
         $where['status'] =  isset($body['status']) || empty($body['status']) ?'':$body['status'];
         $where['time']  =  isset($body['time']) || empty($body['time']) ?'':$body['time'];
         if(!empty($where['time'])){
-            $time = explode('-', $time);
-            $where['start_at'] = time($time[0]);
-            $where['end_at']  = time($time[1]);
+            $time = explode(',', $time);
+            $where['start_at'] =  $time[0];
+            $where['end_at']  = $time[1];
         }
         $typeArr = ['未发布','已发布','已下架','已过期'];
         $offset   = ($page - 1) * $pagesize;
@@ -125,19 +122,14 @@ class OpenCourse extends Model {
                 $query->where('is_del',0);
             })->select('id','title','cover','start_at','end_at','is_recommend','status')->offset($offset)->limit($pagesize)->get();
             foreach ($open_less_arr as $k => $v) {
-                $v['start_at'] = date('Y-m-d H:i:s',$v['start_at']);
-                $v['end_at'] = date('Y-m-d H:i:s',$v['end_at']);
+                $v['time'] = [date('Y-m-d H:i:s',$v['start_at']),date('Y-m-d H:i:s',$v['end_at'])];
                 $teacherIdArr = OpenCourseTeacher::where('course_id',$v['id'])->where('is_del',0)->get(['teacher_id']);
                 $v['teacher_name'] = Teacher::whereIn('id',$teacherIdArr)->where('is_del',0)->where('type',2)->first()['real_name'];
             }
             return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => $open_less_arr , 'total' => $open_less_count , 'pagesize' => $pagesize , 'page' => $page,'sum_page'=>$sum_page,'parent_id'=>$where['parent_id'],'child_id'=>$where['child_id'],'status'=>$where['status'],'time'=>$where['time'],'type'=>$typeArr]];          
         }
-         return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page,'sum_page'=>0,'parent_id'=>$where['parent_id'],'child_id'=>$where['child_id'],'type'=>$where['status'],'time'=>$where['time'],'type'=>$typeArr]];
-
+        return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page,'sum_page'=>0,'parent_id'=>$where['parent_id'],'child_id'=>$where['child_id'],'type'=>$where['status'],'time'=>$where['time'],'type'=>$typeArr]];
     }
-
-
-
 
 }
 

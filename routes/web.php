@@ -487,6 +487,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('doUpdateDel', 'OpenCourseController@doUpdateDel');//是否删除
         $router->post('getOpenLessById', 'OpenCourseController@getOpenLessById');//修改(获取)
         $router->post('doOpenLessById', 'OpenCourseController@doOpenLessById');//修改
+        $router->post('zhiboMethod', 'OpenCourseController@zhiboMethod');//直播类型
+
     });
 
 });

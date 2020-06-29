@@ -12,7 +12,7 @@ use App\Models\Teacher;
 
 class OpenCourseController extends Controller {
     /*
-    * @param  是否推荐
+    * @param  公开课列表
     * @param  author  lys
     * @param  ctime   2020/6/28 9:30
     * return  array
@@ -21,9 +21,21 @@ class OpenCourseController extends Controller {
 		$data = OpenCourse::getList(self::$accept_data);
 		return response()->json($data);
 	}
-
-
-
+	  /*
+    * @param  直播类型
+    * @param  author  lys
+    * @param  ctime   2020/6/28 9:30
+    * return  array
+    */
+	public function zhiboMethod(){
+		$arr = [
+			['id'=>1,'name'=>'语音云'],
+			['id'=>3,'name'=>'大班'],
+			['id'=>5,'name'=>'小班'],
+			['id'=>6,'name'=>'大班互动'],
+		];
+		return response()->json(['code'=>200,'msg'=>'Success','data'=>$arr]); 
+	}
    /*
     * @param  添加公开课
     * @param  author  lys
@@ -35,15 +47,14 @@ class OpenCourseController extends Controller {
         $openCourseArr = self::$accept_data;
         $validator = Validator::make($openCourseArr, 
                 [
-                	'parent_id' => 'required|integer',
-                	'child_id' => 'required|integer',
+                	'subject' => 'required',
                 	'title' => 'required',
                 	'keywords' => 'required',
                 	'cover' => 'required',
-                	'start_at' => 'required',
-                	'end_at' => 'required',
+                	'time' => 'required',
                 	'is_barrage' => 'required',
                 	'live_type' => 'required',
+                	'introduce'=>'required',
                 	'edu_teacher_id' => 'required',
                 	'lect_teacher_id'=>'required',
                	],
@@ -53,27 +64,30 @@ class OpenCourseController extends Controller {
         }
         try{
 	        DB::beginTransaction();
+	        $openCourseArr['parent_id'] = $openCourseArr['subject'][0]<0 ? 0: $openCourseArr['subject'][0];
+	        $openCourseArr['child_id'] = !isset($openCourseArr['subject'][1]) && $openCourseArr['subject'][1] ? 0 : $openCourseArr['subject'][1];
 	     	$eduTeacherArr = explode(',',$openCourseArr['edu_teacher_id']);
-	        $lectTeacherArr = explode(',',$openCourseArr['lect_teacher_id']);
+	        $lectTeacherId = $openCourseArr['lect_teacher_id'];
+	        $time = explode(',', $openCourseArr['time']);
+	        $openCourseArr['start_at']  = $time[0];
+	        $openCourseArr['end_at']  = $time[1];
 	        unset($openCourseArr['edu_teacher_id']);
 	        unset($openCourseArr['lect_teacher_id']);
-	        $openCourseArr['start_at']  = strtotime($openCourseArr['start_at']);
-	        $openCourseArr['end_at']  = strtotime($openCourseArr['end_at']);
+	        unset($openCourseArr['subject']);
+	        unset($openCourseArr['time']);
 	        if($openCourseArr['start_at'] >  $openCourseArr['end_at'] ){
 	        	return response()->json(['code'=>207,'msg'=>'开始时间不能大于结束时间']); 
 	        }
 	        $openCourseArr['school_id']  = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0 ;
 	        $openCourseArr['admin_id']  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
-	        $openCourseArr['describe']  = !isset($openCourseArr['describe']) ?'':$openCourseArr['describe'];
-	        $openCourseArr['introduce'] = !isset($openCourseArr['introduce']) ?'':$openCourseArr['introduce'];
+	        $openCourseArr['describe']  = isset($openCourseArr['describe']) ?$openCourseArr['describe']:'';
 	   		$openCourseArr['create_at'] = date('Y-m-d H:i:s');
 			$openCourseId = OpenCourse::insertGetId($openCourseArr);
 	        if($openCourseId <0){
 	        	DB::rollBack();
 	            return response()->json(['code'=>203,'msg'=>'公开课创建未成功']);  
 	        }
-	      
-	        $teacherArr = array_merge($eduTeacherArr,$lectTeacherArr);
+	        $teacherArr = array_push($eduTeacherArr,$lectTeacherId);
 
 	        foreach ($teacherArr as $key => $val) {
 	        	$addTeacherArr[$key]['course_id'] = (int)$openCourseId;
@@ -84,7 +98,7 @@ class OpenCourseController extends Controller {
 	       	$openCourseTeacher = new OpenCourseTeacher();
 
             $res = $openCourseTeacher->insert($addTeacherArr);
-     
+     		
             if(!$res){
             	DB::rollBack();
 	            return response()->json(['code'=>203,'msg'=>'教师创建未成功']);  
@@ -96,7 +110,6 @@ class OpenCourseController extends Controller {
 	    } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }        
-
     }
     /*
     * @param  是否推荐
@@ -259,6 +272,13 @@ class OpenCourseController extends Controller {
 	    if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
 	    	return response()->json(['code'=>207,'msg'=>'直播中，无法修改']);
 	    }
+	    $data['data']['subject'] = [];
+	   	if($data['data']['parent_id']>0){
+	   		array_push($data['data']['subject'], $data['data']['parent_id']);
+	   	} 
+	   	if($data['data']['child_id']>0){
+	   		array_push($data['data']['subject'], $data['data']['child_id']);
+	   	}                
 	    $data['data']['start_at'] = date('Y-m-d H:i:s',$data['data']['start_at']);
 	    $data['data']['end_at'] = date('Y-m-d H:i:s',$data['data']['end_at']);
 	    $teacher_id = OpenCourseTeacher::where(['course_id'=>$data['data']['id'],'is_del'=>0])->get(['teacher_id'])->toArray();   
@@ -270,11 +290,11 @@ class OpenCourseController extends Controller {
     			if($v['type'] == 1){
     				array_push($eduTeacherArr,$v['id']);
     			}else if($v['type'] == 2){
-    				array_push($lectTeacherArr,$v['id']);
+    				$data['data']['lect_teacher_id'] = $v['id'];
     			}
     		}
     	}
-    	$arr = ['openless'=>$data['data'],'eduteacher'=>$eduTeacherArr,'lecteacher'=>$lectTeacherArr];
+    	$arr = ['openless'=>$data['data'],'eduteacher'=>$eduTeacherArr];
     	return response()->json(['code'=>200,'msg'=>'获取成功','data'=>$arr]);
     }
     /*
@@ -288,15 +308,14 @@ class OpenCourseController extends Controller {
 	    $validator = Validator::make($openCourseArr, 
 	        [
 	        	'openless_id' => 'required|integer',
-	        	'parent_id' => 'required|integer',
-            	'child_id' => 'required|integer',
+	       		'subject' =>'required',
             	'title' => 'required',
             	'keywords' => 'required',
             	'cover' => 'required',
-            	'start_at' => 'required',
-            	'end_at' => 'required',
+            	'time' => 'required',
             	'is_barrage' => 'required',
             	'live_type' => 'required',
+            	'introduce' => 'required',
             	'edu_teacher_id' => 'required',
             	'lect_teacher_id'=>'required',
 	       	],
@@ -310,15 +329,20 @@ class OpenCourseController extends Controller {
 	    }
 	     try{
 	        DB::beginTransaction();
-	     	$eduTeacherArr = explode(',',$openCourseArr['edu_teacher_id']);
-	        $lectTeacherArr = explode(',',$openCourseArr['lect_teacher_id']);
+	     
+	     	$time = explode(',', $openCourseArr['time']);
+	        $openCourseArr['start_at']  = $time[0];
+	        $openCourseArr['end_at']  = $time[1];
+	        if($openCourseArr['start_at'] >  $openCourseArr['end_at'] ){
+	        	return response()->json(['code'=>207,'msg'=>'开始时间不能大于结束时间']); 
+	        }
+	        $eduTeacherArr = explode(',',$openCourseArr['edu_teacher_id']);
+	        $lectTeacherId = $openCourseArr['lect_teacher_id'];
 	        unset($openCourseArr['edu_teacher_id']);
 	        unset($openCourseArr['lect_teacher_id']);
-	        $openCourseArr['start_at']  = strtotime($openCourseArr['start_at']);
-	        $openCourseArr['end_at']  = strtotime($openCourseArr['start_at']);
+	        unset($openCourseArr['time']);
 	        $openCourseArr['admin_id']  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
 	        $openCourseArr['describe']  = !isset($openCourseArr['describe']) ?'':$openCourseArr['describe'];
-	        $openCourseArr['introduce'] = !isset($openCourseArr['introduce']) ?'':$openCourseArr['introduce'];
 	   		$openCourseArr['update_at'] = date('Y-m-d H:i:s');
 			$res = OpenCourse::where('id',$data['data']['id'])->update($openCourseArr);
 	        if(!$res){
@@ -331,7 +355,7 @@ class OpenCourseController extends Controller {
             	DB::rollBack();
 	            return response()->json(['code'=>203,'msg'=>'教师更改未成功']);  
 	        }
-	        $teacherArr = array_merge($eduTeacherArr,$lectTeacherArr);
+	        $teacherArr = array_push($eduTeacherArr,$lectTeacherId);
 	        foreach ($teacherArr as $key => $val) {
 	        	$addTeacherArr[$key]['course_id'] = (int)$openCourseId;
 	        	$addTeacherArr[$key]['teacher_id'] = $val;
@@ -365,7 +389,7 @@ class OpenCourseController extends Controller {
                 $data['start_at'],
                 $data['end_at'],
                 $data['nickname'],
-                '',
+                '',         
                 [   
                     'barrage' => $data['barrage'], 
                     'modetype' => $data['modetype'],

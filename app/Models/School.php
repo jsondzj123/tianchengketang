@@ -5,9 +5,12 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Support\Facades\DB;
 
-use App\Models\Teacher;
-use App\Models\Admin;
-use App\Models\CouresSubject;
+// use App\Models\Teacher;
+// use App\Models\Admin;
+// use App\Models\CouresSubject;
+// use App\Models\Coures;
+// use App\Models\Couresmethod;
+
 use App\Tools\CurrentAdmin;
 class School extends Model {
     //指定别的表名
@@ -23,8 +26,7 @@ class School extends Model {
         return $this->hasMany('App\Models\Admin');
     }
     //错误信息
-     public static function message()
-    {
+     public static function message(){
         return [
             'page.required'  => json_encode(['code'=>'201','msg'=>'页码不能为空']),
             'page.integer'   => json_encode(['code'=>'202','msg'=>'页码类型不合法']),
@@ -52,7 +54,6 @@ class School extends Model {
             'realname.required'=> json_encode(['code'=>'201','msg'=>'联系人不能为空']),
             'role_id.required' => json_encode(['code'=>'201','msg'=>'角色标识不能为空']),
             'role_id.integer'  => json_encode(['code'=>'202','msg'=>'角色标识类型不合法']),  
-
         ];
 
 
@@ -191,27 +192,85 @@ class School extends Model {
      * @param  ctime   2020/6/24
      * return  array
      */ 
-    public static function getSchoolLessonList($school_id){
-        if(empty($school_id) || $school_id <=0){
-            return ['code'=>201,'msg'=>'数据为空或数据有误'];
-        }
-       $subjectArr = CouresSubject::where(['school_id'=>$school_id,'parent_id'=>0,'is_open'=>0,'is_del'=>0])->get();
-       
-       dd($subjectArr);
-    }
+    public static function getSchoolLessonList($data){
 
-    /*
-     * @param  查询学科小类
-     * @param  author  lys
-     * @param  ctime   2020/6/24
-     * return  array
-     */ 
-    public function getSubjectByPid($pid){
-        $subjectArr = CouresSubject::where(['parent_id'=>$pid,'is_open'=>0,'is_del'=>0])->get();
-        if($subjectArr){
-            return ['code'=>201,'msg'=>'数据不存在'];
+        if(!isset($data['school_id']) ||empty($data['school_id']) || $data['school_id'] <=0){
+            return ['code'=>201,'msg'=>'学校标识为空'];
         }
-        return ['code'=>200,'msg'=>'获取列表成功','data'=>$subjectArr];
+        $pagesize = (int)isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 20;
+        $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
+        $offset   = ($page - 1) * $pagesize;
+        $count = $list = Coures::where(function($query) use ($data) {
+            $query->where('school_id',$data['school_id']);
+            //学科大类
+            if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
+                $query->where('parent_id',$data['coursesubjectOne']);
+            }
+            //学科小类
+            if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
+                $query->where('child_id',$data['coursesubjectTwo']);
+            }
+        })->count();
+        $type = [
+            ['id'=>1,'name'=>'直播'],
+            ['id'=>2,'name'=>'录播'],
+            ['id'=>3,'name'=>'其他'],
+        ];
+        if($count > 0){
+            $list = Coures::where(function($query) use ($data) {
+                    $query->where('school_id',$data['school_id']);
+                    //学科大类
+                    if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
+                        $query->where('parent_id',$data['coursesubjectOne']);
+                    }
+                    //学科小类
+                    if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
+                        $query->where('child_id',$data['coursesubjectTwo']);
+                    }
+                })
+                ->select('id','title','cover','nature','status','pricing','school_id')
+                ->orderBy('id','desc')
+                ->offset($offset)->limit($pagesize)->get();
+       
+            foreach($list  as $k=>&$v){
+                $v['sum_nember'] = 0;
+                if($v['nature'] ==1){
+                    $v['sum_number'] = CourseStocks::where(['school_id'=>$v['school_id'],'course_id'=>$v['course_id'],'is_del'=>0,'is_forbid'=>0])->sum('add_number');
+                    $v['buy_number'] = Order::where(['school_id'=>$v['school_id'],'class_id'=>$v['id'],'oa_status'=>1])->count();
+                }
+                
+                $where=[
+                    'course_id'=>$v['id'],
+                    'is_del'=>0
+                ];
+                if(!empty($data['method'])) {
+                   $where['method_id'] = $data['method'];
+                }
+                $method = Couresmethod::select('method_id')->where($where)->get()->toArray();
+                if(!$method){
+                    unset($list[$k]);
+                }else{
+                    foreach ($method as $key=>&$val){
+                        if($val['method_id'] == 1){
+                            $val['method_name'] = '直播';
+                        }
+                        if($val['method_id'] == 2){
+                            $val['method_name'] = '录播';
+                        }
+                        if($val['method_id'] == 3){
+                            $val['method_name'] = '其他';
+                        }
+                    }
+                    $v['method'] = $method;
+                }
+            }
+            $page=[
+                'pagesize'=>$pagesize,
+                'page' =>$page,
+                'total'=>$count
+            ];
+            return ['code' => 200 , 'msg' => '查询成功','data'=>$list,'where'=>$data,'page'=>$page,'type'=>$type];
+        }
     }
 
 }
