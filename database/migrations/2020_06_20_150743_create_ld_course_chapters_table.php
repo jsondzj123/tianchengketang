@@ -22,7 +22,7 @@ class CreateLdCourseChaptersTable extends Migration
             $table->integer('parent_id')->default(0)->comment('父级id');
             $table->integer('course_id')->default(0)->comment('课程id');
             $table->integer('resource_id')->default(0)->comment('录播资源id');
-            $table->integer('name')->default(0)->comment('章/节名称');
+            $table->string('name',255)->default(0)->comment('章/节名称');
             $table->tinyInteger('type')->default(0)->comment('小节类型(1视频2音频3课件4文档)');
             $table->tinyInteger('is_free')->default(0)->comment('是否免费(2代表试听,1代表收费,0代表免费)');
             $table->tinyInteger('is_del')->default(0)->comment('是否删除(1代表删除,0代表正常)');
