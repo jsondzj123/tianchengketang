@@ -38,6 +38,7 @@ class OpenCourse extends Model {
             'edu_teacher_id.required'  => json_encode(['code'=>'201','msg'=>'教务标识不能为空']),
             'lect_teacher_id.required'  => json_encode(['code'=>'201','msg'=>'讲师标识不能为空']),
             'subject.required'  => json_encode(['code'=>'201','msg'=>'学科不能为空']),
+            'introduce.required'  => json_encode(['code'=>'201','msg'=>'课程简介不能为空']),
         ];
     }
 

@@ -567,7 +567,7 @@ class SchoolController extends Controller {
             if ($validator->fails()) {
                 return response()->json(json_decode($validator->errors()->first(),1));
             }
-            $result = School::getSchoolLessonList(self::$accept_data['school_id']);
+            $result = School::getSchoolLessonList(self::$accept_data);
             return response()->json($result);
     }
     /*

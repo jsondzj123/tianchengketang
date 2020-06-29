@@ -12,7 +12,7 @@ use App\Models\Teacher;
 
 class OpenCourseController extends Controller {
     /*
-    * @param  是否推荐
+    * @param  公开课列表
     * @param  author  lys
     * @param  ctime   2020/6/28 9:30
     * return  array
@@ -21,9 +21,21 @@ class OpenCourseController extends Controller {
 		$data = OpenCourse::getList(self::$accept_data);
 		return response()->json($data);
 	}
-
-
-
+	  /*
+    * @param  直播类型
+    * @param  author  lys
+    * @param  ctime   2020/6/28 9:30
+    * return  array
+    */
+	public function zhiboMethod(){
+		$arr = [
+			['id'=>1,'name'=>'语音云'],
+			['id'=>3,'name'=>'大班'],
+			['id'=>5,'name'=>'小班'],
+			['id'=>6,'name'=>'大班互动'],
+		];
+		return response()->json(['code'=>200,'msg'=>'Success','data'=>$arr]); 
+	}
    /*
     * @param  添加公开课
     * @param  author  lys
@@ -42,6 +54,7 @@ class OpenCourseController extends Controller {
                 	'time' => 'required',
                 	'is_barrage' => 'required',
                 	'live_type' => 'required',
+                	'introduce'=>'required',
                 	'edu_teacher_id' => 'required',
                 	'lect_teacher_id'=>'required',
                	],
@@ -68,7 +81,6 @@ class OpenCourseController extends Controller {
 	        $openCourseArr['school_id']  = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0 ;
 	        $openCourseArr['admin_id']  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
 	        $openCourseArr['describe']  = isset($openCourseArr['describe']) ?$openCourseArr['describe']:'';
-	        $openCourseArr['introduce'] = isset($openCourseArr['introduce']) ?$openCourseArr['introduce']:'';
 	   		$openCourseArr['create_at'] = date('Y-m-d H:i:s');
 			$openCourseId = OpenCourse::insertGetId($openCourseArr);
 	        if($openCourseId <0){
@@ -98,7 +110,6 @@ class OpenCourseController extends Controller {
 	    } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }        
-
     }
     /*
     * @param  是否推荐
@@ -304,6 +315,7 @@ class OpenCourseController extends Controller {
             	'time' => 'required',
             	'is_barrage' => 'required',
             	'live_type' => 'required',
+            	'introduce' => 'required',
             	'edu_teacher_id' => 'required',
             	'lect_teacher_id'=>'required',
 	       	],
@@ -331,7 +343,6 @@ class OpenCourseController extends Controller {
 	        unset($openCourseArr['time']);
 	        $openCourseArr['admin_id']  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
 	        $openCourseArr['describe']  = !isset($openCourseArr['describe']) ?'':$openCourseArr['describe'];
-	        $openCourseArr['introduce'] = !isset($openCourseArr['introduce']) ?'':$openCourseArr['introduce'];
 	   		$openCourseArr['update_at'] = date('Y-m-d H:i:s');
 			$res = OpenCourse::where('id',$data['data']['id'])->update($openCourseArr);
 	        if(!$res){
@@ -378,7 +389,7 @@ class OpenCourseController extends Controller {
                 $data['start_at'],
                 $data['end_at'],
                 $data['nickname'],
-                '',
+                '',         
                 [   
                     'barrage' => $data['barrage'], 
                     'modetype' => $data['modetype'],
