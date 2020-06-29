@@ -34,14 +34,14 @@ class CreateLdCourseTable extends Migration
             $table->tinyInteger('status')->default(0)->comment('课程状态(0代表未发布,1代表在售(已发布),2代表停售(已下架))');
             $table->tinyInteger('is_del')->default(0)->comment('是否删除(1代表删除,0代表正常)');
             $table->tinyInteger('is_recommend')->default(0)->comment('是否删除(1代表推荐,0代表不推荐)');
-            $table->dateTime('create_at')->comment('创建时间');
+            $table->timestamp('create_at')->comment('创建时间')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->dateTime('update_at')->nullable()->comment('更新时间');
 
             //索引设置部分
             $table->index('status' , 'index_status');
             $table->index('nature' , 'index_nature');
             $table->index(['parent_id', 'child_id','status', 'nature'], 'index_admin_course');
-            
+
             //引擎设置部分
             $table->engine  = 'InnoDB';
         });
