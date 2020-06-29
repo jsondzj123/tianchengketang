@@ -476,11 +476,23 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getLessonList', 'SchoolController@getSchoolLessonList');      //获取分校课程列表
 
     });
+
+    $router->group(['prefix' => 'courschool'], function () use ($router) {
+        $router->post('courseIdList', 'CourseSchoolController@courseIdList');  //授权分校课程ID
+
+    });
+    $router->group(['prefix' => 'courstocks'], function () use ($router) {
+        $router->post('getList', 'CourseStocksController@getList');  //库存列表
+        $router->post('doInsertStocks', 'CourseStocksController@doInsertStocks');  //库存列表
+       
+    });
+
     //end 网校系统     lys
 
     //课程模块（重构）【公开课】（lys）
     $router->group(['prefix' => 'opencourse'], function () use ($router) {
-        $router->post('getList', 'OpenCourseController@getList');//公开课添加
+
+        $router->post('getList', 'OpenCourseController@getList');//公开课列表
         $router->post('doInsertOpenCourse', 'OpenCourseController@doInsertOpenCourse');//公开课添加
         $router->post('doUpdateRecomend', 'OpenCourseController@doUpdateRecomend');//是否推荐
         $router->post('doUpdateStatus', 'OpenCourseController@doUpdateStatus');//修改状态
@@ -488,8 +500,11 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getOpenLessById', 'OpenCourseController@getOpenLessById');//修改(获取)
         $router->post('doOpenLessById', 'OpenCourseController@doOpenLessById');//修改
         $router->post('zhiboMethod', 'OpenCourseController@zhiboMethod');//直播类型
-
     });
+
+
+
+
 
 });
 /*****************end**********************/
