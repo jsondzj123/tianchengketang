@@ -14,62 +14,17 @@ class LiveClassController extends Controller {
     /**
      * @param  直播班号列表
      * @param  pagesize   page
-     * @param  author  孙晓丽
-     * @param  ctime   2020/6/8 
+     * @param  author  zzk
+     * @param  ctime   2020/6/28
      * @return  array
      */
     public function index(Request $request){
-        $validator = Validator::make($request->all(), [
-            'live_id' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return $this->response($validator->errors()->first(), 202);
+        try{
+            $list = LiveClass::getLiveClassList(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
-        $pagesize = $request->input('pagesize') ?: 15;
-        $page     = $request->input('page') ?: 1;
-        $offset   = ($page - 1) * $pagesize;
-        $live_id = $request->input('live_id');
-        $data = LiveClass::where(['is_del' => 0, 'is_forbid' => 0, 'live_id' => $live_id]);
-        $total = $data->count();
-        $lesson = $data->select('id', 'course_name', 'start_time', 'end_time', 'modetype')
-            ->skip($offset)->take($pagesize)
-            ->get();
-        $data = [
-            'page_data' => $lesson,
-            'total' => $total,
-        ];
-        return $this->response($data);
-    }
-
-     /**
-     * @param   所有班号列表
-     * @param  pagesize   page
-     * @param  author  孙晓丽
-     * @param  ctime   2020/6/8
-     * @return  array
-     */
-    public function allList(Request $request){
-        $pagesize = $request->input('pagesize') ?: 15;
-        $page     = $request->input('page') ?: 1;
-        $offset   = ($page - 1) * $pagesize;
-        $status   = $request->input('status') ?: 0;
-        $start_time = $request->input('start_time');
-        $end_time = $request->input('end_time');
-        $keyword     = $request->input('keyword');
-        $data = LiveClass::where(['is_del' => 0, 'is_forbid' => 0])
-            ->where(function($query) use ($status, $keyword){
-                if(!empty($keyword)){
-                    $query->where('name', 'like', '%'.$keyword.'%');
-                }
-            });
-        $total = $data->count();
-        $lesson = $data->skip($offset)->take($pagesize)->get();
-    
-        $data = [
-            'page_data' => $lesson,
-            'total' => $total,
-        ];
-        return $this->response($data);
     }
 
     /**
@@ -80,29 +35,12 @@ class LiveClassController extends Controller {
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'live_id' => 'required',
-            'name' => 'required',
-            'description' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return $this->response($validator->errors()->first(), 202);
-        }
-        $user = CurrentAdmin::user();
         try{
-           
-            LiveClass::create([
-                'admin_id'    => $user->id,
-                'live_id'     => $request->input('live_id'),
-                'name' => $request->input('name'),
-                'description'    => $request->input('description'),
-            ]);
-
-        }catch(Exception $e){
-            Log::error('创建失败:'.$e->getMessage());
-            return $this->response($e->getMessage(), 500);
+            $list = LiveClass::AddLiveClass(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
-        return $this->response('添加成功');
     }
 
 
@@ -113,22 +51,12 @@ class LiveClassController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return $this->response($validator->errors()->first(), 202);
-        }
-        $subjectIds = json_decode($request->input('subject_id'), true);
-        try {
-            $live = LiveClass::findOrFail($request->input('id'));
-            $live->name = $request->input('name') ?: $live->name;
-            $live->description = $request->input('description') ?: $live->description;
-            $live->save();
-            return $this->response("修改成功");
-        } catch (Exception $e) {
-            Log::error('修改课程信息失败' . $e->getMessage());
-            return $this->response("修改成功");
+        //获取提交的参数
+        try{
+            $data = LiveClass::updateLiveClass(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
 
@@ -139,22 +67,12 @@ class LiveClassController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function status(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return $this->response($validator->errors()->first(), 202);
+        try{
+            $one = LiveClass::updateLiveClassStatus(self::$accept_data);
+            return response()->json($one);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
-        $live = LiveClass::findOrFail($request->input('id'));
-        if($live->is_forbid == 1){
-            $live->is_forbid = 0;
-        }else{
-            $live->is_forbid = 1;
-        }
-        if (!$live->save()) {
-            return $this->response("操作失败", 500);
-        }
-        return $this->response("操作成功");
     }
 
     /**
@@ -164,21 +82,32 @@ class LiveClassController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function destroy(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return $this->response($validator->errors()->first(), 202);
+        try{
+            $one = LiveClass::updateLiveClassDelete(self::$accept_data);
+            return response()->json($one);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
-        $live = LiveClass::findOrFail($id);
-        if($live->is_del == 1){
-            $live->is_del = 0;
-        }else{
-            $live->is_del = 1;
+    }
+    /**
+     * 班号详情
+     *
+     *
+     */
+    public function oneList(){
+        try{
+            $list = LiveClass::getLiveClassOne(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
-        if (!$live->save()) {
-            return $this->response("删除失败", 500);
-        }
-        return $this->response("删除成功");
+    }
+    /**
+     * 添加班号课程资料
+     *
+     *
+     */
+    public function uploadLiveClass(){
+        echo 1;
     }
 }
