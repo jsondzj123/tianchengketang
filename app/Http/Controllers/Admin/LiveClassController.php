@@ -90,6 +90,19 @@ class LiveClassController extends Controller {
         }
     }
     /**
+     * 班号详情
+     *
+     *
+     */
+    public function oneList(){
+        try{
+            $list = LiveClass::getLiveClassOne(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    /**
      * 添加班号课程资料
      *
      *

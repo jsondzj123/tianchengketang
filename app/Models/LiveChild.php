@@ -229,21 +229,23 @@ class LiveChild extends Model {
                 return ['code' => 201 , 'msg' => '讲师id不能为空'];
             }
             //教务id
-            if(empty($data['senate_id'])|| !isset($data['senate_id'])){
-                return ['code' => 201 , 'msg' => '教务id不能为空'];
+            if(isset($data['senate_id'])){
+                //教师id和课次关联
+                $data['teacher_id'] = implode(",",$data['senate_id']).",".$data['teacher_id'];
+                unset($data['senate_id']);
+                $res = explode(",", $data['teacher_id']);
+                foreach($res as $k => $v){
+                    $data[$k]['class_id'] = $data['class_id'];
+                    $data[$k]['teacher_id'] = $v;
+                    $data[$k]['create_at'] = date('Y-m-d H:i:s');
+                    $data[$k]['update_at'] = date('Y-m-d H:i:s');
+                }
+                unset($data['class_id']);
+                unset($data['teacher_id']);
+            }else{
+                $data['create_at'] = date('Y-m-d H:i:s');
+                $data['update_at'] = date('Y-m-d H:i:s');
             }
-            //教师id和课次关联
-            $data['teacher_id'] = implode(",",$data['senate_id']).",".$data['teacher_id'];
-            unset($data['senate_id']);
-            $res = explode(",", $data['teacher_id']);
-            foreach($res as $k => $v){
-                $data[$k]['class_id'] = $data['class_id'];
-                $data[$k]['teacher_id'] = $v;
-                $data[$k]['create_at'] = date('Y-m-d H:i:s');
-                $data[$k]['update_at'] = date('Y-m-d H:i:s');
-            }
-            unset($data['class_id']);
-            unset($data['teacher_id']);
             //获取后端的操作员id
             $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
             $add = LiveClassChildTeacher::insert($data);
@@ -270,8 +272,6 @@ class LiveChild extends Model {
                 return ['code' => 201 , 'msg' => '课次id不能为空'];
             }
             //查询该课次进行发布到欢拓
-            $one = self::where(['is_del'=>0,'status'=>0,'id'=>$data['class_id']])->first();
-
             $one = self::join('ld_course_class_teacher', 'ld_course_class_teacher.class_id', '=', 'ld_course_class_number.id')
                         ->join('ld_lecturer_educationa', 'ld_lecturer_educationa.id', '=', 'ld_course_class_teacher.teacher_id')
                         ->select(['*','ld_course_class_number.id'])
@@ -335,9 +335,9 @@ class LiveChild extends Model {
                             'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                             'create_at'      =>  date('Y-m-d H:i:s')
                         ]);
-                        return ['code' => 200 , 'msg' => '添加成功'];
+                        return ['code' => 200 , 'msg' => '发布成功'];
                     }else{
-                        return ['code' => 202 , 'msg' => '添加失败'];
+                        return ['code' => 202 , 'msg' => '发布失败'];
                     }
 
                 }else{

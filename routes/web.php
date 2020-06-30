@@ -234,7 +234,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
      * 直播班号(sxl)
     */
     $router->post('liveClass', 'LiveClassController@index');
-    $router->post('allLiveClass', 'LiveClassController@allList');
+    $router->post('oneLiveClass', 'LiveClassController@oneList');
     $router->post('liveClass/add', 'LiveClassController@store');
     $router->post('updateLiveClass', 'LiveClassController@update');
     $router->post('deleteLiveClass', 'LiveClassController@destroy');

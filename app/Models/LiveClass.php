@@ -218,5 +218,23 @@ class LiveClass extends Model {
                 return ['code' => 202 , 'msg' => '删除失败'];
             }
         }
+        /*
+         * @param  直播单元班号详情
+         * @param  id   班号id
+         * @param  author  zzk
+         * @param  ctime   2020/6/30
+         * return  array
+         */
+        public static function getLiveClassOne($data){
+            //判断班号id
+            if(empty($data['id'])|| !isset($data['id'])){
+                return ['code' => 201 , 'msg' => '参数为空或格式错误'];
+            }
+            $LiveClassOne = self::where(['id'=>$data['id']])->first();
+            if(!$LiveClassOne){
+                return ['code' => 204 , 'msg' => '参数不正确'];
+            }
+            return ['code' => 200 , 'msg' => '获取直播班号详情成功' , 'data' => $LiveClassOne];
+        }
 }
 
