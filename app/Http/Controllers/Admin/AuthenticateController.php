@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Http\Request;
 use App\Models\Admin;
+use App\Models\School;
 use Log;
 use JWTAuth;
 use Validator;
@@ -64,6 +65,7 @@ class AuthenticateController extends Controller {
         }
 
         $user = JWTAuth::user();
+        $user['school_name'] = School::where('id',$user['school_id'])->select('name')->first()['name'];
         $user['token'] = $token;
         $this->setTokenToRedis($user->id, $token);
         $AdminUser = new AdminUser();
