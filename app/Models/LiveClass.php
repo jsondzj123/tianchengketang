@@ -34,6 +34,10 @@ class LiveClass extends Model {
             $total = self::where(['is_del'=>0,'resource_id'=>$resource_id])->get()->count();
             //获取数据
             $list = self::where(['is_del'=>0,'resource_id'=>$resource_id])->offset($offset)->limit($pagesize)->get();
+            //添加总课次
+            //已上课次
+            //待上课次
+            //课次信息
             if($total > 0){
                 return ['code' => 200 , 'msg' => '获取班号列表成功' , 'data' => ['LiveClass_list' => $list, 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
             }else{
@@ -85,6 +89,57 @@ class LiveClass extends Model {
                 return ['code' => 200 , 'msg' => '添加成功'];
             }else{
                 return ['code' => 202 , 'msg' => '添加失败'];
+            }
+        }
+        /*
+         * @param  更新直播单元班号
+         * @param  resource_id   课程单元id
+         * @param  name   班号名称
+         * @param  content   班号信息
+         * @param  id   班号id
+         * @param  author  zzk
+         * @param  ctime   2020/6/29
+         * return  array
+         */
+        public static function updateLiveClass($data){
+            //班号id
+            if(empty($data['id']) || !isset($data['id'])){
+                return ['code' => 201 , 'msg' => '直播单元id不能为空'];
+            }
+            //课程单元id
+            if(empty($data['resource_id']) || !isset($data['resource_id'])){
+                return ['code' => 201 , 'msg' => '直播单元id不能为空'];
+            }
+            //班号名称
+            if(empty($data['name']) || !isset($data['name'])){
+                return ['code' => 201 , 'msg' => '班号名称不能为空'];
+            }
+            //班号信息
+            if(empty($data['content']) || !isset($data['content'])){
+                return ['code' => 201 , 'msg' => '班号信息不能为空'];
+            }
+            //获取后端的操作员id
+            $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+            $data['admin_id'] = $admin_id;
+
+            $data['update_at'] = date('Y-m-d H:i:s');
+            $id = $data['id'];
+            unset($data['id']);
+            $res = self::where(['id'=>$id])->update($data);
+            if($res){
+                //添加日志操作
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $data['admin_id']  ,
+                    'module_name'    =>  'LiveClass' ,
+                    'route_url'      =>  'admin/updateLiveClass' ,
+                    'operate_method' =>  'update' ,
+                    'content'        =>  '更新数据'.json_encode($data) ,
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                return ['code' => 200 , 'msg' => '更新成功'];
+            }else{
+                return ['code' => 202 , 'msg' => '更新失败'];
             }
         }
 

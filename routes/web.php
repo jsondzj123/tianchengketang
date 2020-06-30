@@ -247,9 +247,12 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->post('liveChildList', 'LiveChildController@liveList');
     $router->post('liveChild', 'LiveChildController@index');
     $router->post('liveChild/add', 'LiveChildController@store');
+    $router->post('updateLiveChild', 'LiveChildController@UpdateChild');
     $router->post('deleteLiveChild', 'LiveChildController@destroy');
     $router->post('editLiveChildStatus', 'LiveChildController@edit');
     $router->post('startLiveChild', 'LiveChildController@startLive');
+    $router->post('teacherLiveChild', 'LiveChildController@ClassChildRelevance');
+    $router->post('creationLive', 'LiveChildController@creationLive');
 
     //上传图片OSS公共参数接口
     $router->post('getImageOssConfig', 'CommonController@getImageOssConfig');
