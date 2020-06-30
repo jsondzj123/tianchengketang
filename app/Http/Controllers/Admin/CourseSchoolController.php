@@ -39,6 +39,49 @@ class CourseSchoolController extends Controller {
                 ->pluck('course_id');
         return $this->response($courseIds);
     }
+    /**
+     * @param  授权课程列表
+     * @param  school_id
+     * @param  author  李银生
+     * @param  ctime   2020/6/30
+     * @return  array
+     */
+    public function courseList(){
+        $validator = Validator::make(self::$accept_data, 
+        [
+            'school_id' => 'required|integer',
+        ],
+        CourseSchool::message());
+        if($validator->fails()) {
+            return response()->json(json_decode($validator->errors()->first(),1));
+        }
+        $result = CourseSchool::courseList(self::$accept_data);
+        return response()->json($result);
+    }
+    /**
+     * @param  批量授权添加课程
+     * @param  school_id
+     * @param  author  李银生
+     * @param  ctime   2020/6/30
+     * @return  array
+     */
+    public function store()
+    { 
+        $validator = Validator::make(self::$accept_data, 
+        [
+            'course_id' => 'required',
+            'school_id' => 'required',
+        ],
+        CourseSchool::message());
+        if($validator->fails()) {
+            return response()->json(json_decode($validator->errors()->first(),1));
+        }
+
+        $result = CourseSchool::store(self::$accept_data);
+        return response()->json($result);
+
+    }
+
 
 
 }
