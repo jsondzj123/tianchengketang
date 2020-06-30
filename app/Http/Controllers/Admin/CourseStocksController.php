@@ -17,7 +17,13 @@ use App\Models\CourseStocks;
 class CourseStocksController extends Controller {
 
 
-
+    /**
+     * @param  
+     * @param  school_id
+     * @param  author  李银生
+     * @param  ctime   2020/6/29 
+     * @return  array
+     */
     public function getList(){
     	$validator = Validator::make(self::$accept_data, 
         [

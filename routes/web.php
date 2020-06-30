@@ -482,7 +482,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
     $router->group(['prefix' => 'courschool'], function () use ($router) {
         $router->post('courseIdList', 'CourseSchoolController@courseIdList');  //授权分校课程ID
-
+        $router->post('courseList', 'CourseSchoolController@courseList');  //授权课程列表
+        $router->post('courseStore', 'CourseSchoolController@store');  //批量添加
     });
     $router->group(['prefix' => 'courstocks'], function () use ($router) {
         $router->post('getList', 'CourseStocksController@getList');  //库存列表
