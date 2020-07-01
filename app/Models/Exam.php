@@ -587,7 +587,7 @@ class Exam extends Model {
         
         if($exam_count > 0){
             //获取试题列表
-            $exam_list = self::select('id as exam_id','exam_content','is_publish')->where(function($query) use ($body){
+            $exam_list = self::select('id as exam_id','exam_content','is_publish','item_diffculty')->where(function($query) use ($body){
                 //题库id
                 $query->where('bank_id' , '=' , $body['bank_id'])->where("subject_id" , "=" , $body['subject_id'])->where("type" , $body['type'])->where("parent_id" , 0);
                 
