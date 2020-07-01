@@ -540,16 +540,16 @@ class Papers extends Model {
                 }
                 
                 //不定项总题数
-                if(in_array(3,$type_array)){  
-                    $options_count     = PapersExam::where("papers_id" , "=" , $v['papers_id'])->where("type" , "=" , 3)->where('is_del' , '=' , 0)->count();
+                if(in_array(4,$type_array)){  
+                    $options_count     = PapersExam::where("papers_id" , "=" , $v['papers_id'])->where("type" , "=" , 4)->where('is_del' , '=' , 0)->count();
                     if($options_count > 0){
                         $consult[]     = ['type'=>'不定项' , 'count' => $options_count , 'score' => $v['options_score'] , 'sum_score' => $v['options_score'] * $options_count];
                     }
                 }
                 
                 //判断题总题数
-                if(in_array(4,$type_array)){  
-                    $judge_count     = PapersExam::where("papers_id" , "=" , $v['papers_id'])->where("type" , "=" , 4)->where('is_del' , '=' , 0)->count();
+                if(in_array(3,$type_array)){  
+                    $judge_count     = PapersExam::where("papers_id" , "=" , $v['papers_id'])->where("type" , "=" , 3)->where('is_del' , '=' , 0)->count();
                     if($judge_count > 0){
                         $consult[]     = ['type'=>'判断题' , 'count' => $judge_count , 'score' => $v['judge_score'] , 'sum_score' => $v['judge_score'] * $judge_count];
                     }
