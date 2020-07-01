@@ -176,6 +176,35 @@ class LiveChildController extends Controller {
         }
     }
     /**
+     * 添加班号课次课程资料
+     */
+    public function uploadLiveClassChild(){
+        try{
+            $list = LiveChild::uploadLiveClassChild(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    //班号课次课程资料列表
+    public function getLiveClassMaterial(){
+        try{
+            $list = LiveChild::getLiveClassMaterial(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    //班号课次课程资料删除
+    public function deleteLiveClassChildMaterial(){
+        try{
+            $list = LiveChild::deleteLiveClassMaterial(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    /**
      * 启动直播
      * @param
      * @param  int  $id

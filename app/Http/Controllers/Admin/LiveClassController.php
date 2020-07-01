@@ -104,10 +104,31 @@ class LiveClassController extends Controller {
     }
     /**
      * 添加班号课程资料
-     *
-     *
      */
     public function uploadLiveClass(){
-        echo 1;
+        try{
+            $list = LiveClass::uploadLiveClass(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    //班号课程资料列表
+    public function getListLiveClassMaterial(){
+        try{
+            $list = LiveClass::getLiveClassMaterial(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    //班号课程资料删除
+    public function deleteLiveClassMaterial(){
+        try{
+            $list = LiveClass::deleteLiveClassMaterial(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
     }
 }

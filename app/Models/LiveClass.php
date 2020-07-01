@@ -3,7 +3,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-
+use App\Models\CourseMaterial;
 class LiveClass extends Model {
 
     //指定别的表名
@@ -34,9 +34,15 @@ class LiveClass extends Model {
             $total = self::where(['is_del'=>0,'resource_id'=>$resource_id])->get()->count();
             //获取数据
             $list = self::where(['is_del'=>0,'resource_id'=>$resource_id])->offset($offset)->limit($pagesize)->get();
-            //添加总课次
-            //已上课次
-            //待上课次
+            foreach($list as $k => $v){
+                //添加总课次
+                $list[$k]['class_num'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where('ld_course_class_number.shift_no_id',$v['id'])->count();
+                //已上课次 课程开始时间超过当前时间
+                $list[$k]['class_num_passed'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where('ld_course_class_number.shift_no_id',$v['id'])->where('ld_course_class_number.start_at','<',time())->count();
+                //待上课次  课程开始时间未超过当前时间
+                $list[$k]['class_num_not'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where('ld_course_class_number.shift_no_id',$v['id'])->where('ld_course_class_number.start_at','>',time())->count();
+
+            }
             //课次信息
             if($total > 0){
                 return ['code' => 200 , 'msg' => '获取班号列表成功' , 'data' => ['LiveClass_list' => $list, 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
@@ -235,6 +241,92 @@ class LiveClass extends Model {
                 return ['code' => 204 , 'msg' => '参数不正确'];
             }
             return ['code' => 200 , 'msg' => '获取直播班号详情成功' , 'data' => $LiveClassOne];
+        }
+
+        //添加班号课程资料
+        public static function uploadLiveClass($data){
+            //班号id
+            if(empty($data['parent_id']) || !isset($data['parent_id'])){
+                return ['code' => 201 , 'msg' => '班号id不能为空'];
+            }
+            //资料类型
+            if(empty($data['type']) || !isset($data['type'])){
+                return ['code' => 201 , 'msg' => '资料类型不能为空'];
+            }
+            //资料的名称
+            if(empty($data['material_name']) || !isset($data['material_name'])){
+                return ['code' => 201 , 'msg' => '资料的名称不能为空'];
+            }
+            //资料的大小
+            if(empty($data['material_size']) || !isset($data['material_size'])){
+                return ['code' => 201 , 'msg' => '资料的大小不能为空'];
+            }
+            //资料的url
+            if(empty($data['material_url']) || !isset($data['material_url'])){
+                return ['code' => 201 , 'msg' => '资料的url不能为空'];
+            }
+            $data['mold'] = 2;
+            //缓存查出用户id和分校id
+            $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+            $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+
+            $data['create_at'] = date('Y-m-d H:i:s');
+            $data['update_at'] = date('Y-m-d H:i:s');
+            $add = CourseMaterial::insert($data);
+            if($add){
+                //添加日志操作
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $data['admin_id']  ,
+                    'module_name'    =>  'LiveClassMaterial' ,
+                    'route_url'      =>  'admin/uploadLiveClass' ,
+                    'operate_method' =>  'insert' ,
+                    'content'        =>  '新增数据'.json_encode($data) ,
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                return ['code' => 200 , 'msg' => '添加成功'];
+            }else{
+                return ['code' => 202 , 'msg' => '添加失败'];
+            }
+        }
+        //获取班号资料列表
+        public static function getLiveClassMaterial($data){
+            //班号id
+            if(empty($data['parent_id']) || !isset($data['parent_id'])){
+                return ['code' => 201 , 'msg' => '班号id不能为空'];
+            }
+            $total = CourseMaterial::where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>2])->get()->count();
+            if($total > 0){
+                $list = CourseMaterial::where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>2])->get();
+                return ['code' => 200 , 'msg' => '获取班号资料列表成功' , 'data' => ['LiveClass_list_Material' => $list]];
+            }else{
+                return ['code' => 200 , 'msg' => '获取班号资料列表成功' , 'data' => ['LiveClass_list_Material' => []]];
+            }
+        }
+        //删除班号课次资源
+        public static function deleteLiveClassMaterial($data){
+            //资料id
+            if(empty($data['id']) || !isset($data['id'])){
+                return ['code' => 201 , 'msg' => '资料id不能为空'];
+            }
+            $update = CourseMaterial::where(['id'=>$data['id'],'mold'=>2])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+            if($update){
+                //获取后端的操作员id
+                $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                //添加日志操作
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $admin_id  ,
+                    'module_name'    =>  'LiveClassMaterial' ,
+                    'route_url'      =>  'admin/deleteLiveClassMaterial' ,
+                    'operate_method' =>  'delete' ,
+                    'content'        =>  '软删除id为'.$data['id'],
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                return ['code' => 200 , 'msg' => '删除成功'];
+            }else{
+                return ['code' => 202 , 'msg' => '删除失败'];
+            }
         }
 }
 

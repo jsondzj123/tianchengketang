@@ -3,7 +3,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Subject;
+use App\Models\LiveClass;
 use App\Models\Admin;
+use App\Models\CourseLiveResource;
 class Live extends Model {
 
     //指定别的表名
@@ -104,6 +106,12 @@ class Live extends Model {
                 return ['code' => 201 , 'msg' => '直播资源id不合法' , 'data' => []];
             }
             $one = self::where("is_del",0)->where("id",$data['id'])->first();
+            //获取学科小类和大类
+            $one['subject_name'] = Subject::where("is_del",0)->where("id",$one['parent_id'])->select("subject_name")->first()['subject_name'];
+            $one['subject_child_name'] = Subject::where("is_del",0)->where("id",$one['child_id'])->select("subject_name")->first()['subject_name'];
+            //添加总课时  该资源下所有班号下课次的所有课时
+            $one['sum_class_hour'] = LiveClass::join('ld_course_class_number','ld_course_shift_no.id','=','ld_course_class_number.shift_no_id')
+            ->where("resource_id",$one['id'])->sum("class_hour");
             return ['code' => 200 , 'msg' => '获取直播资源列表成功' , 'data' => $one];
 
         }
@@ -294,6 +302,48 @@ class Live extends Model {
                 return ['code' => 200 , 'msg' => '更新成功'];
             }else{
                 return ['code' => 202 , 'msg' => '更新失败'];
+            }
+        }
+
+        public static function liveRelationLesson($data){
+            //直播资源id
+            if(empty($data['resource_id']) || !isset($data['resource_id'])){
+                return ['code' => 201 , 'msg' => '直播资源id不能为空'];
+            }
+            //课程id
+            if(!isset($data['course_id'])){
+                return ['code' => 201 , 'msg' => '课程id不能为空'];
+            }
+            if(!is_array($data['course_id'])){
+                return ['code' => 201 , 'msg' => '课程id数据不正确'];
+            }
+            $data['course_id'] = implode(",",$data['course_id']);
+            $res = explode(",", $data['course_id']);
+            foreach($res as $k => $v){
+                $data[$k]['resource_id'] = $data['resource_id'];
+                $data[$k]['course_id'] = $v;
+                $data[$k]['create_at'] = date('Y-m-d H:i:s');
+                $data[$k]['update_at'] = date('Y-m-d H:i:s');
+            }
+            unset($data['resource_id']);
+            unset($data['course_id']);
+            $add = CourseLiveResource::insert($data);
+            //获取后端的操作员id
+            $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+            if($add){
+                //添加日志操作
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $admin_id  ,
+                    'module_name'    =>  'liveRelationLesson' ,
+                    'route_url'      =>  'admin/liveRelationLesson' ,
+                    'operate_method' =>  'insert' ,
+                    'content'        =>  '新增数据'.json_encode($data) ,
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                return ['code' => 200 , 'msg' => '关联成功'];
+            }else{
+                return ['code' => 202 , 'msg' => '关联失败'];
             }
         }
 }
