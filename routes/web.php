@@ -201,7 +201,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->post('updateSubjectStatus', 'SubjectController@status');
 
     /*
-     * 录播模块(sxl)
+     * 录播模块(zzk)
     */
     $router->post('videoList', 'VideoController@list');
     $router->post('video', 'VideoController@index');
@@ -215,7 +215,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
 
     /*
-     * 直播模块(sxl)
+     * 直播模块(zzk)
     */
     $router->post('liveLessonId', 'LiveController@lessonId');
     $router->post('liveList', 'LiveController@list');
@@ -231,7 +231,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
 
     /*
-     * 直播班号(sxl)
+     * 直播班号(zzk)
     */
     $router->post('liveClass', 'LiveClassController@index');
     $router->post('oneLiveClass', 'LiveClassController@oneList');
@@ -239,10 +239,13 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->post('updateLiveClass', 'LiveClassController@update');
     $router->post('deleteLiveClass', 'LiveClassController@destroy');
     $router->post('updateLiveClassStatus', 'LiveClassController@status');
+    $router->post('uploadLiveClass', 'LiveClassController@uploadLiveClass');
+    $router->post('getListLiveClassMaterial', 'LiveClassController@getListLiveClassMaterial');
+    $router->post('deleteLiveClassMaterial', 'LiveClassController@deleteLiveClassMaterial');
 
 
     /*
-     * 直播课次模块(sxl)
+     * 直播课次模块(zzk)
     */
     $router->post('liveChildList', 'LiveChildController@liveList');
     $router->post('liveChild', 'LiveChildController@index');
@@ -253,6 +256,10 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->post('startLiveChild', 'LiveChildController@startLive');
     $router->post('teacherLiveChild', 'LiveChildController@ClassChildRelevance');
     $router->post('creationLive', 'LiveChildController@creationLive');
+    $router->post('uploadLiveClassChild', 'LiveChildController@uploadLiveClassChild');
+    $router->post('getLiveClassMaterial', 'LiveChildController@getLiveClassMaterial');
+    $router->post('deleteLiveClassChildMaterial', 'LiveChildController@deleteLiveClassChildMaterial');
+
 
     //上传图片OSS公共参数接口
     $router->post('getImageOssConfig', 'CommonController@getImageOssConfig');

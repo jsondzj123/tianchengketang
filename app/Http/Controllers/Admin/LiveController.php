@@ -128,7 +128,6 @@ class LiveController extends Controller {
         }
     }
 
-
     /*
      * @param  班号列表
      * @param  直播id

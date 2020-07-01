@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Subject;
+use App\Models\LiveClass;
 use App\Models\Admin;
 class Live extends Model {
 
@@ -104,6 +105,12 @@ class Live extends Model {
                 return ['code' => 201 , 'msg' => '直播资源id不合法' , 'data' => []];
             }
             $one = self::where("is_del",0)->where("id",$data['id'])->first();
+            //获取学科小类和大类
+            $one['subject_name'] = Subject::where("is_del",0)->where("id",$one['parent_id'])->select("subject_name")->first()['subject_name'];
+            $one['subject_child_name'] = Subject::where("is_del",0)->where("id",$one['child_id'])->select("subject_name")->first()['subject_name'];
+            //添加总课时  该资源下所有班号下课次的所有课时
+            $one['sum_class_hour'] = LiveClass::join('ld_course_class_number','ld_course_shift_no.id','=','ld_course_class_number.shift_no_id')
+            ->where("resource_id",$one['id'])->sum("class_hour");
             return ['code' => 200 , 'msg' => '获取直播资源列表成功' , 'data' => $one];
 
         }
