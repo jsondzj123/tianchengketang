@@ -234,7 +234,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
      * 直播班号(sxl)
     */
     $router->post('liveClass', 'LiveClassController@index');
-    $router->post('allLiveClass', 'LiveClassController@allList');
+    $router->post('oneLiveClass', 'LiveClassController@oneList');
     $router->post('liveClass/add', 'LiveClassController@store');
     $router->post('updateLiveClass', 'LiveClassController@update');
     $router->post('deleteLiveClass', 'LiveClassController@destroy');
@@ -247,9 +247,12 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->post('liveChildList', 'LiveChildController@liveList');
     $router->post('liveChild', 'LiveChildController@index');
     $router->post('liveChild/add', 'LiveChildController@store');
+    $router->post('updateLiveChild', 'LiveChildController@UpdateChild');
     $router->post('deleteLiveChild', 'LiveChildController@destroy');
     $router->post('editLiveChildStatus', 'LiveChildController@edit');
     $router->post('startLiveChild', 'LiveChildController@startLive');
+    $router->post('teacherLiveChild', 'LiveChildController@ClassChildRelevance');
+    $router->post('creationLive', 'LiveChildController@creationLive');
 
     //上传图片OSS公共参数接口
     $router->post('getImageOssConfig', 'CommonController@getImageOssConfig');
@@ -482,7 +485,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
     $router->group(['prefix' => 'courschool'], function () use ($router) {
         $router->post('courseIdList', 'CourseSchoolController@courseIdList');  //授权分校课程ID
-
+        $router->post('courseList', 'CourseSchoolController@courseList');  //授权课程列表
+        $router->post('courseStore', 'CourseSchoolController@store');  //批量添加
     });
     $router->group(['prefix' => 'courstocks'], function () use ($router) {
         $router->post('getList', 'CourseStocksController@getList');  //库存列表
