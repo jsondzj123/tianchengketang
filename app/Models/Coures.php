@@ -339,7 +339,7 @@ class Coures extends Model {
         if($count > 0){
             $list = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
             foreach ($list as $k=>&$v){
-                $shift_no = Couresshiftno::where(['resource_id'=>$v['resource_id'],'is_del'=>0,'is_forbid'=>0])->get()->toArray();
+                $shift_no = LiveClass::where(['resource_id'=>$v['resource_id'],'is_del'=>0,'is_forbid'=>0])->get()->toArray();
                 $v['shift_no'] = $shift_no;
             }
         }
