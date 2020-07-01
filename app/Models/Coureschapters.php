@@ -146,14 +146,15 @@ class Coureschapters extends Model {
         unset($data['/admin/course/sectionUpdate']);
         $filearr = $data['filearr'];
         unset($data['filearr']);
+        $data['update_at'] = date('Y-m-d H:i:s');
         $up = self::where(['id'=>$data['id']])->update($data);
         if($up){
             if(!empty($filearr)){
-                Couresmaterial::where(['parent_id'=>$data['id'],'mold'=>1])->update(['is_del'=>1]);
+                Couresmaterial::where(['parent_id'=>$data['id'],'mold'=>1])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
                 foreach ($filearr as $k=>$v){
                     $materialones = Couresmaterial::where(['material_url'=>$v['url'],'mold'=>1])->first();
                     if($materialones){
-                        Couresmaterial::where(['id'=>$materialones['id']])->update(['is_del'=>0]);
+                        Couresmaterial::where(['id'=>$materialones['id']])->update(['is_del'=>0,'update_at'=>date('Y-m-d H:i:s')]);
                     }else{
                         Couresmaterial::insert([
                             'admin_id' => isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0,
