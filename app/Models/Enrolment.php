@@ -99,8 +99,8 @@ class Enrolment extends Model {
         //报名数据信息追加
         $enroll_array = [
             'student_id'     =>   $body['student_id'] ,
-            'parent_id'      =>   $parent_info[0] ,
-            'child_id'       =>   $parent_info[1] ,
+            'parent_id'      =>   isset($parent_info[0]) && $parent_info[0] > 0 ? $parent_info[0] : 0 ,
+            'child_id'       =>   isset($parent_info[1]) && $parent_info[1] > 0 ? $parent_info[1] : 0 ,
             'lession_id'     =>   $body['lession_id'] ,
             'lession_price'  =>   $body['lession_price'] ,
             'student_price'  =>   $body['student_price'] ,
