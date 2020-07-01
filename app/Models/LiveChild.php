@@ -350,13 +350,90 @@ class LiveChild extends Model {
         }
 
 
-        /**
-         * 添加班号课次资料
-         *
-         *
-         */
-        public static function uploadLiveClassChild(){
-            echo 1;
+        //添加班号课次资料
+        public static function uploadLiveClassChild($data){
+            //课次id
+            if(empty($data['parent_id']) || !isset($data['parent_id'])){
+                return ['code' => 201 , 'msg' => '课次id不能为空'];
+            }
+            //资料类型
+            if(empty($data['type']) || !isset($data['type'])){
+                return ['code' => 201 , 'msg' => '资料类型不能为空'];
+            }
+            //资料的名称
+            if(empty($data['material_name']) || !isset($data['material_name'])){
+                return ['code' => 201 , 'msg' => '资料的名称不能为空'];
+            }
+            //资料的大小
+            if(empty($data['material_size']) || !isset($data['material_size'])){
+                return ['code' => 201 , 'msg' => '资料的大小不能为空'];
+            }
+            //资料的url
+            if(empty($data['material_url']) || !isset($data['material_url'])){
+                return ['code' => 201 , 'msg' => '资料的url不能为空'];
+            }
+            $data['mold'] = 3;
+            //缓存查出用户id和分校id
+            $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+            $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+
+            $data['create_at'] = date('Y-m-d H:i:s');
+            $data['update_at'] = date('Y-m-d H:i:s');
+            $add = CourseMaterial::insert($data);
+            if($add){
+                //添加日志操作
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $data['admin_id']  ,
+                    'module_name'    =>  'LiveClassChildMaterial' ,
+                    'route_url'      =>  'admin/uploadLiveClassChild' ,
+                    'operate_method' =>  'insert' ,
+                    'content'        =>  '新增数据'.json_encode($data) ,
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                return ['code' => 200 , 'msg' => '添加成功'];
+            }else{
+                return ['code' => 202 , 'msg' => '添加失败'];
+            }
+        }
+        //获取课次资源列表
+        public static function getLiveClassMaterial($data){
+            //课次id
+            if(empty($data['parent_id']) || !isset($data['parent_id'])){
+                return ['code' => 201 , 'msg' => '课次id不能为空'];
+            }
+            $total = CourseMaterial::where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>3])->get()->count();
+            if($total > 0){
+                $list = CourseMaterial::where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>3])->get();
+                return ['code' => 200 , 'msg' => '获取课次资料列表成功' , 'data' => ['LiveClass_list_child_Material' => $list]];
+            }else{
+                return ['code' => 200 , 'msg' => '获取课次资料列表成功' , 'data' => ['LiveClass_list_child_Material' => []]];
+            }
+        }
+        //删除课次资料
+        public static function deleteLiveClassMaterial($data){
+            //资料id
+            if(empty($data['id']) || !isset($data['id'])){
+                return ['code' => 201 , 'msg' => '资料id不能为空'];
+            }
+            $update = CourseMaterial::where(['id'=>$data['id'],'mold'=>3])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+            if($update){
+                //获取后端的操作员id
+                $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                //添加日志操作
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $admin_id  ,
+                    'module_name'    =>  'LiveClassChildMaterial' ,
+                    'route_url'      =>  'admin/deleteLiveClassChildMaterial' ,
+                    'operate_method' =>  'delete' ,
+                    'content'        =>  '软删除id为'.$data['id'],
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                return ['code' => 200 , 'msg' => '删除成功'];
+            }else{
+                return ['code' => 202 , 'msg' => '删除失败'];
+            }
         }
 }
 
