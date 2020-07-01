@@ -126,7 +126,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('ArticleTypeLead', 'ArticletypeController@ArticleTypeLead');//文章分类导入
     $router->post('ArticleToType', 'ArticleController@ArticleToType');//文章关联分类
     $router->get('liveCallBack', 'LiveChildController@listenLive');
-    $router->post('liveCallBack', 'LiveChildController@listenLive');
+    $router->post('liveCallBack', 'LiveChildController@listenLive');//直播回调状态
 });
 //后端登录权限认证相关接口
 $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors']], function () use ($router) {
@@ -227,7 +227,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->post('deleteLive', 'LiveController@destroy');
     $router->post('updateLiveStatus', 'LiveController@status');
     $router->post('liveRelationLesson', 'LiveController@lesson');
-    $router->post('lesson/liveList', 'LiveController@lessonRelatedLive');
+
 
 
     /*
