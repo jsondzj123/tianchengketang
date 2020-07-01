@@ -377,6 +377,9 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('sectionAdd', 'CourseController@sectionAdd');//节添加
         $router->post('sectionUpdate', 'CourseController@sectionUpdate');//节修改
         $router->post('sectionDataDel', 'CourseController@sectionDataDel');//节资料删除
+
+        //直播课程
+        $router->post('liveCourses', 'CourseController@liveCourses');//直播课程单元列表
     });
     //运营模块(szw)
     $router->group(['prefix' => 'article'], function () use ($router) {
@@ -484,7 +487,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->group(['prefix' => 'courstocks'], function () use ($router) {
         $router->post('getList', 'CourseStocksController@getList');  //库存列表
         $router->post('doInsertStocks', 'CourseStocksController@doInsertStocks');  //库存列表
-       
+
     });
 
     //end 网校系统     lys

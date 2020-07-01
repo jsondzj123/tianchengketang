@@ -143,9 +143,12 @@ class Coures extends Model {
         }
         $user_id = AdminLog::getAdminInfo()->admin_user->id;
         $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
+        $title = self::where(['title'=>$data['title'],'is_del'=>0,'nature'=>1])->first();
+        if($title){
+            return ['code' => 201 , 'msg' => '课程已存在'];
+        }
         DB::beginTransaction();
         //入课程表  课程授课表 课程讲师表
-
         $couser = self::insertGetId([
             'admin_id' => $user_id,
             'school_id' => $school_id,

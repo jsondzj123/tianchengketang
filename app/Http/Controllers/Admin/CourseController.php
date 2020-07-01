@@ -218,4 +218,20 @@ class CourseController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
+
+    /*============================直播课程=============================*/
+    /*
+         * @param  直播课程详情
+         * @param  author  苏振文
+         * @param  ctime   2020/6/30 9:44
+         * return  array
+         */
+    public function liveCourses(){
+        try{
+            $data = Coureschapters::sectionDataDel(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
 }
