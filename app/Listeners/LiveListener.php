@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Tools\MTCloud;
-use App\Models\LiveChild;
+use App\Models\CourseLiveClassChild;
 use Log;
 
 class LiveListener
@@ -28,7 +28,7 @@ class LiveListener
     {
         if($cmd === 'live.start'){
             Log::info('直播开始:'.json_encode($params));
-            $live = LiveChild::where(['course_id' => $params['course_id']])->first();
+            $live = CourseLiveClassChild::where(['course_id' => $params['course_id']])->first();
             $live->status = 2;
             $live->save();
 
@@ -40,7 +40,7 @@ class LiveListener
             ];
         }else if($cmd === 'live.stop'){
             Log::info('直播结束:'.json_encode($params));
-            $live = LiveChild::where(['course_id' => $params['course_id']])->first();
+            $live = CourseLiveClassChild::where(['course_id' => $params['course_id']])->first();
             $live->status = 3;
             $live->save();
             $response = [
@@ -51,7 +51,7 @@ class LiveListener
             ];
         }else if($cmd === 'live.playback'){
             Log::info('直播回放生成:'.json_encode($params));
-            $live = LiveChild::where(['course_id' => $params['course_id']])->first();
+            $live = CourseLiveClassChild::where(['course_id' => $params['course_id']])->first();
             $live->playback = 1;
             $live->playbackUrl = $params['url'];
             $live->save();
