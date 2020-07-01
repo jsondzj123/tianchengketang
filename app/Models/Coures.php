@@ -335,9 +335,9 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '课程id不能为空'];
         }
         $list=[];
-        $count = Couresliveresource::where(['course_id'=>$data['id'],'is_del'=>0])->count();
+        $count = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->count();
         if($count > 0){
-            $list = Couresliveresource::where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
+            $list = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
             foreach ($list as $k=>&$v){
                 $shift_no = Couresshiftno::where(['resource_id'=>$v['resource_id'],'is_del'=>0,'is_forbid'=>0])->get()->toArray();
                 $v['shift_no'] = $shift_no;
@@ -354,7 +354,7 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '参数为空'];
         }
         foreach ($data['shift'] as $k=>$v){
-            Couresliveresource::where('id',$v['id'])->update(['shift_id'=>$v['shift_id'],'update_at'=>date('Y-m-d H:i:s')]);
+            CourseLiveResource::where('id',$v['id'])->update(['shift_id'=>$v['shift_id'],'update_at'=>date('Y-m-d H:i:s')]);
         }
         return ['code' => 200 , 'msg' => '修改成功'];
     }

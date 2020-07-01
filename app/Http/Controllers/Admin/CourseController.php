@@ -6,6 +6,7 @@ use App\Models\Coures;
 use App\Models\Coureschapters;
 use App\Models\Couresliveresource;
 use App\Models\CouresSubject;
+use App\Models\CourseLiveResource;
 
 class CourseController extends Controller {
     //获取学科列表
@@ -243,7 +244,7 @@ class CourseController extends Controller {
          */
     public function liveCourses(){
         try{
-            $data = Couresliveresource::selectFind(self::$accept_data);
+            $data = CourseLiveResource::selectFind(self::$accept_data);
             return response()->json($data);
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
@@ -257,7 +258,7 @@ class CourseController extends Controller {
          */
     public function liveCoursesDel(){
         try{
-            $data = Couresliveresource::delLiveCourse(self::$accept_data);
+            $data = CourseLiveResource::delLiveCourse(self::$accept_data);
             return response()->json($data);
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
@@ -271,7 +272,7 @@ class CourseController extends Controller {
          */
     public function liveCoursesUp(){
         try{
-            $data = Couresliveresource::upLiveCourse(self::$accept_data);
+            $data = CourseLiveResource::upLiveCourse(self::$accept_data);
             return response()->json($data);
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
@@ -285,7 +286,7 @@ class CourseController extends Controller {
          */
     public function liveToCourse(){
         try{
-            $data = Couresliveresource::liveToCourse(self::$accept_data);
+            $data = CourseLiveResource::liveToCourse(self::$accept_data);
             return response()->json($data);
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
