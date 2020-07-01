@@ -3,7 +3,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\AdminLog;
-use App\MOdels\Papers;
+use App\Models\Papers;
 use App\Models\Exam;
 use Validator;
 use Illuminate\Support\Facades\Redis;
@@ -45,12 +45,17 @@ class PapersExam extends Model {
         if ($validator->fails()) {
             return json_decode($validator->errors()->first() , true);
         }
+        
+        $where = [];
 
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         
         //获取选择得题得列表
         $exam_array = json_decode($body['exam_array'] , true);
+        
+        //根据试卷的id更新试题类型的每题分数
+        $papers_info = Papers::where("id" , $body['papers_id'])->first();
         foreach($exam_array as $k=>$v){
             //数据数组组装
             $data = [
@@ -62,6 +67,29 @@ class PapersExam extends Model {
                 "admin_id"   => $admin_id,
                 "create_at"  => date('Y-m-d H:i:s')
             ];
+            
+            //试题类型
+            $type = explode(',' , $papers_info['type']);
+            if(in_array($v['type'] , $type)){
+                if($v['type'] == 1){
+                    $where['signle_score'] = $v['grade'];
+                } else if($v['type'] == 2){
+                    $where['more_score']   = $v['grade'];
+                } else if($v['type'] == 3){
+                    $where['judge_score']  = $v['grade'];
+                } else if($v['type'] == 4){
+                    $where['options_score']= $v['grade'];
+                } else if($v['type'] == 5){
+                    $where['pack_score']   = $v['grade'];
+                } else if($v['type'] == 6){
+                    $where['short_score']  = $v['grade'];
+                } else if($v['type'] == 7){
+                    $where['material_score'] = $v['grade'];
+                } 
+                
+                //更新分数的操作
+                Papers::where("id" , $body['papers_id'])->update($where);
+            }
             
             //将数据插入到表中
             $papersexam_id = self::insertGetId($data);
