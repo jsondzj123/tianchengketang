@@ -192,24 +192,12 @@ class LiveController extends Controller {
      */
     public function lesson(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-            'lesson_id' => 'required|json',
-        ]);
-        if ($validator->fails()) {
-            return $this->response($validator->errors()->first(), 202);
+        try{
+            $list = Live::liveRelationLesson(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
-        $lessonIds = json_decode($request->input('lesson_id'), true);
-        try {
-            $live = Live::find($request->input('id'));
-            if(!empty($lessonIds)){
-                $live->lessons()->attach($lessonIds);
-            }
-        } catch (Exception $e) {
-            Log::error('创建失败:'.$e->getMessage());
-            return $this->response($e->getMessage(), 500);
-        }
-        return $this->response('创建成功');
     }
 
 
