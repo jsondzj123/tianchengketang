@@ -64,7 +64,11 @@ class Student extends Model {
         }
 
         //根据id获取学员详细信息
-        $student_info = self::where('id',$body['student_id'])->select('school_id','phone','real_name','sex','papers_type','papers_num','birthday','address_locus','age','educational','family_phone','office_phone','contact_people','contact_phone','email','qq','wechat','address','remark')->first()->toArray();
+        $student_info = self::where('id',$body['student_id'])->select('school_id','phone','real_name','sex','papers_type','papers_num','birthday','address_locus','age','educational','family_phone','office_phone','contact_people','contact_phone','email','qq','wechat','address','remark','head_icon')->first()->toArray();
+        //判断头像是否为空
+        if(empty($student_info['head_icon'])){
+            $student_info['head_icon']  = 'https://longdeapi.oss-cn-beijing.aliyuncs.com/upload/2020-07-01/159359854490285efc6250a7852.png';
+        }
         return ['code' => 200 , 'msg' => '获取学员信息成功' , 'data' => $student_info];
     }
 
