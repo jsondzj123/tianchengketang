@@ -31,23 +31,14 @@ class PapersExam extends Model {
         $rule = [
             'subject_id'   =>   'required|numeric' ,
             'papers_id'    =>   'required|numeric' ,
-            'exam_id'      =>   'required|numeric' ,
-            'type'         =>   'required|numeric' ,
-            // 'joint_id'     =>   'required|numeric' ,
-            // 'chapter_id'   =>   'required|numeric' ,
-            'grade'        =>   'required|numeric' ,
+            'exam_array'   =>   'required'
         ];
 
         //信息提示
         $message = [
             'subject_id.required'   =>  json_encode(['code'=>201,'msg'=>'科目id为空']) ,
             'papers_id.required'   =>  json_encode(['code'=>201,'msg'=>'试卷id为空']) ,
-            'exam_id.required'   =>  json_encode(['code'=>201,'msg'=>'试题id为空']) ,
-            'type.required'   =>  json_encode(['code'=>201,'msg'=>'试题类型为空']) ,
-            // 'chapter_id.required'   =>  json_encode(['code'=>201,'msg'=>'章id为空']) ,
-            // 'joint_id.required'   =>  json_encode(['code'=>201,'msg'=>'节id为空']) ,
-            'grade.required'   =>  json_encode(['code'=>201,'msg'=>'每题得分为空']) ,
-
+            'exam_array.required'   =>  json_encode(['code'=>201,'msg'=>'试题列表为空'])
         ];
 
         $validator = Validator::make($body , $rule , $message);
@@ -57,21 +48,26 @@ class PapersExam extends Model {
 
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+        
+        //获取选择得题得列表
+        $exam_array = json_decode($body['exam_array'] , true);
+        foreach($exam_array as $k=>$v){
+            //数据数组组装
+            $data = [
+                "subject_id" => $body['subject_id'],
+                "papers_id"  => $body['papers_id'],
+                "exam_id"    => $v['exam_id'],
+                "type"       => $v['type'],
+                "grade"      => $v['grade'],
+                "admin_id"   => $admin_id,
+                "create_at"  => date('Y-m-d H:i:s')
+            ];
+            
+            //将数据插入到表中
+            $papersexam_id = self::insertGetId($data);
+        }
 
-        //将后台人员id追加
-        $body['admin_id']   = $admin_id;
-        $body['create_at']  = date('Y-m-d H:i:s');
-        $data = [
-            "subject_id" => $body['subject_id'],
-            "papers_id" => $body['papers_id'],
-            "exam_id" => $body['exam_id'],
-            "type" => $body['type'],
-            "grade" => $body['grade'],
-            "admin_id" => $body['admin_id'],
-            "create_at" => $body['create_at'],
-        ];
-        //将数据插入到表中
-        $papersexam_id = self::insertGetId($data);
+        //插入日志数据
         if($papersexam_id && $papersexam_id > 0){
             //添加日志操作
             AdminLog::insertAdminLog([

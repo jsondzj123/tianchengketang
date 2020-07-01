@@ -188,11 +188,11 @@ class BankController extends Controller {
                 'name'=> '多选题'
             ] ,
             [
-                'id'  =>  3 ,
+                'id'  =>  4 ,
                 'name'=> '不定项'
             ] ,
             [
-                'id'  =>  4 ,
+                'id'  =>  3 ,
                 'name'=> '判断题'
             ] ,
             [

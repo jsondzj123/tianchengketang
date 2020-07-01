@@ -26,7 +26,7 @@ class CreateLdQuestionPapersTable extends Migration
             $table->integer('area')->default(0)->comment('所属区域');
             $table->string('cover_img' , 255)->default('')->comment('封面图片');
             $table->text('content')->nullable()->comment('简介');
-            $table->string('type' , 60)->default('')->comment('试题类型(1代表单选题2代表多选题3代表不定项4代表判断题5填空题6简答题7材料题)');
+            $table->string('type' , 60)->default('')->comment('试题类型(1代表单选题2代表多选题4代表不定项3代表判断题5填空题6简答题7材料题)');
             $table->integer('signle_score')->default(0)->comment('单选题每题得分');
             $table->integer('more_score')->default(0)->comment('多选题每题得分');
             $table->integer('judge_score')->default(0)->comment('判断题每题得分');

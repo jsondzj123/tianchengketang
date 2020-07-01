@@ -26,7 +26,7 @@ class IndexController extends Controller {
                 [
                     'chart_id'     =>   1 ,
                     'title'        =>   '轮播图1' ,
-                    'jump_url'     =>   '#' ,
+                    'jump_url'     =>   '' ,
                     'pic_image'    =>   "https://longdeapi.oss-cn-beijing.aliyuncs.com/upload/2020-06-17/159238101090725ee9ce52b4dbc.jpg" ,
                     'type'         =>   1 ,
                     'lession_info' => [
@@ -37,9 +37,9 @@ class IndexController extends Controller {
                 [
                     'chart_id'     =>   2 ,
                     'title'        =>   '轮播图2' ,
-                    'jump_url'     =>   '#' ,
+                    'jump_url'     =>   '' ,
                     'pic_image'    =>   "https://longdeapi.oss-cn-beijing.aliyuncs.com/upload/2020-06-17/159238104323565ee9ce73db673.jpg" ,
-                    'type'         =>   0 ,
+                    'type'         =>   1 ,
                     'lession_info' =>   [
                         'lession_id'  => 0 ,
                         'lession_name'=> ''
@@ -48,7 +48,7 @@ class IndexController extends Controller {
                 [
                     'chart_id'     =>   3 ,
                     'title'        =>   '轮播图3' ,
-                    'jump_url'     =>   '#' ,
+                    'jump_url'     =>   '' ,
                     'pic_image'    =>   "https://longdeapi.oss-cn-beijing.aliyuncs.com/upload/2020-06-17/159238106166285ee9ce85ea7e0.jpg" ,
                     'type'         =>   1 ,
                     'lession_info' => [

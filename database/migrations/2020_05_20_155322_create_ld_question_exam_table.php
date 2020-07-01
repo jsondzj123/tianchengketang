@@ -29,7 +29,7 @@ class CreateLdQuestionExamTable extends Migration
             $table->integer('chapter_id')->default(0)->comment('章id');
             $table->integer('joint_id')->default(0)->comment('节id');
             $table->integer('point_id')->default(0)->comment('考点id');
-            $table->tinyInteger('type')->default(0)->comment('试题类型(1代表单选题2代表多选题3代表不定项4代表判断题5填空题6简答题7材料题)');
+            $table->tinyInteger('type')->default(0)->comment('试题类型(1代表单选题2代表多选题4代表不定项3代表判断题5填空题6简答题7材料题)');
             $table->tinyInteger('item_diffculty')->default(0)->comment('试题难度(1代表简单,2代表一般,3代表困难)');
             $table->tinyInteger('is_del')->default(0)->comment('是否删除(1代表删除,0代表正常)');
             $table->tinyInteger('is_publish')->default(0)->comment('是否发布(1代表发布,0代表未发布)');
