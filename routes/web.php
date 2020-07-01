@@ -126,7 +126,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('ArticleTypeLead', 'ArticletypeController@ArticleTypeLead');//文章分类导入
     $router->post('ArticleToType', 'ArticleController@ArticleToType');//文章关联分类
     $router->get('liveCallBack', 'LiveChildController@listenLive');
-    $router->post('liveCallBack', 'LiveChildController@listenLive');
+    $router->post('liveCallBack', 'LiveChildController@listenLive');//直播回调状态
 });
 //后端登录权限认证相关接口
 $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors']], function () use ($router) {
@@ -227,7 +227,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->post('deleteLive', 'LiveController@destroy');
     $router->post('updateLiveStatus', 'LiveController@status');
     $router->post('liveRelationLesson', 'LiveController@lesson');
-    $router->post('lesson/liveList', 'LiveController@lessonRelatedLive');
+
 
 
     /*
@@ -377,6 +377,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseFirst', 'CourseController@courseFirst');//课程单条信息
         $router->post('courseUpdate', 'CourseController@courseUpdate');//课程修改
         $router->post('courseRecommend', 'CourseController@courseRecommend');//课程推荐
+        $router->post('courseUpStatus', 'CourseController@courseUpStatus');//课程发布
+
 
         //录播课程
         $router->post('chapterList', 'CourseController@chapterList');//章/节列表
@@ -390,6 +392,11 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
         //直播课程
         $router->post('liveCourses', 'CourseController@liveCourses');//直播课程单元列表
+        $router->post('liveCoursesDel', 'CourseController@liveCoursesDel');//直播课程删除资源
+        $router->post('liveCoursesUp', 'CourseController@liveCoursesUp');//直播课程修改资源
+        $router->post('liveToCourse', 'CourseController@liveToCourse');//直播课程取消或选择资源
+        $router->post('liveToCourseList', 'CourseController@liveToCourseList');//直播课程排课
+        $router->post('liveToCourseshift', 'CourseController@liveToCourseshift');//直播课程进行排课
     });
     //运营模块(szw)
     $router->group(['prefix' => 'article'], function () use ($router) {

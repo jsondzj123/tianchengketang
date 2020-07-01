@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Coures;
 use App\Models\Coureschapters;
+use App\Models\Couresliveresource;
 use App\Models\CouresSubject;
+use App\Models\CourseLiveResource;
 
 class CourseController extends Controller {
     //获取学科列表
@@ -95,6 +97,20 @@ class CourseController extends Controller {
     public function courseRecommend(){
         try{
             $data = Coures::courseComment(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    /*
+         * @param  课程发布/停售
+         * @param  author  苏振文
+         * @param  ctime   2020/7/1 16:10
+         * return  array
+         */
+    public function courseUpStatus(){
+        try{
+            $data = Coures::courseUpStatus(self::$accept_data);
             return response()->json($data);
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
@@ -228,10 +244,81 @@ class CourseController extends Controller {
          */
     public function liveCourses(){
         try{
-            $data = Coureschapters::sectionDataDel(self::$accept_data);
+            $data = CourseLiveResource::selectFind(self::$accept_data);
             return response()->json($data);
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
+    /*
+         * @param  删除直播资源
+         * @param  author  苏振文
+         * @param  ctime   2020/7/1 15:19
+         * return  array
+         */
+    public function liveCoursesDel(){
+        try{
+            $data = CourseLiveResource::delLiveCourse(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    /*
+         * @param  修改直播资源
+         * @param  author  苏振文
+         * @param  ctime   2020/7/1 15:29
+         * return  array
+         */
+    public function liveCoursesUp(){
+        try{
+            $data = CourseLiveResource::upLiveCourse(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    /*
+         * @param  选择或取消直播资源
+         * @param  author  苏振文
+         * @param  ctime   2020/7/1 15:36
+         * return  array
+         */
+    public function liveToCourse(){
+        try{
+            $data = CourseLiveResource::liveToCourse(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    /*
+         * @param  直播课程关联直播资源列表
+         * @param  author  苏振文
+         * @param  ctime   2020/7/1 17:02
+         * return  array
+         */
+    public function liveToCourseList(){
+        try{
+            $data = Coures::liveToCourseList(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    /*
+         * @param  直播课程进行排课
+         * @param  author  苏振文
+         * @param  ctime   2020/7/1 17:44
+         * return  array
+         */
+    public function liveToCourseshift(){
+        try{
+            $data = Coures::liveToCourseshift(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+
 }

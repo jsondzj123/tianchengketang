@@ -259,12 +259,12 @@ class Coures extends Model {
         unset($data['teacher']);
         self::where(['id'=>$data['id']])->update($data);
         if(!empty($cousermethod)){
-            Couresmethod::where(['course_id'=>$data['id']])->update(['is_del'=>1]);
+            Couresmethod::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
             $method = explode(',',$cousermethod);
             foreach ($method as $k=>$v){
                 $infor = Couresmethod::where(['course_id'=>$data['id'],'method_id'=>$v])->first();
                 if($infor){
-                     Couresmethod::where(['id'=>$infor['id']])->update(['is_del'=>0]);
+                     Couresmethod::where(['id'=>$infor['id']])->update(['is_del'=>0,'update_at'=>date('Y-m-d H:i:s')]);
                 }else{
                     Couresmethod::insert([
                         'course_id' => $data['id'],
@@ -274,12 +274,12 @@ class Coures extends Model {
             }
         }
         if(!empty($couserteacher)){
-            Couresteacher::where(['course_id'=>$data['id']])->update(['is_del'=>1]);
+            Couresteacher::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
             $teacher = explode(',',$couserteacher);
             foreach ($teacher as $k=>$v){
                 $infor = Couresteacher::where(['course_id'=>$data['id'],'teacher_id'=>$v])->first();
                 if($infor){
-                     Couresteacher::where(['id'=>$infor['id']])->update(['is_del'=>0]);
+                     Couresteacher::where(['id'=>$infor['id']])->update(['is_del'=>0,'update_at'=>date('Y-m-d H:i:s')]);
                 }else{
                     Couresteacher::insert([
                         'course_id' => $data['id'],
@@ -301,11 +301,61 @@ class Coures extends Model {
         $id = $data['id'];
         $find = self::where(['id'=>$id])->first();
         $recommend = $find['is_recommend'] == 1 ? 0:1;
-        $up = self::where(['id'=>$id])->update(['is_recommend'=>$recommend]);
+        $up = self::where(['id'=>$id])->update(['is_recommend'=>$recommend,'update_at'=>date('Y-m-d H:i:s')]);
         if($up){
             return ['code' => 200 , 'msg' => '修改成功'];
         }else{
             return ['code' => 201 , 'msg' => '修改失败'];
         }
+    }
+    //修改课程状态
+    public static function courseUpStatus($data){
+        if(!isset($data) || empty($data)){
+            return ['code' => 201 , 'msg' => '传参数组为空'];
+        }
+        if(!isset($data['id']) || empty($data['id'])){
+            return ['code' => 201 , 'msg' => '课程id不能为空'];
+        }
+        if(!isset($data['status']) || empty($data['status'])){
+            return ['code' => 201 , 'msg' => '课程状态不能为空'];
+        }
+        $up = self::where('id',$data['id'])->update(['status'=>$data['status'],'update_at'=>date('Y-m-d H:i:s')]);
+        if($up){
+            return ['code' => 200, 'msg' => '操作成功'];
+        }else{
+            return ['code' => 202 , 'msg' => '操作失败'];
+        }
+    }
+    //课程关联直播的列表
+    public static function liveToCourseList($data){
+        if(!isset($data) || empty($data)){
+            return ['code' => 201 , 'msg' => '传参数组为空'];
+        }
+        if(!isset($data['id']) || empty($data['id'])){
+            return ['code' => 201 , 'msg' => '课程id不能为空'];
+        }
+        $list=[];
+        $count = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->count();
+        if($count > 0){
+            $list = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
+            foreach ($list as $k=>&$v){
+                $shift_no = LiveClass::where(['resource_id'=>$v['resource_id'],'is_del'=>0,'is_forbid'=>0])->get()->toArray();
+                $v['shift_no'] = $shift_no;
+            }
+        }
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
+    }
+    //课程进行排课
+    public static function liveToCourseshift($data){
+        if(!isset($data) || empty($data)){
+            return ['code' => 201 , 'msg' => '传参数组为空'];
+        }
+        if(!isset($data['shift']) || empty($data['shift'])){
+            return ['code' => 201 , 'msg' => '参数为空'];
+        }
+        foreach ($data['shift'] as $k=>$v){
+            CourseLiveResource::where('id',$v['id'])->update(['shift_id'=>$v['shift_id'],'update_at'=>date('Y-m-d H:i:s')]);
+        }
+        return ['code' => 200 , 'msg' => '修改成功'];
     }
 }
