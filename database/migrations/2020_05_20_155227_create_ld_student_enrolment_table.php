@@ -20,6 +20,7 @@ class CreateLdStudentEnrolmentTable extends Migration
             $table->integer('admin_id')->default(0)->comment('操作员id');
             $table->integer('student_id')->default(0)->comment('学员id');
             $table->integer('parent_id')->default(0)->comment('学科分类id');
+            $table->integer('child_id')->default(0)->comment('学科二级分类得id');
             $table->integer('lession_id')->default(0)->comment('课程id');
             $table->decimal('lession_price' , 10 , 2)->default(0)->comment('课程原价');
             $table->decimal('student_price' , 10 , 2)->default(0)->comment('学员价格');

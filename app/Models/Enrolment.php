@@ -51,7 +51,7 @@ class Enrolment extends Model {
         }
         
         //判断学科分类id是否合法
-        if(!isset($body['parent_id']) || empty($body['parent_id']) || $body['parent_id'] <= 0){
+        if(!isset($body['parent_id']) || empty($body['parent_id'])){
             return ['code' => 202 , 'msg' => '学科分类id不合法'];
         }
         
@@ -92,11 +92,15 @@ class Enrolment extends Model {
         
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+        
+        //学科分类得转换
+        $parent_info = json_decode($body['parent_id'] , true);
 
         //报名数据信息追加
         $enroll_array = [
             'student_id'     =>   $body['student_id'] ,
-            'parent_id'      =>   $body['parent_id'] ,
+            'parent_id'      =>   $parent_info[0] ,
+            'child_id'       =>   $parent_info[1] ,
             'lession_id'     =>   $body['lession_id'] ,
             'lession_price'  =>   $body['lession_price'] ,
             'student_price'  =>   $body['student_price'] ,

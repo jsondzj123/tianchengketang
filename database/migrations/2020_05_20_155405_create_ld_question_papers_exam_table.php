@@ -21,7 +21,7 @@ class CreateLdQuestionPapersExamTable extends Migration
             $table->integer('subject_id')->default(0)->comment('科目id');
             $table->integer('papers_id')->default(0)->comment('试卷id');
             $table->integer('exam_id')->default(0)->comment('试题id');
-            $table->tinyInteger('type')->default(0)->comment('试题类型(1代表单选题2代表多选题3代表不定项4代表判断题5填空题6简答题7材料题)');
+            $table->tinyInteger('type')->default(0)->comment('试题类型(1代表单选题2代表多选题4代表不定项3代表判断题5填空题6简答题7材料题)');
             $table->tinyInteger('is_del')->default(0)->comment('是否删除(1代表删除,0代表正常)');
             $table->dateTime('create_at')->comment('创建时间');
             $table->dateTime('update_at')->nullable()->comment('更新时间');

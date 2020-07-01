@@ -269,6 +269,42 @@ class StudentController extends Controller {
                 'name'=>  '博士后及以上'
             ]
         ];
-        return response()->json(['code' => 200 , 'msg' => '返回数据成功' , 'data' => ['papers_type_list' => $papers_type_array , 'educational_list' => $educational_array]]);
+        
+        //付款方式
+        $payment_method = [
+            [
+                'id'  =>  1 ,
+                'name'=> '微信'
+            ] ,
+            [
+                'id'  =>  2 ,
+                'name'=> '支付宝'
+            ] ,
+            [
+                'id'  =>  3 ,
+                'name'=> '银行转账'
+            ]
+        ];
+        
+        //付款类型
+        $payment_type = [
+            [
+                'id'  =>  1 ,
+                'name'=> '定金'
+            ] ,
+            [
+                'id'  =>  2 ,
+                'name'=> '尾款'
+            ] ,
+            [
+                'id'  =>  3 ,
+                'name'=> '最后一次尾款'
+            ],
+            [
+                'id'  =>  4 ,
+                'name'=> '全款'
+            ]
+        ];
+        return response()->json(['code' => 200 , 'msg' => '返回数据成功' , 'data' => ['papers_type_list' => $papers_type_array , 'educational_list' => $educational_array , 'payment_method' => $payment_method , 'payment_type' => $payment_type]]);
     }
 }

@@ -9,7 +9,7 @@ class ExamController extends Controller {
     /*
      * @param  description   增加试题的方法
      * @param  参数说明       body包含以下参数[
-     *     type            试题类型(1代表单选题2代表多选题3代表不定项4代表判断题5填空题6简答题7材料题)
+     *     type            试题类型(1代表单选题2代表多选题4代表不定项3代表判断题5填空题6简答题7材料题)
      *     subject_id      科目id
      *     bank_id         题库id
      *     exam_id         试题id
@@ -50,7 +50,7 @@ class ExamController extends Controller {
     /*
      * @param  description   更改试题的方法
      * @param  参数说明       body包含以下参数[
-     *     type            试题类型(1代表单选题2代表多选题3代表不定项4代表判断题5填空题6简答题7材料题)
+     *     type            试题类型(1代表单选题2代表多选题4代表不定项3代表判断题5填空题6简答题7材料题)
      *     exam_id         试题id
      *     exam_content    题目内容
      *     option_list     [
@@ -137,7 +137,7 @@ class ExamController extends Controller {
      * @param  参数说明         body包含以下参数[
      *     bank_id         题库id(必传)
      *     subject_id      科目id(必传)
-     *     type            试题类型(1代表单选题2代表多选题3代表不定项4代表判断题5填空题6简答题7材料题)(必传)
+     *     type            试题类型(1代表单选题2代表多选题4代表不定项3代表判断题5填空题6简答题7材料题)(必传)
      *     is_publish      审核状态(非必传)
      *     chapter_id      章id(非必传)
      *     joint_id        节id(非必传)
@@ -211,7 +211,7 @@ class ExamController extends Controller {
     /*
      * @param  description   保存所选试题生成试卷
      * @param  参数说明       body包含以下参数[
-     *     type            试题类型(1代表单选题2代表多选题3代表不定项4代表判断题5填空题6简答题7材料题)
+     *     type            试题类型(1代表单选题2代表多选题4代表不定项3代表判断题5填空题6简答题7材料题)
      *     papers_id       试卷id
      * ]
      * @param  author        zzk
@@ -234,7 +234,7 @@ class ExamController extends Controller {
     /*
      * @param  description   试题检测重复
      * @param  参数说明       body包含以下参数[
-     *     type            试题类型(1代表单选题2代表多选题3代表不定项4代表判断题5填空题6简答题7材料题)
+     *     type            试题类型(1代表单选题2代表多选题4代表不定项3代表判断题5填空题6简答题7材料题)
      *     papers_id       试卷id
      * ]
      * @param  author        zzk
@@ -255,7 +255,7 @@ class ExamController extends Controller {
     /*
      * @param  description   手动添加接口
      * @param  参数说明       body包含以下参数[
-     *     type            试题类型(1代表单选题2代表多选题3代表不定项4代表判断题5填空题6简答题7材料题)
+     *     type            试题类型(1代表单选题2代表多选题4代表不定项3代表判断题5填空题6简答题7材料题)
      *     papers_id       试卷id
      *     chapter_id      章id
      *     chapter_id      节id
@@ -280,7 +280,7 @@ class ExamController extends Controller {
     /*
      * @param  description   选择试题接口
      * @param  参数说明       body包含以下参数[
-     *     type            试题类型(1代表单选题2代表多选题3代表不定项4代表判断题5填空题6简答题7材料题)
+     *     type            试题类型(1代表单选题2代表多选题4代表不定项3代表判断题5填空题6简答题7材料题)
      *     papers_id       试卷id
      * ]
      * @param  author        zzk
@@ -349,11 +349,11 @@ class ExamController extends Controller {
                 'name'=> '多选题'
             ] ,
             [
-                'id'  =>  3 ,
+                'id'  =>  4 ,
                 'name'=> '不定项'
             ],
             [
-                'id'  =>  4 ,
+                'id'  =>  3 ,
                 'name'=> '判断题'
             ] ,
             [
