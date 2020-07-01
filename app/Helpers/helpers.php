@@ -143,4 +143,21 @@ function randstr($len=6){
     return $password;
 
 }
+
+     /*
+ * @param  descriptsion    时间戳转时长
+ * @param  author          lys
+ * @param  ctime           2020-04-29
+ * return  array
+ */
+  function timetodate($c){
+        if($c < 86400){
+            $time = explode(' ',gmstrftime('%H %M %S',$c));
+            $duration = $time[0].'小时'.$time[1].'分'.$time[2].'秒';
+        }else{
+            $time = explode(' ',gmstrftime('%j %H %M %S',$c));
+            $duration = ($time[0]-1).'天'.$time[1].'小时'.$time[2].'分'.$time[3].'秒';
+        }
+        return $duration;
+    }
 ?>

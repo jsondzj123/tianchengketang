@@ -79,7 +79,6 @@ class CourseSchoolController extends Controller {
 
         $result = CourseSchool::store(self::$accept_data);
         return response()->json($result);
-
     }
 
 

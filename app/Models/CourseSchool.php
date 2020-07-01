@@ -134,7 +134,17 @@ class CourseSchool extends Model {
    								->select('id','parent_id','child_id','title','keywords','cover','pricing','sale_price','buy_num','expiry','describe','introduce','status','is_recommend')
    								->get();
    		foreach($courseInsertData as $k=>$v){
-   		//资源也未添加
+   		//直播资源也未添加
+            // $v['zhibo_resource'] = CourseLivesResource::where(['course_id',$v['id'],'is_del'=>0])->pluck('resource_id');
+            // if(!empty($v['zhibo_resource'])){
+            //     $v['zhibo_resource']['resource'] = Live::whereIn('id',$v['zhibo_resource'])->get()->toArray();
+            //     if(!empty($v['zhibo_resource']['resource'])){
+            //         foreach($v['zhibo_resource']['resource'] as $kk =>$vv){
+            //             $v['zhibo_resource']['resource'][$kk]['class_no'] =  CourseShiftNo::
+            //         }
+            //     }
+            // }
+            $v['record']  = Video::where(['lesson_id',$v['id'],'is_del'=>0,'status'=>0])->first();//录播资源是单选，表关系是一对一的
    			$v['method_id'] = Couresmethod::where('course_id',$v['id'])->pluck('method_id');
    		}   
    		try{
@@ -173,10 +183,50 @@ class CourseSchool extends Model {
 						DB::rollback();
 						return ['code'=>203,'msg'=>'课程授权未成功！'];
 					}
+                    // //直播资源 
+                    // if(!empty($data['zhibo_resource'])){
+                    //     $zhiboResourseInsertArr = [];
+                    //     foreach($data['zhibo_resource'] as $k=>$v){
+                    //         $zhiboResourseInsertArr[$k]['resource_id'] = $v;
+                    //         $zhiboResourseInsertArr[$k]['course_id'] = $course_id;
+                    //         $zhiboResourseInsertArr[$k]['create_at'] = date('Y-m-d H:i:s');
+                    //     }
+                    //     $res = CourseLivesResource::insert($zhiboResourseInsertArr);
+                    //     if(!$res){
+                    //         DB::rollback();
+                    //         return ['code'=>203,'msg'=>'课程授权未成功！'];
+                    //     }    
+                    // }
+                    if(!empty($data['record'])){  //录播资源
+                        $recordResouInsertArr = [
+                            'lesson_id'=>$data['record']['lesson_id'],
+                            'admin_id'=>$user_id,
+                            'school_id'=>$body['school_id'],
+                            'parent_id'=>$data['record']['parent_id'],
+                            'child_id'=>$data['record']['child_id'],
+                            'course_id'=>$data['record']['course_id'],
+                            'mt_video_id'=>$data['record']['mt_video_id'],
+                            'mt_video_name'=>$data['record']['mt_video_name'],
+                            'mt_url'=>$data['record']['mt_url'],
+                            'mt_duration'=>$data['record']['mt_duration'],
+                            'start_time'=>$data['record']['start_time'],
+                            'end_time'=>$data['record']['end_time'],
+                            'resource_type'=>$data['record']['resource_type'],
+                            'resource_name'=>$data['record']['resource_name'],
+                            'resource_url'=>$data['record']['resource_url'],
+                            'resource_size'=>$data['record']['resource_size'],
+                            'nature'=>1,
+                            'create_at'=>date('Y-m-d H:i:s');
+                        ];
+                        $res = Video::insert($recordResouInsertArr);    
+                        if(!$res){
+                            DB::rollback();
+                            return ['code'=>203,'msg'=>'课程授权未成功！！'];
+                        }    
+                    }
 				}
 				DB::commit();
 				return ['code'=>200,'msg'=>'课程授权成功！'];
-		
 			} catch (Exception $e) {
 				return ['code' => 500 , 'msg' => $ex->getMessage()];
 			}
