@@ -522,6 +522,13 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('doOpenLessById', 'OpenCourseController@doOpenLessById');//修改
         $router->post('zhiboMethod', 'OpenCourseController@zhiboMethod');//直播类型
     });
+    //教学模块
+
+    $router->group(['prefix' => 'teach'], function () use ($router) {
+        $router->post('getList', 'TeachController@getList');//教学列表 //未完成
+    });
+
+
 
 
 
