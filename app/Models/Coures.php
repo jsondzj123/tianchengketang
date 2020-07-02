@@ -115,10 +115,10 @@ class Coures extends Model {
         if(empty($data) || !isset($data)){
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
+        file_put_contents('courseAdd.txt', '时间:'.date('Y-m-d H:i:s').print_r($data,true),FILE_APPEND);
         if(!isset($data['parent']) || empty($data['parent'])){
             return ['code' => 201 , 'msg' => '请选择学科'];
         }
-        print_r($data['parent']);die;
         if(!isset($data['title']) || empty($data['title'])){
             return ['code' => 201 , 'msg' => '学科名称不能为空'];
         }
