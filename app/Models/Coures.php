@@ -339,7 +339,6 @@ class Coures extends Model {
             DB::rollback();
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
-
     }
     //修改推荐状态
     public static function courseComment($data){
