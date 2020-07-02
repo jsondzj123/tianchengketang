@@ -11,9 +11,7 @@ use App\Models\CourseLiveResource;
 class CourseController extends Controller {
     //获取学科列表
     public function coursesubject(){
-        $data = self::$accept_data;
-        $id = empty($data['id'])?0:$data['id'];
-        $list = CouresSubject::couresWhere($id);
+        $list = CouresSubject::couresWhere();
         return response()->json($list);
     }
   /*

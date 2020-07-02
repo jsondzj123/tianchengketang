@@ -139,7 +139,7 @@ class CouresSubject extends Model {
         }
     }
     //课程模块 条件显示
-    public static function couresWhere($id = 0){
+    public static function couresWhere(){
         $one = self::where(['is_del'=>0])->orderByDesc('id')->get()->toArray();
         $list = self::demo($one,0,0);
         return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
