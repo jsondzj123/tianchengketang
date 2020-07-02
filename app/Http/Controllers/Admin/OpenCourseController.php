@@ -57,7 +57,6 @@ class OpenCourseController extends Controller {
                 	'is_barrage' => 'required',
                 	'live_type' => 'required',
                 	'introduce'=>'required',
-                	
                 	'lect_teacher_id'=>'required',
                	],
                 OpenCourse::message());
@@ -169,8 +168,7 @@ class OpenCourseController extends Controller {
 		    }
        	} catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
-        }
-	  
+        }  
     }
     /*
     * @param  修改课程状态

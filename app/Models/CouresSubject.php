@@ -158,8 +158,11 @@ class CouresSubject extends Model {
         $list =array();
         foreach ($arr as $k=>$v){
             if ($v['parent_id'] == $id){
-                $v['level']=$level;
-                $v['childs'] = self::demo($arr,$v['id'],$level+1);
+                $aa = self::demo($arr,$v['id'],$level+1);
+                if(!empty($aa)){
+                    $v['level']=$level;
+                    $v['childs'] = $aa;
+                }
                 $list[] = $v;
             }
         }
