@@ -53,6 +53,9 @@ class PapersExam extends Model {
         
         //获取选择得题得列表
         $exam_array = json_decode($body['exam_array'] , true);
+        if(count($exam_array) <= 0){
+            return ['code' => 201 , 'msg' => '请选择试题'];
+        }
         
         //根据试卷的id更新试题类型的每题分数
         $papers_info = Papers::where("id" , $body['papers_id'])->first();
