@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminLog;
 use App\Models\Coures;
 use App\Models\Coureschapters;
 use App\Models\CouresSubject;
@@ -35,6 +36,8 @@ class CourseController extends Controller {
        * return  array
        */
   public function courseAdd(){
+      $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
+      echo $school_id;die;
       //获取提交的参数
       try{
           $data = Coures::courseAdd(self::$accept_data);
