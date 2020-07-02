@@ -241,13 +241,19 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '此数据不存在'];
         }
         //查询授权课程
-
         $method= Couresmethod::select('method_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
         $find['method'] = json_encode(array_column($method, 'method_id'));
-        $find['parent'] = [
-            0=>$find['parent_id'],
-            1=>$find['child_id']
-        ];
+        $find['parent']=[];
+        if($find['parent_id'] > 0){
+            $find['parent'] = [$find['parent_id']];
+        }
+        if($find['parent_id'] > 0 && $find['child_id'] > 0){
+            $find['parent'] = [$find['parent_id'] , $find['child_id']];
+        }
+//        $find['parent'] = [
+//            0=>$find['parent_id'],
+//            1=>$find['child_id']
+//        ];
         unset($find['parent_id'],$find['child_id']);
         //查询讲师
         $teachers = $teacher = Couresteacher::select('teacher_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
