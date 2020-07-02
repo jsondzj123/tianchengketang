@@ -203,13 +203,21 @@ class Coures extends Model {
         if(empty($data) || !isset($data)){
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
-        file_put_contents('courseDel.txt', '时间:'.date('Y-m-d H:i:s').print_r($data,true),FILE_APPEND);
         if(!isset($data['id']) || empty($data['id'])){
             return ['code' => 201 , 'msg' => '请选择学科大类'];
         }
         $find = self::where(['id'=>$data['id']])->first();
-        if($find['nature'] == 1){
-            return ['code' => 203 , 'msg' => '授权课程，无法删除'];
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+        if($school_status != 1){
+            if($find['nature'] == 1){
+                return ['code' => 203 , 'msg' => '授权课程，无法删除'];
+            }
+        }else{
+            // 总校删除 先查询授权分校库存，没有进行删除
+            $courseSchool = CourseStocks::where(['course_id'=>$data['id'],'add_number'=>'> 0'])->get();
+            if(!empty($courseSchool)){
+                return ['code' => 203 , 'msg' => '此课程授权给分校，无法删除'];
+            }
         }
         $del = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
         if($del){
