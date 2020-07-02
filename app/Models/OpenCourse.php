@@ -64,20 +64,24 @@ class OpenCourse extends Model {
          * return  array
          */
     public static function getList($body){
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
         $pagesize = isset($body['pagesize']) && $body['pagesize'] > 0 ? $body['pagesize'] : 15;
         $page     = isset($body['page']) && $body['page'] > 0 ? $body['page'] : 1;
-        $where['parent_id'] = isset($body['parent_id'])|| empty($body['parent_id'])  ?'':$body['parent_id'];
-        $where['child_id'] =  isset($body['child_id']) || empty($body['child_id']) ?'':$body['child_id'];
-        $where['status'] =  isset($body['status']) || empty($body['status']) ?'':$body['status'];
-        $where['time']  =  isset($body['time']) || empty($body['time']) ?'':$body['time'];
+
+        $where['parent_id'] = !isset($body['parent_id'])|| empty($body['parent_id'])  ?'':$body['parent_id'];
+        $where['child_id'] =  !isset($body['child_id']) || empty($body['child_id']) ?'':$body['child_id'];
+        $where['status'] =  !isset($body['status']) || empty($body['status']) ?'':$body['status'];
+        $where['time']  =  !isset($body['time']) || empty($body['time']) ?[]:$body['time'];
+        $times = [];
         if(!empty($where['time'])){
+            $time = json_decode($where['time'],1);
             $time = explode(',', $time);
             $where['start_at'] =  $time[0];
             $where['end_at']  = $time[1];
         }
         $typeArr = ['未发布','已发布','已下架','已过期'];
         $offset   = ($page - 1) * $pagesize;
-        $open_less_count = self::where(function($query) use ($where){
+        $open_less_count = self::where(function($query) use ($where,$school_id){
             if($where['parent_id'] != ''){
                 $query->where('parent_id',$where['parent_id']);
             }
@@ -86,7 +90,7 @@ class OpenCourse extends Model {
             }
             if($where['status'] != ''){
                 switch ($where['status']) {
-                    case '0': $query->where('status',$where['status']);      break;
+                    // case '0': $query->where('status',$where['status']);      break;
                     case '1': $query->where('status',$where['status']);      break;
                     case '2': $query->where('status',$where['status']);      break;
                     case '3': $query->where('end_at','<',time());            break;
@@ -96,11 +100,13 @@ class OpenCourse extends Model {
                 $query->where('start_at','<',$where['start_at']);
                 $query->where('end_at','>',$where['end_at']);
             }
+            $query->where('school_id',$school_id);
             $query->where('is_del',0);
          })->count();
+        
         $sum_page = ceil($open_less_count/$pagesize);
         if($open_less_count > 0){
-            $open_less_arr = self::where(function($query) use ($where){
+            $open_less_arr = self::where(function($query) use ($where,$school_id){
                if($where['parent_id'] != ''){
                     $query->where('parent_id',$where['parent_id']);
                 }
@@ -109,7 +115,7 @@ class OpenCourse extends Model {
                 }
                 if($where['status'] != ''){
                     switch ($where['status']) {
-                        case '0': $query->where('status',$where['status']);      break;
+                        //case '0': $query->where('status',$where['status']);      break;
                         case '1': $query->where('status',$where['status']);      break;
                         case '2': $query->where('status',$where['status']);      break;
                         case '3': $query->where('end_at','<',time());            break;
@@ -119,6 +125,7 @@ class OpenCourse extends Model {
                     $query->where('start_at','<',$where['start_at']);
                     $query->where('end_at','>',$where['end_at']);
                 }
+                $query->where('school_id',$school_id);
                 $query->where('is_del',0);
             })->select('id','title','cover','start_at','end_at','is_recommend','status')->offset($offset)->limit($pagesize)->get();
             foreach ($open_less_arr as $k => $v) {
@@ -126,9 +133,9 @@ class OpenCourse extends Model {
                 $teacherIdArr = OpenCourseTeacher::where('course_id',$v['id'])->where('is_del',0)->get(['teacher_id']);
                 $v['teacher_name'] = Teacher::whereIn('id',$teacherIdArr)->where('is_del',0)->where('type',2)->first()['real_name'];
             }
-            return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => $open_less_arr , 'total' => $open_less_count , 'pagesize' => $pagesize , 'page' => $page,'sum_page'=>$sum_page,'parent_id'=>$where['parent_id'],'child_id'=>$where['child_id'],'status'=>$where['status'],'time'=>$where['time'],'type'=>$typeArr]];          
+            return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => $open_less_arr , 'total' => $open_less_count , 'pagesize' => $pagesize , 'page' => $page,'sum_page'=>$sum_page,'parent_id'=>$where['parent_id'],'child_id'=>$where['child_id'],'status'=>$where['status'],'time'=>$time,'type'=>$typeArr]];          
         }
-        return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page,'sum_page'=>0,'parent_id'=>$where['parent_id'],'child_id'=>$where['child_id'],'type'=>$where['status'],'time'=>$where['time'],'type'=>$typeArr]];
+        return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page,'sum_page'=>0,'parent_id'=>$where['parent_id'],'child_id'=>$where['child_id'],'type'=>$where['status'],'time'=>$time,'type'=>$typeArr]];
     }
 
 }

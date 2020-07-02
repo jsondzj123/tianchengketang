@@ -5,13 +5,27 @@ use App\Tools\CurrentAdmin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Redis;
 use App\Models\AdminLog;
+use App\Tools\MTCloud;
 //教学模块Model
 class Teach extends Model {
+
+	//返回错误信息
+	public static function message(){
+		 return [
+            'class_id.required'  => json_encode(['code'=>'201','msg'=>'课次id不能为空']),
+            'class_id.integer'   => json_encode(['code'=>'202','msg'=>'课次id类型不合法']),
+            'classno_id.required' => json_encode(['code'=>'201','msg'=>'班号id不能为空']),
+            'classno_id.integer'  => json_encode(['code'=>'202','msg'=>'班号id类型不合法']),
+            'is_public.required' => json_encode(['code'=>'201','msg'=>'是否公开课标识不能为空']),
+            'id.required' =>        json_encode(['code'=>'201','msg'=>'id不能为空']),
+            'file.required' =>       json_encode(['code'=>'201','msg'=>'课件不能为空']),
+        ];
+	}
 	//教学列表
 	public static function getList($body){
 		$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
 		//公开课数据
-		$openCourseArr = openCourse::rightJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_open.id') 
+		$openCourseArr = OpenCourse::rightJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_open.id') 
 						->rightJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_open.id')
 						->rightJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_open_teacher.teacher_id')
 						->where(function($query) use ($body,$school_id) {
@@ -146,5 +160,46 @@ class Teach extends Model {
 				}
 			return ['code'=>200,'msg'=>'Success','data'=>$newcourseArr,'where'=>$body];
 	}
-	
+	//教学详情
+	//缺少公开课课程列表及课程详情   7.2
+	public static function details($body){
+
+		if($body['is_public'] == 1){  //公开课
+			$openCourseArr = OpenCourse::where('id',$body['class_id'])->select('id','title','start_at','end_at')->first();//公开课名称
+			$openChildsArr = OpenLivesChilds::where('lesson_id',$openCourseArr['id'])->select('watch_num','course_id')->first(); 
+			$openCourseArr['watch_num'] = $openChildsArr['watch_num']; //观看人数（学员人数）
+			$teacherIds = OpenCourseTeacher::where('course_id',$openCourseArr['id'])->pluck('teacher_id'); //讲师id组
+			$openCourseArr['lect_teacher_name'] = Teacher::whereIn(['id'=>$teacherIds,'type'=>'1'])->select('real_name')->first()['real_name'];//讲师
+			$eduTeacherName = Teacher::whereIn(['id'=>$teacherIds,'type'=>'2'])->pluck('real_name'); //教务
+			$openCourseArr['edu_teacher_name'] = '';
+			if(!empty($eduTeacherName)){
+				$openCourseArr['edu_teacher_name'] = implode(',', $eduTeacherName);
+			}
+			$openCourseArr['time'] = timetodate((int)$openCourseArr['end_at']-(int)$openCourseArr['start_at']);//时长
+			if($openCourseArr['start_at']>time()){
+				$openCourseArr['zhibostatus'] = '待直播';
+			}
+			if($openCourseArr['end_at']<time()){
+				$openCourseArr['zhibostatus'] = '直播已结束';
+			}
+			if($openCourseArr['start_at']<time() && $openCourseArr['end_at']>time()){
+				$openCourseArr['zhibostatus'] = '直播中';
+			} 
+			$openCourseArr['start_at'] = date('Y-m-d H:i:s',$openCourseArr['start_at']);
+			$openCourseArr['end_at'] = date('Y-m-d H:i:s',$openCourseArr['end_at']);
+			$MTCloud = new MTCloud();
+			$res =$MTCloud->courseDocumentList($body['course_id'],1);
+			$openCourseArr['courseware'] = $newArr = [];
+			if(!empty($res['data'])){
+				foreach($res['data'] as $key =>$v){
+					$newArr[] = $MTCloud->documentGet($v['id']))['data'];
+				}
+				$openCourseArr['courseware'] = $newArr;  //欢拓课件信息
+			}
+			return ['code'=>200,'msg'=>'Success','data'=>$openCourseArr];
+		}
+		if($body['is_public'] == 0){  //课程
+
+		}
+	}
 }
