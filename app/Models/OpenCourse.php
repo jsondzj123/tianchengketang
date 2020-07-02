@@ -75,7 +75,6 @@ class OpenCourse extends Model {
         $times = [];
         if(!empty($where['time'])){
             $time = json_decode($where['time'],1);
-            $time = explode(',', $time);
             $where['start_at'] =  $time[0];
             $where['end_at']  = $time[1];
         }
