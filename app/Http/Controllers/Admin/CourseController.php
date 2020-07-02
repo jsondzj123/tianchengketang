@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Coures;
 use App\Models\Coureschapters;
-use App\Models\Couresliveresource;
 use App\Models\CouresSubject;
 use App\Models\CourseLiveResource;
 
 class CourseController extends Controller {
     //获取学科列表
-    public function coursesubject(){
+    public function subject(){
         $list = CouresSubject::couresWhere();
         return response()->json($list);
     }
