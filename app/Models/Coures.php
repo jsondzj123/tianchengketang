@@ -167,8 +167,7 @@ class Coures extends Model {
             'introduce' => $data['introduce'],
         ]);
         if($couser){
-//            $method = json_decode($data['method'],true);
-            $method = explode(',',$data['method']);
+            $method = json_decode($data['method'],true);
             foreach ($method as $k=>$v){
                  Couresmethod::insert([
                     'course_id' => $couser,
@@ -244,7 +243,7 @@ class Coures extends Model {
         //查询授权课程
 
         $method= Couresmethod::select('method_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
-        $find['method'] = implode(',' ,array_column($method, 'method_id'));
+        $find['method'] = json_encode(array_column($method, 'method_id'));
         $find['parent'] = [
             0=>$find['parent_id'],
             1=>$find['child_id']
@@ -280,8 +279,12 @@ class Coures extends Model {
         unset($data['method']);
         unset($data['teacher']);
         $parent = json_decode($data['parent'],true);
-        $data['parent_id'] = isset($parent[0])?$parent[0]:0;
-        $data['child_id'] = isset($parent[1])?$parent[1]:0;
+        if(isset($parent[0]) && !empty($parent[0])){
+            $data['parent_id'] = $parent[0];
+        }
+        if(isset($parent[1]) && !empty($parent[1])){
+            $data['child_id'] = $parent[1];
+        }
         self::where(['id'=>$data['id']])->update($data);
         if(!empty($cousermethod)){
             Couresmethod::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
