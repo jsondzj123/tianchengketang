@@ -103,12 +103,12 @@ class Coures extends Model {
                     $v['method'] = $method;
                 }
             }
-            $page=[
-                'pageSize'=>$pagesize,
-                'page' =>$page,
-                'total'=>$count
-            ];
         }
+        $page=[
+            'pageSize'=>$pagesize,
+            'page' =>$page,
+            'total'=>$count
+        ];
         return ['code' => 200 , 'msg' => '查询成功','data'=>$list,'where'=>$data,'page'=>$page];
     }
     //添加
