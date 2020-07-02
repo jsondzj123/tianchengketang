@@ -192,14 +192,15 @@ class Teach extends Model {
 			$openCourseArr['courseware'] = $newArr = [];
 			if(!empty($res['data'])){
 				foreach($res['data'] as $key =>$v){
-					$newArr[] = $MTCloud->documentGet($v['id']))['data'];
+					$arr= $MTCloud->documentGet($v['id']);
+					$newArr[] =$arr['data'];
 				}
 				$openCourseArr['courseware'] = $newArr;  //欢拓课件信息
 			}
 			return ['code'=>200,'msg'=>'Success','data'=>$openCourseArr];
 		}
-		if($body['is_public'] == 0){  //课程
+		// if($body['is_public'] == 0){  //课程
 
-		}
+		// }
 	}
 }
