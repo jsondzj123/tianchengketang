@@ -140,7 +140,7 @@ class CouresSubject extends Model {
     }
     //课程模块 条件显示
     public static function couresWhere(){
-        $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['is_del'=>0])->orderByDesc('id')->get()->toArray();
+        $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['is_del'=>0,'is_open'=>0])->get()->toArray();
         $list = self::demo($one,0,0);
         return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
     }

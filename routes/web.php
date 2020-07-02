@@ -130,15 +130,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
 });
 //后端登录权限认证相关接口
 $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors']], function () use ($router) {
-    /*$router->group(['prefix' => 'admin', 'middleware'=> ['jwt.auth']], function () use ($router) {
-        //用户详情
-        $router->post('{id}', 'AdminController@show');
-        $router->post('info', 'AdminController@info');
-
-        //获取学员列表
-        $router->post('postUserList', 'UserController@postUserList');
-    });*/
-
+    $router->post('subject', 'CourseController@subject');//学科列表
     /*
      * 授课方式(sxl)
     */
@@ -192,7 +184,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     /*
      * 科目模块(sxl)
     */
-    $router->post('subject', 'SubjectController@searchList');
+//    $router->post('subject', 'SubjectController@searchList');
     $router->post('subjectList', 'SubjectController@index');
     $router->post('subject/add', 'SubjectController@store');
     $router->post('subjectShow', 'SubjectController@show');
@@ -369,7 +361,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     });
     //课程模块（重构）（szw）
     $router->group(['prefix' => 'course'], function () use ($router) {
-        $router->post('subject', 'CourseController@subject');//学科列表
+//        $router->post('subject', 'CourseController@subject');//学科列表
 
         $router->post('courseList', 'CourseController@courseList');//课程列表
         $router->post('courseAdd', 'CourseController@courseAdd');//课程添加
