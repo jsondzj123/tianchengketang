@@ -115,7 +115,6 @@ class Coures extends Model {
         if(empty($data) || !isset($data)){
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
-        file_put_contents('courseAdd.txt', '时间:'.date('Y-m-d H:i:s').print_r($data,true),FILE_APPEND);
         if(!isset($data['parent']) || empty($data['parent'])){
             return ['code' => 201 , 'msg' => '请选择学科'];
         }
@@ -280,8 +279,9 @@ class Coures extends Model {
         unset($data['/admin/course/courseUpdate']);
         unset($data['method']);
         unset($data['teacher']);
-            $data['parent_id'] = isset($data['parent'][0])?$data['parent'][0]:0;
-            $data['child_id'] = isset($data['parent'][1])?$data['parent'][1]:0;
+        $parent = json_decode($data['parent'],true);
+        $data['parent_id'] = isset($parent[0])?$parent[0]:0;
+        $data['child_id'] = isset($parent[1])?$parent[1]:0;
         self::where(['id'=>$data['id']])->update($data);
         if(!empty($cousermethod)){
             Couresmethod::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
@@ -300,7 +300,7 @@ class Coures extends Model {
         }
         if(!empty($couserteacher)){
             Couresteacher::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
-            $teacher = explode(',',$couserteacher);
+            $teacher = json_decode($couserteacher,true);
             foreach ($teacher as $k=>$v){
                 $infor = Couresteacher::where(['course_id'=>$data['id'],'teacher_id'=>$v])->first();
                 if($infor){
