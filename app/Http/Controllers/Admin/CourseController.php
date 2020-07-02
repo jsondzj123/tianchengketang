@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminLog;
 use App\Models\Coures;
 use App\Models\Coureschapters;
 use App\Models\CouresSubject;

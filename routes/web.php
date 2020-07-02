@@ -183,7 +183,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     /*
      * 科目模块(sxl)
     */
-    $router->post('subject', 'CourseController@subject');//学科列表(szw)
+    $router->post('subject', 'CourseController@subject');//学科列表(szw改)
 //    $router->post('subject', 'SubjectController@searchList');
     $router->post('subjectList', 'SubjectController@index');
     $router->post('subject/add', 'SubjectController@store');
