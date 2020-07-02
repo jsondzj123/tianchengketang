@@ -242,33 +242,24 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '此数据不存在'];
         }
         //查询授权课程
-        $method = Couresmethod::select('method_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get();
-        foreach ($method as $key=>&$val){
-            if($val['method_id'] == 1){
-                $val['method_name'] = '直播';
-            }
-            if($val['method_id'] == 2){
-                $val['method_name'] = '录播';
-            }
-            if($val['method_id'] == 3){
-                $val['method_name'] = '其他';
-            }
-        }
-        $find['method'] = $method;
+
+        $method= Couresmethod::select('method_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
+        $find['method'] = array_column($method, 'method_id');
         $find['parent'] = [
             0=>$find['parent_id'],
             1=>$find['child_id']
         ];
         unset($find['parent_id'],$find['child_id']);
         //查询讲师
-        $teacher = Couresteacher::select('teacher_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
-        if(!empty($teacher)){
-            foreach ($teacher as $k=>&$v){
+        $teachers = $teacher = Couresteacher::select('teacher_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
+        if(!empty($teachers)){
+            foreach ($teachers as $k=>&$v){
                 $name = Lecturer::select('real_name')->where(['id'=>$v['teacher_id'],'is_del'=>0,'type'=>2])->first();
                 $v['real_name'] = $name['real_name'];
             }
         }
-        $find['teacher'] = $teacher;
+        $find['teacher'] = array_column($teacher, 'teacher_id');
+        $find['teachers'] = $teachers;
         return ['code' => 200 , 'msg' => '查询成功','data'=>$find];
     }
     //修改
