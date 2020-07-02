@@ -277,9 +277,10 @@ class Coures extends Model {
         try{
         //修改 课程表 课程授课表 课程讲师表
         $cousermethod = isset($data['method'])?$data['method']:'';
-        $couserteacher = isset($data['teachers'])?$data['teachers']:'';
+        $couserteacher = isset($data['teacher'])?$data['teacher']:'';
         unset($data['/admin/course/courseUpdate']);
         unset($data['method']);
+        unset($data['teacher']);
         unset($data['teachers']);
         $parent = json_decode($data['parent'],true);
         if(isset($parent[0]) && !empty($parent[0])){
@@ -307,8 +308,8 @@ class Coures extends Model {
         }
         if(!empty($couserteacher)){
             Couresteacher::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
-//            $teacher = json_decode($couserteacher,true);
-            foreach ($couserteacher as $k=>$v){
+            $teacher = json_decode($couserteacher,true);
+            foreach ($teacher as $k=>$v){
                 $infor = Couresteacher::where(['course_id'=>$data['id'],'teacher_id'=>$v['teacher_id']])->first();
                 if($infor){
                      Couresteacher::where(['id'=>$infor['id']])->update(['is_del'=>0,'update_at'=>date('Y-m-d H:i:s')]);
