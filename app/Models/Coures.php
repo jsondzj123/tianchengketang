@@ -59,11 +59,11 @@ class Coures extends Model {
                     }
                     //学科大类
                     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
-                        $query->where('parent_id',$data['school_id']);
+                        $query->where('parent_id',$data['coursesubjectOne']);
                     }
                     //学科小类
                     if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
-                        $query->where('child_id',$data['school_id']);
+                        $query->where('child_id',$data['coursesubjectTwo']);
                     }
                     //状态
                     if(!empty($data['status']) && $data['status'] != ''){
