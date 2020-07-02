@@ -369,7 +369,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     });
     //课程模块（重构）（szw）
     $router->group(['prefix' => 'course'], function () use ($router) {
-        $router->post('coursesubject', 'CourseController@coursesubject');//学科列表
+        $router->post('subject', 'CourseController@subject');//学科列表
 
         $router->post('courseList', 'CourseController@courseList');//课程列表
         $router->post('courseAdd', 'CourseController@courseAdd');//课程添加
@@ -522,6 +522,13 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('doOpenLessById', 'OpenCourseController@doOpenLessById');//修改
         $router->post('zhiboMethod', 'OpenCourseController@zhiboMethod');//直播类型
     });
+    //教学模块
+
+    $router->group(['prefix' => 'teach'], function () use ($router) {
+        $router->post('getList', 'TeachController@getList');//教学列表 //未完成
+    });
+
+
 
 
 
