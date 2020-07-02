@@ -58,7 +58,7 @@ class PapersExam extends Model {
         $papers_info = Papers::where("id" , $body['papers_id'])->first();
         foreach($exam_array as $k=>$v){
             //判断此试题在试卷中是否存在
-            $exam_count = self::where("subject_id" , $body['subject_id'])->where("papers_id" , $body['papers_id'])->where("exam_id" , $v['exam_id'])->count();
+            $exam_count = self::where("subject_id" , $body['subject_id'])->where("papers_id" , $body['papers_id'])->where("exam_id" , $v['exam_id'])->count(); 
             
             //数据数组组装
             $data = [
