@@ -285,7 +285,7 @@ class Coures extends Model {
         self::where(['id'=>$data['id']])->update($data);
         if(!empty($cousermethod)){
             Couresmethod::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
-            $method = explode(',',$cousermethod);
+            $method = json_decode($cousermethod,true);
             foreach ($method as $k=>$v){
                 $infor = Couresmethod::where(['course_id'=>$data['id'],'method_id'=>$v])->first();
                 if($infor){
