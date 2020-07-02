@@ -515,9 +515,13 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('zhiboMethod', 'OpenCourseController@zhiboMethod');//直播类型
     });
     //教学模块
-
     $router->group(['prefix' => 'teach'], function () use ($router) {
         $router->post('getList', 'TeachController@getList');//教学列表 //未完成
+        $router->post('startLiveChild', 'TeachController@startLive');  //启动直播
+        $router->post('livePlayback','TeachController@livePlayback');  //课程回放
+        $router->post('coursewareUpload','TeachController@courseUpload');  //课件上传
+        $router->post('details','TeachController@details');  //教学详情
+        $router->post('coursewareDel','TeachController@coursewareDel');  //课件删除（欢拓）
     });
 
 
