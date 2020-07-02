@@ -151,11 +151,12 @@ class Coures extends Model {
         }
         DB::beginTransaction();
         //入课程表  课程授课表 课程讲师表
+        $parent = json_decode($data['parent'],true);
         $couser = self::insertGetId([
             'admin_id' => $user_id,
             'school_id' => $school_id,
-            'parent_id' => isset($data['parent'][0])?$data['parent'][0]:0,
-            'child_id' => isset($data['parent'][1])?$data['parent'][1]:0,
+            'parent_id' => isset($parent[0])?$parent[0]:0,
+            'child_id' => isset($parent[1])?$parent[1]:0,
             'title' => $data['title'],
             'keywords' => isset($data['keywords'])?$data['keywords']:'',
             'cover' => $data['cover'],
@@ -167,13 +168,15 @@ class Coures extends Model {
             'introduce' => $data['introduce'],
         ]);
         if($couser){
-            foreach ($data['method'] as $k=>$v){
+            $method = json_decode($data['method'],true);
+            foreach ($method as $k=>$v){
                  Couresmethod::insert([
                     'course_id' => $couser,
                     'method_id' => $v
                 ]);
             }
-            foreach ($data['teacher'] as $k=>$v){
+            $teacher = json_decode($data['teacher'],true);
+            foreach ($teacher as $k=>$v){
                  Couresteacher::insert([
                     'course_id' => $couser,
                     'teacher_id' => $v
