@@ -95,7 +95,8 @@ class AuthenticateController extends Controller {
                 'device'    =>    isset($body['device']) && !empty($body['device']) ? $body['device'] : '' ,
                 'reg_source'=>    1 ,
                 'school_id' =>    1 ,
-                'create_at' =>    date('Y-m-d H:i:s')
+                'create_at' =>    date('Y-m-d H:i:s'),
+                'login_at'  =>    date('Y-m-d H:i:s')
             ];
 
             //将数据插入到表中
@@ -214,7 +215,7 @@ class AuthenticateController extends Controller {
             Redis::hMset("user:regtoken:".$token , $user_info);
 
             //更新token
-            $rs = User::where("phone" , $body['phone'])->update(["token" => $token , "password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s')]);
+            $rs = User::where("phone" , $body['phone'])->update(["token" => $token , "password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
             if($rs && !empty($rs)){
                 //事务提交
                 DB::commit();
@@ -290,7 +291,7 @@ class AuthenticateController extends Controller {
                 Redis::hMset("user:regtoken:".$token , $user_info);
                 
                 //更新token
-                $rs = User::where("device" , $body['device'])->update(["token" => $token , "update_at" => date('Y-m-d H:i:s')]);
+                $rs = User::where("device" , $body['device'])->update(["token" => $token , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
                 if($rs && !empty($rs)){
                     //事务提交
                     DB::commit();

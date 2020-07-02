@@ -64,11 +64,33 @@ class Student extends Model {
         }
 
         //根据id获取学员详细信息
-        $student_info = self::where('id',$body['student_id'])->select('school_id','phone','real_name','sex','papers_type','papers_num','birthday','address_locus','age','educational','family_phone','office_phone','contact_people','contact_phone','email','qq','wechat','address','remark','head_icon')->first()->toArray();
+        $student_info = self::where('id',$body['student_id'])->select('school_id','phone','real_name','sex','papers_type','papers_num','birthday','address_locus','age','educational','family_phone','office_phone','contact_people','contact_phone','email','qq','wechat','address','remark','head_icon','balance','reg_source','login_at')->first()->toArray();
         //判断头像是否为空
         if(empty($student_info['head_icon'])){
             $student_info['head_icon']  = 'https://longdeapi.oss-cn-beijing.aliyuncs.com/upload/2020-07-01/159359854490285efc6250a7852.png';
         }
+        //证件类型
+        $papers_type_array = [1=>'身份证',2=>'护照',3=>'港澳通行证',4=>'台胞证',5=>'军官证',6=>'士官证',7=>'其他'];
+        //学历数组
+        $educational_array = [1=>'小学',2=>'初中',3=>'高中',4=>'大专',5=>'大本',6=>'研究生',7=>'博士生',8=>'博士后及以上'];
+        //注册来源
+        $reg_source_array  = [0=>'官网注册',1=>'手机端',2=>'线下录入'];
+        //备注
+        $student_info['remark']  = $student_info['remark'] && !empty($student_info['remark']) ? $student_info['remark'] : '';
+        $student_info['educational_name']  = $student_info['educational'] && $student_info['educational'] > 0 ? $educational_array[$student_info['educational']] : '';
+        $student_info['papers_type_name']  = $student_info['papers_type'] && $student_info['papers_type'] > 0 ? $papers_type_array[$student_info['papers_type']] : '';
+        $student_info['reg_source']   = isset($reg_source_array[$student_info['reg_source']]) && !empty($reg_source_array[$student_info['reg_source']]) ? $reg_source_array[$student_info['reg_source']] : '';
+        
+        //通过分校的id获取分校的名称
+        if($student_info['school_id'] && $student_info['school_id'] > 0){
+            $student_info['school_name']  = \App\Models\School::where('id',$student_info['school_id'])->value('name');
+        } else {
+            $student_info['school_name']  = '';
+        }
+        //余额
+        $student_info['balance']  = $student_info['balance'] > 0 ? $student_info['balance'] : 0;
+        //最后登录时间
+        $student_info['login_at']  = $student_info['login_at'] && !empty($student_info['login_at']) ? $student_info['login_at'] : '';
         return ['code' => 200 , 'msg' => '获取学员信息成功' , 'data' => $student_info];
     }
 

@@ -53,6 +53,7 @@ class CreateLdStudentTable extends Migration
             $table->tinyInteger('user_type')->default(1)->comment('用户类型(1代表正常用户,2代表游客)');
             $table->dateTime('create_at')->nullable()->comment('创建时间');
             $table->dateTime('update_at')->nullable()->comment('更新时间');
+            $table->dateTime('login_at')->nullable()->comment('最后登录时间');
 
             //索引设置部分
             $table->index('school_id' , 'index_school_id');

@@ -57,6 +57,9 @@ class PapersExam extends Model {
         //根据试卷的id更新试题类型的每题分数
         $papers_info = Papers::where("id" , $body['papers_id'])->first();
         foreach($exam_array as $k=>$v){
+            //判断此试题在试卷中是否存在
+            $exam_count = self::where("exam_id" , $v['exam_id'])->count();
+            
             //数据数组组装
             $data = [
                 "subject_id" => $body['subject_id'],
@@ -91,8 +94,14 @@ class PapersExam extends Model {
                 Papers::where("id" , $body['papers_id'])->update($where);
             }
             
-            //将数据插入到表中
-            $papersexam_id = self::insertGetId($data);
+            //判断试卷中试题是否存在
+            if($exam_count <= 0){
+                //将数据插入到表中
+                $papersexam_id = self::insertGetId($data);
+            } else {
+                //将数据更新到表中
+                $papersexam_id = self::where("exam_id",$v['exam_id'])->update(['is_del'=>$v['is_del'] , 'update_at' => date('Y-m-d H:i:s')]);
+            }
         }
 
         //插入日志数据
