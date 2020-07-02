@@ -311,13 +311,13 @@ class Coures extends Model {
             Couresteacher::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
             $teacher = json_decode($couserteacher,true);
             foreach ($teacher as $k=>$v){
-                $infor = Couresteacher::where(['course_id'=>$data['id'],'teacher_id'=>$v['teacher_id']])->first();
+                $infor = Couresteacher::where(['course_id'=>$data['id'],'teacher_id'=>$v])->first();
                 if($infor){
                      Couresteacher::where(['id'=>$infor['id']])->update(['is_del'=>0,'update_at'=>date('Y-m-d H:i:s')]);
                 }else{
                     Couresteacher::insert([
                         'course_id' => $data['id'],
-                        'teacher_id' => $v['teacher_id']
+                        'teacher_id' => $v
                     ]);
                 }
             }
