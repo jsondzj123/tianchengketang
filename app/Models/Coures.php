@@ -279,8 +279,11 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
         $find = self::where(['id'=>$data['id']])->first();
-        if($find['nature'] == 1){
-            return ['code' => 203 , 'msg' => '授权课程，无法修改'];
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+        if ($school_status != 1){
+            if($find['nature'] == 1){
+                return ['code' => 203 , 'msg' => '授权课程，无法修改'];
+            }
         }
         DB::beginTransaction();
         try{
