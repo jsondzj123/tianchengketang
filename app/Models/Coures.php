@@ -288,6 +288,7 @@ class Coures extends Model {
         if(isset($parent[1]) && !empty($parent[1])){
             $data['child_id'] = $parent[1];
         }
+        unset($data['parent']);
         self::where(['id'=>$data['id']])->update($data);
         if(!empty($cousermethod)){
             Couresmethod::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
