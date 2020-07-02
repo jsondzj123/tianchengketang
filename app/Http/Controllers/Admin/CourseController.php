@@ -36,8 +36,6 @@ class CourseController extends Controller {
        * return  array
        */
   public function courseAdd(){
-      $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
-      echo $school_id;die;
       //获取提交的参数
       try{
           $data = Coures::courseAdd(self::$accept_data);
