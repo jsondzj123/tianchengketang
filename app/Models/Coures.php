@@ -177,6 +177,16 @@ class Coures extends Model {
                     'teacher_id' => $v
                 ]);
             }
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'courseAdd' ,
+                'route_url'      =>  'admin/Course/courseAdd' ,
+                'operate_method' =>  'add' ,
+                'content'        =>  '添加操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             DB::commit();
             return ['code' => 200 , 'msg' => '添加成功'];
         }else{
@@ -198,6 +208,17 @@ class Coures extends Model {
         }
         $del = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
         if($del){
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'courseDel' ,
+                'route_url'      =>  'admin/Course/courseDel' ,
+                'operate_method' =>  'courseDel' ,
+                'content'        =>  '删除操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code' => 200 , 'msg' => '删除成功'];
         }else{
             return ['code' => 201 , 'msg' => '删除失败'];
@@ -288,6 +309,17 @@ class Coures extends Model {
                 }
             }
         }
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'courseUpdate' ,
+                'route_url'      =>  'admin/Course/courseUpdate' ,
+                'operate_method' =>  'Update' ,
+                'content'        =>  '修改操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
         DB::commit();
         return ['code' => 200 , 'msg' => '修改成功'];
         } catch (Exception $ex) {
@@ -303,6 +335,17 @@ class Coures extends Model {
         $recommend = $find['is_recommend'] == 1 ? 0:1;
         $up = self::where(['id'=>$id])->update(['is_recommend'=>$recommend,'update_at'=>date('Y-m-d H:i:s')]);
         if($up){
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'courseComment' ,
+                'route_url'      =>  'admin/Course/courseComment' ,
+                'operate_method' =>  'update' ,
+                'content'        =>  '修改推荐状态操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code' => 200 , 'msg' => '修改成功'];
         }else{
             return ['code' => 201 , 'msg' => '修改失败'];
@@ -321,6 +364,17 @@ class Coures extends Model {
         }
         $up = self::where('id',$data['id'])->update(['status'=>$data['status'],'update_at'=>date('Y-m-d H:i:s')]);
         if($up){
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'courseUpStatus' ,
+                'route_url'      =>  'admin/Course/courseUpStatus' ,
+                'operate_method' =>  'update' ,
+                'content'        =>  '修改课程状态操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code' => 200, 'msg' => '操作成功'];
         }else{
             return ['code' => 202 , 'msg' => '操作失败'];
@@ -356,6 +410,17 @@ class Coures extends Model {
         foreach ($data['shift'] as $k=>$v){
             CourseLiveResource::where('id',$v['id'])->update(['shift_id'=>$v['shift_id'],'update_at'=>date('Y-m-d H:i:s')]);
         }
+        $user_id = AdminLog::getAdminInfo()->admin_user->id;
+        //添加日志操作
+        AdminLog::insertAdminLog([
+            'admin_id'       =>   $user_id  ,
+            'module_name'    =>  'liveToCourseshift' ,
+            'route_url'      =>  'admin/Course/liveToCourseshift' ,
+            'operate_method' =>  'update' ,
+            'content'        =>  '排课操作'.json_encode($data) ,
+            'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+            'create_at'      =>  date('Y-m-d H:i:s')
+        ]);
         return ['code' => 200 , 'msg' => '修改成功'];
     }
 }

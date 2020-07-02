@@ -29,6 +29,17 @@ class Coureschapters extends Model {
             'name' => $data['name'],
         ]);
         if($add){
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'chapterAdd' ,
+                'route_url'      =>  'admin/Course/chapterAdd' ,
+                'operate_method' =>  'chapterAdd' ,
+                'content'        =>  '添加章或节操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code' => 200 , 'msg' => '添加成功'];
         }else{
             return ['code' => 201 , 'msg' => '添加失败'];
@@ -42,6 +53,17 @@ class Coureschapters extends Model {
         }
         $del = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
         if($del){
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'chapterDel' ,
+                'route_url'      =>  'admin/Course/chapterDel' ,
+                'operate_method' =>  'chapterDel' ,
+                'content'        =>  '删除章或节操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code' => 200 , 'msg' => '删除成功'];
         }else{
             return ['code' => 202 , 'msg' => '删除失败'];
@@ -59,6 +81,17 @@ class Coureschapters extends Model {
         }
         $del = self::where(['id'=>$data['id']])->update(['name'=>$data['name'],'update_at'=>date('Y-m-d H:i:s')]);
         if($del){
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'chapterUpdate' ,
+                'route_url'      =>  'admin/Course/chapterUpdate' ,
+                'operate_method' =>  'chapterUpdate' ,
+                'content'        =>  '修改章信息操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code' => 200 , 'msg' => '修改成功'];
         }else{
             return ['code' => 202 , 'msg' => '修改失败'];
@@ -131,6 +164,17 @@ class Coureschapters extends Model {
                     ]);
                 }
             }
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'sectionAdd' ,
+                'route_url'      =>  'admin/Course/sectionAdd' ,
+                'operate_method' =>  'Add' ,
+                'content'        =>  '添加节操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             DB::commit();
             return ['code' => 200 , 'msg' => '添加成功'];
         } catch (Exception $ex) {
@@ -170,6 +214,17 @@ class Coureschapters extends Model {
                     }
                 }
             }
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'sectionUpdate' ,
+                'route_url'      =>  'admin/Course/sectionUpdate' ,
+                'operate_method' =>  'Update' ,
+                'content'        =>  '修改节操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code' => 200 , 'msg' => '修改成功'];
         }else{
             return ['code' => 202 , 'msg' => '修改失败'];
@@ -189,6 +244,17 @@ class Coureschapters extends Model {
         }
         $del = Couresmaterial::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
         if($del){
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'sectionDataDel' ,
+                'route_url'      =>  'admin/Course/sectionDataDel' ,
+                'operate_method' =>  'Del' ,
+                'content'        =>  '删除节操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code' => 200 , 'msg' => '删除成功'];
         }else{
             return ['code' => 202 , 'msg' => '删除失败'];
