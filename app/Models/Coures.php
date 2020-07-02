@@ -168,7 +168,8 @@ class Coures extends Model {
             'introduce' => $data['introduce'],
         ]);
         if($couser){
-            $method = json_decode($data['method'],true);
+//            $method = json_decode($data['method'],true);
+            $method = explode(',',$data['method']);
             foreach ($method as $k=>$v){
                  Couresmethod::insert([
                     'course_id' => $couser,
@@ -244,7 +245,7 @@ class Coures extends Model {
         //查询授权课程
 
         $method= Couresmethod::select('method_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
-        $find['method'] = array_column($method, 'method_id');
+        $find['method'] = implode(',' ,array_column($method, 'method_id'));
         $find['parent'] = [
             0=>$find['parent_id'],
             1=>$find['child_id']
