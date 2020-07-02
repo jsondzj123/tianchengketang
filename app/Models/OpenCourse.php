@@ -80,24 +80,21 @@ class OpenCourse extends Model {
         } 
         $offset   = ($page - 1) * $pagesize;
         $open_less_count = self::where(function($query) use ($where,$school_id){
-            if(!empty($where['parent_id']) && $where['parent_id'] != ''){
+            if(!empty($where['parent_id']) && $where['parent_id'] != '' && $where['parent_id'] > 0){
                 $query->where('parent_id',$where['parent_id']);
             }
-            if(!empty($where['child_id']) && $where['child_id'] != ''){
+            if(!empty($where['child_id']) && $where['child_id'] != '' && $where['child_id'] > 0){
                 $query->where('child_id',$where['child_id']);
             }
-            if(!empty($where['status']) && $where['status'] != ''){
-                if($where['status'] == 0){
-                    $query->where('status',$where['status']);
-                }
+            if(!empty($where['status']) && $where['status'] != '' ){
                 if($where['status'] == 1){
-                    $query->where('status',$where['status']);  
+                    $query->where('status',0);
                 }
                 if($where['status'] == 2){
-                    $query->where('status',$where['status']); 
+                    $query->where('status',1);  
                 }
                 if($where['status'] == 3){
-                    $query->where('end_at','<',time()); 
+                    $query->where('status',2); 
                 }
             }
             if(!empty($where['time']) && $where['time'] != ''){
@@ -111,19 +108,17 @@ class OpenCourse extends Model {
         $sum_page = ceil($open_less_count/$pagesize);
         if($open_less_count > 0){
             $open_less_arr = self::where(function($query) use ($where,$school_id){
-                if(!empty($where['parent_id']) && $where['parent_id'] != ''){
+                if(!empty($where['parent_id']) && $where['parent_id'] != '' && $where['parent_id'] >0){
                     $query->where('parent_id',$where['parent_id']);
                 }
-                if(!empty($where['child_id']) && $where['child_id'] != ''){
+                if(!empty($where['child_id']) && $where['child_id'] != '' && $where['child_id'] > 0){
                     $query->where('child_id',$where['child_id']);
                 }
-                if(!empty($where['status']) && $where['status'] != ''){
+                if(!empty($where['status']) && $where['status'] != '' ){
                     switch ($where['status']) {
-                        case '0': $query->where('status',$where['status']);      break;
-                        case '1': $query->where('status',$where['status']);      break;
-                        case '2': $query->where('status',$where['status']);      break;
-                        case '3': $query->where('end_at','<',time());            break;
-                    }
+                        case '1': $query->where('status',0);      break;
+                        case '2': $query->where('status',1);      break;
+                        case '3': $query->where('status',2);      break;
                 }
                 if(!empty($where['time']) && $where['time'] != ''){
                     $query->where('start_at','<',$where['start_at']);
