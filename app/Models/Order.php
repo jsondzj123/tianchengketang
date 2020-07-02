@@ -184,18 +184,21 @@ class Order extends Model {
             if(!isset($arr['type']) || empty($arr['type'] || !in_array($arr['type'],[1,2,3]))){
                 return ['code' => 201 , 'msg' => '机型不匹配'];
             }
+            $course = Coures::select('id','title','cover','pricing','sale_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1])->first();
+
+
             //判断用户网校，根据网校查询课程信息
-           if($student['school_id'] == 1){
-               //根据课程id 查询价格
-               $lesson = Lesson::select('id','title','cover','price','favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'is_forbid'=>0,'status'=>2,'is_public'=>0])->first();
-           }else{
-                //根据课程id 网校id 查询网校课程详情
-               $lesson = LessonSchool::select('id','title','cover','price','favorable_price')->where(['lesson_id'=>$arr['class_id'],'school_id'=>$student['school_id'],'is_del'=>0,'is_forbid'=>0,'status'=>1,'is_public'=>0])->first();
-           }
-            if(!$lesson){
+//           if($student['school_id'] == 1){
+//               //根据课程id 查询价格
+//               $lesson = Lesson::select('id','title','cover','price','favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'is_forbid'=>0,'status'=>2,'is_public'=>0])->first();
+//           }else{
+//                //根据课程id 网校id 查询网校课程详情
+//               $lesson = LessonSchool::select('id','title','cover','price','favorable_price')->where(['lesson_id'=>$arr['class_id'],'school_id'=>$student['school_id'],'is_del'=>0,'is_forbid'=>0,'status'=>1,'is_public'=>0])->first();
+//           }
+            if(!$course){
                 return ['code' => 204 , 'msg' => '此课程选择无效'];
             }
-            if(empty($lesson['favorable_price']) || empty($lesson['price'])){
+            if(empty($course['sale_price']) || empty($course['price'])){
                 return ['code' => 204 , 'msg' => '此课程信息有误选择无效'];
             }
 
@@ -230,8 +233,8 @@ class Order extends Model {
             $data['admin_id'] = 0;  //操作员id
             $data['order_type'] = 2;        //1线下支付 2 线上支付
             $data['student_id'] = $arr['student_id'];
-            $data['price'] = $lesson['favorable_price'];
-            $data['lession_price'] = $lesson['price'];
+            $data['price'] = $course['sale_price'];
+            $data['lession_price'] = $course['pricing'];
             $data['pay_status'] = 4;
             $data['pay_type'] = 0;
             $data['status'] = 0;
@@ -244,7 +247,7 @@ class Order extends Model {
                 $lesson['order_number'] = $data['order_number'];
                 $lesson['user_balance'] = $student['balance'];
                 DB::commit();
-                return ['code' => 200 , 'msg' => '生成预订单成功','data'=>$lesson,'paylist'=>$newpay];
+                return ['code' => 200 , 'msg' => '生成预订单成功','data'=>$course,'paylist'=>$newpay];
             }else{
                 DB::rollback();
                 return ['code' => 203 , 'msg' => '生成订单失败'];
@@ -334,7 +337,7 @@ class Order extends Model {
                 }
             }
             if ($order_info['class_id'] != '') {
-                $lesson = Lesson::select('id', 'title')->where(['id' => $order_info['class_id']])->first();
+                $lesson = Coures::select('id', 'title')->where(['id' => $order_info['class_id']])->first();
                 if (!empty($lesson)) {
                     $order_info['title'] = $lesson['title'];
                     $teacher = LessonTeacher::where(['lesson_id' => $lesson['id']])->first();
@@ -373,7 +376,7 @@ class Order extends Model {
         $order = self::where(['order_number'=>$data['order_number']])->first();
         if($data['status'] == 1){
             //修改学员报名  订单状态 课程有效期
-            $lessons = Lesson::where(['id'=>$order['class_id']])->first();
+            $lessons = Coures::where(['id'=>$order['class_id']])->first();
             //计算用户购买课程到期时间
             $validity = date('Y-m-d H:i:s',strtotime('+'.$lessons['ttl'].' day'));
             //修改订单状态 课程有效期 oa状态
