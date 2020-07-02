@@ -118,6 +118,7 @@ class Coures extends Model {
         if(!isset($data['parent']) || empty($data['parent'])){
             return ['code' => 201 , 'msg' => '请选择学科'];
         }
+        print_r($data['parent']);die;
         if(!isset($data['title']) || empty($data['title'])){
             return ['code' => 201 , 'msg' => '学科名称不能为空'];
         }
