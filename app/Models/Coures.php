@@ -39,11 +39,11 @@ class Coures extends Model {
             }
             //状态
             if(!empty($data['status']) && $data['status'] != ''){
-                $query->where('status',$data['status']);
+                $query->where('status',$data['status']-1);
             }
             //属性
             if(!empty($data['nature']) && $data['nature'] != ''){
-                $query->where('nature',$data['nature']);
+                $query->where('nature',$data['nature']-1);
             }
         })->count();
         $list=[];
