@@ -66,21 +66,18 @@ class OpenCourse extends Model {
     public static function getList($body){
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
 
-        $pagesize = isset($body['pagesize']) && $body['pagesize'] > 0 ? $body['pagesize'] : 15;
-        $page     = isset($body['page']) && $body['page'] > 0 ? $body['page'] : 1;
+        $pagesize = !isset($body['pagesize']) && $body['pagesize'] > 0 ? $body['pagesize'] : 15;
+        $page     = !isset($body['page']) && $body['page'] > 0 ? $body['page'] : 1;
 
         $where['parent_id'] = !isset($body['parent_id'])|| empty($body['parent_id'])  ?'':$body['parent_id'];
         $where['child_id'] =  !isset($body['child_id']) || empty($body['child_id']) ?'':$body['child_id'];
         $where['status'] =  !isset($body['status']) || empty($body['status']) ?'':$body['status'];
-        $where['time']  =  !isset($body['time']) || empty($body['time']) ?[]:$body['time'];
-      
+        $where['time']  =  !isset($body['time']) || empty($body['time']) ?[]:json_decode($body['time'],1);
         $time = [];
-        if(!empty($where['time'])){
-            $time = json_decode($where['time'],1);
+        if(!empty($where['time']) ){
             $where['start_at'] =  $time[0];
             $where['end_at']  = $time[1];
-        }
-        $typeArr = ['未发布','已发布','已下架','已过期'];
+        } 
         $offset   = ($page - 1) * $pagesize;
         $open_less_count = self::where(function($query) use ($where,$school_id){
             if(!empty($where['parent_id']) && $where['parent_id'] != ''){
@@ -90,11 +87,17 @@ class OpenCourse extends Model {
                 $query->where('child_id',$where['child_id']);
             }
             if(!empty($where['status']) && $where['status'] != ''){
-                switch ($where['status']) {
-                    case '0': $query->where('status',$where['status']);      break;
-                    case '1': $query->where('status',$where['status']);      break;
-                    case '2': $query->where('status',$where['status']);      break;
-                    case '3': $query->where('end_at','<',time());            break;
+                if($where['status'] == 0){
+                    $query->where('status',$where['status']);
+                }
+                if($where['status'] == 1){
+                    $query->where('status',$where['status']);  
+                }
+                if($where['status'] == 2){
+                    $query->where('status',$where['status']); 
+                }
+                if($where['status'] == 3){
+                    $query->where('end_at','<',time()); 
                 }
             }
             if(!empty($where['time']) && $where['time'] != ''){
@@ -134,9 +137,9 @@ class OpenCourse extends Model {
                 $teacherIdArr = OpenCourseTeacher::where('course_id',$v['id'])->where('is_del',0)->get(['teacher_id']);
                 $v['teacher_name'] = Teacher::whereIn('id',$teacherIdArr)->where('is_del',0)->where('type',2)->first()['real_name'];
             }
-            return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => $open_less_arr , 'total' => $open_less_count , 'pagesize' => $pagesize , 'page' => $page,'sum_page'=>$sum_page,'parent_id'=>$where['parent_id'],'child_id'=>$where['child_id'],'status'=>$where['status'],'time'=>$time,'type'=>$typeArr]];          
+            return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => $open_less_arr , 'total' => $open_less_count ]];          
         }
-        return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page,'sum_page'=>0,'parent_id'=>$where['parent_id'],'child_id'=>$where['child_id'],'type'=>$where['status'],'time'=>$time,'type'=>$typeArr]];
+        return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => [] , 'total' => 0 ]];
     }
 
 }
