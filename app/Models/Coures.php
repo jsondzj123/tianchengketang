@@ -242,11 +242,13 @@ class Coures extends Model {
         }
         //查询授权课程
         $method= Couresmethod::select('method_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
-        $method_array = array_column($method, 'method_id');
-        foreach ($method_array as $v){
-            $arr[] = ''.$v.'';
+        if(!empty($method)){
+           $method_array = array_column($method, 'method_id');
+           foreach ($method_array as $v){
+               $arr[] = ''.$v.'';
+           }
+           $find['method'] = $arr;
         }
-        $find['method'] = $arr;
         $where = [];
         if($find['parent_id'] > 0){
             $where[0] = $find['parent_id'];
