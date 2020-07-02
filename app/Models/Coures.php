@@ -18,7 +18,7 @@ class Coures extends Model {
         $pagesize = (int)isset($data['pageSize']) && $data['pageSize'] > 0 ? $data['pageSize'] : 20;
         $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
-        $count = $list = self::where(function($query) use ($data,$school_id) {
+        $count = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
             //判断总校 查询所有或一个分校
             if($data['school_status'] == 1){
                 if(!empty($data['school_id']) && $data['school_id'] != ''){
@@ -47,7 +47,7 @@ class Coures extends Model {
             }
         })->count();
         if($count > 0){
-            $list = self::where(function($query) use ($data,$school_id) {
+            $list = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
                     if($data['school_status'] == 1){
                         if(!empty($data['school_id']) && $data['school_id'] != ''){
@@ -203,6 +203,7 @@ class Coures extends Model {
         if(empty($data) || !isset($data)){
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
+        file_put_contents('courseDel.txt', '时间:'.date('Y-m-d H:i:s').print_r($data,true),FILE_APPEND);
         if(!isset($data['id']) || empty($data['id'])){
             return ['code' => 201 , 'msg' => '请选择学科大类'];
         }
