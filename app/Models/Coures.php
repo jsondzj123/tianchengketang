@@ -66,11 +66,11 @@ class Coures extends Model {
                     }
                     //状态
                     if(!empty($data['status']) && $data['status'] != ''){
-                        $query->where('status',$data['status']);
+                        $query->where('status',$data['status']-1);
                     }
                     //属性
                     if(!empty($data['nature']) && $data['nature'] != ''){
-                        $query->where('nature',$data['nature']);
+                        $query->where('nature',$data['nature'] -1);
                     }
                 })
                 ->orderBy('id','desc')
@@ -152,7 +152,7 @@ class Coures extends Model {
         $couser = self::insertGetId([
             'admin_id' => $user_id,
             'school_id' => $school_id,
-            'parent_id' => $data['parent'][0],
+            'parent_id' => isset($data['parent'][0])?$data['parent'][0]:0,
             'child_id' => isset($data['parent'][1])?$data['parent'][1]:0,
             'title' => $data['title'],
             'keywords' => isset($data['keywords'])?$data['keywords']:'',
@@ -237,7 +237,7 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '此数据不存在'];
         }
         //查询授权课程
-        $method = Couresmethod::select('method_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
+        $method = Couresmethod::select('method_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get();
         foreach ($method as $key=>&$val){
             if($val['method_id'] == 1){
                 $val['method_name'] = '直播';
@@ -250,6 +250,11 @@ class Coures extends Model {
             }
         }
         $find['method'] = $method;
+        $find['parent'] = [
+            0=>$find['parent_id'],
+            1=>$find['child_id']
+        ];
+        unset($find['parent_id'],$find['child_id']);
         //查询讲师
         $teacher = Couresteacher::select('teacher_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
         if(!empty($teacher)){
@@ -278,6 +283,8 @@ class Coures extends Model {
         unset($data['/admin/course/courseUpdate']);
         unset($data['method']);
         unset($data['teacher']);
+            $data['parent_id'] = isset($data['parent'][0])?$data['parent'][0]:0;
+            $data['child_id'] = isset($data['parent'][1])?$data['parent'][1]:0;
         self::where(['id'=>$data['id']])->update($data);
         if(!empty($cousermethod)){
             Couresmethod::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
