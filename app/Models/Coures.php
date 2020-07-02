@@ -46,6 +46,7 @@ class Coures extends Model {
                 $query->where('nature',$data['nature']);
             }
         })->count();
+        $list=[];
         if($count > 0){
             $list = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
@@ -107,8 +108,8 @@ class Coures extends Model {
                 'page' =>$page,
                 'total'=>$count
             ];
-            return ['code' => 200 , 'msg' => '查询成功','data'=>$list,'where'=>$data,'page'=>$page];
         }
+        return ['code' => 200 , 'msg' => '查询成功','data'=>$list,'where'=>$data,'page'=>$page];
     }
     //添加
     public static function courseAdd($data){
