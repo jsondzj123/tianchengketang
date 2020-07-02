@@ -32,6 +32,7 @@ class Coures extends Model {
             if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
                 $query->where('parent_id',$data['coursesubjectOne']);
             }
+
             //学科小类
             if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
                 $query->where('child_id',$data['coursesubjectTwo']);
