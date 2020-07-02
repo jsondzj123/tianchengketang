@@ -59,11 +59,11 @@ class Coures extends Model {
                     }
                     //学科大类
                     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
-                        $query->where('parent_id',$data['school_id']);
+                        $query->where('parent_id',$data['coursesubjectOne']);
                     }
                     //学科小类
                     if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
-                        $query->where('child_id',$data['school_id']);
+                        $query->where('child_id',$data['coursesubjectTwo']);
                     }
                     //状态
                     if(!empty($data['status']) && $data['status'] != ''){
@@ -118,6 +118,7 @@ class Coures extends Model {
         if(!isset($data['parent']) || empty($data['parent'])){
             return ['code' => 201 , 'msg' => '请选择学科'];
         }
+        print_r($data['parent']);die;
         if(!isset($data['title']) || empty($data['title'])){
             return ['code' => 201 , 'msg' => '学科名称不能为空'];
         }
