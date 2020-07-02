@@ -32,6 +32,7 @@ class Coures extends Model {
             if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
                 $query->where('parent_id',$data['coursesubjectOne']);
             }
+
             //学科小类
             if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
                 $query->where('child_id',$data['coursesubjectTwo']);
@@ -141,8 +142,8 @@ class Coures extends Model {
         if(!isset($data['introduce']) || empty($data['introduce'])){
             return ['code' => 201 , 'msg' => '课程简介不能为空'];
         }
-        $user_id = AdminLog::getAdminInfo()->admin_user->id;
-        $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
+        $user_id = isset(AdminLog::getAdminInfo()->admin_user->id)?AdminLog::getAdminInfo()->admin_user->id:0;
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id)?AdminLog::getAdminInfo()->admin_user->school_id:0;
         $title = self::where(['title'=>$data['title'],'is_del'=>0,'nature'=>1])->first();
         if($title){
             return ['code' => 201 , 'msg' => '课程已存在'];
