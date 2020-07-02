@@ -45,7 +45,7 @@ class Papers extends Model {
             'area'           =>   'bail|required|numeric|min:1' ,
             'cover_img'      =>   'bail|required' ,
             'content'        =>   'bail|required' ,
-            'type'           =>   'bail|required|between:1,7'
+            'type'           =>   'bail|required'
         ];
         
         //信息提示
@@ -58,12 +58,13 @@ class Papers extends Model {
             'diffculty.required'    =>  json_encode(['code'=>201,'msg'=>'请选择试题类型']) ,
             'diffculty.between'     =>  json_encode(['code'=>202,'msg'=>'试题类型不合法']) ,
             'papers_time.required'  =>  json_encode(['code'=>201,'msg'=>'请输入答题时间']) ,
+            'papers_time.numeric'   =>  json_encode(['code'=>202,'msg'=>'答题时间不合法']) ,
             'area.required'         =>  json_encode(['code'=>201,'msg'=>'请选择所属区域']) ,
             'area.min'              =>  json_encode(['code'=>202,'msg'=>'所属区域不合法']) ,
             'cover_img.required'    =>  json_encode(['code'=>201,'msg'=>'请上传封面图片']) ,
             'content.required'      =>  json_encode(['code'=>201,'msg'=>'请输入试卷描述']) ,
-            'type.required'         =>  json_encode(['code'=>201,'msg'=>'请选择题型']) ,
-            'type.between'          =>  json_encode(['code'=>202,'msg'=>'选择题型不合法'])
+            'type.required'         =>  json_encode(['code'=>201,'msg'=>'请选择题型'])
+            //'type.between'          =>  json_encode(['code'=>202,'msg'=>'选择题型不合法'])
         ];
         
         $validator = Validator::make($body , $rule , $message);
@@ -159,7 +160,7 @@ class Papers extends Model {
             'area'           =>   'bail|required|numeric|min:1' ,
             'cover_img'      =>   'bail|required' ,
             'content'        =>   'bail|required' ,
-            'type'           =>   'bail|required|between:1,7'
+            'type'           =>   'bail|required'
         ];
         
         //信息提示
@@ -170,12 +171,13 @@ class Papers extends Model {
             'diffculty.required'    =>  json_encode(['code'=>201,'msg'=>'请选择试题类型']) ,
             'diffculty.between'     =>  json_encode(['code'=>202,'msg'=>'试题类型不合法']) ,
             'papers_time.required'  =>  json_encode(['code'=>201,'msg'=>'请输入答题时间']) ,
+            'papers_time.numeric'   =>  json_encode(['code'=>202,'msg'=>'答题时间不合法']) ,
             'area.required'         =>  json_encode(['code'=>201,'msg'=>'请选择所属区域']) ,
             'area.min'              =>  json_encode(['code'=>202,'msg'=>'所属区域不合法']) ,
             'cover_img.required'    =>  json_encode(['code'=>201,'msg'=>'请上传封面图片']) ,
             'content.required'      =>  json_encode(['code'=>201,'msg'=>'请输入试卷描述']) ,
-            'type.required'         =>  json_encode(['code'=>201,'msg'=>'请选择题型']) ,
-            'type.between'          =>  json_encode(['code'=>202,'msg'=>'选择题型不合法'])
+            'type.required'         =>  json_encode(['code'=>201,'msg'=>'请选择题型']) 
+            //'type.between'          =>  json_encode(['code'=>202,'msg'=>'选择题型不合法'])
         ];
         
         $validator = Validator::make($body , $rule , $message);
@@ -466,6 +468,11 @@ class Papers extends Model {
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         
+        //判断题库的id是否为空
+        if(!isset($body['bank_id']) || $body['bank_id'] <= 0){
+            return ['code' => 201 , 'msg' => '题库id为空'];
+        }
+        
         //获取当前的科目
         if(!isset($body['subject_id']) || empty($body['subject_id'])){
             //获取当前的科目
@@ -480,7 +487,43 @@ class Papers extends Model {
         }
 
         //获取试卷的总数量
-        $papers_count = self::where('is_del' , '=' , 0)->where('admin_id' , '=' , $admin_id)->where("subject_id" , "=" , $body['subject_id'])->count();
+        //$papers_count = self::where('is_del' , '=' , 0)->where('admin_id' , '=' , $admin_id)->where("subject_id" , "=" , $body['subject_id'])->count();
+        $papers_count = self::where('is_del' , '=' , 0)->where(function($query) use ($body){
+            //题库的id
+            $query->where('bank_id' , '=' , $body['bank_id']);
+
+            //删除状态
+            $query->where('is_del' , '=' , 0);
+
+            //获取后端的操作员id
+            $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+
+            //获取科目的id
+            if(isset($body['subject_id']) && !empty($body['subject_id']) && $body['subject_id'] > 0){
+                $query->where('subject_id' , '=' , $body['subject_id']);
+            }
+
+            //获取试卷类型
+            if(isset($body['diffculty']) && !empty($body['diffculty']) && $body['diffculty'] > 0 && in_array($body['diffculty'] , [1,2,3])){
+                $query->where('diffculty' , '=' , $body['diffculty']);
+            }
+
+            //获取试卷状态
+            if(isset($body['is_publish']) && strlen($body['is_publish']) > 0 && $body['is_publish'] >= 0){
+                $is_publish = $body['is_publish'] > 0 ? 1 : 0;
+                $query->where('is_publish' , '=' , $is_publish);
+            }
+
+            //获取试卷名称
+            if(isset($body['papers_name']) && !empty($body['papers_name'])){
+                $query->where('papers_name','like',$body['papers_name'].'%');
+            }
+
+            //操作员id
+            $query->where('admin_id' , '=' , $admin_id);
+        })->count();
+        
+        //判断试卷数量是否为空
         if($papers_count > 0){
             //获取试卷列表
             $papers_list = self::select('id as papers_id','papers_name','papers_time','is_publish','signle_score','more_score','judge_score','options_score','pack_score','short_score','material_score','type')->where(function($query) use ($body){
@@ -494,22 +537,23 @@ class Papers extends Model {
                 $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                 
                 //获取科目的id
-                if(!empty($body['subject_id']) && $body['subject_id'] > 0){
+                if(isset($body['subject_id']) && !empty($body['subject_id']) && $body['subject_id'] > 0){
                     $query->where('subject_id' , '=' , $body['subject_id']);
                 }
                 
                 //获取试卷类型
-                if(!empty($body['diffculty']) && $body['diffculty'] > 0 && in_array($body['diffculty'] , [1,2,3])){
+                if(isset($body['diffculty']) && !empty($body['diffculty']) && $body['diffculty'] > 0 && in_array($body['diffculty'] , [1,2,3])){
                     $query->where('diffculty' , '=' , $body['diffculty']);
                 }
                 
                 //获取试卷状态
-                if(!empty($body['is_publish']) && $body['is_publish'] >= 0){
-                    $query->where('is_publish' , '=' , $body['is_publish']);
+                if(isset($body['is_publish']) && strlen($body['is_publish']) > 0 && $body['is_publish'] >= 0){
+                    $is_publish = $body['is_publish'] > 0 ? 1 : 0;
+                    $query->where('is_publish' , '=' , $is_publish);
                 }
                 
                 //获取试卷名称
-                if(!empty($body['papers_name'])){
+                if(isset($body['papers_name']) && !empty($body['papers_name'])){
                     $query->where('papers_name','like',$body['papers_name'].'%');
                 }
 

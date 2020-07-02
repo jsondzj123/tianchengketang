@@ -286,7 +286,7 @@ class Bank extends Model {
             'bank_id'      =>   'bail|required|numeric|min:1' ,
             'topic_name'   =>   'bail|required' ,
             'parent_id'    =>   'bail|required|numeric|min:1' ,
-            'child_id'     =>   'bail|required|numeric|min:1' ,
+            //'child_id'     =>   'bail|required|numeric|min:1' ,
             'describe'     =>   'bail|required'
         ];
         
@@ -297,8 +297,8 @@ class Bank extends Model {
             'topic_name.required'   =>  json_encode(['code'=>201,'msg'=>'请输入题库名称']) ,
             'parent_id.required'    =>  json_encode(['code'=>201,'msg'=>'请选择一级分类']) ,
             'parent_id.min'         =>  json_encode(['code'=>202,'msg'=>'一级分类id不合法']) ,
-            'child_id.required'     =>  json_encode(['code'=>201,'msg'=>'请选择二级分类']) ,
-            'child_id.min'          =>  json_encode(['code'=>202,'msg'=>'二级分类id不合法']) ,
+            //'child_id.required'     =>  json_encode(['code'=>201,'msg'=>'请选择二级分类']) ,
+            //'child_id.min'          =>  json_encode(['code'=>202,'msg'=>'二级分类id不合法']) ,
             'describe.required'     =>  json_encode(['code'=>201,'msg'=>'请输入题库描述']) ,
         ];
         
@@ -330,7 +330,7 @@ class Bank extends Model {
         $array_bank = [
             'topic_name'   =>  $body['topic_name'] ,
             'parent_id'    =>  $body['parent_id'] ,
-            'child_id'     =>  $body['child_id'] ,
+            'child_id'     =>  isset($body['child_id']) && $body['child_id'] > 0 ? $body['child_id'] : 0 ,
             'describe'     =>  $body['describe'] ,
             'update_at'    =>  date('Y-m-d H:i:s')
         ];
@@ -390,7 +390,7 @@ class Bank extends Model {
             'topic_name'   =>   'bail|required' ,
             'subject_list' =>   'bail|required' ,
             'parent_id'    =>   'bail|required|numeric|min:1' ,
-            'child_id'     =>   'bail|required|numeric|min:1' ,
+            //'child_id'     =>   'bail|required|numeric|min:1' ,
             'describe'     =>   'bail|required'
         ];
         
@@ -400,8 +400,8 @@ class Bank extends Model {
             'subject_list.required' =>  json_encode(['code'=>201,'msg'=>'请添加科目']) ,
             'parent_id.required'    =>  json_encode(['code'=>201,'msg'=>'请选择一级分类']) ,
             'parent_id.min'         =>  json_encode(['code'=>202,'msg'=>'一级分类id不合法']) ,
-            'child_id.required'     =>  json_encode(['code'=>201,'msg'=>'请选择二级分类']) ,
-            'child_id.min'          =>  json_encode(['code'=>202,'msg'=>'二级分类id不合法']) ,
+            //'child_id.required'     =>  json_encode(['code'=>201,'msg'=>'请选择二级分类']) ,
+            //'child_id.min'          =>  json_encode(['code'=>202,'msg'=>'二级分类id不合法']) ,
             'describe.required'     =>  json_encode(['code'=>201,'msg'=>'请输入题库描述']) ,
         ];
         
@@ -417,7 +417,7 @@ class Bank extends Model {
         $array_bank = [
             'topic_name'   =>  $body['topic_name'] ,
             'parent_id'    =>  $body['parent_id'] ,
-            'child_id'     =>  $body['child_id'] ,
+            'child_id'     =>  isset($body['child_id']) && $body['child_id'] > 0 ? $body['child_id'] : 0 ,
             'describe'     =>  $body['describe'] ,
             'admin_id'     =>  $admin_id ,
             'create_at'    =>  date('Y-m-d H:i:s')
