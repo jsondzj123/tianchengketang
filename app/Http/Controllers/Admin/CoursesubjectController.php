@@ -16,7 +16,7 @@ class CoursesubjectController extends Controller {
        //获取用户学校
        $school_status = AdminLog::getAdminInfo()->admin_user->school_status;
        $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
-       $list = CouresSubject::subjectList($id = 0,$school_status,$school_id);
+       $list = CouresSubject::subjectList($school_status,$school_id);
        return response()->json($list);
    }
    /*
