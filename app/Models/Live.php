@@ -211,11 +211,7 @@ class Live extends Model {
         public static function AddLive($data){
             //判断大类id
             if(empty($data['parent_id']) || !isset($data['parent_id'])){
-                return ['code' => 201 , 'msg' => '请正确选择大类'];
-            }
-            //判断小类id
-            if(empty($data['child_id']) || !isset($data['child_id'])){
-                return ['code' => 201 , 'msg' => '请正确选择小类'];
+                return ['code' => 201 , 'msg' => '请正确选择分类'];
             }
             //判断资源名称
             if(empty($data['name']) || !isset($data['name'])){
@@ -225,7 +221,13 @@ class Live extends Model {
             if(empty($data['introduce']) || !isset($data['introduce'])){
                 return ['code' => 201 , 'msg' => '资源介绍不能为空'];
             }
-
+            $s_id = json_decode($data['parent_id']);
+                $data['parent_id'] = $s_id[0];
+            if(!empty($s_id[1])){
+                $data['child_id'] = $s_id[1];
+            }else{
+                $data['child_id'] = 0;
+            }
             //缓存查出用户id和分校id
             $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
             $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
@@ -267,11 +269,7 @@ class Live extends Model {
         public static function updateLive($data){
             //判断大类id
             if(empty($data['parent_id']) || !isset($data['parent_id'])){
-                return ['code' => 201 , 'msg' => '请正确选择大类'];
-            }
-            //判断小类id
-            if(empty($data['child_id']) || !isset($data['child_id'])){
-                return ['code' => 201 , 'msg' => '请正确选择小类'];
+                return ['code' => 201 , 'msg' => '请正确选择分类'];
             }
             //判断资源名称
             if(empty($data['name']) || !isset($data['name'])){
@@ -280,6 +278,13 @@ class Live extends Model {
             //判断资源介绍
             if(empty($data['introduce']) || !isset($data['introduce'])){
                 return ['code' => 201 , 'msg' => '资源介绍不能为空'];
+            }
+            $s_id = json_decode($data['parent_id']);
+                $data['parent_id'] = $s_id[0];
+            if(!empty($s_id[1])){
+                $data['child_id'] = $s_id[1];
+            }else{
+                $data['child_id'] = 0;
             }
             $id = $data['id'];
             unset($data['id']);

@@ -215,11 +215,7 @@ class Video extends Model {
         public static function AddVideo($data){
             //判断大类id
             if(empty($data['parent_id']) || !isset($data['parent_id'])){
-                return ['code' => 201 , 'msg' => '请正确选择大类'];
-            }
-            //判断小类id
-            if(empty($data['child_id']) || !isset($data['child_id'])){
-                return ['code' => 201 , 'msg' => '请正确选择小类'];
+                return ['code' => 201 , 'msg' => '请正确选择分类'];
             }
             //判断课程id
             if(empty($data['course_id']) || !isset($data['course_id'])){
@@ -248,6 +244,13 @@ class Video extends Model {
             //判断资源大小
             if(empty($data['resource_size']) || !isset($data['resource_size'])){
                 return ['code' => 201 , 'msg' => '资源大小不能为空'];
+            }
+            $s_id = json_decode($data['parent_id']);
+                $data['parent_id'] = $s_id[0];
+            if(!empty($s_id[1])){
+                $data['child_id'] = $s_id[1];
+            }else{
+                $data['child_id'] = 0;
             }
             //缓存查出用户id和分校id
             $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
@@ -290,11 +293,7 @@ class Video extends Model {
         public static function updateVideo($data){
             //判断大类id
             if(empty($data['parent_id']) || !isset($data['parent_id'])){
-                return ['code' => 201 , 'msg' => '请正确选择大类'];
-            }
-            //判断小类id
-            if(empty($data['child_id']) || !isset($data['child_id'])){
-                return ['code' => 201 , 'msg' => '请正确选择小类'];
+                return ['code' => 201 , 'msg' => '请正确选择分类'];
             }
             //判断课程id
             if(empty($data['course_id']) || !isset($data['course_id'])){
@@ -323,6 +322,13 @@ class Video extends Model {
             //判断资源大小
             if(empty($data['resource_size']) || !isset($data['resource_size'])){
                 return ['code' => 201 , 'msg' => '资源大小不能为空'];
+            }
+            $s_id = json_decode($data['parent_id']);
+                $data['parent_id'] = $s_id[0];
+            if(!empty($s_id[1])){
+                $data['child_id'] = $s_id[1];
+            }else{
+                $data['child_id'] = 0;
             }
             $id = $data['id'];
             unset($data['id']);
