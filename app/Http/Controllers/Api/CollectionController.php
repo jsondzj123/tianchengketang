@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Validator;
 use App\Models\Collection;
 use App\Models\Student;
+use App\Models\Order;
+use Illuminate\Support\Facades\DB;
+
 
 class CollectionController extends Controller {
 
@@ -14,23 +17,39 @@ class CollectionController extends Controller {
         $pagesize = $request->input('pagesize') ?: 15;
         $page     = $request->input('page') ?: 1;
         $offset   = ($page - 1) * $pagesize;
-        $data = Collection::where('student_id', self::$accept_data['user_info']['user_id'])
-                    ->with(['lessons' => function ($query) {
-                        $query->with(['methods' => function($query){
-                            $query->select('id', 'name');
-                        }])
-                        ->select('id', 'title', 'cover');
-                    }])
-                    ->orderBy('created_at', 'desc'); 
-                    
+        $data = Collection::join("ld_course","ld_collections.lesson_id","=","ld_course.id")
+                    ->select('ld_course.id','ld_course.title','ld_course.cover','ld_course.buy_num')
+                    ->where('student_id', self::$accept_data['user_info']['user_id'])
+                    ->orderBy('created_at', 'desc');
+
+
         $total = $data->count();
         $student = $data->skip($offset)->take($pagesize)->get();
         $lessons = [];
         foreach ($student as $key => $value) {
-            $lessons[$key] = $value->lessons;
+            $is_collection = Collection::where(['student_id'=>self::$accept_data['user_info']['user_id'],'is_del'=>0,'lesson_id'=>$value['id']])->first();
+            if($is_collection){
+                $value['is_collection'] = 1;
+            }else{
+                $value['is_collection'] = 0;
+            }
+            //是否购买
+            $value['sold_num'] =  Order::where(['oa_status'=>1,'class_id'=>$value['id']])->count() + $value['buy_num'];
+            $value['methods'] = DB::table('ld_course')->select('method_id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$value['id']])->get();
+        }
+        foreach($student as $k => $v){
+            foreach($v['methods'] as $kk => $vv){
+                if($vv->method_id == 1){
+                    $vv->name = "直播";
+                }else if($vv->method_id == 2){
+                    $vv->name = "录播";
+                }else{
+                    $vv->name = "其他";
+                }
+            }
         }
         $data = [
-            'page_data' => $lessons,
+            'page_data' => $student,
             'total' => $total,
         ];
         return $this->response($data);
@@ -39,7 +58,7 @@ class CollectionController extends Controller {
      /**
      * @param 收藏课程.
      * @param
-     * @param  
+     * @param
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -69,7 +88,7 @@ class CollectionController extends Controller {
     /**
      * @param 取消收藏课程.
      * @param
-     * @param  
+     * @param
      * @return \Illuminate\Http\Response
      */
     public function cancel(Request $request)
@@ -95,5 +114,5 @@ class CollectionController extends Controller {
         }
         return $this->response('取消成功');
     }
-    
+
 }
