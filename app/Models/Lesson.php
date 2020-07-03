@@ -9,7 +9,7 @@ class Lesson extends Model {
 
     //指定别的表名
     public $table = 'ld_course';
-
+    public $timestamps = false;
     // protected $fillable = [
     //     'id',
     //     'admin_id',
