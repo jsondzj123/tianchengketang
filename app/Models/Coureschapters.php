@@ -136,6 +136,7 @@ class Coureschapters extends Model {
 //        if(!isset($data['resource_id']) || empty($data['resource_id'])){
 //            return ['code' => 201 , 'msg' => '请选择资源'];
 //        }
+
         try{
             DB::beginTransaction();
             $insert = self::insertGetId([
