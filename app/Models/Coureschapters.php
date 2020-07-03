@@ -197,7 +197,7 @@ class Coureschapters extends Model {
             return ['code' => 201 , 'msg' => '参数为空'];
         }
         unset($data['/admin/course/sectionUpdate']);
-        $filearr = $data['filearr'];
+        $filearr = json_decode($data['filearr'],true);
         unset($data['filearr']);
         unset($data['mt_video_name']);
         $data['update_at'] = date('Y-m-d H:i:s');
