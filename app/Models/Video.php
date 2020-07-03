@@ -40,15 +40,17 @@ class Video extends Model {
                 //删除状态
                 $query->where('ld_course_video_resource.is_del' , '=' , 0);
                 //判断学科id是否为空
-                if(isset($data['parent_id']) && !empty(isset($data['parent_id']))){
+                if(isset($data['parent_id'])){
                     $s_id = json_decode($data['parent_id']);
-                    $data['parent_id'] = $s_id[0];
-                    if(!empty($s_id[1])){
-                        $data['child_id'] = $s_id[1];
-                    }else{
-                        $data['child_id'] = 0;
+                    if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                        $data['parent_id'] = $s_id[0];
+                        if(!empty($s_id[1])){
+                            $data['child_id'] = $s_id[1];
+                        }else{
+                            $data['child_id'] = 0;
+                        }
+                        $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
                     }
-                    $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
                 }
                 //判断学科小类
                 if(isset($data['child_id']) && !empty(isset($data['child_id']))){
@@ -63,7 +65,7 @@ class Video extends Model {
                     $query->where('ld_course_video_resource.nature' , '=' , $data['nature']);
                 }
                 //判断资源状态是否为空
-                if(isset($data['status']) && !empty(isset($data['status']))){
+                if(isset($data['status']) && !empty(isset($data['status'])) && $data['status'] != 3){
                     $query->where('ld_course_video_resource.status' , '=' , $data['status']);
                 }
                 //判断资源id是否为空
@@ -85,15 +87,17 @@ class Video extends Model {
                     //删除状态
                     $query->where('ld_course_video_resource.is_del' , '=' , 0);
                     //判断学科id是否为空
-                    if(isset($data['parent_id']) && !empty(isset($data['parent_id']))){
+                    if(isset($data['parent_id'])){
                         $s_id = json_decode($data['parent_id']);
-                        $data['parent_id'] = $s_id[0];
-                        if(!empty($s_id[1])){
-                            $data['child_id'] = $s_id[1];
-                        }else{
-                            $data['child_id'] = 0;
+                        if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                            $data['parent_id'] = $s_id[0];
+                            if(!empty($s_id[1])){
+                                $data['child_id'] = $s_id[1];
+                            }else{
+                                $data['child_id'] = 0;
+                            }
+                            $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
                         }
-                        $query->where('ld_course_video_resource.parent_id','=',$data['parent_id']);
                     }
                     if(isset($data['child_id']) && !empty(isset($data['child_id']))){
                         $query->where('ld_course_video_resource.child_id','=' , $data['child_id']);
@@ -107,7 +111,7 @@ class Video extends Model {
                         $query->where('ld_course_video_resource.nature' , '=' , $data['nature']);
                     }
                     //判断资源状态是否为空
-                    if(isset($data['status']) && !empty(isset($data['status']))){
+                    if(isset($data['status']) && !empty(isset($data['status']))  && $data['status'] != 3){
                         $query->where('ld_course_video_resource.status' , '=' , $data['status']);
                     }
                     //判断资源id是否为空
