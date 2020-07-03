@@ -102,7 +102,7 @@ class LessonController extends Controller {
         if(empty($lesson)){
             return $this->response('课程不存在', 404);
         }
-        Lesson::where('id', $request->input('id'))->update(['watch_num' => DB::raw('watch_num + 1')]);
+        //Lesson::where('id', $request->input('id'))->update(['watch_num' => DB::raw('watch_num + 1')]);
         return $this->response($lesson);
     }
 

@@ -25,18 +25,18 @@ class Teacher extends Model {
     protected $hidden = [
         'pivot'
     ];
-    
+
     protected $appends = ['checked' , 'student_number' , 'star_num'];
 
     public function getCheckedAttribute($value)
     {
         return true;
     }
-    
+
     public function lessons() {
         return $this->belongsToMany('App\Models\Teacher', 'ld_lesson_teachers');
     }
-    
+
     //获取学员数量
     public function getStudentNumberAttribute($value) {
         //获取课程的id列表
@@ -57,12 +57,12 @@ class Teacher extends Model {
         }
         return $student_number;
     }
-    
+
     //好评数量
     public function getStarNumAttribute($value) {
         return 5;
     }
-    
+
     /*
      * @param  description   添加教师/教务方法
      * @param  data          数组数据
@@ -93,7 +93,7 @@ class Teacher extends Model {
         if(!isset($body['teacher_id']) || empty($body['teacher_id']) || $body['teacher_id'] <= 0){
             return ['code' => 202 , 'msg' => '老师id不合法'];
         }
-        
+
         //key赋值
         $key = 'teacher:teacherinfo:'.$body['teacher_id'];
 
@@ -140,24 +140,24 @@ class Teacher extends Model {
         if(!isset($body['type']) || empty($body['type']) || $body['type'] <= 0 || !in_array($body['type'] , [1,2])){
             return ['code' => 202 , 'msg' => '老师类型不合法'];
         }
-        
+
         //每页显示的条数
         $pagesize = isset($body['pagesize']) && $body['pagesize'] > 0 ? $body['pagesize'] : 15;
         $page     = isset($body['page']) && $body['page'] > 0 ? $body['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
-        
+
         //获取讲师或教务是否有数据
         $teacher_count = self::where(function($query) use ($body){
             $query->where('is_del' , '=' , 0);
             //获取老师类型(讲师还是教务)
             $query->where('type' , '=' , $body['type']);
-            
+
             //判断搜索内容是否为空
             if(isset($body['search']) && !empty($body['search'])){
                 $query->where('real_name','like','%'.$body['search'].'%');
             }
         })->count();
-        
+
         //判断讲师或教务是否有数据
         if($teacher_count && $teacher_count > 0){
             //获取讲师或教务列表
@@ -178,11 +178,11 @@ class Teacher extends Model {
                 }
             }
             return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => $teacher_list , 'total' => $teacher_count , 'pagesize' => $pagesize , 'page' => $page]];
-        } else {  
+        } else {
             return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
         }
     }
-    
+
     /*
      * @param  description   讲师或教务搜索列表
      * @param  参数说明       body包含以下参数[
@@ -204,13 +204,13 @@ class Teacher extends Model {
                     $query->where('child_id','=',$parent_id[1]);
                 }
             }
-            
+
             //判断姓名是否为空
             if(isset($body['real_name']) && !empty($body['real_name'])){
                 $query->where('real_name','like','%'.$body['real_name'].'%');
             }
         })->select('id as teacher_id','real_name','type')->orderByDesc('create_at')->get()->toArray();
-        
+
         //判断获取列表是否为空
         if($teacher_list && !empty($teacher_list)){
             $arr = [];
@@ -305,7 +305,7 @@ class Teacher extends Model {
             /*if(!isset($body['content']) || empty($body['content'])){
                 return ['code' => 201 , 'msg' => '请输入详情'];
             }*/
-            
+
             //转化学科类型
             $parent_info = json_decode($body['parent_id'] , true);
         } else {
@@ -314,7 +314,7 @@ class Teacher extends Model {
 
         //获取老师id
         $teacher_id = $body['teacher_id'];
-        
+
         //key赋值
         $key = 'teacher:update:'.$teacher_id;
 
@@ -330,7 +330,7 @@ class Teacher extends Model {
                 return ['code' => 204 , 'msg' => '此讲师教务不存在'];
             }
         }
-        
+
         //判断学科类型
         if($teacher_info['type'] > 1){
             $parent_id = $parent_info && !empty($parent_info) && isset($parent_info[0]) ? $parent_info[0] : 0;
@@ -339,7 +339,7 @@ class Teacher extends Model {
             $parent_id = 0;
             $child_id  = 0;
         }
-        
+
         //讲师或教务数组信息追加
         $teacher_array = [
             'head_icon'  =>    isset($body['head_icon']) && !empty($body['head_icon']) ? $body['head_icon'] : '' ,
@@ -354,10 +354,10 @@ class Teacher extends Model {
             'content'    =>    $teacher_info['type'] > 1 ? isset($body['content']) && !empty($body['content']) ? $body['content'] : '' : '' ,
             'update_at'  =>    date('Y-m-d H:i:s')
         ];
-        
+
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-        
+
         //开启事务
         DB::beginTransaction();
 
@@ -367,7 +367,7 @@ class Teacher extends Model {
             AdminLog::insertAdminLog([
                 'admin_id'       =>   $admin_id  ,
                 'module_name'    =>  'Teacher' ,
-                'route_url'      =>  'admin/teacher/doUpdateTeacher' , 
+                'route_url'      =>  'admin/teacher/doUpdateTeacher' ,
                 'operate_method' =>  'update' ,
                 'content'        =>  json_encode($body) ,
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
@@ -453,18 +453,18 @@ class Teacher extends Model {
                 /*if(!isset($body['content']) || empty($body['content'])){
                     return ['code' => 201 , 'msg' => '请输入详情'];
                 }*/
-                
+
                 //转化学科类型
                 $parent_info = json_decode($body['parent_id'] , true);
             } else {
                 $parent_info = "";
             }
         }
-        
+
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $school_id= isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
-        
+
         //判断学科类型
         if($body['type'] > 1){
             $parent_id = $parent_info && !empty($parent_info) && isset($parent_info[0]) ? $parent_info[0] : 0;
@@ -491,7 +491,7 @@ class Teacher extends Model {
             'school_id'  =>    $school_id ,
             'create_at'  =>    date('Y-m-d H:i:s')
         ];
-        
+
         //开启事务
         DB::beginTransaction();
 
@@ -501,7 +501,7 @@ class Teacher extends Model {
             AdminLog::insertAdminLog([
                 'admin_id'       =>   $admin_id  ,
                 'module_name'    =>  'Teacher' ,
-                'route_url'      =>  'admin/teacher/doInsertTeacher' , 
+                'route_url'      =>  'admin/teacher/doInsertTeacher' ,
                 'operate_method' =>  'insert' ,
                 'content'        =>  json_encode($body) ,
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
@@ -537,7 +537,7 @@ class Teacher extends Model {
         if(!isset($body['teacher_id']) || empty($body['teacher_id']) || $body['teacher_id'] <= 0){
             return ['code' => 202 , 'msg' => '老师id不合法'];
         }
-        
+
         //key赋值
         $key = 'teacher:delete:'.$body['teacher_id'];
 
@@ -559,10 +559,10 @@ class Teacher extends Model {
             'is_del'     => 1 ,
             'update_at'  => date('Y-m-d H:i:s')
         ];
-        
+
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-        
+
         //开启事务
         DB::beginTransaction();
 
@@ -572,7 +572,7 @@ class Teacher extends Model {
             AdminLog::insertAdminLog([
                 'admin_id'       =>   $admin_id  ,
                 'module_name'    =>  'Teacher' ,
-                'route_url'      =>  'admin/teacher/doDeleteTeacher' , 
+                'route_url'      =>  'admin/teacher/doDeleteTeacher' ,
                 'operate_method' =>  'delete' ,
                 'content'        =>  json_encode($body) ,
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
@@ -609,7 +609,7 @@ class Teacher extends Model {
         if(!isset($body['teacher_id']) || empty($body['teacher_id']) || $body['teacher_id'] <= 0){
             return ['code' => 202 , 'msg' => '老师id不合法'];
         }
-        
+
         //key赋值
         $key = 'teacher:recommend:'.$body['teacher_id'];
 
@@ -625,7 +625,7 @@ class Teacher extends Model {
                 return ['code' => 204 , 'msg' => '此讲师教务不存在'];
             }
         }
-        
+
         //根据学员的id获取学员的状态
         $is_recommend = self::where('id',$body['teacher_id'])->pluck('is_recommend');
 
@@ -634,10 +634,10 @@ class Teacher extends Model {
             'is_recommend' => $is_recommend[0] > 0 ? 0 : 1 ,
             'update_at'    => date('Y-m-d H:i:s')
         ];
-        
+
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-        
+
         //开启事务
         DB::beginTransaction();
 
@@ -647,7 +647,7 @@ class Teacher extends Model {
             AdminLog::insertAdminLog([
                 'admin_id'       =>   $admin_id  ,
                 'module_name'    =>  'Teacher' ,
-                'route_url'      =>  'admin/teacher/doRecommendTeacher' , 
+                'route_url'      =>  'admin/teacher/doRecommendTeacher' ,
                 'operate_method' =>  'recommend' ,
                 'content'        =>  json_encode($body) ,
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
@@ -662,7 +662,7 @@ class Teacher extends Model {
             return ['code' => 203 , 'msg' => '操作失败'];
         }
     }
-    
+
     /*
      * @param  descriptsion    启用/禁用的方法
      * @param  参数说明         body包含以下参数[
@@ -698,7 +698,7 @@ class Teacher extends Model {
                 return ['code' => 204 , 'msg' => '此讲师或教务不存在'];
             }
         }
-        
+
         //根据讲师或教务的id获取讲师或教务的状态
         $is_forbid = self::where('id',$body['teacher_id'])->pluck('is_forbid');
 
@@ -707,10 +707,10 @@ class Teacher extends Model {
             'is_forbid'    => $is_forbid[0] >= 1 ? 0 : 1 ,
             'update_at'    => date('Y-m-d H:i:s')
         ];
-        
+
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-        
+
         //开启事务
         DB::beginTransaction();
 
@@ -720,7 +720,7 @@ class Teacher extends Model {
             AdminLog::insertAdminLog([
                 'admin_id'       =>   $admin_id  ,
                 'module_name'    =>  'Teacher' ,
-                'route_url'      =>  'admin/teacher/doForbidTeacher' , 
+                'route_url'      =>  'admin/teacher/doForbidTeacher' ,
                 'operate_method' =>  'update' ,
                 'content'        =>  json_encode($body) ,
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,

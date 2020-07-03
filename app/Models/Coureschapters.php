@@ -35,7 +35,7 @@ class Coureschapters extends Model {
                 'admin_id'       =>   $user_id  ,
                 'module_name'    =>  'chapterAdd' ,
                 'route_url'      =>  'admin/Course/chapterAdd' ,
-                'operate_method' =>  'chapterAdd' ,
+                'operate_method' =>  'Add' ,
                 'content'        =>  '添加章或节操作'.json_encode($data) ,
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                 'create_at'      =>  date('Y-m-d H:i:s')
@@ -59,7 +59,7 @@ class Coureschapters extends Model {
                 'admin_id'       =>   $user_id  ,
                 'module_name'    =>  'chapterDel' ,
                 'route_url'      =>  'admin/Course/chapterDel' ,
-                'operate_method' =>  'chapterDel' ,
+                'operate_method' =>  'Del' ,
                 'content'        =>  '删除章或节操作'.json_encode($data) ,
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                 'create_at'      =>  date('Y-m-d H:i:s')
@@ -87,7 +87,7 @@ class Coureschapters extends Model {
                 'admin_id'       =>   $user_id  ,
                 'module_name'    =>  'chapterUpdate' ,
                 'route_url'      =>  'admin/Course/chapterUpdate' ,
-                'operate_method' =>  'chapterUpdate' ,
+                'operate_method' =>  'Update' ,
                 'content'        =>  '修改章信息操作'.json_encode($data) ,
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                 'create_at'      =>  date('Y-m-d H:i:s')
@@ -271,8 +271,11 @@ class Coureschapters extends Model {
         $list =array();
         foreach ($arr as $k=>$v){
             if ($v['parent_id'] == $id){
-                $v['level']=$level;
-                $v['son'] = self::demo($arr,$v['id'],$level+1);
+                $aa = self::demo($arr,$v['id'],$level+1);
+                if(!empty($aa)){
+                    $v['level']=$level;
+                    $v['childs'] = $aa;
+                }
                 $list[] = $v;
             }
         }
