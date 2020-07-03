@@ -298,6 +298,30 @@ class ExamController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
+    
+    /*
+     * @param  description   根据试卷的id获取每种题型的分数
+     * @param  参数说明       body包含以下参数[
+     *     papers_id       试卷id
+     * ]
+     * @param author    duzhijian
+     * @param ctime     2020-07-03
+     * return string
+     */
+    public function getExamSignleScore(){
+        try{
+            $data = PapersExam::getExamSignleScore(self::$accept_data);
+            if($data['code'] == 200){
+                return response()->json(['code' => 200 , 'msg' => '返回数据信息成功' , 'data' => $data['data']]);
+            } else {
+                return response()->json(['code' => $data['code'] , 'msg' => $data['msg']]);
+            }
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    
+    
     /*
      * @param  description   试卷删除试题
      * @param  author        zzk

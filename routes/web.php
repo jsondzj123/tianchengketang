@@ -328,6 +328,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         /****************试卷选择试题部分  start****************/
         $router->post('InsertTestPaperSelection', 'ExamController@InsertTestPaperSelection');           //添加试题到试卷
         $router->post('doTestPaperSelection', 'ExamController@doTestPaperSelection');                   //试卷已添加试题的列表
+        $router->post('getExamSignleScore', 'ExamController@getExamSignleScore');                       //获取试卷中的试题类型分数
         $router->post('ListTestPaperSelection', 'ExamController@ListTestPaperSelection');               //添加试题到试卷的列表
         $router->post('RepetitionTestPaperSelection', 'ExamController@RepetitionTestPaperSelection');   //检测试卷试题
         $router->post('oneTestPaperSelection', 'ExamController@oneTestPaperSelection');                 //获取试题详情
