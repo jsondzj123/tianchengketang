@@ -13,7 +13,7 @@ use App\Models\LiveChild;
 use App\Models\OpenLivesChilds;
 use Log;
 use App\Listeners\LiveListener;
-//教学
+//教学模块
 class TeachController extends Controller {
 
 	//教学列表
@@ -29,7 +29,7 @@ class TeachController extends Controller {
 	public function details(){
 		$validator = Validator::make(self::$accept_data, 
                 [
-                	'class_id' => 'required',//课次 （公开课的话时课程id）
+                	'class_id' => 'required',//课次 （公开课时为课程id）
                 	// 'classno_id' => 'required',//班号
                 	'is_public' => 'required',//是否未公开课   (1 公开课  0课程)    	
                	],
@@ -63,7 +63,7 @@ class TeachController extends Controller {
         	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('course_id')->first();
         }
        	if($data['is_public']== 0){  //课程
- 			$live = LiveChild::where('class_id',$data['id'])->select('course_id')->first();
+ 			    $live = LiveChild::where('class_id',$data['id'])->select('course_id')->first();
        	}
         $MTCloud = new MTCloud();
         $res = $MTCloud->courseLaunch($live['course_id']);
@@ -99,7 +99,7 @@ class TeachController extends Controller {
      * @param   auther  lys  2020.7.2
      * @param  int  $id
      * @return \Illuminate\Http\Response
-     */  //欢拓 上传课件有问题
+     */ 
     public function courseUpload(){
   		$data = self::$accept_data;
       $validator = Validator::make($data, [
