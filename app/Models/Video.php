@@ -214,6 +214,7 @@ class Video extends Model {
          */
         public static function AddVideo($data){
             //判断大类id
+            unset($data['/admin/video/add']);
             if(empty($data['parent_id']) || !isset($data['parent_id'])){
                 return ['code' => 201 , 'msg' => '请正确选择分类'];
             }
@@ -292,6 +293,7 @@ class Video extends Model {
          */
         public static function updateVideo($data){
             //判断大类id
+            unset($data['/admin/updateVideo']);
             if(empty($data['parent_id']) || !isset($data['parent_id'])){
                 return ['code' => 201 , 'msg' => '请正确选择分类'];
             }
