@@ -516,7 +516,7 @@ class Papers extends Model {
 
             //获取试卷名称
             if(isset($body['papers_name']) && !empty($body['papers_name'])){
-                $query->where('papers_name','like',$body['papers_name'].'%');
+                $query->where('papers_name','like','%'.$body['papers_name'].'%');
             }
 
             //操作员id
@@ -554,7 +554,7 @@ class Papers extends Model {
                 
                 //获取试卷名称
                 if(isset($body['papers_name']) && !empty($body['papers_name'])){
-                    $query->where('papers_name','like',$body['papers_name'].'%');
+                    $query->where('papers_name','like','%'.$body['papers_name'].'%');
                 }
 
                 //操作员id
@@ -572,6 +572,8 @@ class Papers extends Model {
                     $signle_count     = PapersExam::where("papers_id" , "=" , $v['papers_id'])->where("type" , "=" , 1)->where('is_del' , '=' , 0)->count();
                     if($signle_count > 0){
                         $consult[] = ['type'=>'单选题' , 'count' => $signle_count , 'score' => $v['signle_score'] , 'sum_score' => $v['signle_score'] * $signle_count];
+                    } else {
+                        $consult[] = ['type'=>'单选题' , 'count' => 0 , 'score' => $v['signle_score'] , 'sum_score' => 0];
                     }
                 }
                 
@@ -580,6 +582,8 @@ class Papers extends Model {
                     $more_count     = PapersExam::where("papers_id" , "=" , $v['papers_id'])->where("type" , "=" , 2)->where('is_del' , '=' , 0)->count();
                     if($more_count > 0){
                         $consult[] = ['type'=>'多选题' , 'count' => $more_count , 'score' => $v['more_score'] , 'sum_score' => $v['more_score'] * $more_count];
+                    } else {
+                        $consult[] = ['type'=>'多选题' , 'count' => 0 , 'score' => $v['more_score'] , 'sum_score' => 0];
                     }
                 }
                 
@@ -588,6 +592,8 @@ class Papers extends Model {
                     $options_count     = PapersExam::where("papers_id" , "=" , $v['papers_id'])->where("type" , "=" , 4)->where('is_del' , '=' , 0)->count();
                     if($options_count > 0){
                         $consult[]     = ['type'=>'不定项' , 'count' => $options_count , 'score' => $v['options_score'] , 'sum_score' => $v['options_score'] * $options_count];
+                    } else {
+                        $consult[]     = ['type'=>'不定项' , 'count' => 0 , 'score' => $v['options_score'] , 'sum_score' => 0];
                     }
                 }
                 
@@ -596,6 +602,8 @@ class Papers extends Model {
                     $judge_count     = PapersExam::where("papers_id" , "=" , $v['papers_id'])->where("type" , "=" , 3)->where('is_del' , '=' , 0)->count();
                     if($judge_count > 0){
                         $consult[]     = ['type'=>'判断题' , 'count' => $judge_count , 'score' => $v['judge_score'] , 'sum_score' => $v['judge_score'] * $judge_count];
+                    } else {
+                        $consult[]     = ['type'=>'判断题' , 'count' => 0 , 'score' => $v['judge_score'] , 'sum_score' => 0];
                     }
                 }
                 
@@ -604,6 +612,8 @@ class Papers extends Model {
                     $pack_count     = PapersExam::where("papers_id" , "=" , $v['papers_id'])->where("type" , "=" , 5)->where('is_del' , '=' , 0)->count();
                     if($pack_count > 0){
                         $consult[]     = ['type'=>'填空题' , 'count' => $pack_count , 'score' => $v['pack_score'] , 'sum_score' => $v['pack_score'] * $pack_count];
+                    } else {
+                        $consult[]     = ['type'=>'填空题' , 'count' => 0 , 'score' => $v['pack_score'] , 'sum_score' => 0];
                     }
                 }
                 
@@ -612,6 +622,8 @@ class Papers extends Model {
                     $short_count     = PapersExam::where("papers_id" , "=" , $v['papers_id'])->where("type" , "=" , 6)->where('is_del' , '=' , 0)->count();
                     if($short_count > 0){
                         $consult[]     = ['type'=>'简答题' , 'count' => $short_count , 'score' => $v['short_score'] , 'sum_score' => $v['short_score'] * $short_count];
+                    } else {
+                        $consult[]     = ['type'=>'简答题' , 'count' => 0 , 'score' => $v['short_score'] , 'sum_score' => 0];
                     }
                 }
                 
@@ -620,6 +632,8 @@ class Papers extends Model {
                     $material_count     = PapersExam::where("papers_id" , "=" , $v['papers_id'])->where("type" , "=" , 7)->where('is_del' , '=' , 0)->count();
                     if($material_count > 0){
                         $consult[]     = ['type'=>'材料题' , 'count' => $material_count , 'score' => $v['material_score'] , 'sum_score' => $v['material_score'] * $material_count];
+                    } else {
+                        $consult[]     = ['type'=>'材料题' , 'count' => 0 , 'score' => $v['material_score'] , 'sum_score' => 0];
                     }
                 }
                 

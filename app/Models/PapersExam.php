@@ -97,13 +97,18 @@ class PapersExam extends Model {
                 Papers::where("id" , $body['papers_id'])->update($where);
             }
             
-            //判断试卷中试题是否存在
-            if($exam_count <= 0){
-                //将数据插入到表中
-                $papersexam_id = self::insertGetId($data);
+            //判断试题的id是否大于0
+            if($v['exam_id'] && $v['exam_id'] > 0){
+                //判断试卷中试题是否存在
+                if($exam_count <= 0){
+                    //将数据插入到表中
+                    $papersexam_id = self::insertGetId($data);
+                } else {
+                    //将数据更新到表中
+                    $papersexam_id = self::where("exam_id",$v['exam_id'])->update(['is_del'=>$v['is_del'] , 'update_at' => date('Y-m-d H:i:s')]);
+                }
             } else {
-                //将数据更新到表中
-                $papersexam_id = self::where("exam_id",$v['exam_id'])->update(['is_del'=>$v['is_del'] , 'update_at' => date('Y-m-d H:i:s')]);
+                $papersexam_id = 1;
             }
         }
 
