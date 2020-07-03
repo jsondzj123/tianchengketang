@@ -134,7 +134,10 @@ class Live extends Model {
             //添加总课时  该资源下所有班号下课次的所有课时
             $one['sum_class_hour'] = LiveClass::join('ld_course_class_number','ld_course_shift_no.id','=','ld_course_class_number.shift_no_id')
             ->where("resource_id",$one['id'])->sum("class_hour");
-            $one['parent_id'] = [$one['parent_id'],$one['child_id']];
+            if(!empty($one['child_id'])){
+                $one['parent_id'] = [$one['parent_id'],$one['child_id']];
+            }
+            $one['parent_id'] = [$one['parent_id']];
             unset($one['child_id']);
             return ['code' => 200 , 'msg' => '获取直播资源列表成功' , 'data' => $one];
 
