@@ -3209,9 +3209,10 @@ class MTCloud{
             if(is_array($data)){
                 $postMultipart =false;
                 foreach($data as $_key=>$_val){
-                    if((is_object($_val) && $_val instanceof CURLFile) || (is_string($_val) && "@" === substr($_val,0,1))){
+                    if((is_object($_val) && $_val instanceof \CURLFile) || (is_string($_val) && "@" === substr($_val,0,1))){
                         $postMultipart = true;
                     }
+                   
                 }
 
                 $options[CURLOPT_POSTFIELDS] = $postMultipart ? $data : http_build_query($data);
@@ -3270,7 +3271,6 @@ class MTCloud{
         $base64url = strtr($base64, '+/', '-_');
         return $base64url;
     }
-
 
 
 }

@@ -53,10 +53,16 @@ class PapersExam extends Model {
         
         //获取选择得题得列表
         $exam_array = json_decode($body['exam_array'] , true);
+        if(count($exam_array) <= 0){
+            return ['code' => 201 , 'msg' => '请选择试题'];
+        }
         
         //根据试卷的id更新试题类型的每题分数
         $papers_info = Papers::where("id" , $body['papers_id'])->first();
         foreach($exam_array as $k=>$v){
+            //判断此试题在试卷中是否存在
+            $exam_count = self::where("subject_id" , $body['subject_id'])->where("papers_id" , $body['papers_id'])->where("exam_id" , $v['exam_id'])->count();
+            
             //数据数组组装
             $data = [
                 "subject_id" => $body['subject_id'],
@@ -91,8 +97,19 @@ class PapersExam extends Model {
                 Papers::where("id" , $body['papers_id'])->update($where);
             }
             
-            //将数据插入到表中
-            $papersexam_id = self::insertGetId($data);
+            //判断试题的id是否大于0
+            if($v['exam_id'] && $v['exam_id'] > 0){
+                //判断试卷中试题是否存在
+                if($exam_count <= 0){
+                    //将数据插入到表中
+                    $papersexam_id = self::insertGetId($data);
+                } else {
+                    //将数据更新到表中
+                    $papersexam_id = self::where("exam_id",$v['exam_id'])->update(['is_del'=>$v['is_del'] , 'update_at' => date('Y-m-d H:i:s')]);
+                }
+            } else {
+                $papersexam_id = 1;
+            }
         }
 
         //插入日志数据
@@ -209,17 +226,38 @@ class PapersExam extends Model {
         $type = $body['type'];
         if(!empty($type)){
             //通过试卷id获取该试卷下的所有试题按照分类进行搜索
-            $exam = self::where(['papers_id'=>$papers_id,'type'=>$type,'is_del'=>0])->select('id','exam_id')->get()->toArray();
+            $exam = self::where(['papers_id'=>$papers_id,'type'=>$type,'is_del'=>0])->select('id','exam_id' , 'type')->get()->toArray();
         }else{
-            $exam = self::where(['papers_id'=>$papers_id,'is_del'=>0])->select('id','exam_id')->get()->toArray();
+            $exam = self::where(['papers_id'=>$papers_id,'is_del'=>0])->select('id','exam_id' , 'type')->get()->toArray();
         }
+
         foreach($exam as $k => $exams){
             if(empty(Exam::where(['id'=>$exams['exam_id'],'is_del'=>0])->select('exam_content')->first()['exam_content'])){
                 unset($exam[$k]);
             }else{
                 $exam[$k]['exam_content'] = Exam::where(['id'=>$exams['exam_id'],'is_del'=>0])->select('exam_content')->first()['exam_content'];
             }
-
+            
+            //根据试卷的id获取试卷详情
+            $parpers_info =  Papers::where("id" , $papers_id)->first();
+            
+            //单选题
+            if($exams['type'] == 1) {
+                $score = $parpers_info['signle_score'];
+            } else if($exams['type'] == 2){
+                $score = $parpers_info['more_score'];
+            } else if($exams['type'] == 3){
+                $score = $parpers_info['judge_score'];
+            } else if($exams['type'] == 4){
+                $score = $parpers_info['options_score'];
+            } else if($exams['type'] == 5){
+                $score = $parpers_info['pack_score'];
+            } else if($exams['type'] == 6){
+                $score = $parpers_info['short_score'];
+            } else if($exams['type'] == 7){
+                $score = $parpers_info['material_score'];
+            }
+            $exam[$k]['score']  = $score;
         }
         return ['code' => 200 , 'msg' => '获取成功','data'=>$exam];
     }

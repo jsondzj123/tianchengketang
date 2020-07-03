@@ -31,6 +31,7 @@ class CreateLdCourseOpenTable extends Migration
             $table->tinyInteger('is_barrage')->default(0)->comment('是否弹幕(1代表是,0代表否)');
             $table->tinyInteger('live_type')->default(6)->comment('直播类型(1语音云3大班5小班6大班互动)');
             $table->tinyInteger('nature')->default(0)->comment('课程属性(1代表授权,0代表自增)');
+            $table->tinyInteger('is_recommend')->default(0)->comment('是否推荐(1代表推荐,0代表不推荐)');
             $table->tinyInteger('status')->default(0)->comment('课程状态(0代表未发布,1代表在售(已发布),2代表停售(已下架))');
             $table->tinyInteger('is_del')->default(0)->comment('是否删除(1代表删除,0代表正常)');
             $table->dateTime('create_at')->comment('创建时间');

@@ -18,7 +18,7 @@ class Coures extends Model {
         $pagesize = (int)isset($data['pageSize']) && $data['pageSize'] > 0 ? $data['pageSize'] : 20;
         $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
-        $count = $list = self::where(function($query) use ($data,$school_id) {
+        $count = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
             //判断总校 查询所有或一个分校
             if($data['school_status'] == 1){
                 if(!empty($data['school_id']) && $data['school_id'] != ''){
@@ -32,21 +32,23 @@ class Coures extends Model {
             if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
                 $query->where('parent_id',$data['coursesubjectOne']);
             }
+
             //学科小类
             if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
                 $query->where('child_id',$data['coursesubjectTwo']);
             }
             //状态
             if(!empty($data['status']) && $data['status'] != ''){
-                $query->where('status',$data['status']);
+                $query->where('status',$data['status']-1);
             }
             //属性
             if(!empty($data['nature']) && $data['nature'] != ''){
-                $query->where('nature',$data['nature']);
+                $query->where('nature',$data['nature']-1);
             }
         })->count();
+        $list=[];
         if($count > 0){
-            $list = self::where(function($query) use ($data,$school_id) {
+            $list = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
                     if($data['school_status'] == 1){
                         if(!empty($data['school_id']) && $data['school_id'] != ''){
@@ -58,19 +60,19 @@ class Coures extends Model {
                     }
                     //学科大类
                     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
-                        $query->where('parent_id',$data['school_id']);
+                        $query->where('parent_id',$data['coursesubjectOne']);
                     }
                     //学科小类
                     if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
-                        $query->where('child_id',$data['school_id']);
+                        $query->where('child_id',$data['coursesubjectTwo']);
                     }
                     //状态
                     if(!empty($data['status']) && $data['status'] != ''){
-                        $query->where('status',$data['status']);
+                        $query->where('status',$data['status']-1);
                     }
                     //属性
                     if(!empty($data['nature']) && $data['nature'] != ''){
-                        $query->where('nature',$data['nature']);
+                        $query->where('nature',$data['nature'] -1);
                     }
                 })
                 ->orderBy('id','desc')
@@ -101,13 +103,13 @@ class Coures extends Model {
                     $v['method'] = $method;
                 }
             }
-            $page=[
-                'pageSize'=>$pagesize,
-                'page' =>$page,
-                'total'=>$count
-            ];
-            return ['code' => 200 , 'msg' => '查询成功','data'=>$list,'where'=>$data,'page'=>$page];
         }
+        $page=[
+            'pageSize'=>$pagesize,
+            'page' =>$page,
+            'total'=>$count
+        ];
+        return ['code' => 200 , 'msg' => '查询成功','data'=>$list,'where'=>$data,'page'=>$page];
     }
     //添加
     public static function courseAdd($data){
@@ -141,19 +143,20 @@ class Coures extends Model {
         if(!isset($data['introduce']) || empty($data['introduce'])){
             return ['code' => 201 , 'msg' => '课程简介不能为空'];
         }
-        $user_id = AdminLog::getAdminInfo()->admin_user->id;
-        $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
+        $user_id = isset(AdminLog::getAdminInfo()->admin_user->id)?AdminLog::getAdminInfo()->admin_user->id:0;
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id)?AdminLog::getAdminInfo()->admin_user->school_id:0;
         $title = self::where(['title'=>$data['title'],'is_del'=>0,'nature'=>1])->first();
         if($title){
             return ['code' => 201 , 'msg' => '课程已存在'];
         }
         DB::beginTransaction();
         //入课程表  课程授课表 课程讲师表
+        $parent = json_decode($data['parent'],true);
         $couser = self::insertGetId([
             'admin_id' => $user_id,
             'school_id' => $school_id,
-            'parent_id' => $data['parent'][0],
-            'child_id' => isset($data['parent'][1])?$data['parent'][1]:0,
+            'parent_id' => isset($parent[0])?$parent[0]:0,
+            'child_id' => isset($parent[1])?$parent[1]:0,
             'title' => $data['title'],
             'keywords' => isset($data['keywords'])?$data['keywords']:'',
             'cover' => $data['cover'],
@@ -165,18 +168,30 @@ class Coures extends Model {
             'introduce' => $data['introduce'],
         ]);
         if($couser){
-            foreach ($data['method'] as $k=>$v){
+            $method = json_decode($data['method'],true);
+            foreach ($method as $k=>$v){
                  Couresmethod::insert([
                     'course_id' => $couser,
                     'method_id' => $v
                 ]);
             }
-            foreach ($data['teacher'] as $k=>$v){
+            $teacher = json_decode($data['teacher'],true);
+            foreach ($teacher as $k=>$v){
                  Couresteacher::insert([
                     'course_id' => $couser,
                     'teacher_id' => $v
                 ]);
             }
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'courseAdd' ,
+                'route_url'      =>  'admin/Course/courseAdd' ,
+                'operate_method' =>  'add' ,
+                'content'        =>  '添加操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             DB::commit();
             return ['code' => 200 , 'msg' => '添加成功'];
         }else{
@@ -193,11 +208,31 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '请选择学科大类'];
         }
         $find = self::where(['id'=>$data['id']])->first();
-        if($find['nature'] == 1){
-            return ['code' => 203 , 'msg' => '授权课程，无法删除'];
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+        if($school_status != 1){
+            if($find['nature'] == 1){
+                return ['code' => 203 , 'msg' => '授权课程，无法删除'];
+            }
+        }else{
+            // 总校删除 先查询授权分校库存，没有进行删除
+            $courseSchool = CourseStocks::where(['course_id'=>$data['id'],'add_number'=>'> 0'])->get();
+            if(!empty($courseSchool)){
+                return ['code' => 203 , 'msg' => '此课程授权给分校，无法删除'];
+            }
         }
         $del = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
         if($del){
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'courseDel' ,
+                'route_url'      =>  'admin/Course/courseDel' ,
+                'operate_method' =>  'courseDel' ,
+                'content'        =>  '删除操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code' => 200 , 'msg' => '删除成功'];
         }else{
             return ['code' => 201 , 'msg' => '删除失败'];
@@ -216,28 +251,27 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '此数据不存在'];
         }
         //查询授权课程
-        $method = Couresmethod::select('method_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
-        foreach ($method as $key=>&$val){
-            if($val['method_id'] == 1){
-                $val['method_name'] = '直播';
-            }
-            if($val['method_id'] == 2){
-                $val['method_name'] = '录播';
-            }
-            if($val['method_id'] == 3){
-                $val['method_name'] = '其他';
-            }
+        $method= Couresmethod::select('method_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
+        $find['method'] = array_column($method, 'method_id');
+        $where = [];
+        if($find['parent_id'] > 0){
+            $where[0] = $find['parent_id'];
         }
-        $find['method'] = $method;
+        if($find['parent_id'] > 0 && $find['child_id'] > 0){
+            $where[1] = $find['child_id'];
+        }
+        $find['parent'] = $where;
+        unset($find['parent_id'],$find['child_id']);
         //查询讲师
-        $teacher = Couresteacher::select('teacher_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
-        if(!empty($teacher)){
-            foreach ($teacher as $k=>&$v){
+        $teachers = $teacher = Couresteacher::select('teacher_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
+        if(!empty($teachers)){
+            foreach ($teachers as $k=>&$v){
                 $name = Lecturer::select('real_name')->where(['id'=>$v['teacher_id'],'is_del'=>0,'type'=>2])->first();
                 $v['real_name'] = $name['real_name'];
             }
         }
-        $find['teacher'] = $teacher;
+        $find['teacher'] = array_column($teacher, 'teacher_id');
+        $find['teachers'] = $teachers;
         return ['code' => 200 , 'msg' => '查询成功','data'=>$find];
     }
     //修改
@@ -246,8 +280,11 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
         $find = self::where(['id'=>$data['id']])->first();
-        if($find['nature'] == 1){
-            return ['code' => 203 , 'msg' => '授权课程，无法修改'];
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+        if ($school_status != 1){
+            if($find['nature'] == 1){
+                return ['code' => 203 , 'msg' => '授权课程，无法修改'];
+            }
         }
         DB::beginTransaction();
         try{
@@ -257,10 +294,20 @@ class Coures extends Model {
         unset($data['/admin/course/courseUpdate']);
         unset($data['method']);
         unset($data['teacher']);
+        unset($data['teachers']);
+        $parent = json_decode($data['parent'],true);
+        if(isset($parent[0]) && !empty($parent[0])){
+            $data['parent_id'] = $parent[0];
+        }
+        if(isset($parent[1]) && !empty($parent[1])){
+            $data['child_id'] = $parent[1];
+        }
+        unset($data['parent']);
+        $data['update_at'] = date('Y-m-d H:i:s');
         self::where(['id'=>$data['id']])->update($data);
         if(!empty($cousermethod)){
             Couresmethod::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
-            $method = explode(',',$cousermethod);
+            $method = json_decode($cousermethod,true);
             foreach ($method as $k=>$v){
                 $infor = Couresmethod::where(['course_id'=>$data['id'],'method_id'=>$v])->first();
                 if($infor){
@@ -275,7 +322,7 @@ class Coures extends Model {
         }
         if(!empty($couserteacher)){
             Couresteacher::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
-            $teacher = explode(',',$couserteacher);
+            $teacher = json_decode($couserteacher,true);
             foreach ($teacher as $k=>$v){
                 $infor = Couresteacher::where(['course_id'=>$data['id'],'teacher_id'=>$v])->first();
                 if($infor){
@@ -288,13 +335,23 @@ class Coures extends Model {
                 }
             }
         }
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'courseUpdate' ,
+                'route_url'      =>  'admin/Course/courseUpdate' ,
+                'operate_method' =>  'Update' ,
+                'content'        =>  '修改操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
         DB::commit();
         return ['code' => 200 , 'msg' => '修改成功'];
         } catch (Exception $ex) {
             DB::rollback();
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
-
     }
     //修改推荐状态
     public static function courseComment($data){
@@ -303,6 +360,17 @@ class Coures extends Model {
         $recommend = $find['is_recommend'] == 1 ? 0:1;
         $up = self::where(['id'=>$id])->update(['is_recommend'=>$recommend,'update_at'=>date('Y-m-d H:i:s')]);
         if($up){
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'courseComment' ,
+                'route_url'      =>  'admin/Course/courseComment' ,
+                'operate_method' =>  'update' ,
+                'content'        =>  '修改推荐状态操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code' => 200 , 'msg' => '修改成功'];
         }else{
             return ['code' => 201 , 'msg' => '修改失败'];
@@ -321,6 +389,17 @@ class Coures extends Model {
         }
         $up = self::where('id',$data['id'])->update(['status'=>$data['status'],'update_at'=>date('Y-m-d H:i:s')]);
         if($up){
+            $user_id = AdminLog::getAdminInfo()->admin_user->id;
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $user_id  ,
+                'module_name'    =>  'courseUpStatus' ,
+                'route_url'      =>  'admin/Course/courseUpStatus' ,
+                'operate_method' =>  'update' ,
+                'content'        =>  '修改课程状态操作'.json_encode($data) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code' => 200, 'msg' => '操作成功'];
         }else{
             return ['code' => 202 , 'msg' => '操作失败'];
@@ -356,6 +435,17 @@ class Coures extends Model {
         foreach ($data['shift'] as $k=>$v){
             CourseLiveResource::where('id',$v['id'])->update(['shift_id'=>$v['shift_id'],'update_at'=>date('Y-m-d H:i:s')]);
         }
+        $user_id = AdminLog::getAdminInfo()->admin_user->id;
+        //添加日志操作
+        AdminLog::insertAdminLog([
+            'admin_id'       =>   $user_id  ,
+            'module_name'    =>  'liveToCourseshift' ,
+            'route_url'      =>  'admin/Course/liveToCourseshift' ,
+            'operate_method' =>  'update' ,
+            'content'        =>  '排课操作'.json_encode($data) ,
+            'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+            'create_at'      =>  date('Y-m-d H:i:s')
+        ]);
         return ['code' => 200 , 'msg' => '修改成功'];
     }
 }

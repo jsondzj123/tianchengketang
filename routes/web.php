@@ -130,15 +130,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
 });
 //后端登录权限认证相关接口
 $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors']], function () use ($router) {
-    /*$router->group(['prefix' => 'admin', 'middleware'=> ['jwt.auth']], function () use ($router) {
-        //用户详情
-        $router->post('{id}', 'AdminController@show');
-        $router->post('info', 'AdminController@info');
-
-        //获取学员列表
-        $router->post('postUserList', 'UserController@postUserList');
-    });*/
-
     /*
      * 授课方式(sxl)
     */
@@ -192,7 +183,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     /*
      * 科目模块(sxl)
     */
-    $router->post('subject', 'SubjectController@searchList');
+    $router->post('subject', 'CourseController@subject');//学科列表(szw改)
+//    $router->post('subject', 'SubjectController@searchList');
     $router->post('subjectList', 'SubjectController@index');
     $router->post('subject/add', 'SubjectController@store');
     $router->post('subjectShow', 'SubjectController@show');
@@ -369,7 +361,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     });
     //课程模块（重构）（szw）
     $router->group(['prefix' => 'course'], function () use ($router) {
-        $router->post('coursesubject', 'CourseController@coursesubject');//学科列表
+//        $router->post('subject', 'CourseController@subject');//学科列表
 
         $router->post('courseList', 'CourseController@courseList');//课程列表
         $router->post('courseAdd', 'CourseController@courseAdd');//课程添加
@@ -522,6 +514,17 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('doOpenLessById', 'OpenCourseController@doOpenLessById');//修改
         $router->post('zhiboMethod', 'OpenCourseController@zhiboMethod');//直播类型
     });
+    //教学模块
+    $router->group(['prefix' => 'teach'], function () use ($router) {
+        $router->post('getList', 'TeachController@getList');//教学列表 //未完成
+        $router->post('startLiveChild', 'TeachController@startLive');  //启动直播
+        $router->post('livePlayback','TeachController@livePlayback');  //课程回放
+        $router->post('coursewareUpload','TeachController@courseUpload');  //课件上传
+        $router->post('details','TeachController@details');  //教学详情
+        $router->post('coursewareDel','TeachController@coursewareDel');  //课件删除（欢拓）
+    });
+
+
 
 
 

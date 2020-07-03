@@ -3,8 +3,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\AdminLog;
-use App\Models\LessonTeacher;
-use App\Models\Lesson;
+use App\Models\Couresteacher;
+use App\Models\Coures;
 use App\Models\Order;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\DB;
@@ -40,12 +40,12 @@ class Teacher extends Model {
     //获取学员数量
     public function getStudentNumberAttribute($value) {
         //获取课程的id列表
-        $lesson_list     = LessonTeacher::where('teacher_id' , $this->id)->get();
+        $lesson_list     = Couresteacher::where('teacher_id' , $this->id)->get();
         if($lesson_list && !empty($lesson_list)){
             //获取课程id列表
-            $lesson_ids = array_column($lesson_list->toArray() , 'lesson_id');
+            $lesson_ids = array_column($lesson_list->toArray() , 'course_id');
             //通过课程id获取对应的购买基数
-            $buy_num    = Lesson::whereIn('id' , $lesson_ids)->where('is_public' , 0)->sum('buy_num');
+            $buy_num    = Coures::whereIn('id' , $lesson_ids)->sum('buy_num');
 
             //查询订单所属的学员购买记录数量
             $order_count= Order::whereIn('class_id' , $lesson_ids)->where('status' , 2)->count();
@@ -174,7 +174,7 @@ class Teacher extends Model {
             //判断如果是讲师则查询开课数量
             if($body['type'] == 2){
                 foreach($teacher_list as $k=>$v){
-                    $teacher_list[$k]['number'] = LessonTeacher::where('teacher_id' , $v['teacher_id'])->count();
+                    $teacher_list[$k]['number'] = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
                 }
             }
             return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => $teacher_list , 'total' => $teacher_count , 'pagesize' => $pagesize , 'page' => $page]];

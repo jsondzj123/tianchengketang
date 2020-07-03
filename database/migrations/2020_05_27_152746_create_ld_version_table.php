@@ -19,6 +19,7 @@ class CreateLdVersionTable extends Migration
             $table->increments('id')->comment('自增id');
             $table->string('version' , 255)->default('')->comment('版本号名称');
             $table->string('download_url' , 255)->default('')->comment('下载地址');
+            $table->string('type' , 30)->default('')->comment('手机类型(IOS,Android)');
             $table->text('content')->nullable()->comment('更新内容');
             $table->tinyInteger('is_online')->default(0)->comment('是否在审核阶段(1代表是,0代表否)');
             $table->tinyInteger('is_mustup')->default(0)->comment('是否强制更新(1代表是,0代表否)');

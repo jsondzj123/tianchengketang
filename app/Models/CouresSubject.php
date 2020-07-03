@@ -139,15 +139,33 @@ class CouresSubject extends Model {
         }
     }
     //课程模块 条件显示
-    public static function couresWhere($id = 0){
-        $one = self::where(['is_del'=>0,'parent_id'=>0])->orderByDesc('id')->get();
-        if($id == 0){
-            $two = self::where(['is_del'=>0,'parent_id'=>$one[0]['id']])->orderByDesc('id')->get();
-        }else{
-            $two = self::where(['is_del'=>0,'parent_id'=>$id])->orderByDesc('id')->get();
+    public static function couresWhere(){
+        //获取用户学校
+        $school_status = AdminLog::getAdminInfo()->admin_user->school_status;
+        $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
+        $where['is_del'] = 0;
+        $where['is_open'] = 0;
+        if($school_status != 1){
+            $where['school_id'] = $school_id;
         }
-        $list['bigsubject'] = $one;
-        $list['littlesubject'] = $two;
+        $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where($where)->get()->toArray();
+        $list = self::demo($one,0,0);
         return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
+    }
+
+    //递归
+    public static function demo($arr,$id,$level){
+        $list =array();
+        foreach ($arr as $k=>$v){
+            if ($v['parent_id'] == $id){
+                $aa = self::demo($arr,$v['id'],$level+1);
+                if(!empty($aa)){
+                    $v['level']=$level;
+                    $v['childs'] = $aa;
+                }
+                $list[] = $v;
+            }
+        }
+        return $list;
     }
 }

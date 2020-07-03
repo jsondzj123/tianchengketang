@@ -454,12 +454,22 @@ class Exam extends Model {
         }*/
         //试题id参数
         $exam_id = json_decode($body['exam_id'] , true);
-
-        //追加更新时间
-        $data = [
-            'is_publish' => 1 ,
-            'update_at'  => date('Y-m-d H:i:s')
-        ];
+        
+        //获取试题是否有审核通过了
+        $exam_count = self::whereIn('id',$exam_id)->where("is_publish",1)->count();
+        if($exam_count && $exam_count > 0){
+            //追加更新时间
+            $data = [
+                'is_publish' => 0 ,
+                'update_at'  => date('Y-m-d H:i:s')
+            ];
+        } else {
+            //追加更新时间
+            $data = [
+                'is_publish' => 1 ,
+                'update_at'  => date('Y-m-d H:i:s')
+            ];
+        }
         
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
