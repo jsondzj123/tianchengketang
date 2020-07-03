@@ -41,7 +41,18 @@ class Video extends Model {
                 $query->where('ld_course_video_resource.is_del' , '=' , 0);
                 //判断学科id是否为空
                 if(isset($data['parent_id']) && !empty(isset($data['parent_id']))){
+                    $s_id = json_decode($data['parent_id']);
+                    $data['parent_id'] = $s_id[0];
+                    if(!empty($s_id[1])){
+                        $data['child_id'] = $s_id[1];
+                    }else{
+                        $data['child_id'] = 0;
+                    }
                     $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
+                }
+                //判断学科小类
+                if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                    $query->where('ld_course_video_resource.child_id' , '=' , $data['child_id']);
                 }
                 //判断资源类型是否为空
                 if(isset($data['resource_type']) && !empty(isset($data['resource_type']))){
@@ -66,7 +77,7 @@ class Video extends Model {
             })->get()->count();
             //获取所有列表
             if($total > 0){
-                $list = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->select('*','ld_course_video_resource.parent_id')->where(function($query) use ($data){
+                $list = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->select('*','ld_course_video_resource.parent_id','ld_course_video_resource.id')->where(function($query) use ($data){
                     // //获取后端的操作员id
                     // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                     // //操作员id
@@ -75,7 +86,17 @@ class Video extends Model {
                     $query->where('ld_course_video_resource.is_del' , '=' , 0);
                     //判断学科id是否为空
                     if(isset($data['parent_id']) && !empty(isset($data['parent_id']))){
-                        $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
+                        $s_id = json_decode($data['parent_id']);
+                        $data['parent_id'] = $s_id[0];
+                        if(!empty($s_id[1])){
+                            $data['child_id'] = $s_id[1];
+                        }else{
+                            $data['child_id'] = 0;
+                        }
+                        $query->where('ld_course_video_resource.parent_id','=',$data['parent_id']);
+                    }
+                    if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                        $query->where('ld_course_video_resource.child_id','=' , $data['child_id']);
                     }
                     //判断资源类型是否为空
                     if(isset($data['resource_type']) && !empty(isset($data['resource_type']))){
@@ -98,7 +119,7 @@ class Video extends Model {
                         $query->where('resource_name','like','%'.$data['resource_name'].'%');
                     }
 
-                })->offset($offset)->limit($pagesize)->get();
+                })->offset($offset)->limit($pagesize)->orderBy('ld_course_video_resource.id','desc')->get();
                 return ['code' => 200 , 'msg' => '获取录播资源列表成功' , 'data' => ['video_list' => $list, 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
             }else{
                 return ['code' => 200 , 'msg' => '获取录播资源列表成功' , 'data' => ['video_list' => [], 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
@@ -116,6 +137,11 @@ class Video extends Model {
                 return ['code' => 201 , 'msg' => '录播资源id不合法' , 'data' => []];
             }
             $one = self::where("is_del",0)->where("id",$data['id'])->first();
+            if(!empty($one['child_id'])){
+                $one['parent_id'] = [$one['parent_id'],$one['child_id']];
+            }
+            $one['parent_id'] = [$one['parent_id']];
+            unset($one['child_id']);
             return ['code' => 200 , 'msg' => '获取录播资源列表成功' , 'data' => $one];
 
         }
