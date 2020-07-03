@@ -24,7 +24,12 @@ class LiveChildController extends Controller {
         if ($validator->fails()) {
             return $this->response($validator->errors()->first(), 202);
         }
-        $lives = Lesson::find($request->input('lesson_id'))->lives->toArray();
+        $lives = Lesson::join("ld_course_live_resource","ld_course.id","=","ld_course_live_resource.course_id")
+        ->join("ld_course_livecast_resource","ld_course_live_resource.resource_id","=","ld_course_livecast_resource.id")
+        ->select(['ld_course_livecast_resource.id as resource_id'])
+        ->where(["ld_course.status"=>1,"ld_course.is_del"=>0,'ld_course.id'=>$request->input('course_id')])->get();
+        //获取班号
+        //获取班号下所有课次
         $childs = [];
         if(!empty($lives)){
             foreach ($lives as $key => $value) {
