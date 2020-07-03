@@ -133,9 +133,9 @@ class Coureschapters extends Model {
         if(!isset($data['name']) || empty($data['name'])){
             return ['code' => 201 , 'msg' => '请填写节名称'];
         }
-        if(!isset($data['resource_id']) || empty($data['resource_id'])){
-            return ['code' => 201 , 'msg' => '请选择资源'];
-        }
+//        if(!isset($data['resource_id']) || empty($data['resource_id'])){
+//            return ['code' => 201 , 'msg' => '请选择资源'];
+//        }
         try{
             DB::beginTransaction();
             $insert = self::insertGetId([
@@ -143,7 +143,7 @@ class Coureschapters extends Model {
                 'school_id' => $course['school_id'],
                 'parent_id' => $data['chapter_id'],
                 'course_id' => $data['course_id'],
-                'resource_id' => $data['resource_id'],
+                'resource_id' => isset($data['resource_id'])?$data['resource_id']:0,
                 'name' => $data['name'],
                 'type' => $data['type'],
                 'is_free' => isset($data['is_free'])?$data['is_free']:0
