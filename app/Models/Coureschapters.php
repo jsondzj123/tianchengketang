@@ -199,6 +199,7 @@ class Coureschapters extends Model {
         unset($data['/admin/course/sectionUpdate']);
         $filearr = $data['filearr'];
         unset($data['filearr']);
+        unset($data['mt_video_name']);
         $data['update_at'] = date('Y-m-d H:i:s');
         $up = self::where(['id'=>$data['id']])->update($data);
         if($up){
