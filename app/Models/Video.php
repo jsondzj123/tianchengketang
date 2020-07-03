@@ -137,7 +137,10 @@ class Video extends Model {
                 return ['code' => 201 , 'msg' => '录播资源id不合法' , 'data' => []];
             }
             $one = self::where("is_del",0)->where("id",$data['id'])->first();
-            $one['parent_id'] = [$one['parent_id'],$one['child_id']];
+            if(!empty($one['child_id'])){
+                $one['parent_id'] = [$one['parent_id'],$one['child_id']];
+            }
+            $one['parent_id'] = [$one['parent_id']];
             unset($one['child_id']);
             return ['code' => 200 , 'msg' => '获取录播资源列表成功' , 'data' => $one];
 
