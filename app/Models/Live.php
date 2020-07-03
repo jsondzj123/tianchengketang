@@ -35,9 +35,9 @@ class Live extends Model {
                 // $query->where('ld_course_livecast_resource.admin_id' , '=' , $admin_id);
                 //删除状态
                 $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
-                //判断学科大类id是否为空
-                if(isset($data['parent_id']) && !empty(isset($data['parent_id']))){
-                    $s_id = json_decode($data['parent_id']);
+                //判断学科id是否为空
+                $s_id = json_decode($data['parent_id']);
+                if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
                     $data['parent_id'] = $s_id[0];
                     if(!empty($s_id[1])){
                         $data['child_id'] = $s_id[1];
@@ -55,9 +55,9 @@ class Live extends Model {
                     $query->where('ld_course_livecast_resource.nature' , '=' , $data['nature']);
                 }
                 //判断资源状态是否为空
-                if(isset($data['status']) && !empty(isset($data['status']))){
-                    $query->where('ld_course_livecast_resource.status' , '=' , $data['status']);
-                }
+                    if(isset($data['is_forbid']) && !empty(isset($data['is_forbid'])) && $data['is_forbid'] != 3){
+                        $query->where('ld_course_livecast_resource.is_forbid' , '=' , $data['is_forbid']);
+                    }
                 //判断课程单元名称是否为空
                 if(isset($data['name']) && !empty(isset($data['name']))){
                     $query->where('name','like',$data['name'].'%');
@@ -72,9 +72,9 @@ class Live extends Model {
                     // $query->where('ld_course_livecast_resource.admin_id' , '=' , $admin_id);
                     //删除状态
                     $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
-                    //判断学科大类id是否为空
-                    if(isset($data['parent_id']) && !empty(isset($data['parent_id']))){
-                        $s_id = json_decode($data['parent_id']);
+                    //判断学科id是否为空
+                    $s_id = json_decode($data['parent_id']);
+                    if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
                         $data['parent_id'] = $s_id[0];
                         if(!empty($s_id[1])){
                             $data['child_id'] = $s_id[1];
@@ -92,8 +92,8 @@ class Live extends Model {
                         $query->where('ld_course_livecast_resource.nature' , '=' , $data['nature']);
                     }
                     //判断资源状态是否为空
-                    if(isset($data['status']) && !empty(isset($data['status']))){
-                        $query->where('ld_course_livecast_resource.status' , '=' , $data['status']);
+                    if(isset($data['is_forbid']) && !empty(isset($data['is_forbid'])) && $data['is_forbid'] != 3){
+                        $query->where('ld_course_livecast_resource.is_forbid' , '=' , $data['is_forbid']);
                     }
                     //判断课程单元名称是否为空
                     if(isset($data['name']) && !empty(isset($data['name']))){
