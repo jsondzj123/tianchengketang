@@ -41,8 +41,6 @@ class Live extends Model {
                     $data['parent_id'] = $s_id[0];
                     if(!empty($s_id[1])){
                         $data['child_id'] = $s_id[1];
-                    }else{
-                        $data['child_id'] = 0;
                     }
                     $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
                 }
@@ -78,8 +76,6 @@ class Live extends Model {
                         $data['parent_id'] = $s_id[0];
                         if(!empty($s_id[1])){
                             $data['child_id'] = $s_id[1];
-                        }else{
-                            $data['child_id'] = 0;
                         }
                         $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
                     }
