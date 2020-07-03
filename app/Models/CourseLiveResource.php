@@ -25,7 +25,15 @@ class CourseLiveResource extends Model {
         //取直播资源列表
         $where['is_del'] = 0;
         $where['is_forbid'] = '< 2';
-        isset($data['child_id'])?$where['child_id'] = $data['child_id']:'';
+        if(isset($data['parent']) && !empty($data['parent'])){
+            $parent = json_decode($data['parent'],true);
+            if(isset($parent[0]) && !empty($parent[0])){
+                $where['parent_id'] = $parent[0];
+            }
+            if(isset($parent[1]) && !empty($parent[1])){
+                $where['child_id'] = $parent[1];
+            }
+        }
         $livecast = Coureslivecastresource::where($where)->orderByDesc('id')->get()->toArray();
         //已经加入的直播资源
         $existLive = self::select('ld_course_livecast_resource.*')

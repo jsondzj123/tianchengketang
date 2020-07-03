@@ -3,9 +3,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Tools\MTCloud;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Validator;
 
 class LessonController extends Controller {
@@ -13,69 +14,85 @@ class LessonController extends Controller {
     /**
      * @param  课程列表
      * @param  current_count   count
-     * @param  author  孙晓丽
-     * @param  ctime   2020/5/1
+     * @param  author  zzk
+     * @param  ctime   2020/7/3
      * return  array
      */
     public function index(Request $request){
         $pagesize = $request->input('pagesize') ?: 15;
         $page     = $request->input('page') ?: 1;
         $offset   = ($page - 1) * $pagesize;
-        $subject_id = $request->input('subject_id') ?: 0;
+        $parent_id = $request->input('parent_id') ?: 0;
         $child_id = $request->input('child_id') ?: 0;
-        if($subject_id == 0 && $child_id == 0){
+        if($parent_id == 0 && $child_id == 0){
             $subjectId = 0;
-        }elseif($subject_id != 0 && $child_id == 0){
-            $subjectId = $subject_id;
-        }elseif($subject_id != 0 && $child_id != 0){
+        }elseif($parent_id != 0 && $child_id == 0){
+            $subjectId = $parent_id;
+        }elseif($parent_id != 0 && $child_id != 0){
             $subjectId = $child_id;
-        }elseif($subject_id == 0 && $child_id != 0){
-            $subjectId = $subject_id;
+        }elseif($parent_id == 0 && $child_id != 0){
+            $subjectId = $parent_id;
         }
         $keyWord = $request->input('keyword') ?: 0;
         $method = $request->input('method_id') ?: 0;
         $sort = $request->input('sort_id') ?: 0;
         if($sort == 0){
-            $sort_name = 'created_at';
+            $sort_name = 'ld_course.create_at';
         }elseif($sort == 1){
-            $sort_name = 'watch_num';
+            $sort_name = 'ld_course.watch_num';
         }elseif($sort == 2){
-            $sort_name = 'price';
+            $sort_name = 'ld_course.pricing';
         }elseif($sort == 3){
-            $sort_name = 'price';
+            $sort_name = 'ld_course.pricing';
         }
-        $where = ['is_del'=> 0, 'is_forbid' => 0, 'status' => 2];
+        $where['ld_course.is_del'] = 0;
+        $where['ld_course.status'] = 1;
+        if($parent_id > 0){
+            $where['ld_course.parent_id'] = $parent_id;
+        }
+        if($child_id > 0){
+            $where['ld_course.child_id'] = $child_id;
+        }
+        if($method > 0){
+            $where['ld_course_method.method_id'] = $method;
+        }
         $sort_type = $request->input('sort_type') ?: 'asc';
-        $data =  Lesson::with('subjects', 'methods')
-                ->select('id', 'admin_id', 'title', 'cover', 'price', 'favorable_price', 'buy_num', 'status', 'is_del', 'is_forbid')
-                ->where(['is_del'=> 0, 'is_forbid' => 0, 'status' => 2])
+        $data =  Lesson::join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
+                ->join("ld_course_method","ld_course_method.course_id","=","ld_course.id")
+                ->select('ld_course.id', 'ld_course.admin_id','ld_course.child_id','ld_course.parent_id', 'ld_course.title', 'ld_course.cover', 'ld_course.pricing', 'ld_course.sale_price','ld_course.buy_num','ld_course.is_del','ld_course.status','ld_course.watch_num','ld_course.keywords','ld_course_subject.subject_name')
+                ->where($where)
+                ->orWhere(function ($query) use ($keyWord){
+                    $query->where('ld_course.title', 'like', '%'.$keyWord.'%')->orWhere('ld_course.keywords', 'like', '%'.$keyWord.'%');
+                })
                 ->orderBy($sort_name, $sort_type)
-                ->whereHas('subjects', function ($query) use ($subjectId)
-                {
-                    if($subjectId != 0){
-                        $query->where('id', $subjectId);
-                    }
-                })
-                ->whereHas('methods', function ($query) use ($method)
-                {
-                    if($method != 0){
-                        $query->where('id', $method);
-                    }
-                })
-                ->where(function($query) use ($keyWord){
-                    if(!empty($keyWord)){
-                        $query->where('title', 'like', '%'.$keyWord.'%');
-                    }
-                })
                 ->skip($offset)->take($pagesize)->get();
-        $lessons = [];
-        foreach ($data as $value) {
-            if($value['is_auth'] == 1 || $value['is_auth'] == 2){
-                $lessons[] = $value;
+        foreach($data as $k => $v){
+            //二级分类
+            $res = DB::table('ld_course_subject')->select('subject_name')->where(['id'=>$v['child_id']])->first();
+            if(!empty($res)){
+                $v['subject_child_name']   = $res->subject_name;
+            }else{
+                $v['subject_child_name']   = "无二级分类";
+            }
+            //购买数量
+            $v['sold_num'] =  Order::where(['oa_status'=>1,'class_id'=>$v['id']])->count() + $v['buy_num'];
+            //获取授课模式
+            $v['methods'] = DB::table('ld_course')->select('method_id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
+        }
+        foreach($data as $k => $v){
+            foreach($v['methods'] as $kk => $vv){
+                if($vv->method_id == 1){
+                    $vv->name = "直播";
+                }else if($vv->method_id == 2){
+                    $vv->name = "录播";
+                }else{
+                    $vv->name = "其他";
+                }
             }
         }
-        $total = count($lessons);
-        $lessons = $lessons;
+
+        $total = count($data);
+        $lessons = $data;
         $data = [
             'page_data' => $lessons,
             'total' => $total,
@@ -102,7 +119,7 @@ class LessonController extends Controller {
         if(empty($lesson)){
             return $this->response('课程不存在', 404);
         }
-        Lesson::where('id', $request->input('id'))->update(['watch_num' => DB::raw('watch_num + 1')]);
+        Lesson::where('id', $request->input('id'))->update(['watch_num' => DB::raw('watch_num + 1'),'update_at'=>date('Y-m-d H:i:s')]);
         return $this->response($lesson);
     }
 

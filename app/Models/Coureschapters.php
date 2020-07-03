@@ -35,7 +35,7 @@ class Coureschapters extends Model {
                 'admin_id'       =>   $user_id  ,
                 'module_name'    =>  'chapterAdd' ,
                 'route_url'      =>  'admin/Course/chapterAdd' ,
-                'operate_method' =>  'chapterAdd' ,
+                'operate_method' =>  'Add' ,
                 'content'        =>  '添加章或节操作'.json_encode($data) ,
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                 'create_at'      =>  date('Y-m-d H:i:s')
@@ -59,7 +59,7 @@ class Coureschapters extends Model {
                 'admin_id'       =>   $user_id  ,
                 'module_name'    =>  'chapterDel' ,
                 'route_url'      =>  'admin/Course/chapterDel' ,
-                'operate_method' =>  'chapterDel' ,
+                'operate_method' =>  'Del' ,
                 'content'        =>  '删除章或节操作'.json_encode($data) ,
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                 'create_at'      =>  date('Y-m-d H:i:s')
@@ -87,7 +87,7 @@ class Coureschapters extends Model {
                 'admin_id'       =>   $user_id  ,
                 'module_name'    =>  'chapterUpdate' ,
                 'route_url'      =>  'admin/Course/chapterUpdate' ,
-                'operate_method' =>  'chapterUpdate' ,
+                'operate_method' =>  'Update' ,
                 'content'        =>  '修改章信息操作'.json_encode($data) ,
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                 'create_at'      =>  date('Y-m-d H:i:s')
@@ -105,6 +105,13 @@ class Coureschapters extends Model {
             return ['code' => 201 , 'msg' => '请传参'];
         }
         $list = self::where(['id'=>$data['section_id'],'is_del'=>0])->first();
+        //资源名称resource_id
+        $resource='';
+        if($list['resource_id'] != ''){
+            $r= Video::select('mt_video_name')->where(['id'=>$list['resource_id'],'is_del'=>0])->first();
+            $resource = $r['mt_video_name'];
+        }
+        $list['mt_video_name'] = $resource;
         //查询录播课程名称
         $section = Couresmaterial::where(['parent_id'=>$data['section_id'],'mold'=>1,'is_del'=>0])->get();
         $list['filearr'] = $section;
@@ -133,9 +140,10 @@ class Coureschapters extends Model {
         if(!isset($data['name']) || empty($data['name'])){
             return ['code' => 201 , 'msg' => '请填写节名称'];
         }
-        if(!isset($data['resource_id']) || empty($data['resource_id'])){
-            return ['code' => 201 , 'msg' => '请选择资源'];
-        }
+//        if(!isset($data['resource_id']) || empty($data['resource_id'])){
+//            return ['code' => 201 , 'msg' => '请选择资源'];
+//        }
+
         try{
             DB::beginTransaction();
             $insert = self::insertGetId([
@@ -143,14 +151,15 @@ class Coureschapters extends Model {
                 'school_id' => $course['school_id'],
                 'parent_id' => $data['chapter_id'],
                 'course_id' => $data['course_id'],
-                'resource_id' => $data['resource_id'],
+                'resource_id' => isset($data['resource_id'])?$data['resource_id']:0,
                 'name' => $data['name'],
                 'type' => $data['type'],
                 'is_free' => isset($data['is_free'])?$data['is_free']:0
             ]);
             //判断小节资料
             if(!empty($data['filearr'])){
-                foreach ($data['filearr'] as $k=>$v){
+                $filearr = json_decode($data['filearr'],true);
+                foreach ($filearr as $k=>$v){
                     Couresmaterial::insert([
                         'admin_id' => isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0,
                         'school_id' => $course['school_id'],
@@ -188,8 +197,9 @@ class Coureschapters extends Model {
             return ['code' => 201 , 'msg' => '参数为空'];
         }
         unset($data['/admin/course/sectionUpdate']);
-        $filearr = $data['filearr'];
+        $filearr = json_decode($data['filearr'],true);
         unset($data['filearr']);
+        unset($data['mt_video_name']);
         $data['update_at'] = date('Y-m-d H:i:s');
         $up = self::where(['id'=>$data['id']])->update($data);
         if($up){
@@ -271,8 +281,11 @@ class Coureschapters extends Model {
         $list =array();
         foreach ($arr as $k=>$v){
             if ($v['parent_id'] == $id){
-                $v['level']=$level;
-                $v['son'] = self::demo($arr,$v['id'],$level+1);
+                $aa = self::demo($arr,$v['id'],$level+1);
+                if(!empty($aa)){
+                    $v['level']=$level;
+                    $v['childs'] = $aa;
+                }
                 $list[] = $v;
             }
         }

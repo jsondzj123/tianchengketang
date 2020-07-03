@@ -97,13 +97,18 @@ class PapersExam extends Model {
                 Papers::where("id" , $body['papers_id'])->update($where);
             }
             
-            //判断试卷中试题是否存在
-            if($exam_count <= 0){
-                //将数据插入到表中
-                $papersexam_id = self::insertGetId($data);
+            //判断试题的id是否大于0
+            if($v['exam_id'] && $v['exam_id'] > 0){
+                //判断试卷中试题是否存在
+                if($exam_count <= 0){
+                    //将数据插入到表中
+                    $papersexam_id = self::insertGetId($data);
+                } else {
+                    //将数据更新到表中
+                    $papersexam_id = self::where("exam_id",$v['exam_id'])->update(['is_del'=>$v['is_del'] , 'update_at' => date('Y-m-d H:i:s')]);
+                }
             } else {
-                //将数据更新到表中
-                $papersexam_id = self::where("exam_id",$v['exam_id'])->update(['is_del'=>$v['is_del'] , 'update_at' => date('Y-m-d H:i:s')]);
+                $papersexam_id = 1;
             }
         }
 
@@ -256,6 +261,39 @@ class PapersExam extends Model {
         }
         return ['code' => 200 , 'msg' => '获取成功','data'=>$exam];
     }
+    
+    /*
+     * @param  description   根据试卷的id获取每种题型的分数
+     * @param  参数说明       body包含以下参数[
+     *     papers_id       试卷id
+     * ]
+     * @param author    duzhijian
+     * @param ctime     2020-07-03
+     * return string
+     */
+    public static function getExamSignleScore($body=[]){
+        //判断试卷的id是否为空
+        if(!isset($body['papers_id']) || $body['papers_id'] <= 0){
+            return ['code' => 202 , 'msg' => '试卷的id不合法'];
+        }
+        
+        //根据试卷的id获取试卷详情
+        $parpers_info =  Papers::where("id" , $body['papers_id'])->first();
+        
+        //分数数组组装
+        $score_array = [
+            1 => $parpers_info['signle_score'] ,
+            2 => $parpers_info['more_score'] ,
+            3 => $parpers_info['judge_score'] ,
+            4 => $parpers_info['options_score'] ,
+            5 => $parpers_info['pack_score'] ,
+            6 => $parpers_info['short_score'] ,
+            7 => $parpers_info['material_score']
+        ];
+        
+        return ['code' => 200 , 'msg' => '返回数据信息成功','data' => $score_array];
+    }
+    
     /*
      * @param  description   软删试卷试题
      * @param  参数说明       body包含以下参数

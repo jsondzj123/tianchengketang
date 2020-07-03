@@ -693,7 +693,7 @@ class Exam extends Model {
         $exam_info['option_list'] = [];
         
         //根据试题的id获取选项的列表(只有单选题,多选题,不定项有选项,其他没有)
-        if(in_array($exam_info['type'] , [1,2,4])){
+        if(in_array($exam_info['type'] , [1,2,4,5])){
             //根据试题的id获取选项列表
             $option_list = ExamOption::select("option_content")->where("exam_id",$body['exam_id'])->first()->toArray();
             $exam_info['option_list']   =   json_decode($option_list['option_content'] , true);
