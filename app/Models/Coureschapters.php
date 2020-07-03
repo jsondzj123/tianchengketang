@@ -105,6 +105,13 @@ class Coureschapters extends Model {
             return ['code' => 201 , 'msg' => '请传参'];
         }
         $list = self::where(['id'=>$data['section_id'],'is_del'=>0])->first();
+        //资源名称resource_id
+        $resource='';
+        if($list['resource_id'] != ''){
+            $r= Video::select('mt_video_name')->where(['id'=>$list['resource_id'],'is_del'=>0])->first();
+            $resource = $r['mt_video_name'];
+        }
+        $list['mt_video_name'] = $resource;
         //查询录播课程名称
         $section = Couresmaterial::where(['parent_id'=>$data['section_id'],'mold'=>1,'is_del'=>0])->get();
         $list['filearr'] = $section;
