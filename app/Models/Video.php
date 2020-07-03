@@ -66,7 +66,7 @@ class Video extends Model {
             })->get()->count();
             //获取所有列表
             if($total > 0){
-                $list = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->select('*','ld_course_video_resource.parent_id')->where(function($query) use ($data){
+                $list = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->select('*','ld_course_video_resource.parent_id','ld_course_video_resource.id')->where(function($query) use ($data){
                     // //获取后端的操作员id
                     // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                     // //操作员id
