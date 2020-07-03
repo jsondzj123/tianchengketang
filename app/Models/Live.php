@@ -37,7 +37,18 @@ class Live extends Model {
                 $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
                 //判断学科大类id是否为空
                 if(isset($data['parent_id']) && !empty(isset($data['parent_id']))){
+                    $s_id = json_decode($data['parent_id']);
+                    $data['parent_id'] = $s_id[0];
+                    if(!empty($s_id[1])){
+                        $data['child_id'] = $s_id[1];
+                    }else{
+                        $data['child_id'] = 0;
+                    }
                     $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
+                }
+                //判断学科小类
+                if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                    $query->where('ld_course_livecast_resource.child_id' , '=' , $data['child_id']);
                 }
                 //判断资源属性是否为空
                 if(isset($data['nature']) && !empty(isset($data['nature']))){
@@ -63,7 +74,18 @@ class Live extends Model {
                     $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
                     //判断学科大类id是否为空
                     if(isset($data['parent_id']) && !empty(isset($data['parent_id']))){
+                        $s_id = json_decode($data['parent_id']);
+                        $data['parent_id'] = $s_id[0];
+                        if(!empty($s_id[1])){
+                            $data['child_id'] = $s_id[1];
+                        }else{
+                            $data['child_id'] = 0;
+                        }
                         $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
+                    }
+                    //判断学科小类
+                    if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                        $query->where('ld_course_livecast_resource.child_id' , '=' , $data['child_id']);
                     }
                     //判断资源属性是否为空
                     if(isset($data['nature']) && !empty(isset($data['nature']))){
@@ -112,6 +134,8 @@ class Live extends Model {
             //添加总课时  该资源下所有班号下课次的所有课时
             $one['sum_class_hour'] = LiveClass::join('ld_course_class_number','ld_course_shift_no.id','=','ld_course_class_number.shift_no_id')
             ->where("resource_id",$one['id'])->sum("class_hour");
+            $one['parent_id'] = [$one['parent_id'],$one['child_id']];
+            unset($one['child_id']);
             return ['code' => 200 , 'msg' => '获取直播资源列表成功' , 'data' => $one];
 
         }
