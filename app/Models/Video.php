@@ -46,8 +46,6 @@ class Video extends Model {
                         $data['parent_id'] = $s_id[0];
                         if(!empty($s_id[1])){
                             $data['child_id'] = $s_id[1];
-                        }else{
-                            $data['child_id'] = 0;
                         }
                         $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
                     }
@@ -57,7 +55,7 @@ class Video extends Model {
                     $query->where('ld_course_video_resource.child_id' , '=' , $data['child_id']);
                 }
                 //判断资源类型是否为空
-                if(isset($data['resource_type']) && !empty(isset($data['resource_type']))){
+                if(isset($data['resource_type']) && !empty(isset($data['resource_type'])) && $data['resource_type'] != 0){
                     $query->where('ld_course_video_resource.resource_type' , '=' , $data['resource_type']);
                 }
                 //判断资源属性是否为空
@@ -93,8 +91,6 @@ class Video extends Model {
                             $data['parent_id'] = $s_id[0];
                             if(!empty($s_id[1])){
                                 $data['child_id'] = $s_id[1];
-                            }else{
-                                $data['child_id'] = 0;
                             }
                             $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
                         }
@@ -103,7 +99,7 @@ class Video extends Model {
                         $query->where('ld_course_video_resource.child_id','=' , $data['child_id']);
                     }
                     //判断资源类型是否为空
-                    if(isset($data['resource_type']) && !empty(isset($data['resource_type']))){
+                    if(isset($data['resource_type']) && !empty(isset($data['resource_type'])) && $data['resource_type'] != 0){
                         $query->where('ld_course_video_resource.resource_type' , '=' , $data['resource_type']);
                     }
                     //判断资源属性是否为空
