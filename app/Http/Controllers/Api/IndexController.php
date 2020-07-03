@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
+use App\Models\OpenCourse;
 use App\Models\Teacher;
+use App\Models\Student;
 use App\Models\Order;
 use App\Models\Subject;
 use App\Models\LessonTeacher;
@@ -73,23 +75,22 @@ class IndexController extends Controller {
         //获取提交的参数
         try{
             //判断公开课列表是否为空
-            $open_class_count = Lesson::where('is_public' , 1)->where('status' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->where('is_recommend', 1)->count();
+            $open_class_count = OpenCourse::where('status' , 1)->where('is_del' , 0)->where('is_recommend', 1)->count();
             if($open_class_count && $open_class_count > 0){
                 //获取公开课列表
-                $open_class_list = Lesson::select('id' , 'cover' , 'start_at' , 'end_at')->where('is_public' , 1)
-                        ->where('status' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->where('is_recommend', 1)
+                $open_class_list = OpenCourse::select('id' , 'cover' , 'start_at' , 'end_at')
+                        ->where('status' , 1)->where('is_del' , 0)->where('is_recommend', 1)
                         ->orderBy('start_at' , 'ASC')->offset(0)->limit(3)->get()->toArray();
 
                 //新数组赋值
                 $lession_array = [];
-
                 //循环公开课列表
                 foreach($open_class_list as $k=>$v){
                     //根据课程id获取讲师姓名
-                    $info = DB::table('ld_lesson_lives')->select("ld_lecturer_educationa.real_name")->where("ld_lesson_lives.lesson_id" , $v['id'])->leftJoin('ld_live_teachers' , function($join){
-                        $join->on('ld_lesson_lives.live_id', '=', 'ld_live_teachers.live_id');
+                    $info = DB::table('ld_course_open')->select("ld_lecturer_educationa.real_name")->where("ld_course_open.id" , $v['id'])->leftJoin('ld_course_open_teacher' , function($join){
+                        $join->on('ld_course_open.id', '=', 'ld_course_open_teacher.course_id');
                     })->leftJoin("ld_lecturer_educationa" , function($join){
-                        $join->on('ld_live_teachers.teacher_id', '=', 'ld_lecturer_educationa.id')->where("ld_lecturer_educationa.type" , 2);
+                        $join->on('ld_course_open_teacher.teacher_id', '=', 'ld_lecturer_educationa.id')->where("ld_lecturer_educationa.type" , 2);
                     })->first();
 
                     //判断课程状态
@@ -204,14 +205,14 @@ class IndexController extends Controller {
             $tomorrow_class  = [];
             $over_class      = [];
             $arr             = [];
-            $lession_list= DB::table('ld_lessons')->select(DB::raw("any_value(id) as id") , DB::raw("any_value(cover) as cover") , DB::raw("any_value(start_at) as start_at") , DB::raw("any_value(end_at) as end_at") , DB::raw("from_unixtime(start_at , '%Y-%m-%d') as start_time"))->where('is_public',1)->where('is_del',0)->where('is_forbid',0)->where('status',2)->orderBy('start_at' , 'DESC')->groupBy('start_time')->offset($offset)->limit($pagesize)->get()->toArray();
+            $lession_list= DB::table('ld_course_open')->select(DB::raw("any_value(id) as id") , DB::raw("any_value(cover) as cover") , DB::raw("any_value(start_at) as start_at") , DB::raw("any_value(end_at) as end_at") , DB::raw("from_unixtime(start_at , '%Y-%m-%d') as start_time"))->where('is_del',0)->where('status',1)->orderBy('start_at' , 'DESC')->groupBy('start_time')->offset($offset)->limit($pagesize)->get()->toArray();
             //判读公开课列表是否为空
             if($lession_list && !empty($lession_list)){
                 foreach($lession_list as $k=>$v){
                     //获取当天公开课列表的数据
                     if($v->start_time == date('Y-m-d')){
                         //根据开始日期和结束日期进行查询
-                        $class_list = DB::table('ld_lessons')->select('id as open_class_id' , 'title' , 'cover' , DB::raw("from_unixtime(start_at , '%H:%i') as start_time") , DB::raw("from_unixtime(end_at , '%H:%i') as end_time") , 'start_at' , 'end_at')->where('start_at' , '>=' , strtotime($v->start_time.' 00:00:00'))->where('end_at' , '<=' , strtotime($v->start_time.' 23:59:59'))->where('is_public',1)->where('is_del',0)->where('is_forbid',0)->where('status',2)->orderBy('start_at' , 'ASC')->get()->toArray();
+                        $class_list = DB::table('ld_course_open')->select('id as open_class_id' , 'title' , 'cover' , DB::raw("from_unixtime(start_at , '%H:%i') as start_time") , DB::raw("from_unixtime(end_at , '%H:%i') as end_time") , 'start_at' , 'end_at')->where('start_at' , '>=' , strtotime($v->start_time.' 00:00:00'))->where('end_at' , '<=' , strtotime($v->start_time.' 23:59:59'))->where('is_del',0)->where('status',1)->orderBy('start_at' , 'ASC')->get()->toArray();
                         $today_arr = [];
                         foreach($class_list as $k1=>$v1){
                             //判断课程状态
@@ -240,7 +241,7 @@ class IndexController extends Controller {
                         $today_class[$v->start_time]['open_class_list']   = $today_arr;
                     } else if($v->start_time > date('Y-m-d')) {
                         //公开课日期赋值
-                        $class_list = DB::table('ld_lessons')->select('id as open_class_id' , 'title' , 'cover' , DB::raw("from_unixtime(start_at , '%H:%i') as start_time") , DB::raw("from_unixtime(end_at , '%H:%i') as end_time") , 'start_at' , 'end_at')->where("start_at" , ">" , strtotime($v->start_time.' 00:00:00'))->where("end_at" , "<" , strtotime($v->start_time.' 23:59:59'))->where('is_public',1)->where('is_del',0)->where('is_forbid',0)->where('status',2)->orderBy('start_at' , 'ASC')->get()->toArray();
+                        $class_list = DB::table('ld_course_open')->select('id as open_class_id' , 'title' , 'cover' , DB::raw("from_unixtime(start_at , '%H:%i') as start_time") , DB::raw("from_unixtime(end_at , '%H:%i') as end_time") , 'start_at' , 'end_at')->where("start_at" , ">" , strtotime($v->start_time.' 00:00:00'))->where("end_at" , "<" , strtotime($v->start_time.' 23:59:59'))->where('is_del',0)->where('status',1)->orderBy('start_at' , 'ASC')->get()->toArray();
                         $date2_arr = [];
                         foreach($class_list as $k2=>$v2){
                             $date2_arr[] = [
@@ -260,7 +261,7 @@ class IndexController extends Controller {
                         $tomorrow_class[$v->start_time]['open_class_list']   = $date2_arr;
                     } else {
                         //公开课日期赋值
-                        $class_list = DB::table('ld_lessons')->select('id as open_class_id' , 'title' , 'cover' , DB::raw("from_unixtime(start_at , '%H:%i') as start_time") , DB::raw("from_unixtime(end_at , '%H:%i') as end_time") , 'start_at' , 'end_at')->where("start_at" , ">" , strtotime($v->start_time.' 00:00:00'))->where("end_at" , "<" , strtotime($v->start_time.' 23:59:59'))->where('is_public',1)->where('is_del',0)->where('is_forbid',0)->where('status',2)->orderBy('start_at' , 'ASC')->get()->toArray();
+                        $class_list = DB::table('ld_course_open')->select('id as open_class_id' , 'title' , 'cover' , DB::raw("from_unixtime(start_at , '%H:%i') as start_time") , DB::raw("from_unixtime(end_at , '%H:%i') as end_time") , 'start_at' , 'end_at')->where("start_at" , ">" , strtotime($v->start_time.' 00:00:00'))->where("end_at" , "<" , strtotime($v->start_time.' 23:59:59'))->where('is_del',0)->where('status',1)->orderBy('start_at' , 'ASC')->get()->toArray();
                         $date_arr = [];
                         foreach($class_list as $k2=>$v2){
                             $date_arr[] = [
@@ -419,12 +420,9 @@ class IndexController extends Controller {
             $offset   = ($page - 1) * $pagesize;
 
             //获取名师课程列表
-            $teacher_lesson_list = Lesson::with('methods')->select('id', 'admin_id', 'title', 'cover', 'price', 'favorable_price', 'buy_num', 'status', 'is_del', 'is_forbid')
-                    ->where(['is_del'=> 0, 'is_forbid' => 0, 'status' => 2])
-                    ->whereHas('teachers', function ($query) use ($teacher_id)
-                    {
-                        $query->where('id', $teacher_id);
-                    })
+            $teacher_lesson_list = Lesson::join('ld_course_teacher','ld_course_teacher.course_id','=','ld_course.id')
+                    ->select('ld_course.id', 'admin_id', 'title', 'cover', 'pricing', 'sale_price', 'buy_num', 'status', 'ld_course.is_del')
+                    ->where(['ld_course.is_del'=> 0, 'ld_course.status' => 1])
                     ->offset($offset)->limit($pagesize)->get()->toArray();
             if($teacher_lesson_list && !empty($teacher_lesson_list)){
                 return response()->json(['code' => 200 , 'msg' => '获取名师课程列表成功' , 'data' => $teacher_lesson_list]);
@@ -446,7 +444,7 @@ class IndexController extends Controller {
     public function getSubjectList() {
         //获取提交的参数
         try{
-            $subject = Subject::select('id', 'name')->where(['is_del' => 0, 'is_forbid' => 0, 'pid' => 0])->limit(6)->get();
+            $subject = Subject::select('id', 'subject_name')->where(['is_del' => 0,'parent_id' => 0])->limit(6)->get();
             return $this->response($subject);
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
@@ -462,32 +460,40 @@ class IndexController extends Controller {
     public function getLessonList() {
         //获取提交的参数
         try{
-            $subject = Subject::select('id', 'name')
-                        ->where(['is_del' => 0, 'is_forbid' => 0, 'pid' => 0])
+                $subject = Subject::select('id', 'subject_name')
+                        ->where(['is_del' => 0,'parent_id' => 0])
                         ->limit(4)
                         ->get();
-            $lessons = [];
-            foreach ($subject as $key => $value) {
-                $lesson = Lesson::select('id', 'title', 'cover', 'buy_num', 'price as old_price', 'favorable_price')
-                                            ->where(['is_del' => 0, 'is_recommend' => 1, 'is_forbid' => 0, 'is_public' => 0, 'status' => 2])
-                                            ->with(['subjects' => function ($query) {
-                                                $query->select('id', 'name');
-                                            }])
-                                            ->whereHas('subjects', function ($query) use ($value)
-                                                {
-                                                    $query->where('id', $value->id);
-                                                })
-                                            ->get();
-                if(!empty($lesson->toArray())){
-                    $arr = [
-                        'subject' => $value,
-                        'lesson' => $lesson,
-                    ];
-                    $lessons[] = $arr;
+                foreach($subject as $k =>$v){
+                    $subject[$k]['lesson'] = Lesson::join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
+                    ->select('ld_course.id', 'ld_course.title', 'ld_course.cover', 'ld_course.buy_num', 'ld_course.pricing as old_price', 'ld_course.sale_price')
+                    ->where(['ld_course.is_del' => 0, 'ld_course.is_recommend' => 1, 'ld_course.status' => 1,'ld_course.parent_id' => $v['id']])
+                    ->get();
+                }
+                foreach($subject as $k => $v){
+
+                    foreach($v['lesson'] as $kk => $vv){
+
+                        $token = isset($_REQUEST['user_token']) ? $_REQUEST['user_token'] : 0;
+                        $student = Student::where('token', $token)->first();
+                        //是否收藏
+                        //购买人数  基数加真是购买人数
+                        $vv['sold_num'] =  Order::where(['oa_status'=>1,'class_id'=>$vv['id']])->count() + $vv['buy_num'];
+                        if(!empty($student)){
+                            $num = Order::where(['student_id'=>$student['id'],'status'=>2,'class_id'=>$vv['id']])->count();
+                            if($num > 0){
+                                $vv['is_buy'] = 1;
+                            }else{
+                                $vv['is_buy'] = 0;
+                            }
+                        }else{
+                            $vv['is_buy'] = 0;
+                        }
+                    }
                 }
 
-            }
-            return $this->response($lessons);
+
+            return $this->response($subject);
         } catch (Exception $ex) {
             return $this->response($ex->getMessage());
         }
