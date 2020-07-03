@@ -151,7 +151,8 @@ class Coureschapters extends Model {
             ]);
             //判断小节资料
             if(!empty($data['filearr'])){
-                foreach ($data['filearr'] as $k=>$v){
+                $filearr = json_decode($data['filearr'],true);
+                foreach ($filearr as $k=>$v){
                     Couresmaterial::insert([
                         'admin_id' => isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0,
                         'school_id' => $course['school_id'],
