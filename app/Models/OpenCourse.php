@@ -65,10 +65,8 @@ class OpenCourse extends Model {
          */
     public static function getList($body){
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
-
         $pagesize = !isset($body['pagesize']) && $body['pagesize'] > 0 ? $body['pagesize'] : 15;
         $page     = !isset($body['page']) && $body['page'] > 0 ? $body['page'] : 1;
-
         $where['parent_id'] = !isset($body['parent_id'])|| empty($body['parent_id'])  ?'':$body['parent_id'];
         $where['child_id'] =  !isset($body['child_id']) || empty($body['child_id']) ?'':$body['child_id'];
         $where['status'] =  !isset($body['status']) || empty($body['status']) ?'':$body['status'];
@@ -119,6 +117,7 @@ class OpenCourse extends Model {
                         case '1': $query->where('status',0);      break;
                         case '2': $query->where('status',1);      break;
                         case '3': $query->where('status',2);      break;
+                    }
                 }
                 if(!empty($where['time']) && $where['time'] != ''){
                     $query->where('start_at','<',$where['start_at']);

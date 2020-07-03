@@ -51,6 +51,9 @@ class CreateLdCourseOpenLiveChildsTable extends Migration
             $table->tinyInteger('is_forbid')->default(0)->comment('是否禁用(1代表是,0代表否)');
             $table->dateTime('create_at')->comment('创建时间');
             $table->dateTime('update_at')->nullable()->comment('更新时间');
+            $table->tinyInteger('playback')->default(0)->comment('是否生成回放0未生成1已生成');
+            $table->string('playbackUrl' , 255)->default('')->comment('回放地址');
+            $table->integer('duration')->default(0)->comment('时长(秒)');
 
             //索引设置部分
             $table->index('live_id' , 'index_live_id');
