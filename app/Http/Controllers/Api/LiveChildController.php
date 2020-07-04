@@ -19,14 +19,15 @@ class LiveChildController extends Controller {
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
-           'lesson_id' => 'required',
+           'course_id' => 'required',
         ]);
         if ($validator->fails()) {
             return $this->response($validator->errors()->first(), 202);
         }
         $lives = Lesson::join("ld_course_live_resource","ld_course.id","=","ld_course_live_resource.course_id")
         ->join("ld_course_livecast_resource","ld_course_live_resource.resource_id","=","ld_course_livecast_resource.id")
-        ->select(['ld_course_livecast_resource.id as resource_id'])
+        ->join("ld_course_shift_no","ld_course_livecast_resource.id","=","ld_course_shift_no.resource_id")
+        ->select(['ld_course_livecast_resource.id as resource_id','ld_course_shift_no.id as shift_no_id'])
         ->where(["ld_course.status"=>1,"ld_course.is_del"=>0,'ld_course.id'=>$request->input('course_id')])->get();
         //获取班号
         //获取班号下所有课次
@@ -34,16 +35,22 @@ class LiveChildController extends Controller {
         if(!empty($lives)){
             foreach ($lives as $key => $value) {
                 //直播中
-                $live = LiveChild::select('id', 'course_name', 'start_time', 'end_time', 'course_id', 'status')->where([
-                    'is_del' => 0, 'is_forbid' => 0, 'status' => 2, 'live_id' => $value['id']
+                $live = LiveChild::join("ld_course_live_childs","ld_course_class_number.id","=","ld_course_live_childs.class_id")
+                ->join("ld_course_shift_no","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
+                ->select('ld_course_class_number.id', 'ld_course_class_number.name', 'ld_course_class_number.start_at', 'ld_course_class_number.end_at', 'ld_course_live_childs.course_id', 'ld_course_live_childs.status','ld_course_shift_no.name as class_name')->where([
+                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 2
                 ])->get();
                 //预告
-                $advance = LiveChild::select('id', 'course_name', 'start_time', 'end_time', 'course_id', 'status')->where([
-                    'is_del' => 0, 'is_forbid' => 0, 'status' => 1, 'live_id' => $value['id']
+                $advance = LiveChild::join("ld_course_live_childs","ld_course_class_number.id","=","ld_course_live_childs.class_id")
+                ->join("ld_course_shift_no","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
+                ->select('ld_course_class_number.id', 'ld_course_class_number.name', 'ld_course_class_number.start_at', 'ld_course_class_number.end_at', 'ld_course_live_childs.course_id', 'ld_course_live_childs.status','ld_course_shift_no.name as class_name')->where([
+                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 1
                 ])->get();
                 //回放
-                $playback = LiveChild::select('id', 'course_name', 'start_time', 'end_time', 'course_id', 'status')->where([
-                    'is_del' => 0, 'is_forbid' => 0, 'status' => 3, 'live_id' => $value['id']
+                $playback = LiveChild::join("ld_course_live_childs","ld_course_class_number.id","=","ld_course_live_childs.class_id")
+                ->join("ld_course_shift_no","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
+                ->select('ld_course_class_number.id', 'ld_course_class_number.name', 'ld_course_class_number.start_at', 'ld_course_class_number.end_at', 'ld_course_live_childs.course_id', 'ld_course_live_childs.status','ld_course_shift_no.name as class_name')->where([
+                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 3
                 ])->get();
             }
             if(!empty($live->toArray())){
@@ -65,6 +72,12 @@ class LiveChildController extends Controller {
                     ]);
             }
 
+        }
+        foreach($childs as $k => $v){
+            foreach($v['data'] as $kk =>$vv){
+                $vv['start_at']  = date("Y:m:d H:i:s",$vv['start_at']);
+                $vv['end_at']  = date("Y:m:d H:i:s",$vv['end_at']);
+            }
         }
         return $this->response($childs);
     }

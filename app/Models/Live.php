@@ -36,13 +36,15 @@ class Live extends Model {
                 //删除状态
                 $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
                 //判断学科id是否为空
-                $s_id = json_decode($data['parent_id']);
-                if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
-                    $data['parent_id'] = $s_id[0];
-                    if(!empty($s_id[1])){
-                        $data['child_id'] = $s_id[1];
+                if(isset($data['parent_id'])){
+                    $s_id = json_decode($data['parent_id']);
+                    if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                        $data['parent_id'] = $s_id[0];
+                        if(!empty($s_id[1])){
+                            $data['child_id'] = $s_id[1];
+                        }
+                        $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
                     }
-                    $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
                 }
                 //判断学科小类
                 if(isset($data['child_id']) && !empty(isset($data['child_id']))){
@@ -71,13 +73,15 @@ class Live extends Model {
                     //删除状态
                     $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
                     //判断学科id是否为空
-                    $s_id = json_decode($data['parent_id']);
-                    if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
-                        $data['parent_id'] = $s_id[0];
-                        if(!empty($s_id[1])){
-                            $data['child_id'] = $s_id[1];
+                    if(isset($data['parent_id'])){
+                        $s_id = json_decode($data['parent_id']);
+                        if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                            $data['parent_id'] = $s_id[0];
+                            if(!empty($s_id[1])){
+                                $data['child_id'] = $s_id[1];
+                            }
+                            $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
                         }
-                        $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
                     }
                     //判断学科小类
                     if(isset($data['child_id']) && !empty(isset($data['child_id']))){
