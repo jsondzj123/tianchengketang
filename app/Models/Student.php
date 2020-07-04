@@ -126,7 +126,7 @@ class Student extends Model {
             }
 
             //判断开课状态是否选择
-            if(isset($body['state_status']) && strlen($body['state_status']) > 0){
+            if(isset($body['state_status']) && strlen($body['state_status']) > 0 && in_array($body['state_status'] , [0,1,2])){
                 $state_status = $body['state_status'] > 0 ? $body['state_status'] : 0;
                 $query->where('state_status' , '=' , $state_status);
             }
@@ -161,7 +161,7 @@ class Student extends Model {
                 }
                 
                 //判断开课状态是否选择
-                if(isset($body['state_status']) && strlen($body['state_status']) > 0){
+                if(isset($body['state_status']) && strlen($body['state_status']) > 0 && in_array($body['state_status'] , [0,1,2])){
                     $state_status = $body['state_status'] > 0 ? $body['state_status'] : 0;
                     $query->where('state_status' , '=' , $state_status);
                 }
