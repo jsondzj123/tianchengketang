@@ -34,7 +34,7 @@ class Teacher extends Model {
     }
 
     public function lessons() {
-        return $this->belongsToMany('App\Models\Teacher', 'ld_lesson_teachers');
+        return $this->belongsToMany('App\Models\Teacher', 'ld_course_teacher');
     }
 
     //获取学员数量
