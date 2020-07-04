@@ -36,6 +36,12 @@ class CourseLiveResource extends Model {
             }
         }
         $livecast = Coureslivecastresource::where($where)->orderByDesc('id')->get()->toArray();
+        foreach ($livecast as $k=>&$v){
+            $ones = CouresSubject::where('id',$v['parent_id'])->first();
+            $v['parent_name'] = $ones['subject_name'];
+            $twos = CouresSubject::where('id',$v['child_id'])->first();
+            $v['chind_name'] = $twos['subject_name'];
+        }
         //已经加入的直播资源
         $existLive = self::select('ld_course_livecast_resource.*')
             ->leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
