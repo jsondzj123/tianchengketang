@@ -201,7 +201,10 @@ class Teacher extends Model {
                 $parent_id = json_decode($body['parent_id'] , true);
                 if($parent_id && !empty($parent_id)){
                     $query->where('parent_id','=',$parent_id[0]);
-                    $query->where('child_id','=',$parent_id[1]);
+                    //判断二级分类的id是否为空
+                    if(isset($parent_id[1]) && $parent_id[1] > 0){
+                        $query->where('child_id','=',$parent_id[1]);
+                    }
                 }
             }
 
