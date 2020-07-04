@@ -140,7 +140,9 @@ class Video extends Model {
             if(!empty($one['child_id'])){
                 $one['parent_id'] = [$one['parent_id'],$one['child_id']];
             }
-            $one['parent_id'] = [$one['parent_id']];
+            if($one['child_id'] == 0){
+                $one['parent_id'] = [$one['parent_id']];
+            }
             unset($one['child_id']);
             return ['code' => 200 , 'msg' => '获取录播资源列表成功' , 'data' => $one];
 

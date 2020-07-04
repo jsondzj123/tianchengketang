@@ -106,21 +106,23 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
 
 //PC端路由接口
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
-    //pc支付
     $router->group(['prefix' => 'order'], function () use ($router) {
         $router->post('aliPcpay','OrderController@aliPcpay');          //支付宝pc
         $router->post('wxPcpay','OrderController@wxPcpay');          //微信pc
         $router->post('hjaliPcpay','OrderController@hjaliPcpay');          //汇聚支付宝pc
         $router->post('hjwxPcpay','OrderController@hjwxPcpay');          //汇聚微信pc
     });
-    //pc支付回调
+    //pc支付回调(szw)
     $router->group(['prefix' => 'notify'], function () use ($router) {
         $router->post('hjAlinotify','NotifyController@hjAlinotify');          //汇聚支付宝pc回调
         $router->post('hjWxnotify','NotifyController@hjWxnotify');          //汇聚支付宝pc回调
         $router->post('Alinotify','NotifyController@Alinotify');          //支付宝pc回调
         $router->post('Wxnotify','NotifyController@Wxnotify');          //汇聚支付宝pc回调
     });
-
+    //课程（szw）
+    $router->group(['prefix' => 'course'], function () use ($router) {
+        $router->post('courseList','CourseController@courseList');//课程列表
+    });
 });
 
 //后台端路由接口
