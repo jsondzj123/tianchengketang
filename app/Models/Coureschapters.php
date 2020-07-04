@@ -113,7 +113,18 @@ class Coureschapters extends Model {
         }
         $list['mt_video_name'] = $resource;
         //查询录播课程名称
-        $section = Couresmaterial::where(['parent_id'=>$data['section_id'],'mold'=>1,'is_del'=>0])->get();
+        $section = Couresmaterial::select('material_name as name','material_size as size','material_url as url','type')->where(['parent_id'=>$data['section_id'],'mold'=>1,'is_del'=>0])->get();
+        foreach ($section as $k=>&$v){
+            if($v['type'] == 1){
+                $v['typeName'] = '材料';
+            }
+            if($v['type'] == 2){
+                $v['typeName'] = '辅料';
+            }
+            if($v['type'] == 3){
+                $v['typeName'] = '其他';
+            }
+        }
         $list['filearr'] = $section;
         return ['code' => 200 , 'msg' => '查询成功','data'=>$list];
     }
@@ -140,10 +151,9 @@ class Coureschapters extends Model {
         if(!isset($data['name']) || empty($data['name'])){
             return ['code' => 201 , 'msg' => '请填写节名称'];
         }
-//        if(!isset($data['resource_id']) || empty($data['resource_id'])){
-//            return ['code' => 201 , 'msg' => '请选择资源'];
-//        }
-
+        if(!isset($data['resource_id']) || empty($data['resource_id'])){
+            return ['code' => 201 , 'msg' => '请选择资源'];
+        }
         try{
             DB::beginTransaction();
             $insert = self::insertGetId([
