@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use PHPUnit\Framework\Constraint\ExceptionMessage;
 
 class CourseLiveResource extends Model {
 
@@ -120,32 +121,33 @@ class CourseLiveResource extends Model {
         if(!isset($data['course_id']) || empty($data['course_id'])){
             return ['code' => 201 , 'msg' => '课程id不能为空'];
         }
-        $course_live_resource = Couresliveresource::where(['resource_id'=>$data['id'],'course_id'=>$data['course_id']])->first();
-        if(!empty($course_live_resource)){
-            $del = $course_live_resource['is_del'] == 1?0:1;
-            $up = Couresliveresource::where(['resource_id'=>$data['id'],'course_id'=>$data['course_id']])->update(['is_del'=>$del,'update_at'=>date('Y-m-d H:i:s')]);
-        }else{
-            $up = Couresliveresource::insert([
-                'resource_id' => $data['id'],
-                'course_id' => $data['course_id']
-            ]);
+        $resource = json_decode($data['id'],true);
+        if(!empty($resource)){
+            CourseLiveResource::where(['course_id'=>$data['course_id']])->update(['is_del'=>1]);
+            foreach ($resource as $k=>$v){
+                $resourceones = CourseLiveResource::where(['course_id'=>$data['course_id'],'resource_id'=>$v])->first();
+                if($resourceones){
+                    CourseLiveResource::where(['course_id'=>$data['course_id'],'resource_id'=>$v])->update(['is_del'=>0]);
+                }else{
+                    CourseLiveResource::insert([
+                        'resource_id' => $v['id'],
+                        'course_id' => $data['course_id']
+                    ]);
+                }
+            }
         }
-        if($up){
-            $user_id = AdminLog::getAdminInfo()->admin_user->id;
-            //添加日志操作
-            AdminLog::insertAdminLog([
-                'admin_id'       =>   $user_id  ,
-                'module_name'    =>  'liveToCourse' ,
-                'route_url'      =>  'admin/Course/liveToCourse' ,
-                'operate_method' =>  'update' ,
-                'content'        =>  '课程与直播资源关联操作'.json_encode($data) ,
-                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
-                'create_at'      =>  date('Y-m-d H:i:s')
-            ]);
-            return ['code' => 200 , 'msg' => '操作成功'];
-        }else{
-            return ['code' => 202 , 'msg' => '操作失败'];
-        }
+        $user_id = AdminLog::getAdminInfo()->admin_user->id;
+        //添加日志操作
+        AdminLog::insertAdminLog([
+            'admin_id'       =>   $user_id  ,
+            'module_name'    =>  'liveToCourse' ,
+            'route_url'      =>  'admin/Course/liveToCourse' ,
+            'operate_method' =>  'update' ,
+            'content'        =>  '课程与直播资源关联操作'.json_encode($data) ,
+            'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+            'create_at'      =>  date('Y-m-d H:i:s')
+        ]);
+        return ['code' => 200 , 'msg' => '操作成功'];
     }
 }
 
