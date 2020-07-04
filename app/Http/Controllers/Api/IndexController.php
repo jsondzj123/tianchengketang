@@ -142,12 +142,12 @@ class IndexController extends Controller {
                 foreach($teacher_list as $k=>$v){
                     //根据大分类的id获取大分类的名称
                     if($v['parent_id'] && $v['parent_id'] > 0){
-                        $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_forbid" , 0)->value("name");
+                        $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_forbid" , 0)->value("subject_name");
                     }
 
                     //根据小分类的id获取小分类的名称
                     if($v['child_id'] && $v['child_id'] > 0){
-                        $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_forbid" , 0)->value("name");
+                        $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_forbid" , 0)->value("subject_name");
                     }
 
                     //数组赋值
@@ -336,12 +336,12 @@ class IndexController extends Controller {
                 foreach($famous_teacher_list as $k=>$v){
                     //根据大分类的id获取大分类的名称
                     if($v['parent_id'] && $v['parent_id'] > 0){
-                        $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_forbid" , 0)->value("name");
+                        $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_forbid" , 0)->value("subject_name");
                     }
 
                     //根据小分类的id获取小分类的名称
                     if($v['child_id'] && $v['child_id'] > 0){
-                        $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_forbid" , 0)->value("name");
+                        $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_forbid" , 0)->value("subject_name");
                     }
 
                     //数组数值信息赋值
