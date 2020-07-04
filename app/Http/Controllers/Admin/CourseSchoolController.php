@@ -23,33 +23,34 @@ class CourseSchoolController extends Controller {
      * @param  school_id
      * @param  author  李银生
      * @param  ctime   2020/6/29 
-     * @return  array
+     * @return  array  7.4 调整
      */
     public function courseIdList(){
     	$data = self::$accept_data;
     	$validator = Validator::make($data, 
         [
         	'school_id' => 'required|integer',
+            'is_public' => 'required|integer',
        	],
         CourseSchool::message());
         if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-        $courseIds = CourseSchool::where('school_id', $data['school_id'])->where('is_del',0)
-                ->pluck('course_id');
-        return $this->response($courseIds);
+        $result = CourseSchool::courseIds(self::$accept_data);
+        return response()->json($result);
     }
     /**
      * @param  授权课程列表
      * @param  school_id
      * @param  author  李银生
      * @param  ctime   2020/6/30
-     * @return  array
+     * @return  array  7.4 调整
      */
     public function courseList(){
         $validator = Validator::make(self::$accept_data, 
         [
             'school_id' => 'required|integer',
+            'is_public' => 'required|integer' //是否为公开课  1公开课 0课程
         ],
         CourseSchool::message());
         if($validator->fails()) {
@@ -63,7 +64,7 @@ class CourseSchoolController extends Controller {
      * @param  school_id
      * @param  author  李银生
      * @param  ctime   2020/6/30
-     * @return  array
+     * @return  array 7.4调整
      */
     public function store()
     { 

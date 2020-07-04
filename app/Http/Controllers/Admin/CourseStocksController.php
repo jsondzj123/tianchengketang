@@ -28,7 +28,7 @@ class CourseStocksController extends Controller {
     	$validator = Validator::make(self::$accept_data, 
         [
         	'school_id' => 'required|integer',
-        	'course_id' => 'required|integer',
+        	'course_id' => 'required|integer', //授权课程id
        	],
         CourseStocks::message());
         if($validator->fails()) {
