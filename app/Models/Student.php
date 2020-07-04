@@ -116,7 +116,7 @@ class Student extends Model {
         //获取学员的总数量
         $student_count = self::where(function($query) use ($body){
             //判断报名状态是否选择
-            if(isset($body['enroll_status']) && strlen($body['enroll_status']) > 0){
+            if(isset($body['enroll_status']) && strlen($body['enroll_status']) > 0 && in_array($body['enroll_status'] , [1,2])){
                 //已报名
                 if($body['enroll_status'] > 0 && $body['enroll_status'] == 1){
                     $query->where('enroll_status' , '=' , 1);
@@ -151,9 +151,13 @@ class Student extends Model {
                     $query->where('subject_id' , '=' , $body['subject_id']);
                 }*/
                 //判断报名状态是否选择
-                if(isset($body['enroll_status']) && strlen($body['enroll_status']) > 0){
-                    $enroll_status = $body['enroll_status'] == 1 ? 1 : 0;
-                    $query->where('enroll_status' , '=' , $enroll_status);
+                if(isset($body['enroll_status']) && strlen($body['enroll_status']) > 0 && in_array($body['enroll_status'] , [1,2])){
+                    //已报名
+                    if($body['enroll_status'] > 0 && $body['enroll_status'] == 1){
+                        $query->where('enroll_status' , '=' , 1);
+                    } else if($body['enroll_status'] > 0 && $body['enroll_status'] == 2){
+                        $query->where('enroll_status' , '=' , 0);
+                    }
                 }
                 
                 //判断开课状态是否选择
