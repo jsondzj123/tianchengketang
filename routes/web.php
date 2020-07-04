@@ -98,6 +98,14 @@ $router->group(['prefix' => 'api', 'namespace' => 'Api', 'middleware'=> 'user'],
 
 //PC端路由接口
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
+    $router->post('doUserRegister','AuthenticateController@doUserRegister');    //WEB注册接口
+    $router->post('doUserLogin','AuthenticateController@doUserLogin');          //WEB登录接口
+    $router->post('doSendSms','AuthenticateController@doSendSms');              //WEB发送短信接口
+
+});
+
+//PC端路由接口
+$router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
     //pc支付
     $router->group(['prefix' => 'order'], function () use ($router) {
         $router->post('aliPcpay','OrderController@aliPcpay');          //支付宝pc

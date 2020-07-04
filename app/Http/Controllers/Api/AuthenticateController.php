@@ -166,7 +166,7 @@ class AuthenticateController extends Controller {
             }
             
             //生成随机唯一的token
-            $token = self::setAppLoginToken($body['phone']);
+            //$token = self::setAppLoginToken($body['phone']);
             
             //开启事务
             DB::beginTransaction();
@@ -188,16 +188,16 @@ class AuthenticateController extends Controller {
             }
 
             //判断redis中值是否存在
-            $hash_len = Redis::hLen("user:regtoken:".$user_login->token);
+            /*$hash_len = Redis::hLen("user:regtoken:".$user_login->token);
             if($hash_len && $hash_len > 0){
                 //清除老的redis的key值
                 Redis::del("user:regtoken:".$user_login->token);
-            }
+            }*/
 
             //用户详细信息赋值
             $user_info = [
                 'user_id'    => $user_login->id ,
-                'user_token' => $token , 
+                'user_token' => $user_login->token , 
                 'user_type'  => 1 ,
                 'head_icon'  => $user_login->head_icon , 
                 'real_name'  => $user_login->real_name , 
@@ -212,10 +212,11 @@ class AuthenticateController extends Controller {
             ];
 
             //redis存储信息
-            Redis::hMset("user:regtoken:".$token , $user_info);
+            //Redis::hMset("user:regtoken:".$token , $user_info);
 
             //更新token
-            $rs = User::where("phone" , $body['phone'])->update(["token" => $token , "password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
+            //$rs = User::where("phone" , $body['phone'])->update(["token" => $token , "password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
+            $rs = User::where("phone" , $body['phone'])->update(["password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
             if($rs && !empty($rs)){
                 //事务提交
                 DB::commit();
@@ -268,12 +269,12 @@ class AuthenticateController extends Controller {
                 }
                 
                 //清除老的redis的key值
-                Redis::del("user:regtoken:".$student_info->token);
+                //Redis::del("user:regtoken:".$student_info->token);
                 
                 //用户详细信息赋值
                 $user_info = [
                     'user_id'    => $student_info->id ,
-                    'user_token' => $token , 
+                    'user_token' => $student_info->token , 
                     'user_type'  => 2 ,
                     'head_icon'  => $student_info->head_icon , 
                     'real_name'  => $student_info->real_name , 
@@ -288,10 +289,11 @@ class AuthenticateController extends Controller {
                 ];
                 
                 //redis存储信息
-                Redis::hMset("user:regtoken:".$token , $user_info);
+                //Redis::hMset("user:regtoken:".$token , $user_info);
                 
                 //更新token
-                $rs = User::where("device" , $body['device'])->update(["token" => $token , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
+                //$rs = User::where("device" , $body['device'])->update(["token" => $token , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
+                $rs = User::where("device" , $body['device'])->update(["update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
                 if($rs && !empty($rs)){
                     //事务提交
                     DB::commit();
