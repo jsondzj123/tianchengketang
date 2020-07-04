@@ -591,7 +591,7 @@ class Exam extends Model {
             
             //判断试题名称是否为空
             if(isset($body['exam_name']) && !empty(isset($body['exam_name']))){
-                $query->where('exam_content','like',$body['exam_name'].'%');
+                $query->where('exam_content','like','%'.$body['exam_name'].'%');
             }
         })->count();
         
@@ -637,7 +637,7 @@ class Exam extends Model {
 
                 //判断试题名称是否为空
                 if(isset($body['exam_name']) && !empty(isset($body['exam_name']))){
-                    $query->where('exam_content','like',$body['exam_name'].'%');
+                    $query->where('exam_content','like','%'.$body['exam_name'].'%');
                 }
             })->orderByDesc('create_at')->offset($offset)->limit($pagesize)->get();
             return ['code' => 200 , 'msg' => '获取试题列表成功' , 'data' => ['exam_list' => $exam_list , 'total' => $exam_count , 'pagesize' => $pagesize , 'page' => $page]];
