@@ -9,6 +9,7 @@ use Log;
 use App\Models\Lesson;
 use App\Models\LessonLive;
 use App\Models\LiveChild;
+use App\Models\CourseLiveClassChild;
 use App\Models\Video;
 
 class LiveChildController extends Controller {
@@ -98,7 +99,7 @@ class LiveChildController extends Controller {
         $student_id = self::$accept_data['user_info']['user_id'];
         $nickname = self::$accept_data['user_info']['nickname'];
         $MTCloud = new MTCloud();
-        $liveChild = LiveChild::where('course_id', $course_id)->first();
+        $liveChild = CourseLiveClassChild::where('course_id', $course_id)->first();
         $video = Video::where('course_id', $course_id)->first();
         if(empty($liveChild) && empty($video)){
             return $this->response('course_id不存在', 202);

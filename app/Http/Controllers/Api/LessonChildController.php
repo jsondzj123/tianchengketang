@@ -2,7 +2,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\LessonChild;
 use App\Models\LessonVideo;
 use App\Models\Coureschapters;
 use App\Models\Video;
@@ -40,65 +39,49 @@ class LessonChildController extends Controller {
                 }
 
         }
+        //查询章
+        $chapters =  Coureschapters::select('id', 'name', 'parent_id')
+                ->where(['is_del'=> 0,'parent_id' => 0, 'course_id' => $course_id])
+                ->orderBy('create_at', 'desc')->get()->toArray();
 
-        $pid = $request->input('pid') ?: 0;
-        $lessons =  LessonChild::select('id', 'name', 'description', 'pid')
-                ->where(['is_del'=> 0, 'is_forbid' => 0, 'pid' => 0, 'course_id' => $course_id])
-                ->orderBy('created_at', 'desc')->get();
-            //查询章小节
-
-        foreach ($lessons as $key => $value) {
-            //关联资源
-            $lesson = LessonChild::with(['videos' => function ($query) {
-                    $query->select('id', 'course_id', 'mt_duration');
-                }])
-                ->where(['is_del'=> 0, 'is_forbid' => 0, 'pid' => $value->id, 'course_id' => $course_id])->get();
-
-            foreach ($lesson as $k => $v) {
-                $arr_v = $v->toArray();
-                if(!empty($arr_v) && !empty($arr_v['videos'])){
-                    $videos = $arr_v['videos'];
-                    $v['course_id'] = $videos[0]['course_id'];
-                    $v['mt_duration'] = $videos[0]['mt_duration'];
-                }else{
-                    $v['course_id'] = 0;
-                    $v['mt_duration'] = 0;
-                }
-                unset($v['videos']);
-                $v['use_duration']  =  "未学习";
-                //获取用户使用课程时长
+        foreach ($chapters as $key => $value) {
+            //查询小节
+            $chapters[$key]['child'] = Coureschapters::join("ld_course_video_resource","ld_course_chapters.resource_id","=","ld_course_video_resource.id")
+                ->select('ld_course_chapters.id','ld_course_chapters.name','ld_course_chapters.resource_id','ld_course_video_resource.course_id','ld_course_video_resource.mt_video_id','ld_course_video_resource.mt_duration')
+                ->where(['ld_course_chapters.is_del'=> 0, 'ld_course_chapters.parent_id' => $value['id'], 'ld_course_chapters.course_id' => $course_id])->get()->toArray();
+        }
+        foreach ($chapters as $k => &$v) {
+            //获取用户使用课程时长
+            foreach($v['child'] as $kk => &$vv){
                 if(isset(self::$accept_data['user_token']) && !empty(self::$accept_data['user_token'])){
-                    $course_id = $v['course_id'];
+                    $course_id = $vv['course_id'];
                     $MTCloud = new MTCloud();
-                    $v['use_duration']  =  $MTCloud->coursePlaybackVisitorList($course_id,1,50)['data'];
+                    $vv['use_duration']  =  $MTCloud->coursePlaybackVisitorList($course_id,1,50)['data'];
+                }else{
+                    $vv['use_duration']  = array();
                 }
             }
-            $value['childs'] = $lesson;
-
-            if(isset(self::$accept_data['user_token']) && !empty(self::$accept_data['user_token'])){
-                foreach($value['childs'] as $k => $v){
-                    if(count($v['use_duration']) > 0){
-                        foreach($v['use_duration'] as $k => $vv){
-                            if($vv['uid'] == $uid){
-                                $v['use_duration'] = $vv['duration'];
-                            }else{
-                                if(is_array($v['use_duration'])){
-                                    $v['use_duration'] = 0;
-                                }
+        }
+        foreach($chapters as $k => &$v){
+            foreach($v['child'] as $kk => &$vv){
+                if(count($vv['use_duration']) > 0){
+                    foreach($vv['use_duration'] as $kkk => $vvv){
+                        if($vvv['uid'] == $uid){
+                            $vv['use_duration'] = $vvv['duration'];
+                        }else{
+                            if(is_array($vv['use_duration'])){
+                                $vv['use_duration'] = 0;
                             }
                         }
-                    }else{
-                        $value['childs'][$k]['use_duration'] = 0;
                     }
-
+                }else{
+                    $vv['use_duration'] = 0;
                 }
             }
-
-
         }
 
-        foreach($lessons as $k => $v){
-                foreach($v['childs'] as $k1 =>$vv){
+        foreach($chapters as $k => &$v){
+                foreach($v['child'] as $k1 => &$vv){
                     if($vv['use_duration'] == 0){
                         $vv['use_duration'] = "未学习";
                     }else{
@@ -111,7 +94,7 @@ class LessonChildController extends Controller {
 
             }
 
-        return $this->response($lessons);
+        return $this->response($chapters);
     }
 
 
