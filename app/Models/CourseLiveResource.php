@@ -136,7 +136,7 @@ class CourseLiveResource extends Model {
                     CourseLiveResource::where(['course_id'=>$data['course_id'],'resource_id'=>$v])->update(['is_del'=>0]);
                 }else{
                     CourseLiveResource::insert([
-                        'resource_id' => $v['id'],
+                        'resource_id' => $v,
                         'course_id' => $data['course_id']
                     ]);
                 }
