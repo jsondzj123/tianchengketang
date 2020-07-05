@@ -572,21 +572,45 @@ class SchoolController extends Controller {
             return response()->json($result);
     }
     /*
-     * @param  description 获取分校课程大小学科
+     * @param  description 授权课程列表学科大类
      * @param  参数说明       body包含以下参数[
      *      'id'=>学科id
      * ]
      * @param author    lys
      * @param ctime     2020-05-11
      */
-     public function getSubjectByid(){
+     public function getNatureSubjectOneByid(){
             $validator = Validator::make(self::$accept_data, 
-                ['id' => 'required|integer'],
+                [
+                    'school_id' => 'required|integer',
+                    'is_public'=> 'required|integer',
+                ],
                 School::message());
             if ($validator->fails()) {
                 return response()->json(json_decode($validator->errors()->first(),1));
             }
-            $result = School::getSubjectByid(self::$accept_data['id']);
+            $result = School::getNatureSubjectOneByid(self::$accept_data['id']);
+            return response()->json($result);
+    }
+    /*
+     * @param  description 授权课程列表学科小类
+     * @param  参数说明       body包含以下参数[
+     *      'id'=>学科id
+     * ]
+     * @param author    lys
+     * @param ctime     2020-7-4
+     */
+     public function getNatureSubjectTwoByid(){
+            $validator = Validator::make(self::$accept_data, 
+                [
+                    'school_id' => 'required|integer',
+                    'is_public'=> 'required|integer',
+                ],
+                School::message());
+            if ($validator->fails()) {
+                return response()->json(json_decode($validator->errors()->first(),1));
+            }
+            $result = School::getNatureSubjectTwoByid(self::$accept_data['id']);
             return response()->json($result);
     }
        /*

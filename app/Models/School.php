@@ -193,7 +193,6 @@ class School extends Model {
      * return  array
      */  //7.4调整 暂时不考虑分页
     public static function getSchoolLessonList($data){
-
         if(!isset($data['school_id']) ||empty($data['school_id']) || $data['school_id'] <=0){
             return ['code'=>201,'msg'=>'学校标识为空或参数有误'];
         }
@@ -345,6 +344,7 @@ class School extends Model {
         }
         return ['code' => 200 , 'msg' => '查询成功','data'=>$arr]; 
     }
+    
 }
 
 
