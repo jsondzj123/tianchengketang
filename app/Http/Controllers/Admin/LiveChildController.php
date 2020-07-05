@@ -157,6 +157,15 @@ class LiveChildController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
+    //课次详情
+    public function showOne(Request $request) {
+        try{
+            $one = LiveChild::getLiveClassChildListOne(self::$accept_data);
+            return response()->json($one);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
     //关联讲师
     public function ClassChildRelevance(Request $request){
         try{

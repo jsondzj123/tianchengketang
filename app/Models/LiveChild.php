@@ -30,15 +30,41 @@ class LiveChild extends Model {
             $total = self::where(['is_del'=>0,'shift_no_id'=>$shift_no_id])->get()->count();
             //获取数据
             $list = self::where(['is_del'=>0,'shift_no_id'=>$shift_no_id])->offset($offset)->limit($pagesize)->get();
-            //添加总课次
-            //已上课次
-            //待上课次
-            //课次信息
+            //开始时间  结束时间  转为  日期 星期  时段  和 09:00 - 12:00
+            foreach($list as  $key => $value){
+                $value['date'] = date('Y-m-d',$value['start_at']);
+                $weekarray=array("日","一","二","三","四","五","六");
+                $value['week'] = "星期".$weekarray[date('w',$value['start_at'])];
+                $no = date("H",$value['start_at']);
+                if ($no>=0&&$no<=12){
+                    $value['period'] = "上午";
+                }
+                if ($no>12&&$no<=24){
+                    $value['period'] = "下午";
+                }
+                $value['time'] = date('H:i',$value['start_at']).'-'.date('H:i',$value['end_at']);
+                unset($value['start_at']);
+                unset($value['end_at']);
+            }
             if($total > 0){
                 return ['code' => 200 , 'msg' => '获取班号课次列表成功' , 'data' => ['LiveClassChild_list' => $list, 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
             }else{
                 return ['code' => 200 , 'msg' => '获取班号课次成功' , 'data' => ['LiveClassChild_list' => [], 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
             }
+        }
+        //课次详情
+        public static function getLiveClassChildListOne($data){
+            if(empty($data['id'])){
+                return ['code' => 201 , 'msg' => '课次id不合法'];
+            }
+            $one = self::where("is_del",0)->where("id",$data['id'])->first();
+            //更改时间格式
+            $one['date'] = date('Y-m-d',$one['start_at']);
+            $one['time'] = [date('H:i:s',$one['start_at']),date('H:i:s',$one['end_at'])];
+            unset($data['start_at']);
+            unset($data['end_at']);
+            return ['code' => 200 , 'msg' => '获取课次详情成功' , 'data' => $one];
+
         }
         /*
          * @param  添加直播单元班号课次
@@ -56,6 +82,10 @@ class LiveChild extends Model {
          */
         public static function AddLiveClassChild($data){
             unset($data['/admin/liveChild/add']);
+            //处理时间
+            $res = json_decode($data['time']);
+            $data['start_at'] = strtotime($data['date'].$res[0]);
+            $data['end_at'] = strtotime($data['date'].$res[1]);
             //班号id
             if(empty($data['shift_no_id']) || !isset($data['shift_no_id'])){
                 return ['code' => 201 , 'msg' => '班号id不能为空'];
@@ -80,7 +110,8 @@ class LiveChild extends Model {
             if(empty($data['live_type']) || !isset($data['live_type'])){
                 return ['code' => 201 , 'msg' => '选择模式不能为空'];
             }
-
+            unset($data['date']);
+            unset($data['time']);
             //缓存查出用户id和分校id
             $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
             $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
@@ -120,8 +151,12 @@ class LiveChild extends Model {
          * return  array
          */
         public static function updateLiveClassChild($data){
-            //课次id
             unset($data['/admin/updateLiveChild']);
+            //处理时间
+            $res = json_decode($data['time']);
+            $data['start_at'] = strtotime($data['date'].$res[0]);
+            $data['end_at'] = strtotime($data['date'].$res[1]);
+            //课次id
             if(empty($data['id']) || !isset($data['id'])){
                 return ['code' => 201 , 'msg' => '课次id不能为空'];
             }
@@ -149,10 +184,11 @@ class LiveChild extends Model {
             if(empty($data['live_type']) || !isset($data['live_type'])){
                 return ['code' => 201 , 'msg' => '选择模式不能为空'];
             }
+            unset($data['date']);
+            unset($data['time']);
             //获取后端的操作员id
             $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
             $data['admin_id'] = $admin_id;
-
             $data['update_at'] = date('Y-m-d H:i:s');
             $id = $data['id'];
             unset($data['id']);

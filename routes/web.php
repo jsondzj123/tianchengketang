@@ -251,6 +251,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     */
     $router->post('liveChildList', 'LiveChildController@liveList');
     $router->post('liveChild', 'LiveChildController@index');
+    $router->post('liveChildShowOne', 'LiveChildController@showOne');
     $router->post('liveChild/add', 'LiveChildController@store');
     $router->post('updateLiveChild', 'LiveChildController@UpdateChild');
     $router->post('deleteLiveChild', 'LiveChildController@destroy');
