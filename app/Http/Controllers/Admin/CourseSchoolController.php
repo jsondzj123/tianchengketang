@@ -81,7 +81,48 @@ class CourseSchoolController extends Controller {
         $result = CourseSchool::store(self::$accept_data);
         return response()->json($result);
     }
+     /*
+     * @param  description 授权课程列表学科大类
+     * @param  参数说明       body包含以下参数[
+     *      'id'=>学科id
+     * ]
+     * @param author    lys
+     * @param ctime     2020-05-11
+     */
+     public function getNatureSubjectOneByid(){
 
+            $validator = Validator::make(self::$accept_data, 
+                [
+                    'school_id' => 'required|integer',
+                    'is_public'=> 'required|integer',
+                ],
+                CourseSchool::message());
+            if ($validator->fails()) {
+                return response()->json(json_decode($validator->errors()->first(),1));
+            }
+            $result = CourseSchool::getNatureSubjectOneByid(self::$accept_data);
+            return response()->json($result);
+    }
+    /*
+     * @param  description 授权课程列表学科小类
+     * @param  参数说明       body包含以下参数[
+     *      'subjectOne'=>学科id
+     * ]
+     * @param author    lys
+     * @param ctime     2020-7-4
+     */
+     public function getNatureSubjectTwoByid(){
+            $validator = Validator::make(self::$accept_data, 
+                [
+                    'subjectOne' => 'required',
+                ],
+                CourseSchool::message());
+            if ($validator->fails()) {
+                return response()->json(json_decode($validator->errors()->first(),1));
+            }
+            $result = CourseSchool::getNatureSubjectTwoByid(self::$accept_data);
+            return response()->json($result);
+    }
 
 
 }

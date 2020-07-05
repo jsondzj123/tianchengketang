@@ -504,6 +504,10 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseIdList', 'CourseSchoolController@courseIdList');  //授权分校课程ID
         $router->post('courseList', 'CourseSchoolController@courseList');  //授权课程列表
         $router->post('courseStore', 'CourseSchoolController@store');  //批量添加
+        $router->post('getNatureSubjectList', 'CourseSchoolController@getNatureSubjectOneByid');  //授权课程列表大类
+        $router->post('getNatureSubjectByid', 'CourseSchoolController@getNatureSubjectTwoByid');  //授权课程列表大类
+
+
     });
     $router->group(['prefix' => 'courstocks'], function () use ($router) {
         $router->post('getList', 'CourseStocksController@getList');  //库存列表
