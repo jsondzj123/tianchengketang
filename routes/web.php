@@ -130,6 +130,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('ArticleToType', 'ArticleController@ArticleToType');//文章关联分类
     $router->get('liveCallBack', 'LiveChildController@listenLive');
     $router->post('liveCallBack', 'LiveChildController@listenLive');//直播回调状态
+    $router->post('orderUpOaForId', 'OrderController@orderUpOaForId');//订单修改oa状态
 });
 //后端登录权限认证相关接口
 $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors']], function () use ($router) {
@@ -417,7 +418,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('orderList', 'OrderController@orderList');//订单列表
         $router->post('findOrderForId', 'OrderController@findOrderForId');//订单详情
         $router->post('auditToId', 'OrderController@auditToId');//订单审核通过/不通过
-        $router->post('orderUpOaForId', 'OrderController@orderUpOaForId');//订单修改oa状态
+
         $router->post('ExcelExport', 'OrderController@ExcelExport');//订单导出
         $router->post('buttOa', 'OrderController@buttOa');//对接oa
         $router->post('orderBack', 'OrderController@orderBack');//退回
