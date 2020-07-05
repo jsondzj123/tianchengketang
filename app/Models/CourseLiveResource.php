@@ -98,6 +98,7 @@ class CourseLiveResource extends Model {
             return ['code' => 201 , 'msg' => '资源id不能为空'];
         }
         unset($data['/admin/course/liveCoursesUp']);
+        print_r($data);die;
         $data['update_at'] = date('Y-m-d H:i:s');
         $up = Coureslivecastresource::where(['id'=>$data['id']])->update($data);
         if($up){
