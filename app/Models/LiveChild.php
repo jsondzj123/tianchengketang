@@ -29,9 +29,27 @@ class LiveChild extends Model {
             //获取总条数
             $total = self::where(['is_del'=>0,'shift_no_id'=>$shift_no_id])->get()->count();
             //获取数据
-            $list = self::where(['is_del'=>0,'shift_no_id'=>$shift_no_id])->offset($offset)->limit($pagesize)->get();
+            $list = self::where(['is_del'=>0,'shift_no_id'=>$shift_no_id])->offset($offset)->limit($pagesize)
+            ->orderBy("id","desc")
+            ->get();
             //开始时间  结束时间  转为  日期 星期  时段  和 09:00 - 12:00
             foreach($list as  $key => $value){
+                //查询关联老师
+                $teacher_id = LiveClassChildTeacher::join("ld_lecturer_educationa","ld_lecturer_educationa.id","=","ld_course_class_teacher.teacher_id")
+                ->select("ld_lecturer_educationa.id")
+                ->where('class_id',$value['id'])
+                ->where("ld_lecturer_educationa.type",2)->first();
+                //查询关联教务
+                $senate_id = LiveClassChildTeacher::join("ld_lecturer_educationa","ld_lecturer_educationa.id","=","ld_course_class_teacher.teacher_id")
+                ->select("ld_lecturer_educationa.id")
+                ->where('class_id',$value['id'])
+                ->where("ld_lecturer_educationa.type",1)->get()->toArray();
+                if(!is_null($teacher_id)){
+                    $value['teacher_id']  = $teacher_id['id'];
+                }else{
+                    $value['teacher_id']  = "";
+                }
+                $value['senate_id']  = $senate_id;
                 $value['date'] = date('Y-m-d',$value['start_at']);
                 $weekarray=array("日","一","二","三","四","五","六");
                 $value['week'] = "星期".$weekarray[date('w',$value['start_at'])];
@@ -45,6 +63,13 @@ class LiveChild extends Model {
                 $value['time'] = date('H:i',$value['start_at']).'-'.date('H:i',$value['end_at']);
                 unset($value['start_at']);
                 unset($value['end_at']);
+            }
+            foreach($list as  $key => &$value){
+                if(count($value['senate_id'])  > 0){
+                    $value['senate_id'] = array_column($value['senate_id'], 'id');
+                }else{
+                    $value['senate_id'] = [];
+                }
             }
             if($total > 0){
                 return ['code' => 200 , 'msg' => '获取班号课次列表成功' , 'data' => ['LiveClassChild_list' => $list, 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
@@ -266,26 +291,33 @@ class LiveChild extends Model {
             if(empty($data['teacher_id'])|| !isset($data['teacher_id'])){
                 return ['code' => 201 , 'msg' => '讲师id不能为空'];
             }
+            //查询是否关联老师
+            $teacher = LiveClassChildTeacher::where("class_id",$data['class_id'])->first();
+            if(!empty($teacher)){
+                //删除所有之前关联的数据
+                LiveClassChildTeacher::where("class_id",$data['class_id'])->delete();
+            }
             //教务id
             if(isset($data['senate_id'])){
                 //教师id和课次关联
-                $data['teacher_id'] = implode(",",$data['senate_id']).",".$data['teacher_id'];
-                unset($data['senate_id']);
-                $res = explode(",", $data['teacher_id']);
+                $res = json_decode($data['senate_id']);
+                array_push($res,$data['teacher_id']);
                 foreach($res as $k => $v){
                     $data[$k]['class_id'] = $data['class_id'];
                     $data[$k]['teacher_id'] = $v;
                     $data[$k]['create_at'] = date('Y-m-d H:i:s');
                     $data[$k]['update_at'] = date('Y-m-d H:i:s');
                 }
-                unset($data['class_id']);
-                unset($data['teacher_id']);
+                    unset($data['class_id']);
+                    unset($data['teacher_id']);
+                    unset($data['senate_id']);
             }else{
                 $data['create_at'] = date('Y-m-d H:i:s');
                 $data['update_at'] = date('Y-m-d H:i:s');
             }
             //获取后端的操作员id
             $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+
             $add = LiveClassChildTeacher::insert($data);
             if($add){
                 //添加日志操作

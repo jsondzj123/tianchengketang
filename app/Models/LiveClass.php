@@ -4,6 +4,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use App\Models\CourseMaterial;
+use App\Models\LiveChild;
 class LiveClass extends Model {
 
     //指定别的表名
@@ -41,9 +42,31 @@ class LiveClass extends Model {
                 $list[$k]['class_num_passed'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where('ld_course_class_number.shift_no_id',$v['id'])->where('ld_course_class_number.start_at','<',time())->count();
                 //待上课次  课程开始时间未超过当前时间
                 $list[$k]['class_num_not'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where('ld_course_class_number.shift_no_id',$v['id'])->where('ld_course_class_number.start_at','>',time())->count();
-
+                // 课次名称 关联老师名称  课次时间
+                $list[$k]['class_child'] = self::leftjoin("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
+                // ->join("ld_course_class_teacher","ld_course_class_number.id","=","ld_course_class_teacher.class_id")
+                // ->join("ld_lecturer_educationa","ld_course_class_teacher.teacher_id","=","ld_lecturer_educationa.id")
+                ->select("ld_course_class_number.id","ld_course_class_number.name","ld_course_class_number.start_at","ld_course_class_number.end_at")
+                ->where(["ld_course_shift_no.id"=>$v['id'],"ld_course_class_number.is_del"=>0])
+                //,"ld_lecturer_educationa.type"=>2  "ld_lecturer_educationa.real_name",
+                ->get();
             }
-            //课次信息
+            foreach($list as $key => &$value){
+                foreach($value['class_child'] as $k => &$v){
+                        $teacher_name = LiveChild::join("ld_course_class_teacher","ld_course_class_number.id","=","ld_course_class_teacher.class_id")
+                        ->join("ld_lecturer_educationa","ld_course_class_teacher.teacher_id","=","ld_lecturer_educationa.id")
+                        ->select("ld_lecturer_educationa.real_name")
+                        ->where(["ld_course_class_number.id"=>$v['id'],"ld_lecturer_educationa.type"=>2])
+                        ->first();
+                        if(!empty($teacher_name)){
+                            $v['teacher_name'] = $teacher_name['real_name'];
+                        }else{
+                            $v['teacher_name'] = "";
+                        }
+                        $v['time'] = date("Y/m/d H:i",$v['start_at'])."-".date("H:i",$v['end_at']);
+                    }
+            }
+
             if($total > 0){
                 return ['code' => 200 , 'msg' => '获取班号列表成功' , 'data' => ['LiveClass_list' => $list, 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
             }else{
