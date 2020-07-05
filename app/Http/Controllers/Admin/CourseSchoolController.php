@@ -72,6 +72,7 @@ class CourseSchoolController extends Controller {
         [
             'course_id' => 'required',
             'school_id' => 'required',
+            'is_public' => 'required',
         ],
         CourseSchool::message());
         if($validator->fails()) {

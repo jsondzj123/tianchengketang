@@ -144,7 +144,7 @@ function randstr($len=6){
 
 }
 
-     /*
+/*
  * @param  descriptsion    时间戳转时长
  * @param  author          lys
  * @param  ctime           2020-04-29
@@ -160,4 +160,19 @@ function randstr($len=6){
         }
         return $duration;
     }
+
+
+/*
+ * @param  descriptsion    判断一维数组是否在二维数组里
+ * @param  author          lys
+ * @param  ctime           2020-04-29
+ * return  array
+ */
+function judgeEqual($key1,$key2){
+    if(array_diff($key1,$key2) || array_diff($key2,$key1)){
+        return true;
+    }else{
+        return false;
+    }
+}
 ?>
