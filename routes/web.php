@@ -98,7 +98,14 @@ $router->group(['prefix' => 'api', 'namespace' => 'Api', 'middleware'=> 'user'],
 
 //PC端路由接口
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
-    //pc支付(szw)
+    $router->post('doUserRegister','AuthenticateController@doUserRegister');    //WEB注册接口
+    $router->post('doUserLogin','AuthenticateController@doUserLogin');          //WEB登录接口
+    $router->post('doSendSms','AuthenticateController@doSendSms');              //WEB发送短信接口
+
+});
+
+//PC端路由接口
+$router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
     $router->group(['prefix' => 'order'], function () use ($router) {
         $router->post('aliPcpay','OrderController@aliPcpay');          //支付宝pc
         $router->post('wxPcpay','OrderController@wxPcpay');          //微信pc
@@ -489,9 +496,9 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getAdminById', 'SchoolController@postAdminById');                      //获取分校超级管理用户信息（编辑） √√
         $router->post('doAdminUpdate', 'SchoolController@doAdminUpdate');                    //编辑分校超级管理用户信息   √√  +1
         $router->post('getSchoolTeacherList', 'SchoolController@getSchoolTeacherList');      //获取分校讲师列表  √√√  5.11
-
-        $router->post('getLessonList', 'SchoolController@getSchoolLessonList');      //获取分校课程列表
-
+        $router->post('getLessonList', 'SchoolController@getLessonLists');      //获取分校课程列表
+        $router->post('getOpenLessonList', 'SchoolController@getOpenLessonList');      //获取分校公开课列表  
+        
     });
 
     $router->group(['prefix' => 'courschool'], function () use ($router) {
@@ -501,8 +508,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     });
     $router->group(['prefix' => 'courstocks'], function () use ($router) {
         $router->post('getList', 'CourseStocksController@getList');  //库存列表
-        $router->post('doInsertStocks', 'CourseStocksController@doInsertStocks');  //库存列表
-
+        $router->post('doInsertStocks', 'CourseStocksController@doInsertStocks');  //添加库存
     });
 
     //end 网校系统     lys

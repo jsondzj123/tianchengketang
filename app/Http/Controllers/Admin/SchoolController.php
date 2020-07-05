@@ -559,8 +559,9 @@ class SchoolController extends Controller {
      * ]
      * @param author    lys
      * @param ctime     2020-05-11
-     */
-    public function getSchoolLessonList(){
+     *///7.4调整
+    public function getLessonLists(){
+          
             $validator = Validator::make(self::$accept_data, 
                 ['school_id' => 'required|integer'],
                 School::message());
@@ -588,6 +589,26 @@ class SchoolController extends Controller {
             $result = School::getSubjectByid(self::$accept_data['id']);
             return response()->json($result);
     }
+       /*
+     * @param  description 获取网校公开课列表
+     * @param  参数说明       body包含以下参数[
+     *      'school_id'=>学校id
+     * ]
+     * @param author    lys
+     * @param ctime     2020-7-4
+     */
+     public function getOpenLessonList(){
+
+            $validator = Validator::make(self::$accept_data, 
+                ['school_id' => 'required|integer'],
+                School::message());
+            if ($validator->fails()) {
+                return response()->json(json_decode($validator->errors()->first(),1));
+            }
+            $result = School::getOpenLessonList(self::$accept_data);
+            return response()->json($result);
+    }
+
 
 
 }

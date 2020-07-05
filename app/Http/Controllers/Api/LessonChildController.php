@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\LessonChild;
 use App\Models\LessonVideo;
+use App\Models\Coureschapters;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use App\Tools\MTCloud;
@@ -44,7 +45,10 @@ class LessonChildController extends Controller {
         $lessons =  LessonChild::select('id', 'name', 'description', 'pid')
                 ->where(['is_del'=> 0, 'is_forbid' => 0, 'pid' => 0, 'course_id' => $course_id])
                 ->orderBy('created_at', 'desc')->get();
+            //查询章小节
+
         foreach ($lessons as $key => $value) {
+            //关联资源
             $lesson = LessonChild::with(['videos' => function ($query) {
                     $query->select('id', 'course_id', 'mt_duration');
                 }])

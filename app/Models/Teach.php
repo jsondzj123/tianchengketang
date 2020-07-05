@@ -76,7 +76,6 @@ class Teach extends Model {
 						$query->where('ld_lecturer_educationa.type',2);
 					})->select('ld_course_open.title as class_name','ld_lecturer_educationa.real_name as teacher_name','ld_course_open.start_at','ld_course_open.end_at','ld_course_open_live_childs.watch_num')
 					->get()->toArray();
-
 			//课程
 		$courseArr = CourseShiftNo::rightJoin('ld_course_class_number','ld_course_class_number.id','=','ld_course_shift_no.id')
 					->rightJoin('ld_course_class_teacher','ld_course_class_number.id','=','ld_course_class_teacher.class_id')
@@ -135,60 +134,63 @@ class Teach extends Model {
 				})->select('ld_course_shift_no.name as classno_name','ld_lecturer_educationa.real_name as class_name','ld_course_class_number.start_at','ld_course_class_number.end_at','ld_lecturer_educationa.real_name as teacher_name','ld_course_live_childs.watch_num')	
 				->get()->toArray();
 				$newcourseArr = [];
-				if(!empty($openCourseArr) && !empty($courseArr) ){
+				if(!empty($openCourseArr)){
 					foreach($openCourseArr as $k=>$v){
 						$openCourseArr[$k]['is_public'] = 1;
 					}
+				}
+				if(!empty($courseArr)){
 					foreach($courseArr as $k=>$v){
 						$courseArr[$k]['is_public'] = 0;
 					}
-					$newcourseArr = array_merge($openCourseArr,$courseArr);
+				}
+				$newcourseArr = array_merge($openCourseArr,$courseArr);
+				if(!empty($newcourseArr) ){
 					foreach($newcourseArr as $k=>$v){
 						$time = (int)$v['end_at']-(int)$v['start_at'];
 						$newcourseArr[$k]['time'] = timetodate($time);
-						$newcourseArr[$k]['start_time'] = date('Y-m-d H:i:s',$v['start_at']);
+						$newcourseArr[$k]['start_time'] = date('Y-m-d H:i',$v['start_at']);
 						if(time()<$v['start_at']){
-							$newcourseArr[$k]['zhibostatus'] = '预开始';
+							$newcourseArr[$k]['status'] = '预开始';
 						}
 						if(time()>$v['end_at']){
-							$newcourseArr[$k]['zhibostatus'] = '直播已结束';
+							$newcourseArr[$k]['status'] = '直播已结束';
 						}
 						if(time()>$v['start_at'] && time()<$v['end_at']){
-							$newcourseArr[$k]['zhibostatus'] = '直播中';
+							$newcourseArr[$k]['status'] = '直播中';
 						}
-					}
+					} 
 				}
 			return ['code'=>200,'msg'=>'Success','data'=>$newcourseArr,'where'=>$body];
 	}
 	//教学详情
-	//缺少公开课课程列表及课程详情   7.2
 	public static function details($body){
-
 		if($body['is_public'] == 1){  //公开课
 			$openCourseArr = OpenCourse::where('id',$body['class_id'])->select('id','title','start_at','end_at')->first();//公开课名称
 			$openChildsArr = OpenLivesChilds::where('lesson_id',$openCourseArr['id'])->select('watch_num','course_id')->first(); 
 			$openCourseArr['watch_num'] = $openChildsArr['watch_num']; //观看人数（学员人数）
-			$teacherIds = OpenCourseTeacher::where('course_id',$openCourseArr['id'])->pluck('teacher_id'); //讲师id组
-			$openCourseArr['lect_teacher_name'] = Teacher::whereIn(['id'=>$teacherIds,'type'=>'1'])->select('real_name')->first()['real_name'];//讲师
-			$eduTeacherName = Teacher::whereIn(['id'=>$teacherIds,'type'=>'2'])->pluck('real_name'); //教务
+			$teacherIds = OpenCourseTeacher::where('course_id',$openCourseArr['id'])->pluck('teacher_id')->toArray(); //讲师id组
+			
+			$openCourseArr['lect_teacher_name'] = Teacher::whereIn('id',$teacherIds)->where('type',2)->select('real_name')->first()['real_name'];//讲师
+			$eduTeacherName = Teacher::whereIn('id',$teacherIds)->where('type',1)->pluck('real_name')->toArray(); //教务
 			$openCourseArr['edu_teacher_name'] = '';
 			if(!empty($eduTeacherName)){
 				$openCourseArr['edu_teacher_name'] = implode(',', $eduTeacherName);
 			}
 			$openCourseArr['time'] = timetodate((int)$openCourseArr['end_at']-(int)$openCourseArr['start_at']);//时长
 			if($openCourseArr['start_at']>time()){
-				$openCourseArr['zhibostatus'] = '待直播';
+				$openCourseArr['status'] = '待直播';
 			}
 			if($openCourseArr['end_at']<time()){
-				$openCourseArr['zhibostatus'] = '直播已结束';
+				$openCourseArr['status'] = '直播已结束';
 			}
 			if($openCourseArr['start_at']<time() && $openCourseArr['end_at']>time()){
-				$openCourseArr['zhibostatus'] = '直播中';
+				$openCourseArr['status'] = '直播中';
 			} 
 			$openCourseArr['start_at'] = date('Y-m-d H:i:s',$openCourseArr['start_at']);
 			$openCourseArr['end_at'] = date('Y-m-d H:i:s',$openCourseArr['end_at']);
 			$MTCloud = new MTCloud();
-			$res =$MTCloud->courseDocumentList($body['course_id'],1);
+			$res =$MTCloud->courseDocumentList($openChildsArr['course_id'],1);
 			$openCourseArr['courseware'] = $newArr = [];
 			if(!empty($res['data'])){
 				foreach($res['data'] as $key =>$v){
@@ -199,8 +201,41 @@ class Teach extends Model {
 			}
 			return ['code'=>200,'msg'=>'Success','data'=>$openCourseArr];
 		}
-		// if($body['is_public'] == 0){  //课程
-
-		// }
+		if($body['is_public'] == 0){  //课程
+			if(!isset($body['classno_id'])||empty($body['classno_id']) || $body['classno_id']<=0){ //班号
+				return ['code'=>201,'data'=>'班号标识为空或者不合法'];
+			}
+			$live = []; 
+			$LiveChildArr  = LiveChild::where('id',$body['class_id'])->selelct('name')->first();//课次名称
+			$liveChildClassArr	= LiveClassChild::where('class_id',$body['classno_id'])->selelct('start_at','end_at','watch_num','status','course_id')->first();//开始/结束时间/时长/观看人数/课程id(欢拓)
+			$classno_id = LiveClass::where('id',$body['classno_id'])->select('name')->first();//班号名称
+			$teacherIds = LiveClassChildTeacher::where('course_id',$openCourseArr['id'])->pluck('teacher_id'); //教师id组
+			$live['lect_teacher_name'] = Teacher::whereIn(['id'=>$teacherIds,'type'=>'1'])->select('real_name')->first()['real_name'];//讲师
+			$eduTeacherName = Teacher::whereIn(['id'=>$teacherIds,'type'=>'2'])->pluck('real_name'); //教务
+			$live['edu_teacher_name'] = '';
+			if(!empty($eduTeacherName)){
+				$live['edu_teachre_name'] = implode(',', $eduTeacherName);
+			}
+			$MTCloud = new MTCloud();
+			$res =$MTCloud->courseDocumentList($liveChildClassArr['course_id'],1);
+			$live['courseware'] = $newArr = [];
+			if(!empty($res['data'])){
+				foreach($res['data'] as $key =>$v){
+					$arr= $MTCloud->documentGet($v['id']);
+					$newArr[] =$arr['data'];
+				}
+				$live['courseware'] = $newArr;  //欢拓课件信息
+			}
+			$live = [
+				'class_name'=>$classno_id['name'],
+				'title'=>$LiveChildArr['name'],
+				'start_at'=>date('Y-m-d H:i:s',$liveChildClassArr['start_at']),
+				'end_at'=>date('Y-m-d H:i:s',$liveChildClassArr['end_at']),
+				'watch_num'=>$liveChildClassArr['watch_num'],
+				'status'=> $liveChildClassArr['status'] == 1?'预直播':($liveChildClassArr['status']==2?'直播中':'直播已结束'),
+				'duration'=>timetodate((int)$liveChildClassArr['end_at']-(int)$liveChildClassArr['start_at']),
+			];
+			return ['code'=>200,'msg'=>'Success','data'=>$live];
+		}
 	}
 }

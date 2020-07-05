@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\School;
 use Validator;
-use Log;
-use JWTAuth;
 use Illuminate\Support\Facades\DB;
 use Lysice\Sms\Facade\SmsFacade;
 
@@ -18,11 +17,10 @@ class AuthenticateController extends Controller {
      * @param  参数说明       body包含以下参数[
      *     phone             手机号(必传)
      *     password          密码(必传)
-     *     device            设备唯一标识(非必传)
      *     verifycode        验证码(必传)
      * ]
      * @param author    dzj
-     * @param ctime     2020-05-22
+     * @param ctime     2020-07-04
      * return string
      */
     public function doUserRegister() {
@@ -48,6 +46,11 @@ class AuthenticateController extends Controller {
             //判断验证码是否为空
             if(!isset($body['verifycode']) || empty($body['verifycode'])){
                 return response()->json(['code' => 201 , 'msg' => '请输入验证码']);
+            }
+            
+            //分校域名
+            if(!isset($body['school_dns']) || empty($body['school_dns'])){
+                return response()->json(['code' => 201 , 'msg' => '分校域名为空']);
             }
 
             //验证码合法验证
@@ -85,6 +88,9 @@ class AuthenticateController extends Controller {
 
             //开启事务
             DB::beginTransaction();
+            
+            //根据分校的域名获取所属分校的id
+            $school_id = School::where('dns' , $body['school_dns'])->value('id');
 
             //封装成数组
             $user_data = [
@@ -92,9 +98,7 @@ class AuthenticateController extends Controller {
                 'password'  =>    password_hash($body['password'] , PASSWORD_DEFAULT) ,
                 'nickname'  =>    $nickname ,
                 'token'     =>    $token ,
-                'device'    =>    isset($body['device']) && !empty($body['device']) ? $body['device'] : '' ,
-                'reg_source'=>    1 ,
-                'school_id' =>    1 ,
+                'school_id' =>    isset($school_id) && !empty($school_id) && $school_id > 0 ? $school_id : 1 ,
                 'create_at' =>    date('Y-m-d H:i:s'),
                 'login_at'  =>    date('Y-m-d H:i:s')
             ];
@@ -102,7 +106,7 @@ class AuthenticateController extends Controller {
             //将数据插入到表中
             $user_id = User::insertGetId($user_data);
             if($user_id && $user_id > 0){
-                $user_info = ['user_id' => $user_id , 'user_token' => $token , 'user_type' => 1  , 'head_icon' => '' , 'real_name' => '' , 'phone' => $body['phone'] , 'nickname' => $nickname , 'sign' => '' , 'papers_type' => '' , 'papers_name' => '' , 'papers_num' => '' , 'balance' => 0 , 'school_id' => 1];
+                $user_info = ['user_id' => $user_id , 'user_token' => $token , 'phone' => $body['phone'] , 'nickname' => $nickname , 'school_id' => $user_data['school_id']];
                 //redis存储信息
                 Redis::hMset("user:regtoken:".$token , $user_info);
                 
@@ -126,7 +130,7 @@ class AuthenticateController extends Controller {
      *     password          密码
      * ]
      * @param author    dzj
-     * @param ctime     2020-05-23
+     * @param ctime     2020-07-04
      * return string
      */
     public function doUserLogin() {
@@ -165,9 +169,6 @@ class AuthenticateController extends Controller {
                 }
             }
             
-            //生成随机唯一的token
-            //$token = self::setAppLoginToken($body['phone']);
-            
             //开启事务
             DB::beginTransaction();
 
@@ -187,35 +188,22 @@ class AuthenticateController extends Controller {
                 return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
             }
 
-            //判断redis中值是否存在
-            /*$hash_len = Redis::hLen("user:regtoken:".$user_login->token);
-            if($hash_len && $hash_len > 0){
-                //清除老的redis的key值
-                Redis::del("user:regtoken:".$user_login->token);
-            }*/
-
             //用户详细信息赋值
             $user_info = [
                 'user_id'    => $user_login->id ,
                 'user_token' => $user_login->token , 
-                'user_type'  => 1 ,
                 'head_icon'  => $user_login->head_icon , 
                 'real_name'  => $user_login->real_name , 
                 'phone'      => $user_login->phone , 
                 'nickname'   => $user_login->nickname , 
                 'sign'       => $user_login->sign , 
                 'papers_type'=> $user_login->papers_type , 
-                'papers_name'=> $user_login->papers_type > 0 ? parent::getPapersNameByType($user_login->papers_type) : '',
                 'papers_num' => $user_login->papers_num ,
                 'balance'    => $user_login->balance > 0 ? floatval($user_login->balance) : 0 ,
                 'school_id'  => $user_login->school_id
             ];
 
-            //redis存储信息
-            //Redis::hMset("user:regtoken:".$token , $user_info);
-
             //更新token
-            //$rs = User::where("phone" , $body['phone'])->update(["token" => $token , "password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
             $rs = User::where("phone" , $body['phone'])->update(["password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
             if($rs && !empty($rs)){
                 //事务提交
@@ -231,130 +219,6 @@ class AuthenticateController extends Controller {
     }
     
     /*
-     * @param  description   游客登录方法
-     * @param  参数说明       body包含以下参数[
-     *     device            设备唯一标识(必传)
-     * ]
-     * @param author    dzj
-     * @param ctime     2020-05-23
-     * return string
-     */
-    public function doVisitorLogin() {
-        try {
-            $body = self::$accept_data;
-            //判断传过来的数组数据是否为空
-            if(!$body || !is_array($body)){
-                return response()->json(['code' => 202 , 'msg' => '传递数据不合法']);
-            }
-
-            //判断设备唯一标识是否为空
-            if(!isset($body['device']) || empty($body['device'])){
-                return response()->json(['code' => 201 , 'msg' => '设备唯一标识为空']);
-            }
-            
-            //生成随机唯一的token
-            $token = self::setAppLoginToken($body['device']);
-            
-            //通过设备唯一标识判断是否注册过
-            $student_info = User::where("device" , $body['device'])->first();
-            
-            //开启事务
-            DB::beginTransaction();
-            
-            //判断是否是存在用户信息
-            if($student_info && !empty($student_info)){
-                //判断此手机号是否被禁用了
-                if($student_info->is_forbid == 2){
-                    return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
-                }
-                
-                //清除老的redis的key值
-                //Redis::del("user:regtoken:".$student_info->token);
-                
-                //用户详细信息赋值
-                $user_info = [
-                    'user_id'    => $student_info->id ,
-                    'user_token' => $student_info->token , 
-                    'user_type'  => 2 ,
-                    'head_icon'  => $student_info->head_icon , 
-                    'real_name'  => $student_info->real_name , 
-                    'phone'      => $student_info->phone , 
-                    'nickname'   => $student_info->nickname , 
-                    'sign'       => $student_info->sign , 
-                    'papers_type'=> $student_info->papers_type , 
-                    'papers_name'=> $student_info->papers_type > 0 ? parent::getPapersNameByType($student_info->papers_type) : '',
-                    'papers_num' => $student_info->papers_num ,
-                    'balance'    => $student_info->balance > 0 ? floatval($student_info->balance) : 0 ,
-                    'school_id'  => $student_info->school_id
-                ];
-                
-                //redis存储信息
-                //Redis::hMset("user:regtoken:".$token , $user_info);
-                
-                //更新token
-                //$rs = User::where("device" , $body['device'])->update(["token" => $token , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
-                $rs = User::where("device" , $body['device'])->update(["update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
-                if($rs && !empty($rs)){
-                    //事务提交
-                    DB::commit();
-                    return response()->json(['code' => 200 , 'msg' => '登录成功' , 'data' => ['user_info' => $user_info]]);
-                } else {
-                    //事务回滚
-                    DB::rollBack();
-                    return response()->json(['code' => 203 , 'msg' => '登录失败']);
-                }
-            } else {
-                //游客昵称
-                $nickname = '游客'.randstr(8);
-                
-                //封装成数组
-                $user_data = [
-                    'token'     =>    $token ,
-                    'device'    =>    isset($body['device']) && !empty($body['device']) ? $body['device'] : '' ,
-                    'reg_source'=>    1 ,
-                    'school_id' =>    1 ,
-                    'nickname'  =>    $nickname ,
-                    'user_type' =>    2 ,
-                    'create_at' =>    date('Y-m-d H:i:s')
-                ];
-
-                $user_id = User::insertGetId($user_data);
-                if($user_id && $user_id > 0){
-                    //用户详细信息赋值
-                    $user_info = [
-                        'user_id'    => $user_id ,
-                        'user_token' => $token , 
-                        'user_type'  => 2 ,
-                        'head_icon'  => '' , 
-                        'real_name'  => '' , 
-                        'phone'      => '' , 
-                        'nickname'   => $nickname , 
-                        'sign'       => '' , 
-                        'papers_type'=> '' , 
-                        'papers_name'=> '' ,
-                        'papers_num' => '' ,
-                        'balance'    => 0  ,
-                        'school_id'  => 1
-                    ];
-                
-                    //redis存储信息
-                    Redis::hMset("user:regtoken:".$token , $user_info);
-
-                    //事务提交
-                    DB::commit();
-                    return response()->json(['code' => 200 , 'msg' => '登录成功' , 'data' => ['user_info' => $user_info]]);
-                } else {
-                    //事务回滚
-                    DB::rollBack();
-                    return response()->json(['code' => 203 , 'msg' => '登录失败']);
-                }
-            }
-        } catch (Exception $ex) {
-            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
-        }
-    }
-    
-    /*
      * @param  description   找回密码方法
      * @param  参数说明       body包含以下参数[
      *     phone             手机号
@@ -362,7 +226,7 @@ class AuthenticateController extends Controller {
      *     verifycode        验证码
      * ]
      * @param author    dzj
-     * @param ctime     2020-05-23
+     * @param ctime     2020-07-04
      * return string
      */
     public function doUserForgetPassword() {
@@ -393,12 +257,12 @@ class AuthenticateController extends Controller {
             //验证码合法验证
             $verify_code = Redis::get('user:forget:'.$body['phone']);
             if(!$verify_code || empty($verify_code)){
-                return ['code' => 201 , 'msg' => '请先获取验证码'];
+                return ['code' => 201 , 'msg' => '请先获取短信验证码'];
             }
 
             //判断验证码是否一致
             if($verify_code != $body['verifycode']){
-                return ['code' => 202 , 'msg' => '验证码错误'];
+                return ['code' => 202 , 'msg' => '短信验证码错误'];
             }
             
             //key赋值
@@ -522,20 +386,5 @@ class AuthenticateController extends Controller {
         } else {
             return response()->json(['code' => 203 , 'msg' => '发送短信失败' , 'data' => $send_data->Message]);
         }
-    }
-    
-    //删除redis指定key的所有键值信息
-    public function doDelRedisKeys(){
-        //获取所有的指定的前缀的信息列表
-        $key_list = Redis::keys('user:regtoken:*');
-        Redis::del($key_list);
-        return response()->json(['code' => 200 , 'msg' => '删除成功']);
-    }
-    
-    //删除redis指定key的所有键值信息
-    public function getRedisKeys(){
-        //获取所有的指定的前缀的信息列表
-        $key_list =  Redis::keys('user:regtoken:*');
-        return response()->json(['code' => 200 , 'msg' => '获取成功' , 'data'=> $key_list]);
     }
 }
