@@ -61,6 +61,7 @@ class LiveClass extends Model {
          * return  array
          */
         public static function AddLiveClass($data){
+            unset($data['/admin/liveClass/add']);
             //课程单元id
             if(empty($data['resource_id']) || !isset($data['resource_id'])){
                 return ['code' => 201 , 'msg' => '直播单元id不能为空'];
@@ -108,6 +109,7 @@ class LiveClass extends Model {
          * return  array
          */
         public static function updateLiveClass($data){
+            unset($data['/admin/updateLiveClass']);
             //班号id
             if(empty($data['id']) || !isset($data['id'])){
                 return ['code' => 201 , 'msg' => '直播单元id不能为空'];
