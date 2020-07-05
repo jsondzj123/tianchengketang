@@ -16,7 +16,6 @@
 $router->post('/', function () use ($router) {
     return $router->app->version();
 });
-
 //客户端(ios,安卓)不需要登录路由接口
 $router->group(['prefix' => 'api', 'namespace' => 'Api'], function () use ($router) {
     /*
@@ -497,8 +496,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('doAdminUpdate', 'SchoolController@doAdminUpdate');                    //编辑分校超级管理用户信息   √√  +1
         $router->post('getSchoolTeacherList', 'SchoolController@getSchoolTeacherList');      //获取分校讲师列表  √√√  5.11
         $router->post('getLessonList', 'SchoolController@getLessonLists');      //获取分校课程列表
-        $router->post('getOpenLessonList', 'SchoolController@getOpenLessonList');      //获取分校公开课列表  
-        
+        $router->post('getOpenLessonList', 'SchoolController@getOpenLessonList');      //获取分校公开课列表
+
     });
 
     $router->group(['prefix' => 'courschool'], function () use ($router) {
