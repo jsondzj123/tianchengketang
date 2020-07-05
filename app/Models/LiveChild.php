@@ -61,8 +61,8 @@ class LiveChild extends Model {
             //更改时间格式
             $one['date'] = date('Y-m-d',$one['start_at']);
             $one['time'] = [date('H:i:s',$one['start_at']),date('H:i:s',$one['end_at'])];
-            unset($data['start_at']);
-            unset($data['end_at']);
+            unset($one['start_at']);
+            unset($one['end_at']);
             return ['code' => 200 , 'msg' => '获取课次详情成功' , 'data' => $one];
 
         }
