@@ -283,6 +283,7 @@ class LiveChild extends Model {
         }
         //关联讲师教务
         public static function LiveClassChildTeacher($data){
+            unset($data['/admin/teacherLiveChild']);
             //课次id
             if(empty($data['class_id'])|| !isset($data['class_id'])){
                 return ['code' => 201 , 'msg' => '课次id不能为空'];
