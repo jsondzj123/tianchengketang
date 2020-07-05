@@ -498,6 +498,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getSchoolTeacherList', 'SchoolController@getSchoolTeacherList');      //获取分校讲师列表  √√√  5.11
         $router->post('getLessonList', 'SchoolController@getLessonLists');      //获取分校课程列表
         $router->post('getOpenLessonList', 'SchoolController@getOpenLessonList');      //获取分校公开课列表
+        $router->post('getSubjecList', 'SchoolController@getSubjecList');      //获取课程/公开课学科大类小类
 
     });
 
@@ -506,7 +507,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseList', 'CourseSchoolController@courseList');  //授权课程列表
         $router->post('courseStore', 'CourseSchoolController@store');  //批量添加
         $router->post('getNatureSubjectList', 'CourseSchoolController@getNatureSubjectOneByid');  //授权课程列表大类
-        $router->post('getNatureSubjectByid', 'CourseSchoolController@getNatureSubjectTwoByid');  //授权课程列表大类
+        $router->post('getNatureSubjectByid', 'CourseSchoolController@getNatureSubjectTwoByid');  //授权课程列表小类
 
 
     });
@@ -538,9 +539,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('details','TeachController@details');  //教学详情
         $router->post('coursewareDel','TeachController@coursewareDel');  //课件删除（欢拓）
     });
-
-
-
 
 
 

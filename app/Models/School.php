@@ -53,7 +53,9 @@ class School extends Model {
             'user_id.integer'  => json_encode(['code'=>'202','msg'=>'用户标识类型不合法']),
             'realname.required'=> json_encode(['code'=>'201','msg'=>'联系人不能为空']),
             'role_id.required' => json_encode(['code'=>'201','msg'=>'角色标识不能为空']),
-            'role_id.integer'  => json_encode(['code'=>'202','msg'=>'角色标识类型不合法']),  
+            'role_id.integer'  => json_encode(['code'=>'202','msg'=>'角色标识类型不合法']),
+            'is_public.required' => json_encode(['code'=>'201','msg'=>'是否为公开课标识不能为空']),
+            'is_public.integer'  => json_encode(['code'=>'202','msg'=>'是否为公开课标识类型不合法']),    
         ];
 
 
@@ -344,7 +346,60 @@ class School extends Model {
         }
         return ['code' => 200 , 'msg' => '查询成功','data'=>$arr]; 
     }
-    
+     /*
+     * @param  获取学科列表
+     * @param  author  lys
+     * @param  ctime   2020/7/5
+     * return  array
+     */
+    public static function getSubjecList($data){
+        $arr = $subjectArr  = $newIdsArr = $subjectIdsArr = $subjectIdsData = $natureSubjectIdsData = [];
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登陆学校id
+        $subjectIdsArr = $zizengSubject = CouresSubject::where(['school_id'=>$data['school_id'],'is_open'=>0,'is_del'=>0])->select('id','parent_id','subject_name')->get()->toArray();
+        if($data['is_public'] == 1){//公开课
+            $natureSubject = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
+                            ->where(function($query) use ($data,$school_id) {
+                                $query->where('ld_course_ref_open.to_school_id',$data['school_id']);
+                                $query->where('ld_course_ref_open.from_school_id',$school_id);
+                                $query->where('ld_course_ref_open.is_del',0);
+                    })->select('ld_course_open.parent_id','ld_course_open.child_id')->get()->toArray(); //授权公开课信息（分校）
+        }
+        if($data['is_public'] == 0){//课程
+            $natureCourse = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
+                            ->where(function($query) use ($data,$school_id) {
+                                $query->where('ld_course_school.to_school_id',$data['school_id']);
+                                $query->where('ld_course_school.from_school_id',$school_id);
+                                $query->where('ld_course_school.is_del',0);
+                    })->select('ld_course.parent_id','ld_course.child_id')
+                    ->get()->toArray(); //授权课程信息（分校）
+        }
+        if(!empty($natureSubject)){
+            $arr =array_unique($natureSubject, SORT_REGULAR);
+            foreach($arr as $k=>$v){
+                 $subjectArr [] = CourseRefSubject::where(['to_school_id'=>$data['school_id'],'from_school_id'=>$school_id,'is_del'=>0,'parent_id'=>$v['parent_id'],'child_id'=>$v['child_id']])->select('parent_id','child_id')->get()->toArray();
+            }
+           
+            if(!empty($subjectArr)){
+                foreach($subjectArr as $k=>$v){
+                    array_push($v['parent_id'],$newIdsArr);
+                    array_psuh($v['child_id'],$newIdsArr);
+                }
+                $newIdsArr = array_unique($newIdsArr);
+                $natureSubjectIdsData = CouresSubject::whereIn('id',$newIdsArr)->where(['is_oepn'=>0,'is_del'=>0])->select('id','parent_id','subject_name')->get();
+            }
+        }
+        if(!empty($zizengSubject)){
+            $subjectIdsArr = array_merge($natureSubjectIdsData,$zizengSubject);
+            
+            if(!empty($subjectIdsArr)){
+                $subjectIdsData = getParentsList($subjectIdsArr);
+            }    
+        }  
+        return ['code'=>200,'msg'=>'Success','data'=>$subjectIdsData];
+        
+    }
+
+
 }
 
 
