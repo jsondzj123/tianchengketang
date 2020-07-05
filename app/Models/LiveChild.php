@@ -55,6 +55,7 @@ class LiveChild extends Model {
          * return  array
          */
         public static function AddLiveClassChild($data){
+            unset($data['/admin/liveChild/add']);
             //班号id
             if(empty($data['shift_no_id']) || !isset($data['shift_no_id'])){
                 return ['code' => 201 , 'msg' => '班号id不能为空'];
@@ -120,6 +121,7 @@ class LiveChild extends Model {
          */
         public static function updateLiveClassChild($data){
             //课次id
+            unset($data['/admin/updateLiveChild']);
             if(empty($data['id']) || !isset($data['id'])){
                 return ['code' => 201 , 'msg' => '课次id不能为空'];
             }
