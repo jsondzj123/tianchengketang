@@ -17,17 +17,17 @@ class SubjectController extends Controller {
      */
     public function index(Request $request){
         $subjects = Subject::where('parent_id', 0)
-                ->select('id', 'subject_name as name', 'parent_id')
+                ->select('id', 'subject_name as name', 'parent_id as pid')
                 ->orderBy('create_at', 'desc')
                 ->get();
         foreach ($subjects as $value) {
-                $child = [['id' => 0, 'subject_name' => '全部']];
+                $child = [['id' => 0, 'name' => '全部']];
                 $value['childs'] = array_merge($child, Subject::where('parent_id', $value['id'])
-                ->select('id', 'subject_name', 'parent_id')
+                ->select('id', 'subject_name as name', 'parent_id as pid')
                 ->orderBy('create_at', 'desc')
                 ->get()->toArray());
         }
-        $all = [['id' => 0, 'name' => '全部', 'parent_id' => 0, 'childs' => []]];
+        $all = [['id' => 0, 'name' => '全部', 'pid' => 0, 'childs' => []]];
         $data['subjects'] = array_merge($all, json_decode($subjects));
         $data['sort'] = [
             ['sort_id' => 0, 'name' => '综合', 'type' => ['asc', 'desc']],
