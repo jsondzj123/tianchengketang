@@ -20,7 +20,7 @@ class LiveChildController extends Controller {
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
-           'course_id' => 'required',
+           'lesson_id' => 'required',
         ]);
         if ($validator->fails()) {
             return $this->response($validator->errors()->first(), 202);
@@ -29,7 +29,7 @@ class LiveChildController extends Controller {
         ->join("ld_course_livecast_resource","ld_course_live_resource.resource_id","=","ld_course_livecast_resource.id")
         ->join("ld_course_shift_no","ld_course_livecast_resource.id","=","ld_course_shift_no.resource_id")
         ->select(['ld_course_livecast_resource.id as resource_id','ld_course_shift_no.id as shift_no_id'])
-        ->where(["ld_course.status"=>1,"ld_course.is_del"=>0,'ld_course.id'=>$request->input('course_id')])->get();
+        ->where(["ld_course.status"=>1,"ld_course.is_del"=>0,'ld_course.id'=>$request->input('lesson_id')])->get();
         //获取班号
         //获取班号下所有课次
         $childs = [];

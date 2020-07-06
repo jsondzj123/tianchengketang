@@ -21,12 +21,12 @@ class LessonChildController extends Controller {
      */
     public function index(Request $request){
         $validator = Validator::make($request->all(), [
-            'course_id' => 'required',
+            'lesson_id' => 'required',
         ]);
         if ($validator->fails()) {
             return $this->response($validator->errors()->first(), 202);
         }
-        $course_id = $request->input('course_id');
+        $course_id = $request->input('lesson_id');
         if(isset(self::$accept_data['user_token']) && !empty(self::$accept_data['user_token'])){
             //判断token值是否合法
             $redis_token = Redis::hLen("user:regtoken:".self::$accept_data['user_token']);
@@ -40,19 +40,19 @@ class LessonChildController extends Controller {
 
         }
         //查询章
-        $chapters =  Coureschapters::select('id', 'name', 'parent_id')
+        $chapters =  Coureschapters::select('id', 'name', 'parent_id as pid')
                 ->where(['is_del'=> 0,'parent_id' => 0, 'course_id' => $course_id])
                 ->orderBy('create_at', 'desc')->get()->toArray();
 
         foreach ($chapters as $key => $value) {
             //查询小节
-            $chapters[$key]['child'] = Coureschapters::join("ld_course_video_resource","ld_course_chapters.resource_id","=","ld_course_video_resource.id")
+            $chapters[$key]['childs'] = Coureschapters::join("ld_course_video_resource","ld_course_chapters.resource_id","=","ld_course_video_resource.id")
                 ->select('ld_course_chapters.id','ld_course_chapters.name','ld_course_chapters.resource_id','ld_course_video_resource.course_id','ld_course_video_resource.mt_video_id','ld_course_video_resource.mt_duration')
                 ->where(['ld_course_chapters.is_del'=> 0, 'ld_course_chapters.parent_id' => $value['id'], 'ld_course_chapters.course_id' => $course_id])->get()->toArray();
         }
         foreach ($chapters as $k => &$v) {
             //获取用户使用课程时长
-            foreach($v['child'] as $kk => &$vv){
+            foreach($v['childs'] as $kk => &$vv){
                 if(isset(self::$accept_data['user_token']) && !empty(self::$accept_data['user_token'])){
                     $course_id = $vv['course_id'];
                     $MTCloud = new MTCloud();
@@ -63,7 +63,7 @@ class LessonChildController extends Controller {
             }
         }
         foreach($chapters as $k => &$v){
-            foreach($v['child'] as $kk => &$vv){
+            foreach($v['childs'] as $kk => &$vv){
                 if(count($vv['use_duration']) > 0){
                     foreach($vv['use_duration'] as $kkk => $vvv){
                         if($vvv['uid'] == $uid){
@@ -81,7 +81,7 @@ class LessonChildController extends Controller {
         }
 
         foreach($chapters as $k => &$v){
-                foreach($v['child'] as $k1 => &$vv){
+                foreach($v['childs'] as $k1 => &$vv){
                     if($vv['use_duration'] == 0){
                         $vv['use_duration'] = "未学习";
                     }else{

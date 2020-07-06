@@ -451,6 +451,7 @@ class IndexController extends Controller {
         }
     }
 
+
     /**
      * @param  description   首页课程接口
      * @param author    sxl
@@ -460,17 +461,26 @@ class IndexController extends Controller {
     public function getLessonList() {
         //获取提交的参数
         try{
-                $subject = Subject::select('id', 'subject_name as name')
+            $subject = Subject::select('id', 'subject_name as name')
                         ->where(['is_del' => 0,'parent_id' => 0])
                         ->limit(4)
-                        ->get();
+                        ->get()->toArray();
+            $lessons = [];
                 foreach($subject as $k =>$v){
-                    $subject[$k]['lesson'] = Lesson::join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
-                    ->select('ld_course.id', 'ld_course.title', 'ld_course.cover', 'ld_course.buy_num', 'ld_course.pricing as old_price', 'ld_course.sale_price')
+
+                    $lesson = Lesson::join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
+                    ->select('ld_course.id', 'ld_course.title', 'ld_course.cover', 'ld_course.buy_num', 'ld_course.pricing as old_price', 'ld_course.sale_price as favorable_price')
                     ->where(['ld_course.is_del' => 0, 'ld_course.is_recommend' => 1, 'ld_course.status' => 1,'ld_course.parent_id' => $v['id']])
                     ->get();
+                    if(!empty($lesson->toArray())){
+                        $arr = [
+                            'subject' => $v,
+                            'lesson' => $lesson,
+                        ];
+                        $lessons[] = $arr;
+                    }
                 }
-                foreach($subject as $k => $v){
+                foreach($lessons as $k => $v){
 
                     foreach($v['lesson'] as $kk => $vv){
 
@@ -491,9 +501,7 @@ class IndexController extends Controller {
                         }
                     }
                 }
-
-
-            return $this->response($subject);
+            return $this->response($lessons);
         } catch (Exception $ex) {
             return $this->response($ex->getMessage());
         }
