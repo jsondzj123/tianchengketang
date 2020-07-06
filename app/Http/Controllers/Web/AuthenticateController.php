@@ -108,7 +108,7 @@ class AuthenticateController extends Controller {
             //将数据插入到表中
             $user_id = User::insertGetId($user_data);
             if($user_id && $user_id > 0){
-                $user_info = ['user_id' => $user_id , 'user_token' => $token , 'user_type' => 1  , 'head_icon' => '' , 'real_name' => '' , 'phone' => $body['phone'] , 'nickname' => $nickname , 'sign' => '' , 'papers_type' => '' , 'papers_num' => '' , 'balance' => 0 , 'school_id' => $user_data['school_id']];
+                $user_info = ['user_id' => $user_id , 'user_token' => $token , 'user_type' => 1  , 'head_icon' => '' , 'real_name' => '' , 'phone' => $body['phone'] , 'nickname' => $nickname , 'sign' => '' , 'papers_type' => '' , 'papers_name' => '' , 'papers_num' => '' , 'balance' => 0 , 'school_id' => $user_data['school_id']];
                 //redis存储信息
                 Redis::hMset("user:regtoken:".$platform.":".$token , $user_info);
                 Redis::hMset("user:regtoken:".$platform.":".$body['phone'] , $user_info);
@@ -205,12 +205,14 @@ class AuthenticateController extends Controller {
             $user_info = [
                 'user_id'    => $user_login->id ,
                 'user_token' => $token , 
+                'user_type'  => 1 ,
                 'head_icon'  => $user_login->head_icon , 
                 'real_name'  => $user_login->real_name , 
                 'phone'      => $user_login->phone , 
                 'nickname'   => $user_login->nickname , 
                 'sign'       => $user_login->sign , 
                 'papers_type'=> $user_login->papers_type , 
+                'papers_name'=> $user_login->papers_type > 0 ? parent::getPapersNameByType($user_login->papers_type) : '',
                 'papers_num' => $user_login->papers_num ,
                 'balance'    => $user_login->balance > 0 ? floatval($user_login->balance) : 0 ,
                 'school_id'  => $user_login->school_id
@@ -219,6 +221,13 @@ class AuthenticateController extends Controller {
             //更新token
             $rs = User::where("phone" , $body['phone'])->update(["password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
             if($rs && !empty($rs)){
+                //判断是否设置了记住我
+                if(isset($body['is_remember']) && $body['is_remember'] == 1){
+                    //保存30天先
+                    setcookie("user_phone", $body['phone'] , time()+3600*24*30 , '/');
+                    setcookie("user_password", password_hash($body['password'] , PASSWORD_DEFAULT) , time()+3600*24*30 , '/'); 
+                }
+                
                 //事务提交
                 DB::commit();
                 

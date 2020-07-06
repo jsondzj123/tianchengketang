@@ -15,11 +15,17 @@ class UserAuthToken {
             return ['code' => 401 , 'msg' => '请登录账号'];
         } 
         
+        //获取请求的平台端
+        $platform = verifyPlat() ? verifyPlat() : 'pc';
+        
+        //hash中token赋值
+        $token_key   = "user:regtoken:".$platform.":".$token;
+        
         //判断token值是否合法
-        $redis_token = Redis::hLen("user:regtoken:".$token);
+        $redis_token = Redis::hLen($token_key);
         if($redis_token && $redis_token > 0) {
             //解析json获取用户详情信息
-            $json_info = Redis::hGetAll("user:regtoken:".$token);
+            $json_info = Redis::hGetAll($token_key);
             
             //判断是正常用户还是游客用户
             if($json_info['user_type'] && $json_info['user_type'] == 1){
@@ -29,18 +35,13 @@ class UserAuthToken {
                     return ['code' => 401 , 'msg' => '请登录账号'];
                 }
                 
-                //判断用户是否在其他设备登录
-                /*if($user_info['token'] != $token){
-                    return ['code' => 206 , 'msg' => '您已在其他设备上登录'];
-                }*/
-                
                 //判断用户是否被禁用
                 if($user_info['is_forbid'] == 2){
                     return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
                 }
-            } else {
-                //通过token获取用户信息
-                $user_info = User::select("id as user_id" , "is_forbid")->where("token" , $token)->first();
+            } else if($json_info['user_type'] && $json_info['user_type'] == 2){
+                //通过device获取用户信息
+                $user_info = User::select("id as user_id" , "is_forbid")->where("device" , $json_info['device'])->first();
                 if(!$user_info || empty($user_info)){
                     return ['code' => 401 , 'msg' => '请登录账号'];
                 }
@@ -51,30 +52,8 @@ class UserAuthToken {
                 }
             }
         } else {
-            //通过token获取用户信息
-            $user_info = User::select("id as user_id" , "is_forbid")->where("token" , $token)->first();
-            if(!$user_info || empty($user_info)){
-                return ['code' => 401 , 'msg' => '请登录账号'];
-            }
-            
-            //判断用户是否被禁用
-            if($user_info['is_forbid'] == 2){
-                return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
-            }
-            $json_info = $user_info->toArray();
+            return ['code' => 401 , 'msg' => '请登录账号'];
         }
-
-        //从redis中获取token相关信息
-        //第一种方法赋值:$request->offsetSet('user_token_info' , json_decode(Redis::get("user:regtoken:".$token) , true));  //添加参数
-        /****
-         * 例如:public function doUpdateUser(Request $request) {}
-         */
-        //第二种方法赋值:$_REQUEST['user_info'] = json_decode(Redis::get("user:regtoken:".$token) , true);
-        /****
-         * 例如:public function doUpdateUser() {
-         *     self::$accept_data
-         * }
-         */
         $_REQUEST['user_info'] = $json_info;
         return $next($request);//进行下一步(即传递给控制器)
     }

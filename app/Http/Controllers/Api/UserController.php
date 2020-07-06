@@ -59,6 +59,12 @@ class UserController extends Controller {
                 return response()->json(['code' => 202 , 'msg' => '传递数据不合法']);
             }
             
+            //获取请求的平台端
+            $platform = verifyPlat() ? verifyPlat() : 'pc';
+            
+            //hash中的token的key值
+            $token_key   = "user:regtoken:".$platform.":".$body['user_token'];
+            
             //空数组赋值
             $where = [];
             
@@ -66,28 +72,28 @@ class UserController extends Controller {
             if(isset($body['head_icon']) && !empty($body['head_icon'])){
                 $where['head_icon'] = $body['head_icon'];
                 //设置redis的头像值
-                Redis::hSet("user:regtoken:".$body['user_token'] , 'head_icon' , $body['head_icon']);
+                Redis::hSet($token_key , 'head_icon' , $body['head_icon']);
             }
             
             //判断姓名是否为空
             if(isset($body['real_name']) && !empty($body['real_name'])){
                 $where['real_name'] = $body['real_name'];
                 //设置redis的姓名值
-                Redis::hSet("user:regtoken:".$body['user_token'] , 'real_name' , $body['real_name']);
+                Redis::hSet($token_key , 'real_name' , $body['real_name']);
             }
             
             //判断昵称是否为空
             if(isset($body['nickname']) && !empty($body['nickname'])){
                 $where['nickname']  = $body['nickname'];
                 //设置redis的昵称值
-                Redis::hSet("user:regtoken:".$body['user_token'] , 'nickname' , $body['nickname']);
+                Redis::hSet($token_key , 'nickname' , $body['nickname']);
             }
             
             //判断签名是否为空
             if(isset($body['sign']) && !empty($body['sign'])){
                 $where['sign']      = $body['sign'];
                 //设置redis的签名值
-                Redis::hSet("user:regtoken:".$body['user_token'] , 'sign' , $body['sign']);
+                Redis::hSet($token_key , 'sign' , $body['sign']);
             }
             
             //判断证件名称是否为空
@@ -96,14 +102,14 @@ class UserController extends Controller {
                 $papers_type = array_search($body['papers_name'], [1=>'身份证' , 2=>'护照' , 3=>'港澳通行证' , 4=>'台胞证' , 5=>'军官证' , 6=>'士官证' , 7=>'其他']);
                 $where['papers_type'] = $papers_type ? $papers_type : 0;
                 //设置redis的证件值
-                Redis::hMset("user:regtoken:".$body['user_token'] , ['papers_type' => $where['papers_type'] , 'papers_name' => parent::getPapersNameByType($where['papers_type'])]);
+                Redis::hMset($token_key , ['papers_type' => $where['papers_type'] , 'papers_name' => parent::getPapersNameByType($where['papers_type'])]);
             }
             
             //判断证件号码是否为空
             if(isset($body['papers_num']) && !empty($body['papers_num'])){
                 $where['papers_num'] = $body['papers_num'];
                 //设置redis的证件号码值
-                Redis::hSet("user:regtoken:".$body['user_token'] , 'papers_num' , $body['papers_num']);
+                Redis::hSet($token_key , 'papers_num' , $body['papers_num']);
             }
             $where['update_at']  = date('Y-m-d H:i:s');
             
@@ -138,23 +144,17 @@ class UserController extends Controller {
             //获取用户token
             $token   =   self::$accept_data['user_info']['user_token'];
             
-            //开启事务
-            DB::beginTransaction();
-            
-            //通过用户token删除表中对应的记录
-            $delete_token = Student::where("token" , $token)->update(["token" => ""]);
-            if($delete_token && !empty($delete_token)){
-                //删除redis中用户token
-                Redis::del("user:regtoken:".$token);
-                
-                //事务提交
-                DB::commit();
-                return response()->json(['code' => 200 , 'msg' => '退出成功']);
-            } else {
-                //事务回滚
-                DB::rollBack();
-                return response()->json(['code' => 203 , 'msg' => '退出失败']);
-            }
+            //获取请求的平台端
+            $platform = verifyPlat() ? verifyPlat() : 'pc';
+
+            //hash中的token的key值
+            $token_key   = "user:regtoken:".$platform.":".$token;
+            $token_phone = "user:regtoken:".$platform.":".self::$accept_data['user_info']['phone'];
+
+            //删除redis中用户token
+            Redis::del($token_key);
+            Redis::del($token_phone);
+            return response()->json(['code' => 200 , 'msg' => '退出成功']);
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }

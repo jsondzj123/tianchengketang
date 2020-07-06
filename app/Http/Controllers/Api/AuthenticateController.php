@@ -301,7 +301,8 @@ class AuthenticateController extends Controller {
                     'papers_name'=> $student_info->papers_type > 0 ? parent::getPapersNameByType($student_info->papers_type) : '',
                     'papers_num' => $student_info->papers_num ,
                     'balance'    => $student_info->balance > 0 ? floatval($student_info->balance) : 0 ,
-                    'school_id'  => $student_info->school_id
+                    'school_id'  => $student_info->school_id ,
+                    'device'     => isset($body['device']) && !empty($body['device']) ? $body['device'] : ''
                 ];
                 
                 //更新token
@@ -358,7 +359,8 @@ class AuthenticateController extends Controller {
                         'papers_name'=> '' ,
                         'papers_num' => '' ,
                         'balance'    => 0  ,
-                        'school_id'  => 1
+                        'school_id'  => 1  ,
+                        'device'     => isset($body['device']) && !empty($body['device']) ? $body['device'] : ''
                     ];
 
                     //事务提交
