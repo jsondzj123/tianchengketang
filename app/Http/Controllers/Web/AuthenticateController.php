@@ -10,6 +10,8 @@ use App\Models\School;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use Lysice\Sms\Facade\SmsFacade;
+use Illuminate\Support\Facades\Cookie;
+use Symfony\Component\HttpFoundation\Cookie as SCookie;
 
 class AuthenticateController extends Controller {
     /*
@@ -221,13 +223,6 @@ class AuthenticateController extends Controller {
             //更新token
             $rs = User::where("phone" , $body['phone'])->update(["password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
             if($rs && !empty($rs)){
-                //判断是否设置了记住我
-                if(isset($body['is_remember']) && $body['is_remember'] == 1){
-                    //保存30天先
-                    setcookie("user_phone", $body['phone'] , time()+3600*24*30 , '/');
-                    setcookie("user_password", password_hash($body['password'] , PASSWORD_DEFAULT) , time()+3600*24*30 , '/'); 
-                }
-                
                 //事务提交
                 DB::commit();
                 
@@ -247,7 +242,13 @@ class AuthenticateController extends Controller {
                 //事务回滚
                 DB::rollBack();
             }
-            return response()->json(['code' => 200 , 'msg' => '登录成功' , 'data' => ['user_info' => $user_info]]);
+            
+            //判断是否设置了记住我
+            if(isset($body['is_remember']) && $body['is_remember'] == 1){
+                return response()->json(['code' => 200 , 'msg' => '登录成功' , 'data' => ['user_info' => $user_info]])->withCookie(new SCookie('user_phone', $body['phone'] , time()+3600*24*30)) ->withCookie(new SCookie('user_password', password_hash($body['password'] , PASSWORD_DEFAULT) , time()+3600*24*30));
+            } else {
+                return response()->json(['code' => 200 , 'msg' => '登录成功' , 'data' => ['user_info' => $user_info]]);
+            }
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
