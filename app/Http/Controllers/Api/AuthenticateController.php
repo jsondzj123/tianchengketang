@@ -82,6 +82,9 @@ class AuthenticateController extends Controller {
             
             //正常用户昵称
             $nickname = randstr(8);
+            
+            //获取请求的平台端
+            $platform = verifyPlat() ? verifyPlat() : 'pc';
 
             //开启事务
             DB::beginTransaction();
@@ -91,7 +94,6 @@ class AuthenticateController extends Controller {
                 'phone'     =>    $body['phone'] ,
                 'password'  =>    password_hash($body['password'] , PASSWORD_DEFAULT) ,
                 'nickname'  =>    $nickname ,
-                'token'     =>    $token ,
                 'device'    =>    isset($body['device']) && !empty($body['device']) ? $body['device'] : '' ,
                 'reg_source'=>    1 ,
                 'school_id' =>    1 ,
@@ -104,7 +106,8 @@ class AuthenticateController extends Controller {
             if($user_id && $user_id > 0){
                 $user_info = ['user_id' => $user_id , 'user_token' => $token , 'user_type' => 1  , 'head_icon' => '' , 'real_name' => '' , 'phone' => $body['phone'] , 'nickname' => $nickname , 'sign' => '' , 'papers_type' => '' , 'papers_name' => '' , 'papers_num' => '' , 'balance' => 0 , 'school_id' => 1];
                 //redis存储信息
-                Redis::hMset("user:regtoken:".$token , $user_info);
+                Redis::hMset("user:regtoken:".$platform.":".$token , $user_info);
+                Redis::hMset("user:regtoken:".$platform.":".$body['phone'] , $user_info);
                 
                 //事务提交
                 DB::commit();
@@ -166,7 +169,14 @@ class AuthenticateController extends Controller {
             }
             
             //生成随机唯一的token
-            //$token = self::setAppLoginToken($body['phone']);
+            $token = self::setAppLoginToken($body['phone']);
+            
+            //获取请求的平台端
+            $platform = verifyPlat() ? verifyPlat() : 'pc';
+            
+            //hash中的token的key值
+            $token_key   = "user:regtoken:".$platform.":".$token;
+            $token_phone = "user:regtoken:".$platform.":".$body['phone'];
             
             //开启事务
             DB::beginTransaction();
@@ -187,17 +197,10 @@ class AuthenticateController extends Controller {
                 return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
             }
 
-            //判断redis中值是否存在
-            /*$hash_len = Redis::hLen("user:regtoken:".$user_login->token);
-            if($hash_len && $hash_len > 0){
-                //清除老的redis的key值
-                Redis::del("user:regtoken:".$user_login->token);
-            }*/
-
             //用户详细信息赋值
             $user_info = [
                 'user_id'    => $user_login->id ,
-                'user_token' => $user_login->token , 
+                'user_token' => $token , 
                 'user_type'  => 1 ,
                 'head_icon'  => $user_login->head_icon , 
                 'real_name'  => $user_login->real_name , 
@@ -211,15 +214,24 @@ class AuthenticateController extends Controller {
                 'school_id'  => $user_login->school_id
             ];
 
-            //redis存储信息
-            //Redis::hMset("user:regtoken:".$token , $user_info);
-
             //更新token
-            //$rs = User::where("phone" , $body['phone'])->update(["token" => $token , "password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
             $rs = User::where("phone" , $body['phone'])->update(["password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
             if($rs && !empty($rs)){
                 //事务提交
                 DB::commit();
+                
+                //判断redis中值是否存在
+                $hash_len = Redis::hLen($token_phone);
+                if($hash_len && $hash_len > 0){
+                    //获取手机号下面对应的token信息
+                    $key_info = Redis::hMGet($token_phone , ['user_token']);
+                    Redis::del("user:regtoken:".$platform.":".$key_info[0]);
+                    Redis::del($token_phone);
+                }
+                
+                //redis存储信息
+                Redis::hMset($token_key , $user_info);
+                Redis::hMset($token_phone , $user_info);
             } else {
                 //事务回滚
                 DB::rollBack();
@@ -255,6 +267,13 @@ class AuthenticateController extends Controller {
             //生成随机唯一的token
             $token = self::setAppLoginToken($body['device']);
             
+            //获取请求的平台端
+            $platform = verifyPlat() ? verifyPlat() : 'pc';
+            
+            //hash中的token的key值
+            $token_key    = "user:regtoken:".$platform.":".$token;
+            $token_device = "user:regtoken:".$platform.":".$body['device'];
+            
             //通过设备唯一标识判断是否注册过
             $student_info = User::where("device" , $body['device'])->first();
             
@@ -268,13 +287,10 @@ class AuthenticateController extends Controller {
                     return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
                 }
                 
-                //清除老的redis的key值
-                //Redis::del("user:regtoken:".$student_info->token);
-                
                 //用户详细信息赋值
                 $user_info = [
                     'user_id'    => $student_info->id ,
-                    'user_token' => $student_info->token , 
+                    'user_token' => $token , 
                     'user_type'  => 2 ,
                     'head_icon'  => $student_info->head_icon , 
                     'real_name'  => $student_info->real_name , 
@@ -288,15 +304,24 @@ class AuthenticateController extends Controller {
                     'school_id'  => $student_info->school_id
                 ];
                 
-                //redis存储信息
-                //Redis::hMset("user:regtoken:".$token , $user_info);
-                
                 //更新token
-                //$rs = User::where("device" , $body['device'])->update(["token" => $token , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
                 $rs = User::where("device" , $body['device'])->update(["update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
                 if($rs && !empty($rs)){
                     //事务提交
                     DB::commit();
+                    
+                    //判断redis中值是否存在
+                    $hash_len = Redis::hLen($token_device);
+                    if($hash_len && $hash_len > 0){
+                        //获取设备下面对应的token信息
+                        $key_info = Redis::hMGet($token_device , ['user_token']);
+                        Redis::del("user:regtoken:".$platform.":".$key_info[0]);
+                        Redis::del($token_device);
+                    }
+
+                    //redis存储信息
+                    Redis::hMset($token_key , $user_info);
+                    Redis::hMset($token_device , $user_info);
                     return response()->json(['code' => 200 , 'msg' => '登录成功' , 'data' => ['user_info' => $user_info]]);
                 } else {
                     //事务回滚
@@ -309,7 +334,6 @@ class AuthenticateController extends Controller {
                 
                 //封装成数组
                 $user_data = [
-                    'token'     =>    $token ,
                     'device'    =>    isset($body['device']) && !empty($body['device']) ? $body['device'] : '' ,
                     'reg_source'=>    1 ,
                     'school_id' =>    1 ,
@@ -336,12 +360,13 @@ class AuthenticateController extends Controller {
                         'balance'    => 0  ,
                         'school_id'  => 1
                     ];
-                
-                    //redis存储信息
-                    Redis::hMset("user:regtoken:".$token , $user_info);
 
                     //事务提交
                     DB::commit();
+                    
+                    //redis存储信息
+                    Redis::hMset($token_key , $user_info);
+                    Redis::hMset($token_device , $user_info);
                     return response()->json(['code' => 200 , 'msg' => '登录成功' , 'data' => ['user_info' => $user_info]]);
                 } else {
                     //事务回滚
