@@ -314,7 +314,7 @@ class Article extends Model {
             return ['code' => 202 , 'msg' => '更新失败'];
         }
     }
-    public static function schoolANDtype($role_id,$school_id){
+    public static function schoolANDtype($role_id,$school_id=0){
         if($role_id == 1){
             if($school_id != 0){
                 $type = Articletype::select('id as value','typename as label')->where(['status'=>1,'is_del'=>1,'school_id'=>$school_id])->get()->toArray();
