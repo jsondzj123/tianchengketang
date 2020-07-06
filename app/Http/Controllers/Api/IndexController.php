@@ -469,7 +469,7 @@ class IndexController extends Controller {
                 foreach($subject as $k =>$v){
 
                     $lesson = Lesson::join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
-                    ->select('ld_course.id', 'ld_course.title', 'ld_course.cover', 'ld_course.buy_num', 'ld_course.pricing as old_price', 'ld_course.sale_price')
+                    ->select('ld_course.id', 'ld_course.title', 'ld_course.cover', 'ld_course.buy_num', 'ld_course.pricing as old_price', 'ld_course.sale_price as favorable_price')
                     ->where(['ld_course.is_del' => 0, 'ld_course.is_recommend' => 1, 'ld_course.status' => 1,'ld_course.parent_id' => $v['id']])
                     ->get();
                     if(!empty($lesson->toArray())){

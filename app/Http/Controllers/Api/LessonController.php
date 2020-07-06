@@ -115,10 +115,14 @@ class LessonController extends Controller {
         if ($validator->fails()) {
             return $this->response($validator->errors()->first(), 202);
         }
-        $lesson = Lesson::find($request->input('id'));
+        $lesson = Lesson::select("*","pricing as price","sale_price as favorable_price","expiry as ttl")->find($request->input('id'));
         if(empty($lesson)){
             return $this->response('课程不存在', 404);
         }
+        //该课程下所有的课时数
+        //该课程下所有的
+        // join('ld_course_class_number','ld_course_shift_no.id','=','ld_course_class_number.shift_no_id')
+        // ->where("resource_id",$one['id'])->sum("class_hour");
         Lesson::where('id', $request->input('id'))->update(['watch_num' => DB::raw('watch_num + 1'),'update_at'=>date('Y-m-d H:i:s')]);
         return $this->response($lesson);
     }
