@@ -477,11 +477,11 @@ class LiveChild extends Model {
                 $list = CourseMaterial::select("id","type","material_name","material_size","material_url")->where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>3])->get();
                 foreach($list as $k => $v){
                     if($v['type'] == 1){
-                        $v['type_name'] = "材料";
+                        $v['typeName'] = "材料";
                     }else if($v['type'] == 2){
-                        $v['type_name'] = "辅料";
+                        $v['typeName'] = "辅料";
                     }else{
-                        $v['type_name'] = "其他";
+                        $v['typeName'] = "其他";
                     }
                 }
                 return ['code' => 200 , 'msg' => '获取课次资料列表成功' , 'data' => ['LiveClass_list_child_Material' => $list]];
