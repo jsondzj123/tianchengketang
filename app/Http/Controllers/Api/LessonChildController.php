@@ -21,12 +21,12 @@ class LessonChildController extends Controller {
      */
     public function index(Request $request){
         $validator = Validator::make($request->all(), [
-            'course_id' => 'required',
+            'lesson_id' => 'required',
         ]);
         if ($validator->fails()) {
             return $this->response($validator->errors()->first(), 202);
         }
-        $course_id = $request->input('course_id');
+        $course_id = $request->input('lesson_id');
         if(isset(self::$accept_data['user_token']) && !empty(self::$accept_data['user_token'])){
             //判断token值是否合法
             $redis_token = Redis::hLen("user:regtoken:".self::$accept_data['user_token']);
