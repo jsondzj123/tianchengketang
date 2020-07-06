@@ -444,7 +444,7 @@ class IndexController extends Controller {
     public function getSubjectList() {
         //获取提交的参数
         try{
-            $subject = Subject::select('id', 'subject_name')->where(['is_del' => 0,'parent_id' => 0])->limit(6)->get();
+            $subject = Subject::select('id', 'subject_name as name')->where(['is_del' => 0,'parent_id' => 0])->limit(6)->get();
             return $this->response($subject);
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
@@ -460,7 +460,7 @@ class IndexController extends Controller {
     public function getLessonList() {
         //获取提交的参数
         try{
-                $subject = Subject::select('id', 'subject_name')
+                $subject = Subject::select('id', 'subject_name as name')
                         ->where(['is_del' => 0,'parent_id' => 0])
                         ->limit(4)
                         ->get();
