@@ -29,10 +29,14 @@ class LessonChildController extends Controller {
         $course_id = $request->input('lesson_id');
         if(isset(self::$accept_data['user_token']) && !empty(self::$accept_data['user_token'])){
             //判断token值是否合法
-            $redis_token = Redis::hLen("user:regtoken:".self::$accept_data['user_token']);
+            //获取请求的平台端
+            $platform = verifyPlat() ? verifyPlat() : 'pc';
+
+            $key  = "user:regtoken:".$platform.":".self::$accept_data['user_token'];
+            $redis_token = Redis::hLen($key);
                 if($redis_token && $redis_token > 0) {
                     //通过token获取用户信息
-                    $json_info = Redis::hGetAll("user:regtoken:".self::$accept_data['user_token']);
+                    $json_info = Redis::hGetAll($key);
                     $uid       = $json_info['user_id'];
                 } else {
                     return $this->response('请登录账号', 401);

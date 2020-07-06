@@ -25,18 +25,18 @@ class UserAuthToken {
             //判断用户token是否为空
             if(!$token || empty($token)){
                 return ['code' => 401 , 'msg' => '请登录账号'];
-            } 
-            
+            }
+
             //hash中token赋值
             $token_key   = "user:regtoken:".$platform.":".$token;
         }
-        
+
         //判断token值是否合法
         $redis_token = Redis::hLen($token_key);
         if($redis_token && $redis_token > 0) {
             //解析json获取用户详情信息
             $json_info = Redis::hGetAll($token_key);
-            
+
             //判断是正常用户还是游客用户
             if($json_info['user_type'] && $json_info['user_type'] == 1){
                 //根据手机号获取用户详情
@@ -44,7 +44,7 @@ class UserAuthToken {
                 if(!$user_info || empty($user_info)){
                     return ['code' => 401 , 'msg' => '请登录账号'];
                 }
-                
+
                 //判断用户是否被禁用
                 if($user_info['is_forbid'] == 2){
                     return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
@@ -55,7 +55,7 @@ class UserAuthToken {
                 if(!$user_info || empty($user_info)){
                     return ['code' => 401 , 'msg' => '请登录账号'];
                 }
-                
+
                 //判断用户是否被禁用
                 if($user_info['is_forbid'] == 2){
                     return response()->json(['code' => 207 , 'msg' => '账户已禁用']);

@@ -116,22 +116,22 @@ class OrderController extends Controller
         $offset   = ($page - 1) * $pagesize;
         $student_id = $data['user_info']['user_id'];
         $count = Order::where(['student_id'=>$data['user_info']['user_id'],'status'=>2,'oa_status'=>1])->count();
-        $orderlist = Order::select('ld_course.id','ld_course.admin_id','ld_course.title','ld_course.cover','ld_course.pricing','ld_course.sale_price','ld_course.buy_num','ld_course.status','ld_course.is_del','ld_order.id as orderid')
+        $orderlist = Order::select('ld_course.id','ld_course.admin_id','ld_course.title','ld_course.cover','ld_course.pricing as price','ld_course.sale_price as favorable_price','ld_course.buy_num','ld_course.status','ld_course.is_del','ld_order.id as orderid')
             ->leftJoin('ld_course','ld_course.id','=','ld_order.class_id')
             ->where(['ld_order.student_id'=>$student_id,'ld_order.status'=>2,'ld_order.oa_status'=>1,'ld_course.is_del'=>0,'ld_course.status'=>1])
             ->orderByDesc('ld_order.id')
             ->offset($offset)->limit($pagesize)->get()->toArray();
         foreach ($orderlist as $k=>&$v){
-            $method = Couresmethod::select('method_id')->where(['course_id'=>$v['id']])->get()->toArray();
+            $method = Couresmethod::select('method_id as id')->where(['course_id'=>$v['id']])->get()->toArray();
             foreach ($method as $key=>&$val){
-                if($val['method_id'] == 1){
-                    $val['method_name'] = '直播';
+                if($val['id'] == 1){
+                    $val['name'] = '直播';
                 }
-                if($val['method_id'] == 2){
-                    $val['method_name'] = '录播';
+                if($val['id'] == 2){
+                    $val['name'] = '录播';
                 }
-                if($val['method_id'] == 3){
-                    $val['method_name'] = '其他';
+                if($val['id'] == 3){
+                    $val['name'] = '其他';
                 }
             }
             $v['methods'] = $method;
