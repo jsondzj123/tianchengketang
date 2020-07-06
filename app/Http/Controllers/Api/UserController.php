@@ -35,7 +35,7 @@ class UserController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
-    
+
     /*
      * @param  description   用户更新信息方法
      * @param  参数说明       body包含以下参数[
@@ -58,44 +58,44 @@ class UserController extends Controller {
             if(!$body || !is_array($body)){
                 return response()->json(['code' => 202 , 'msg' => '传递数据不合法']);
             }
-            
+
             //获取请求的平台端
             $platform = verifyPlat() ? verifyPlat() : 'pc';
-            
+
             //hash中的token的key值
             $token_key   = "user:regtoken:".$platform.":".$body['user_token'];
-            
+
             //空数组赋值
             $where = [];
-            
+
             //判断头像是否为空
             if(isset($body['head_icon']) && !empty($body['head_icon'])){
                 $where['head_icon'] = $body['head_icon'];
                 //设置redis的头像值
                 Redis::hSet($token_key , 'head_icon' , $body['head_icon']);
             }
-            
+
             //判断姓名是否为空
             if(isset($body['real_name']) && !empty($body['real_name'])){
                 $where['real_name'] = $body['real_name'];
                 //设置redis的姓名值
                 Redis::hSet($token_key , 'real_name' , $body['real_name']);
             }
-            
+
             //判断昵称是否为空
             if(isset($body['nickname']) && !empty($body['nickname'])){
                 $where['nickname']  = $body['nickname'];
                 //设置redis的昵称值
                 Redis::hSet($token_key , 'nickname' , $body['nickname']);
             }
-            
+
             //判断签名是否为空
             if(isset($body['sign']) && !empty($body['sign'])){
                 $where['sign']      = $body['sign'];
                 //设置redis的签名值
                 Redis::hSet($token_key , 'sign' , $body['sign']);
             }
-            
+
             //判断证件名称是否为空
             if(isset($body['papers_name']) && !empty($body['papers_name'])){
                 //根据证件名称获取证件类的id
@@ -104,7 +104,7 @@ class UserController extends Controller {
                 //设置redis的证件值
                 Redis::hMset($token_key , ['papers_type' => $where['papers_type'] , 'papers_name' => parent::getPapersNameByType($where['papers_type'])]);
             }
-            
+
             //判断证件号码是否为空
             if(isset($body['papers_num']) && !empty($body['papers_num'])){
                 $where['papers_num'] = $body['papers_num'];
@@ -112,10 +112,10 @@ class UserController extends Controller {
                 Redis::hSet($token_key , 'papers_num' , $body['papers_num']);
             }
             $where['update_at']  = date('Y-m-d H:i:s');
-            
+
             //开启事务
             DB::beginTransaction();
-            
+
             //更新用户信息
             $rs = Student::where("id" , $body['user_info']['user_id'])->update($where);
             if($rs && !empty($rs)){
@@ -131,8 +131,8 @@ class UserController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
-    
-    
+
+
     /*
      * @param  description   用户退出登录接口
      * @param author    dzj
@@ -143,7 +143,7 @@ class UserController extends Controller {
         try {
             //获取用户token
             $token   =   self::$accept_data['user_info']['user_token'];
-            
+
             //获取请求的平台端
             $platform = verifyPlat() ? verifyPlat() : 'pc';
 

@@ -37,11 +37,11 @@ class LiveClass extends Model {
             $list = self::where(['is_del'=>0,'resource_id'=>$resource_id])->offset($offset)->limit($pagesize)->get();
             foreach($list as $k => $v){
                 //添加总课次
-                $list[$k]['class_num'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where('ld_course_class_number.shift_no_id',$v['id'])->count();
+                $list[$k]['class_num'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where(['ld_course_class_number.shift_no_id'=>$v['id'],'ld_course_class_number.is_del'=>0])->count();
                 //已上课次 课程开始时间超过当前时间
-                $list[$k]['class_num_passed'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where('ld_course_class_number.shift_no_id',$v['id'])->where('ld_course_class_number.start_at','<',time())->count();
+                $list[$k]['class_num_passed'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where('ld_course_class_number.shift_no_id',$v['id'])->where('ld_course_class_number.start_at','<',time())->where('ld_course_class_number.is_del',0)->count();
                 //待上课次  课程开始时间未超过当前时间
-                $list[$k]['class_num_not'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where('ld_course_class_number.shift_no_id',$v['id'])->where('ld_course_class_number.start_at','>',time())->count();
+                $list[$k]['class_num_not'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where('ld_course_class_number.shift_no_id',$v['id'])->where('ld_course_class_number.start_at','>',time())->where('ld_course_class_number.is_del',0)->count();
                 // 课次名称 关联老师名称  课次时间
                 $list[$k]['class_child'] = self::leftjoin("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
                 ->select("ld_course_class_number.id","ld_course_class_number.name","ld_course_class_number.start_at","ld_course_class_number.end_at")
