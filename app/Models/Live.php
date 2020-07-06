@@ -382,7 +382,12 @@ class Live extends Model {
                     }
                 })->get();
                 foreach($list as $k => $live){
-                    $live['subject_child_name'] = Subject::where("is_del",0)->where("id",$live['child_id'])->select("subject_name")->first()['subject_name'];
+                    $res = Subject::where("is_del",0)->where("id",$live['child_id'])->select("subject_name")->first()['subject_name'];
+                    if(!empty($res)){
+                        $live['subject_child_name'] = $res;
+                    }else{
+                        $live['subject_child_name'] = "";
+                    }
                 }
             }else{
                 $list = Coures::join('ld_course_subject','ld_course_subject.id','=','ld_course.parent_id')->select('*','ld_course.parent_id','ld_course.child_id','ld_course.id','ld_course.create_at','ld_course.admin_id')->where(function($query) use ($data){
@@ -408,11 +413,16 @@ class Live extends Model {
                     }
                 })->get();
                 foreach($list as $k => $live){
-                    $live['subject_child_name'] = Subject::where("is_del",0)->where("id",$live['child_id'])->select("subject_name")->first()['subject_name'];
+                    $res = Subject::where("is_del",0)->where("id",$live['child_id'])->select("subject_name")->first()['subject_name'];
+                    if(!empty($res)){
+                        $live['subject_child_name'] = $res;
+                    }else{
+                        $live['subject_child_name'] = "";
+                    }
                 }
             }
+            return ['code' => 200 , 'msg' => '获取课程列表成功' , 'data' => $list];
 
-            dd($list->toArray());
         }
 
         //资源关联课程
