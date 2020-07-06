@@ -423,6 +423,7 @@ class LiveChild extends Model {
 
         //添加班号课次资料
         public static function uploadLiveClassChild($data){
+            unset($data["/admin/uploadLiveClassChild"]);
             //课次id
             if(empty($data['parent_id']) || !isset($data['parent_id'])){
                 return ['code' => 201 , 'msg' => '课次id不能为空'];

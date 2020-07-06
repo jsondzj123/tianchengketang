@@ -268,6 +268,7 @@ class LiveClass extends Model {
         //添加班号课程资料
         public static function uploadLiveClass($data){
             //班号id
+            unset($data["/admin/uploadLiveClass"]);
             if(empty($data['parent_id']) || !isset($data['parent_id'])){
                 return ['code' => 201 , 'msg' => '班号id不能为空'];
             }
