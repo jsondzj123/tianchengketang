@@ -35,7 +35,8 @@ class CourseController extends Controller {
         //授权学科
         $course = CourseSchool::select('ld_course.parent_id')
                   ->leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
-                  ->where(['ld_course_school.to_school_id'=>$this->school,'ld_course_school.is_del'=>0,'ld_course.is_del'=>0])->get();
+                  ->where(['ld_course_school.to_school_id'=>$this->school,'ld_course_school.is_del'=>0,'ld_course.is_del'=>0])->groupBy('parent_id');
+        print_r($course);die;
 
     }
     /*

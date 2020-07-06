@@ -120,6 +120,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     });
     //课程（szw）
     $router->group(['prefix' => 'course'], function () use ($router) {
+        $router->post('subjectList','CourseController@subjectList');//学科列表
         $router->post('courseList','CourseController@courseList');//课程列表
     });
 });
