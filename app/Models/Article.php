@@ -4,7 +4,6 @@ namespace App\Models;
 use App\Tools\CurrentAdmin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Redis;
-
 class Article extends Model {
     //指定别的表名
     public $table = 'ld_article';
