@@ -130,7 +130,14 @@ class CourseLiveResource extends Model {
         }
         $resource = json_decode($data['id'],true);
         if(!empty($resource)){
-            self::where(['course_id'=>$data['course_id']])->update(['is_del'=>1]);
+            $glarr = self::where(['course_id'=>$data['course_id'],'is_del'=>0])->get();
+            foreach ($glarr as $k=>$v){
+                self::where(['id'=>$v['id']])->update(['is_del'=>1]);
+                $findv = self::where(['is_del'=>0,'resource_id'=>$v['resource_id']])->count();
+                if($findv <= 0){
+                    Live::where(['id'=>$v['resource_id']])->update(['is_forbid'=>0,'update_at'=>date('Y-m-d H:i:s')]);
+                }
+            }
             foreach ($resource as $k=>$v){
                 $resourceones = self::where(['course_id'=>$data['course_id'],'resource_id'=>$v])->first();
                 if($resourceones){
