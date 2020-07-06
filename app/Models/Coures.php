@@ -421,9 +421,9 @@ class Coures extends Model {
                 $shift_no = LiveClass::where(['resource_id'=>$v['resource_id'],'is_del'=>0,'is_forbid'=>0])->get()->toArray();
                 foreach ($shift_no as $ks=>&$vs){
                     //查询课次
-                    $class_num = LiveClass::where(['shift_no_id'=>$vs['id'],'is_del'=>0,'status'=>1])->count();
+                    $class_num = LiveChild::where(['shift_no_id'=>$vs['id'],'is_del'=>0,'status'=>1])->count();
                     //课时
-                    $class_time = LiveClass::where(['shift_no_id'=>$vs['id'],'is_del'=>0,'status'=>1])->sum('class_hour');
+                    $class_time = LiveChild::where(['shift_no_id'=>$vs['id'],'is_del'=>0,'status'=>1])->sum('class_hour');
                     $vs['class_num'] = $class_num;
                     $vs['class_time'] = $class_time;
                 }

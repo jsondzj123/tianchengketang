@@ -25,7 +25,18 @@ class CourseController extends Controller {
          */
     public function subjectList(){
         //自增学科
-        $subject = CouresSubject::where(['school_id'=>$this->school,''])->get();
+        $subject = CouresSubject::where(['school_id'=>$this->school,'parent_id'=>0,'is_open'=>0,'is_del'=>0])->get();
+        if(!empty($subject)){
+            foreach ($subject as $k=>&$v){
+                $subject = CouresSubject::where(['parent_id'=>$v['id'],'is_open'=>0,'is_del'=>0])->get();
+                $v['son'] = $subject;
+            }
+        }
+        //授权学科
+        $course = CourseSchool::select('ld_course.parent_id')
+                  ->leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
+                  ->where(['ld_course_school.to_school_id'=>$this->school,'ld_course_school.is_del'=>0,'ld_course.is_del'=>0])->get();
+
     }
     /*
          * @param  课程列表
