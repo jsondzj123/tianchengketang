@@ -421,9 +421,25 @@ class IndexController extends Controller {
 
             //获取名师课程列表
             $teacher_lesson_list = Lesson::join('ld_course_teacher','ld_course_teacher.course_id','=','ld_course.id')
-                    ->select('ld_course.id', 'admin_id', 'title', 'cover', 'pricing', 'sale_price', 'buy_num', 'status', 'ld_course.is_del')
-                    ->where(['ld_course.is_del'=> 0, 'ld_course.status' => 1])
+                    ->select('ld_course.id', 'admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'ld_course.is_del')
+                    ->where(['ld_course.is_del'=> 0, 'ld_course.status' => 1,'ld_course_teacher.teacher_id'=>$teacher_id])
+                    ->groupBy("ld_course.id")
                     ->offset($offset)->limit($pagesize)->get()->toArray();
+            foreach($teacher_lesson_list as $k => &$v){
+                //获取授课模式
+                $v['methods'] = DB::table('ld_course')->select('method_id as id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
+            }
+            foreach($teacher_lesson_list as $k => $v){
+                foreach($v['methods'] as $kk => $vv){
+                    if($vv->id == 1){
+                        $vv->name = "直播";
+                    }else if($vv->id == 2){
+                        $vv->name = "录播";
+                    }else{
+                        $vv->name = "其他";
+                    }
+                }
+            }
             if($teacher_lesson_list && !empty($teacher_lesson_list)){
                 return response()->json(['code' => 200 , 'msg' => '获取名师课程列表成功' , 'data' => $teacher_lesson_list]);
             } else {
