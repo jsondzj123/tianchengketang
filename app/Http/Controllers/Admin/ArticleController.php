@@ -9,9 +9,11 @@ use App\Models\Articletype;
 class ArticleController extends Controller {
     //获取分类和学校
     public function schoolList(){
+        $school = self::$accept_data;
+        $school_id = !empty($school['school_id'])?$school['school_id']:0;
         $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
-        $data = Article::schoolANDtype($role_id);
-        return response()->json(['code' => 200 , 'msg' =>'成功','school'=>$data[0],'type'=>$data[1],]);
+        $data = Article::schoolANDtype($role_id,$school_id);
+        return response()->json(['code' => 200 , 'msg' =>'成功','school'=>$data[0],'type'=>$data[1]]);
     }
     /*
          * @param  新增文章
