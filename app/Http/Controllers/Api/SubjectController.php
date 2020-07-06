@@ -17,7 +17,7 @@ class SubjectController extends Controller {
      */
     public function index(Request $request){
         $subjects = Subject::where('parent_id', 0)
-                ->select('id', 'subject_name', 'parent_id')
+                ->select('id', 'subject_name as name', 'parent_id')
                 ->orderBy('create_at', 'desc')
                 ->get();
         foreach ($subjects as $value) {
