@@ -474,8 +474,9 @@ class LiveChild extends Model {
             }
             $total = CourseMaterial::where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>3])->get()->count();
             if($total > 0){
-                $list = CourseMaterial::where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>3])->get();
-                foreach($list as $k => $v){
+                $list = [];
+                $res = CourseMaterial::select("id","type","material_name as name","material_size as size","material_url as url")->where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>3])->get();
+                foreach($res as $k => $v){
                     if($v['type'] == 1){
                         $v['type_name'] = "材料";
                     }else if($v['type'] == 2){
@@ -484,6 +485,8 @@ class LiveChild extends Model {
                         $v['type_name'] = "其他";
                     }
                 }
+                $list['parent_id'] = $data['parent_id'];
+                $list['filearr'] = json_encode($res);
                 return ['code' => 200 , 'msg' => '获取课次资料列表成功' , 'data' => ['LiveClass_list_child_Material' => $list]];
             }else{
                 return ['code' => 200 , 'msg' => '获取课次资料列表成功' , 'data' => ['LiveClass_list_child_Material' => []]];
