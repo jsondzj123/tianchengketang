@@ -35,7 +35,7 @@ class CourseLiveResource extends Model {
                 $where['child_id'] = $parent[1];
             }
         }
-        $livecast = Coureslivecastresource::where($where)->orderByDesc('id')->get()->toArray();
+        $livecast = Live::where($where)->orderByDesc('id')->get()->toArray();
         foreach ($livecast as $k=>&$v){
             $ones = CouresSubject::where('id',$v['parent_id'])->first();
             $v['parent_name'] = $ones['subject_name'];
@@ -63,7 +63,7 @@ class CourseLiveResource extends Model {
         if(!isset($data['id']) || empty($data['id'])){
             return ['code' => 201 , 'msg' => '资源id不能为空'];
         }
-        $livecourse = Coureslivecastresource::where(['id'=>$data['id']])->first();
+        $livecourse = Live::where(['id'=>$data['id']])->first();
         if($livecourse['nature'] == 1){
             return ['code' => 202 , 'msg' => '此课程单元为授权课程资源，如需删除请联系系统管理员'];
         }
@@ -71,7 +71,7 @@ class CourseLiveResource extends Model {
         if(!empty($care)){
             return ['code' => 202 , 'msg' => '此课程单元已有被关联的课程,取消关联后删除班号'];
         }
-        $del = Coureslivecastresource::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+        $del = Live::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
         if($del){
             $user_id = AdminLog::getAdminInfo()->admin_user->id;
             //添加日志操作
@@ -99,7 +99,7 @@ class CourseLiveResource extends Model {
         }
         unset($data['/admin/course/liveCoursesUp']);
         $data['update_at'] = date('Y-m-d H:i:s');
-        $up = Coureslivecastresource::where(['id'=>$data['id']])->update($data);
+        $up = Live::where(['id'=>$data['id']])->update($data);
         if($up){
             $user_id = AdminLog::getAdminInfo()->admin_user->id;
             //添加日志操作
@@ -130,13 +130,14 @@ class CourseLiveResource extends Model {
         }
         $resource = json_decode($data['id'],true);
         if(!empty($resource)){
-            CourseLiveResource::where(['course_id'=>$data['course_id']])->update(['is_del'=>1]);
+            self::where(['course_id'=>$data['course_id']])->update(['is_del'=>1]);
             foreach ($resource as $k=>$v){
-                $resourceones = CourseLiveResource::where(['course_id'=>$data['course_id'],'resource_id'=>$v])->first();
+                $resourceones = self::where(['course_id'=>$data['course_id'],'resource_id'=>$v])->first();
                 if($resourceones){
-                    CourseLiveResource::where(['course_id'=>$data['course_id'],'resource_id'=>$v])->update(['is_del'=>0]);
+                    self::where(['course_id'=>$data['course_id'],'resource_id'=>$v])->update(['is_del'=>0]);
+                    Live::where(['id'=>$v])->update(['is_forbid'=>1,'update_at'=>date('Y-m-d H:i:s')]);
                 }else{
-                    CourseLiveResource::insert([
+                    self::insert([
                         'resource_id' => $v,
                         'course_id' => $data['course_id']
                     ]);
