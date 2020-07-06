@@ -318,6 +318,8 @@ class Article extends Model {
         if($role_id == 1){
             if($school_id != 0){
                 $type = Articletype::select('id as value','typename as label')->where(['status'=>1,'is_del'=>1,'school_id'=>$school_id])->get()->toArray();
+            }else{
+                $type = Articletype::select('id as value','typename as label')->where(['status'=>1,'is_del'=>1])->get()->toArray();
             }
             $school = School::select('id as value','name as label')->where(['is_forbid'=>1,'is_del'=>1])->get()->toArray();
         }else{
