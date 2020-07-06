@@ -112,7 +112,7 @@ class RoleController extends Controller {
         $data['create_time'] = date('Y-m-d H:i:s');
         if($role){  $data['is_super'] = 0; }
         else{       $data['is_super'] = 1; }
-        if(Roleauth::create($data)){
+        if(Roleauth::insert($data)){
              AdminLog::insertAdminLog([
                 'admin_id'       =>   CurrentAdmin::user()['id'] ,
                 'module_name'    =>  'Role' ,

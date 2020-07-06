@@ -158,9 +158,17 @@ class AdminUserController extends Controller {
         if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-        $data['teacher_id'] = !isset($data['teacher_id']) || empty($data['teacher_id'])? 0: $data['teacher_id'];
-        if($data['password'] != $data['pwd']){
-            return response()->json(['code'=>206,'msg'=>'登录密码不一致']);
+        $data['teacher_id'] = !isset($data['teacher_id'])  || empty($data['teacher_id']) || $data['teacher']<=0 ? 0: $data['teacher_id'];
+        if(strlen($data['password']) <8){
+            return response()->json(['code'=>207,'msg'=>'密码长度不能小于8位']);
+        }
+        if(preg_match('/[\x{4e00}-\x{9fa5}]/u', $data['password'])) {
+            return response()->json(['code'=>207,'msg'=>'密码格式不正确，请重新输入']);
+        }
+        if(!empty($data['password']) && !empty($data['pwd'])){
+            if($data['password'] != $data['pwd']){
+                return response()->json(['code'=>206,'msg'=>'登录密码不一致']);
+            }
         }  
         $count  = Adminuser::where('username',$data['username'])->where('school_id',$data['school_id'])->where('is_del',1)->count();
         if($count>0){
@@ -170,6 +178,7 @@ class AdminUserController extends Controller {
         if(isset($data['/admin/adminuser/doInsertAdminUser'])){
             unset($data['/admin/adminuser/doInsertAdminUser']);
         }
+
         $data['school_status']=CurrentAdmin::user()['school_status'] == 1 ?1:0;
         $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         $data['admin_id'] = CurrentAdmin::user()['id'];
@@ -213,10 +222,9 @@ class AdminUserController extends Controller {
         $roleAuthArr = Roleauth::getRoleAuthAlls(['school_id'=>$adminUserArr['data']['school_id'],'is_del'=>1],['id','role_name']);
         $teacherArr = [];
         $adminUserArr['data']['teacher_name'] = '';
+      
         if(!empty($adminUserArr['data']['teacher_id'])){
-            // $teacher_id_arr = explode(',', $adminUserArr['data']['teacher_id']);
-             // $teacherArr= Teacher::whereIn('id',$teacher_id_arr)->where('is_del','!=',1)->where('is_forbid','!=',1)->select('id as teacher_id','real_name','type')->get();
-            $adminUserArr['data']['teacher_name'] = Teacher::where('id',$adminUserArr['data']['teacher_id'])->where('is_del','!=',1)->where('is_forbid','!=',1)->select('real_name')->get();
+            $adminUserArr['data']['teacher_name'] = Teacher::where('id',$adminUserArr['data']['teacher_id'])->where('is_del',0)->where('is_forbid',0)->select('real_name')->first();
         }
         $arr = [
             'admin_user'=> $adminUserArr['data'],
@@ -262,11 +270,13 @@ class AdminUserController extends Controller {
         if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-        $data['teacher_id']= !isset($data['teacher_id']) || empty($data['teacher_id']) ?0 :$data['teacher_id'];
-     
-        if($data['password'] != $data['pwd']){
-            return response()->json(['code'=>206,'msg'=>'登录密码不一致']);
+        $data['teacher_id']= !isset($data['teacher_id']) || empty($data['teacher_id']) || $data['teacher_id']<=0 ?0 :$data['teacher_id'];
+        if(!empty($data['password']) && !empty($data['pwd'])){
+            if($data['password'] != $data['pwd']){
+                return response()->json(['code'=>206,'msg'=>'登录密码不一致']);
+            }
         }
+        
         if(isset($data['/admin/adminuser/doAdminUserUpdate'])){
             unset($data['/admin/adminuser/doAdminUserUpdate']);
         }
@@ -297,7 +307,7 @@ class AdminUserController extends Controller {
             //         $data['role_id'] = $role_id;
             //     }
             // }
-            
+            $data['updated_at'] = date('Y-m-d H:i:s');
             $result = Adminuser::where('id','=',$data['id'])->update($data);
             if($result){
              //添加日志操作
