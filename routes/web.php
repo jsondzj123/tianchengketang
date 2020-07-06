@@ -229,6 +229,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->post('deleteLive', 'LiveController@destroy');
     $router->post('updateLiveStatus', 'LiveController@status');
     $router->post('liveRelationLesson', 'LiveController@lesson');
+    $router->post('lessonList', 'LiveController@lessonList');
 
 
 

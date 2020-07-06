@@ -39,8 +39,8 @@ class OrderController extends Controller
         $fily = Order::where(['student_id'=>$data['user_info']['user_id'],'status'=>'< 2'])->count(); //未完成
         $orderlist = [];
         if($count >0){
-            $orderlist =Order::select('ld_order.id','ld_order.order_number','ld_order.create_at','ld_order.price','ld_order.status','ld_order.pay_time','ld_coures.title')
-                ->leftJoin('ld_coures','ld_order.class_id','=','ld_coures.id')
+            $orderlist =Order::select('ld_order.id','ld_order.order_number','ld_order.create_at','ld_order.price','ld_order.status','ld_order.pay_time','ld_course.title')
+                ->leftJoin('ld_course','ld_order.class_id','=','ld_course.id')
                 ->where(['ld_order.student_id'=>$data['user_info']['user_id']])
                 ->where(function($query) use ($type) {
                     if($type == 1){
@@ -116,10 +116,9 @@ class OrderController extends Controller
         $offset   = ($page - 1) * $pagesize;
         $student_id = $data['user_info']['user_id'];
         $count = Order::where(['student_id'=>$data['user_info']['user_id'],'status'=>2,'oa_status'=>1])->count();
-
-        $orderlist = Order::select('ld_coures.id','ld_coures.admin_id','ld_coures.title','ld_coures.cover','ld_coures.pricing','ld_coures.sale_price','ld_coures.buy_num','ld_coures.status','ld_coures.is_del','ld_order.id as orderid')
-            ->leftJoin('ld_coures','ld_coures.id','=','ld_order.class_id')
-            ->where(['ld_order.student_id'=>$student_id,'ld_order.status'=>2,'ld_order.oa_status'=>1,'ld_coures.is_del'=>0,'ld_coures.status'=>1])
+        $orderlist = Order::select('ld_course.id','ld_course.admin_id','ld_course.title','ld_course.cover','ld_course.pricing','ld_course.sale_price','ld_course.buy_num','ld_course.status','ld_course.is_del','ld_order.id as orderid')
+            ->leftJoin('ld_course','ld_course.id','=','ld_order.class_id')
+            ->where(['ld_order.student_id'=>$student_id,'ld_order.status'=>2,'ld_order.oa_status'=>1,'ld_course.is_del'=>0,'ld_course.status'=>1])
             ->orderByDesc('ld_order.id')
             ->offset($offset)->limit($pagesize)->get()->toArray();
         foreach ($orderlist as $k=>&$v){

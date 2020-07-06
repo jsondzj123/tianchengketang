@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Subject;
 use App\Models\LiveClass;
 use App\Models\Admin;
+use App\Models\Coures;
 use App\Models\CourseLiveResource;
 class Live extends Model {
 
@@ -343,7 +344,78 @@ class Live extends Model {
                 return ['code' => 202 , 'msg' => '更新失败'];
             }
         }
+        //关联课次列表
+        public static function LessonList($data){
+            //搜索  学科搜索  课程名字搜索   展示当前关联的课程
+            //判断只显示当前关联的课程
+            if(isset($data['is_show']) && $data['is_show'] == 1){
+                //直播资源id
+                if(empty($data['resource_id']) || !isset($data['resource_id'])){
+                    return ['code' => 201 , 'msg' => '直播资源id不能为空'];
+                }
+                $list = CourseLiveResource::join('ld_course','ld_course.id','=','ld_course_live_resource.course_id')
+                ->join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
+                ->select('*','ld_course.parent_id','ld_course.child_id','ld_course.id','ld_course.create_at','ld_course.admin_id')->where(function($query) use ($data){
+                    //删除状态
+                    $query->where('ld_course.is_del' , '=' , 0);
+                    if(isset($data['parent_id'])){
+                        $s_id = json_decode($data['parent_id']);
+                        if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                            $data['parent_id'] = $s_id[0];
+                            if(!empty($s_id[1])){
+                                $data['child_id'] = $s_id[1];
+                            }
+                            $query->where('ld_course.parent_id' , '=' , $data['parent_id']);
+                        }
+                    }
+                    //判断当前资源
+                    if(isset($data['resource_id']) && !empty(isset($data['resource_id']))){
+                        $query->where('ld_course_live_resource.resource_id' , '=' , $data['resource_id']);
+                    }
+                    //判断学科小类
+                    if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                        $query->where('ld_course.child_id' , '=' , $data['child_id']);
+                    }
+                    //判断课程单元名称是否为空
+                    if(isset($data['title']) && !empty(isset($data['title']))){
+                        $query->where('ld_course.title','like','%'.$data['title'].'%');
+                    }
+                })->get();
+                foreach($list as $k => $live){
+                    $live['subject_child_name'] = Subject::where("is_del",0)->where("id",$live['child_id'])->select("subject_name")->first()['subject_name'];
+                }
+            }else{
+                $list = Coures::join('ld_course_subject','ld_course_subject.id','=','ld_course.parent_id')->select('*','ld_course.parent_id','ld_course.child_id','ld_course.id','ld_course.create_at','ld_course.admin_id')->where(function($query) use ($data){
+                    //删除状态
+                    $query->where('ld_course.is_del' , '=' , 0);
+                    if(isset($data['parent_id'])){
+                        $s_id = json_decode($data['parent_id']);
+                        if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                            $data['parent_id'] = $s_id[0];
+                            if(!empty($s_id[1])){
+                                $data['child_id'] = $s_id[1];
+                            }
+                            $query->where('ld_course.parent_id' , '=' , $data['parent_id']);
+                        }
+                    }
+                    //判断学科小类
+                    if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                        $query->where('ld_course.child_id' , '=' , $data['child_id']);
+                    }
+                    //判断课程单元名称是否为空
+                    if(isset($data['title']) && !empty(isset($data['title']))){
+                        $query->where('ld_course.title','like','%'.$data['title'].'%');
+                    }
+                })->get();
+                foreach($list as $k => $live){
+                    $live['subject_child_name'] = Subject::where("is_del",0)->where("id",$live['child_id'])->select("subject_name")->first()['subject_name'];
+                }
+            }
 
+            dd($list->toArray());
+        }
+
+        //资源关联课程
         public static function liveRelationLesson($data){
             //直播资源id
             if(empty($data['resource_id']) || !isset($data['resource_id'])){
