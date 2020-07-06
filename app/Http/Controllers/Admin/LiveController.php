@@ -199,6 +199,15 @@ class LiveController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
+    //关联课程列表
+    public function lessonList(){
+        try{
+            $list = Live::LessonList(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
 
 
     /**
