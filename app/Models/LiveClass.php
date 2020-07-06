@@ -44,11 +44,8 @@ class LiveClass extends Model {
                 $list[$k]['class_num_not'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where('ld_course_class_number.shift_no_id',$v['id'])->where('ld_course_class_number.start_at','>',time())->count();
                 // 课次名称 关联老师名称  课次时间
                 $list[$k]['class_child'] = self::leftjoin("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
-                // ->join("ld_course_class_teacher","ld_course_class_number.id","=","ld_course_class_teacher.class_id")
-                // ->join("ld_lecturer_educationa","ld_course_class_teacher.teacher_id","=","ld_lecturer_educationa.id")
                 ->select("ld_course_class_number.id","ld_course_class_number.name","ld_course_class_number.start_at","ld_course_class_number.end_at")
                 ->where(["ld_course_shift_no.id"=>$v['id'],"ld_course_class_number.is_del"=>0])
-                //,"ld_lecturer_educationa.type"=>2  "ld_lecturer_educationa.real_name",
                 ->get();
             }
             foreach($list as $key => &$value){
@@ -271,33 +268,33 @@ class LiveClass extends Model {
         //添加班号课程资料
         public static function uploadLiveClass($data){
             //班号id
+            unset($data["/admin/uploadLiveClass"]);
             if(empty($data['parent_id']) || !isset($data['parent_id'])){
                 return ['code' => 201 , 'msg' => '班号id不能为空'];
             }
-            //资料类型
-            if(empty($data['type']) || !isset($data['type'])){
-                return ['code' => 201 , 'msg' => '资料类型不能为空'];
+            //查询该班号是否有资料
+            $teacher = CourseMaterial::where(["parent_id"=>$data['parent_id'],"mold"=>2])->first();
+            if(!empty($teacher)){
+                //删除所有之前关联的数据
+                CourseMaterial::where(["parent_id"=>$data['parent_id'],"mold"=>2])->delete();
             }
-            //资料的名称
-            if(empty($data['material_name']) || !isset($data['material_name'])){
-                return ['code' => 201 , 'msg' => '资料的名称不能为空'];
-            }
-            //资料的大小
-            if(empty($data['material_size']) || !isset($data['material_size'])){
-                return ['code' => 201 , 'msg' => '资料的大小不能为空'];
-            }
-            //资料的url
-            if(empty($data['material_url']) || !isset($data['material_url'])){
-                return ['code' => 201 , 'msg' => '资料的url不能为空'];
-            }
-            $data['mold'] = 2;
-            //缓存查出用户id和分校id
-            $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
-            $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+            //资料合集
+            $res = json_decode($data['filearr'],1);
+            unset($data['filearr']);
+            foreach($res as $k =>$v){
+                $data['type'] = $v['type'];
+                $data['material_name'] = $v['name'];
+                $data['material_size'] = $v['size'];
+                $data['material_url'] = $v['url'];
+                $data['mold'] = 2;
+                //缓存查出用户id和分校id
+                $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+                $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
 
-            $data['create_at'] = date('Y-m-d H:i:s');
-            $data['update_at'] = date('Y-m-d H:i:s');
-            $add = CourseMaterial::insert($data);
+                $data['create_at'] = date('Y-m-d H:i:s');
+                $data['update_at'] = date('Y-m-d H:i:s');
+                $add = CourseMaterial::insert($data);
+            }
             if($add){
                 //添加日志操作
                 AdminLog::insertAdminLog([
@@ -322,7 +319,16 @@ class LiveClass extends Model {
             }
             $total = CourseMaterial::where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>2])->get()->count();
             if($total > 0){
-                $list = CourseMaterial::where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>2])->get();
+                $list = CourseMaterial::select("id","type","material_name as name","material_size as size","material_url as url")->where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>2])->get();
+                foreach($list as $k => &$v){
+                    if($v['type'] == 1){
+                        $v['type_name'] = "材料";
+                    }else if($v['type'] == 2){
+                        $v['type_name'] = "辅料";
+                    }else{
+                        $v['type_name'] = "其他";
+                    }
+                }
                 return ['code' => 200 , 'msg' => '获取班号资料列表成功' , 'data' => ['LiveClass_list_Material' => $list]];
             }else{
                 return ['code' => 200 , 'msg' => '获取班号资料列表成功' , 'data' => ['LiveClass_list_Material' => []]];

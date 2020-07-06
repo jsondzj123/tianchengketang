@@ -4,7 +4,6 @@ namespace App\Models;
 use App\Tools\CurrentAdmin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Redis;
-
 class Article extends Model {
     //指定别的表名
     public $table = 'ld_article';
@@ -78,7 +77,8 @@ class Article extends Model {
             $list=[];
         }
         //分校列表
-        $schooltype = self::schoolANDtype($data['role_id']);
+        $sschool_id = isset($data['school_id'])?$data['school_id']:$school_id;
+        $schooltype = self::schoolANDtype($data['role_id'],$sschool_id);
         $page=[
             'pageSize'=>$pagesize,
             'page' =>$page,
@@ -314,11 +314,14 @@ class Article extends Model {
             return ['code' => 202 , 'msg' => '更新失败'];
         }
     }
-    public static function schoolANDtype($role_id){
-//        $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
+    public static function schoolANDtype($role_id,$school_id=0){
         if($role_id == 1){
+            if($school_id != 0){
+                $type = Articletype::select('id as value','typename as label')->where(['status'=>1,'is_del'=>1,'school_id'=>$school_id])->get()->toArray();
+            }else{
+                $type = Articletype::select('id as value','typename as label')->where(['status'=>1,'is_del'=>1])->get()->toArray();
+            }
             $school = School::select('id as value','name as label')->where(['is_forbid'=>1,'is_del'=>1])->get()->toArray();
-            $type = Articletype::select('id as value','typename as label')->where(['status'=>1,'is_del'=>1])->get()->toArray();
         }else{
             $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
             $school = School::select('id as value','name as label')->where(['id'=>$school_id,'is_forbid'=>1,'is_del'=>1])->get()->toArray();
