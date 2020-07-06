@@ -57,7 +57,7 @@ class LessonController extends Controller {
             $where['ld_course_method.method_id'] = $method;
         }
         $sort_type = $request->input('sort_type') ?: 'asc';
-        $data =  Lesson::join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
+        $data =  Lesson::leftjoin("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
                 ->join("ld_course_method","ld_course_method.course_id","=","ld_course.id")
                 ->select('ld_course.id', 'ld_course.admin_id','ld_course.child_id','ld_course.parent_id', 'ld_course.title', 'ld_course.cover', 'ld_course.pricing', 'ld_course.sale_price','ld_course.buy_num','ld_course.is_del','ld_course.status','ld_course.watch_num','ld_course.keywords','ld_course_subject.subject_name')
                 ->where($where)
@@ -77,20 +77,19 @@ class LessonController extends Controller {
             //购买数量
             $v['sold_num'] =  Order::where(['oa_status'=>1,'class_id'=>$v['id']])->count() + $v['buy_num'];
             //获取授课模式
-            $v['methods'] = DB::table('ld_course')->select('method_id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
+            $v['methods'] = DB::table('ld_course')->select('method_id as id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
         }
         foreach($data as $k => $v){
             foreach($v['methods'] as $kk => $vv){
-                if($vv->method_id == 1){
+                if($vv->id == 1){
                     $vv->name = "直播";
-                }else if($vv->method_id == 2){
+                }else if($vv->id == 2){
                     $vv->name = "录播";
                 }else{
                     $vv->name = "其他";
                 }
             }
         }
-
         $total = count($data);
         $lessons = $data;
         $data = [
@@ -115,11 +114,11 @@ class LessonController extends Controller {
         if ($validator->fails()) {
             return $this->response($validator->errors()->first(), 202);
         }
-        $lesson = Lesson::select("*","pricing as price","sale_price as favorable_price","expiry as ttl")->find($request->input('id'));
+        $lesson = Lesson::select("*","pricing as price","sale_price as favorable_price","expiry as ttl","introduce as introduction","describe as description")->find($request->input('id'));
         if(empty($lesson)){
             return $this->response('课程不存在', 404);
         }
-        //该课程下所有的课时数
+        //该课程为直播的时候所有的课时数
         //该课程下所有的
         // join('ld_course_class_number','ld_course_shift_no.id','=','ld_course_class_number.shift_no_id')
         // ->where("resource_id",$one['id'])->sum("class_hour");
