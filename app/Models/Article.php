@@ -78,7 +78,8 @@ class Article extends Model {
             $list=[];
         }
         //分校列表
-        $schooltype = self::schoolANDtype($data['role_id']);
+        $sschool_id = isset($data['school_id'])?$data['school_id']:$school_id;
+        $schooltype = self::schoolANDtype($data['role_id'],$sschool_id);
         $page=[
             'pageSize'=>$pagesize,
             'page' =>$page,
