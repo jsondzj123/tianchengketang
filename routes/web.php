@@ -100,9 +100,11 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->post('doUserRegister','AuthenticateController@doUserRegister');    //WEB注册接口
     $router->post('doUserLogin','AuthenticateController@doUserLogin');          //WEB登录接口
     $router->post('doSendSms','AuthenticateController@doSendSms');              //WEB发送短信接口
+
     $router->post('doUserVerifyPassword','AuthenticateController@doUserVerifyPassword');              //忘记密码验证接口
     $router->post('doUserForgetPassword','AuthenticateController@doUserForgetPassword');              //找回密码接口
     $router->post('captchaInfo','AuthenticateController@captchaInfo');          //WEB生成图片验证码接口
+
 });
 
 //PC端路由接口
@@ -126,7 +128,17 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('courseList','CourseController@courseList');//课程列表
     });
 });
+// PC端口路由接口（lys） begin 
+$router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
+    $router->group(['prefix' => 'index'], function () use ($router) {
+        $router->post('teacherList','IndexController@teacherList');//我们的团队
+        $router->post('news','IndexController@newInformation');//新闻资讯
+        $router->post('footer','IndexController@footer');//页脚
+        $router->post('course','IndexController@course');//精品课程
+    });
 
+});
+//PC端口路由接口(LYS ) end
 //后台端路由接口
 /*****************start**********************/
 //后端登录注册接口
@@ -536,7 +548,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     });
     //教学模块
     $router->group(['prefix' => 'teach'], function () use ($router) {
-        $router->post('getList', 'TeachController@getList');//教学列表 //未完成
+        $router->post('getList', 'TeachController@getList');//教学列表 
         $router->post('startLiveChild', 'TeachController@startLive');  //启动直播
         $router->post('livePlayback','TeachController@livePlayback');  //课程回放
         $router->post('coursewareUpload','TeachController@courseUpload');  //课件上传
