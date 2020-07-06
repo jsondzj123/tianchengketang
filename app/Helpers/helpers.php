@@ -141,8 +141,34 @@ function randstr($len=6){
     while(strlen($password)<$len)
     $password.=substr($chars,(mt_rand()%strlen($chars)),1);
     return $password;
-
 }
+
+ /*
+ * @param  descriptsion    判断客户端平台（PC、安卓、iPhone、平板）
+ * @param  author          dzj
+ * @param  ctime           2020-07-06
+ * return  array
+ */
+function verifyPlat(){
+    $agent      = strtolower($_SERVER['HTTP_USER_AGENT']);  
+    $is_pc      = (strpos($agent, 'windows nt')) ? true : false;  
+    $is_iphone  = (strpos($agent, 'iphone')) ? true : false;  
+    $is_ipad    = (strpos($agent, 'ipad')) ? true : false;  
+    $is_android = (strpos($agent, 'android')) ? true : false;  
+    
+    //平台判断返回对应的字符串
+    if($is_pc){  
+        return 'pc';  
+    }else if($is_iphone){  
+        return 'iphone';  
+    }else if($is_ipad){  
+        return 'ipad';
+    }else if($is_android){  
+        return 'android';
+    }
+}
+
+
 
 /*
  * @param  descriptsion    时间戳转时长
