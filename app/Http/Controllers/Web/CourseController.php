@@ -25,19 +25,26 @@ class CourseController extends Controller {
          */
     public function subjectList(){
         //自增学科
-        $subject = CouresSubject::where(['school_id'=>$this->school,'parent_id'=>0,'is_open'=>0,'is_del'=>0])->get();
+        $subject = CouresSubject::where(['school_id'=>$this->school,'parent_id'=>0,'is_open'=>0,'is_del'=>0])->get()->toArray();
         if(!empty($subject)){
             foreach ($subject as $k=>&$v){
-                $subject = CouresSubject::where(['parent_id'=>$v['id'],'is_open'=>0,'is_del'=>0])->get();
+                $subject = CouresSubject::where(['parent_id'=>$v['id'],'is_open'=>0,'is_del'=>0])->get()->toArray();
                 $v['son'] = $subject;
             }
         }
         //授权学科
-        $course = CourseSchool::select('ld_course.parent_id')
-                  ->leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
-                  ->where(['ld_course_school.to_school_id'=>$this->school,'ld_course_school.is_del'=>0,'ld_course.is_del'=>0])->groupBy('parent_id');
-        print_r($course);die;
-
+        $course = CourseSchool::select('ld_course.parent_id')->leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
+                  ->where(['ld_course_school.to_school_id'=>$this->school['id'],'ld_course_school.is_del'=>0,'ld_course.is_del'=>0])->groupBy('ld_course.parent_id')->get()->toArray();
+        if(!empty($course)){
+            foreach ($course as $ks=>$vs){
+                $ones = CouresSubject::where(['id'=>$v['parent_id'],'parent_id'=>0,'is_open'=>0,'is_del'=>0])->first()->toArray();
+                if(!empty($ones)){
+                    $ones['son'] = CouresSubject::where(['parent_id'=>$v['parent_id'],'is_open'=>0,'is_del'=>0])->get()->toArray();
+                }
+                array_push($subject,$ones);
+            }
+        }
+        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$subject]);
     }
     /*
          * @param  课程列表
@@ -125,7 +132,21 @@ class CourseController extends Controller {
             array_multisort($date,SORT_DESC,$all);
         }
         $res = array_slice($all,($page-1)*$pagesize,$pagesize);
-
+        $page=[
+            'pageSize'=>$pagesize,
+            'page' =>$page,
+            'total'=>$count
+        ];
+        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res,'page'=>$page,'where'=>$this->data]);
     }
+    /*
+         * @param  课程详情
+         * @param  author  苏振文
+         * @param  ctime   2020/7/6 17:50
+         * return  array
+         */
+    public function courseDetail(){
+    }
+
 }
 
