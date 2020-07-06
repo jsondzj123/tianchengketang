@@ -429,8 +429,8 @@ class IndexController extends Controller {
                 //获取授课模式
                 $v['methods'] = DB::table('ld_course')->select('method_id as id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
             }
-            foreach($teacher_lesson_list as $k => $v){
-                foreach($v['methods'] as $kk => $vv){
+            foreach($teacher_lesson_list as $k => &$v){
+                foreach($v['methods'] as $kk => &$vv){
                     if($vv->id == 1){
                         $vv->name = "直播";
                     }else if($vv->id == 2){
