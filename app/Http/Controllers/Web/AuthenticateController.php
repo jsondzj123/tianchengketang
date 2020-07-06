@@ -255,17 +255,18 @@ class AuthenticateController extends Controller {
     }
     
     /*
-     * @param  description   找回密码方法
+     * @param  description   忘记密码验证方法
      * @param  参数说明       body包含以下参数[
      *     phone             手机号
-     *     password          新密码
-     *     verifycode        验证码
+     *     key               图片的key
+     *     captchacode       图片验证码
+     *     verifycode        短信验证码
      * ]
      * @param author    dzj
      * @param ctime     2020-07-04
      * return string
      */
-    public function doUserForgetPassword() {
+    public function doUserVerifyPassword() {
         try {
             $body = self::$accept_data;
             //判断传过来的数组数据是否为空
@@ -280,14 +281,20 @@ class AuthenticateController extends Controller {
                 return response()->json(['code' => 202 , 'msg' => '手机号不合法']);
             }
 
-            //判断密码是否为空
-            if(!isset($body['password']) || empty($body['password'])){
-                return response()->json(['code' => 201 , 'msg' => '请输入新密码']);
+            //判断验证码是否为空
+            if((!isset($body['captchacode']) || empty($body['captchacode'])) || (!isset($body['key']) || empty($body['key']))){
+                return response()->json(['code' => 201 , 'msg' => '请输入验证码']);
+            }
+            
+            //判断验证码是否合法
+            $captch_code = Redis::get($body['key']);
+            if(!app('captcha')->check(strtolower($body['captchacode']),$captch_code)){
+                return response()->json(['code' => 202 , 'msg' => '验证码错误']);
             }
             
             //判断验证码是否为空
             if(!isset($body['verifycode']) || empty($body['verifycode'])){
-                return response()->json(['code' => 201 , 'msg' => '请输入验证码']);
+                return response()->json(['code' => 201 , 'msg' => '请输入短信验证码']);
             }
 
             //验证码合法验证
@@ -322,6 +329,61 @@ class AuthenticateController extends Controller {
                 return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
             }
             
+            //返回操作的redis更改密码成功标识
+            $forget_password = Redis::set('userMobileStatus'.$body['phone'] , 1);
+            return response()->json(['code' => 200 , 'msg' => '验证成功']);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    
+    /*
+     * @param  description   找回密码方法
+     * @param  参数说明       body包含以下参数[
+     *     phone             手机号
+     *     password          新密码
+     *     verifycode        验证码
+     * ]
+     * @param author    dzj
+     * @param ctime     2020-07-04
+     * return string
+     */
+    public function doUserForgetPassword() {
+        try {
+            $body = self::$accept_data;
+            //判断传过来的数组数据是否为空
+            if(!$body || !is_array($body)){
+                return response()->json(['code' => 202 , 'msg' => '传递数据不合法']);
+            }
+            
+            //判断手机号是否为空
+            if(!isset($body['phone']) || empty($body['phone'])){
+                return response()->json(['code' => 201 , 'msg' => '请输入手机号']);
+            } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}$#', $body['phone'])) {
+                return response()->json(['code' => 202 , 'msg' => '手机号不合法']);
+            }
+            
+            //判断是否忘记密码验证通过
+            $verify_password = Redis::get('userMobileStatus'.$body['phone']);
+            if(!$verify_password || empty($verify_password)){
+                return response()->json(['code' => 201 , 'msg' => '请先进行验证']);
+            }
+            
+            //判断密码是否为空
+            if(!isset($body['password']) || empty($body['password'])){
+                return response()->json(['code' => 201 , 'msg' => '请输入新密码']);
+            }
+            
+            //判断确认密码是否为空
+            if(!isset($body['repassword']) || empty($body['repassword'])){
+                return response()->json(['code' => 201 , 'msg' => '请输入确认密码']);
+            }
+            
+            //判断两次密码输入的是否相等
+            if($body['password'] != $body['repassword']){
+                return response()->json(['code' => 202 , 'msg' => '两次密码输入不一致']);
+            }
+
             //开启事务
             DB::beginTransaction();
 
@@ -330,6 +392,8 @@ class AuthenticateController extends Controller {
             if($update_user_password && !empty($update_user_password)){
                 //事务提交
                 DB::commit();
+                //删除旧的key值
+                Redis::del('userMobileStatus'.$body['phone']);
                 return response()->json(['code' => 200 , 'msg' => '更新成功']);
             } else {
                 //事务回滚
@@ -339,6 +403,21 @@ class AuthenticateController extends Controller {
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
+    }
+    
+    /*
+     * @param  description   生成验证码图片方法
+     * @param author    dzj
+     * @param ctime     2020-07-06
+     * return string
+     */
+    public function captchaInfo(){
+        $result = app('captcha')->create();
+        Redis::setex($result['key'], 300 , $result['key']);
+        if(isset($result['sensitive'])){
+            unset($result['sensitive']);
+        }
+        return response()->json(['code'=>200,'msg'=>'生成成功','data'=>$result]);
     }
     
     /*

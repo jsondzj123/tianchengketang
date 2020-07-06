@@ -100,7 +100,9 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->post('doUserRegister','AuthenticateController@doUserRegister');    //WEB注册接口
     $router->post('doUserLogin','AuthenticateController@doUserLogin');          //WEB登录接口
     $router->post('doSendSms','AuthenticateController@doSendSms');              //WEB发送短信接口
-
+    $router->post('doUserVerifyPassword','AuthenticateController@doUserVerifyPassword');              //忘记密码验证接口
+    $router->post('doUserForgetPassword','AuthenticateController@doUserForgetPassword');              //找回密码接口
+    $router->post('captchaInfo','AuthenticateController@captchaInfo');          //WEB生成图片验证码接口
 });
 
 //PC端路由接口
