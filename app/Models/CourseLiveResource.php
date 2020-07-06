@@ -45,7 +45,7 @@ class CourseLiveResource extends Model {
         //已经加入的直播资源
         $existLive = self::select('ld_course_livecast_resource.*')
             ->leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
-            ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0])
+            ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0,'ld_course_live_resource.course_id'=>$data['course_id']])
             ->orderByDesc('ld_course_live_resource.id')->get()->toArray();
         //加入课程总数
         $count = self::leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
