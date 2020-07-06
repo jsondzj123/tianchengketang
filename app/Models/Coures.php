@@ -430,6 +430,7 @@ class Coures extends Model {
                 $v['shift_no'] = $shift_no;
             }
         }
+
         return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
     }
     //课程进行排课
