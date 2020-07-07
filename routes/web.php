@@ -105,12 +105,12 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->post('doUserForgetPassword','AuthenticateController@doUserForgetPassword');              //找回密码接口
     $router->post('captchaInfo','AuthenticateController@captchaInfo');          //WEB生成图片验证码接口
 
-    //题库部分 
+    //题库部分
     $router->post('getBankList','BankController@getBankList');                  //全部题库接口
     $router->post('getBankChaptersList','BankController@getBankChaptersList');  //题库章节接口
 });
 
-//PC端路由接口
+//PC端路由接口  需要登录
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
     $router->group(['prefix' => 'order'], function () use ($router) {
         $router->post('aliPcpay','OrderController@aliPcpay');          //支付宝pc
