@@ -105,7 +105,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->post('doUserForgetPassword','AuthenticateController@doUserForgetPassword');              //找回密码接口
     $router->post('captchaInfo','AuthenticateController@captchaInfo');          //WEB生成图片验证码接口
 
-    //题库部分 
+    //题库部分
     $router->post('getBankList','BankController@getBankList');                  //全部题库接口
     $router->group(['prefix' => 'bank' , 'middleware'=> 'user'], function () use ($router) {
         $router->post('getBankChaptersList','BankController@getBankChaptersList');  //题库章节接口
@@ -114,7 +114,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     });
 });
 
-//PC端路由接口
+//PC端路由接口  需要登录
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
     $router->group(['prefix' => 'order'], function () use ($router) {
         $router->post('aliPcpay','OrderController@aliPcpay');          //支付宝pc
@@ -134,17 +134,20 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('subjectList','CourseController@subjectList');//学科列表
         $router->post('courseList','CourseController@courseList');//课程列表
         $router->post('courseDetail','CourseController@courseDetail');//课程详情
+        $router->post('courseIntroduce','CourseController@courseIntroduce');//课程简介
+        $router->post('livearr','CourseController@livearr');//课程直播列表
+        $router->post('recordedarr','CourseController@recordedarr');//课程录播列表
+        $router->post('material','CourseController@material');//课程资料列表
     });
 });
 // PC端口路由接口（lys） begin
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
     $router->group(['prefix' => 'index'], function () use ($router) {
-        $router->post('teacherList','IndexController@teacherList');//我们的团队
+        $router->post('teacher','IndexController@teacherList');//我们的团队
         $router->post('news','IndexController@newInformation');//新闻资讯
         $router->post('footer','IndexController@footer');//页脚
         $router->post('course','IndexController@course');//精品课程
     });
-
 });
 //PC端口路由接口(LYS ) end
 //后台端路由接口

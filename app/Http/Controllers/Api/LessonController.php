@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
 use App\Models\Order;
+use App\Models\Collection;
 use Illuminate\Http\Request;
 use App\Tools\MTCloud;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Validator;
 
 class LessonController extends Controller {
@@ -22,7 +24,7 @@ class LessonController extends Controller {
         $pagesize = $request->input('pagesize') ?: 15;
         $page     = $request->input('page') ?: 1;
         $offset   = ($page - 1) * $pagesize;
-        $parent_id = $request->input('parent_id') ?: 0;
+        $parent_id = $request->input('subject_id') ?: 0;
         $child_id = $request->input('child_id') ?: 0;
         if($parent_id == 0 && $child_id == 0){
             $subjectId = 0;
@@ -116,10 +118,43 @@ class LessonController extends Controller {
         if ($validator->fails()) {
             return $this->response($validator->errors()->first(), 202);
         }
+
         $lesson = Lesson::select("*","pricing as price","sale_price as favorable_price","expiry as ttl","introduce as introduction","describe as description")->find($request->input('id'));
         if(empty($lesson)){
             return $this->response('课程不存在', 404);
         }
+        //获取请求的平台端
+        $platform = verifyPlat() ? verifyPlat() : 'pc';
+        //获取用户token值
+        $token = $request->input('user_token');
+        //hash中token赋值
+        $token_key   = "user:regtoken:".$platform.":".$token;
+        //判断token值是否合法
+        $redis_token = Redis::hLen($token_key);
+        if($redis_token && $redis_token > 0) {
+             //解析json获取用户详情信息
+                $json_info = Redis::hGetAll($token_key);
+                //is_collection   是否收藏
+                $is_collection = Collection::where(['student_id'=>$json_info['user_id'],'is_del'=>0,'lesson_id'=>$lesson['id']])->first();
+                if($is_collection){
+                    $lesson['is_collection'] = 1;
+                }else{
+                    $lesson['is_collection'] = 0;
+                }
+                //is_buy  是否购买
+                $is_buy = Order::where(['student_id'=>$json_info['user_id'],'status'=>2,'oa_status'=>1,'class_id'=>$lesson['id']])->first();
+                if($is_buy){
+                    $lesson['is_buy'] = 1;
+                }else{
+                    $lesson['is_buy'] = 0;
+                }
+
+        } else {
+            $lesson['is_collection'] = 0;
+            $lesson['is_buy'] = 0;
+        }
+
+
         //该课程为直播的时候所有的课时数
         //该课程下所有的
         // join('ld_course_class_number','ld_course_shift_no.id','=','ld_course_class_number.shift_no_id')

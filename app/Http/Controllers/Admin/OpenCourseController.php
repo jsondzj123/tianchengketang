@@ -65,11 +65,12 @@ class OpenCourseController extends Controller {
         }
         try{
 	        DB::beginTransaction();
+	        $openCourseArr['subject'] = json_decode($openCourseArr['subject'],1);
 	        $openCourseArr['parent_id'] = $openCourseArr['subject'][0]<0 ? 0: $openCourseArr['subject'][0];
 	        $openCourseArr['child_id'] = !isset($openCourseArr['subject'][1]) && $openCourseArr['subject'][1] ? 0 : $openCourseArr['subject'][1];
 	     	$eduTeacherArr = !isset($openCourseArr['edu_teacher_id']) && empty($openCourseArr['edu_teacher_id'])?[]:explode(',',$openCourseArr['edu_teacher_id']);
 	        $lectTeacherId  = $openCourseArr['lect_teacher_id'];
-	        $time = explode(',',$openCourseArr['time']);
+	        $time = json_decode($openCourseArr['time'],1);
 	        $openCourseArr['start_at']  = $time[0];
 	        $openCourseArr['end_at']  = $time[1];
 	        unset($openCourseArr['edu_teacher_id']);
@@ -262,9 +263,11 @@ class OpenCourseController extends Controller {
 		    	DB::rollBack();
 		    	return response()->json(['code'=>203,'msg'=>'删除成功!!']);	
 		    }
-		    $course_id  = openLivesChilds::where('lesson_id',$openCourseArr['openless_id'])->select('course_id')->first()['course_id'];
-		    $res = $this->courseDelete($course_id);
-		    if(!$res){
+            $result = OpenLivesChilds::where('lesson_id',$data['data']['id'])->update(['is_del'=>1,
+            	'update_at'=>date('Y-m-d H:i:s')]); //不删除欢拓数据
+		    // $course_id  = openLivesChilds::where('lesson_id',$openCourseArr['openless_id'])->select('course_id')->first()['course_id'];
+		    // $res = $this->courseDelete($course_id);
+		    if(!$result){
 		    	DB::rollBack();
 		    	return response()->json(['code'=>203,'msg'=>'删除成功!!!']);	
 		    }

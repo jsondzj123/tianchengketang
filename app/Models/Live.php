@@ -347,12 +347,13 @@ class Live extends Model {
         //关联课次列表
         public static function LessonList($data){
             //搜索  学科搜索  课程名字搜索   展示当前关联的课程
+
+            //直播资源id
+            if(empty($data['resource_id']) || !isset($data['resource_id'])){
+                return ['code' => 201 , 'msg' => '直播资源id不能为空'];
+            }
             //判断只显示当前关联的课程
             if(isset($data['is_show']) && $data['is_show'] == 1){
-                //直播资源id
-                if(empty($data['resource_id']) || !isset($data['resource_id'])){
-                    return ['code' => 201 , 'msg' => '直播资源id不能为空'];
-                }
                 $list = CourseLiveResource::join('ld_course','ld_course.id','=','ld_course_live_resource.course_id')
                 ->join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
                 ->select('*','ld_course.parent_id','ld_course.child_id','ld_course.id','ld_course.create_at','ld_course.admin_id')->where(function($query) use ($data){
@@ -382,6 +383,7 @@ class Live extends Model {
                     }
                 })->get();
                 foreach($list as $k => $live){
+                    $live['is_relevance'] = 1;
                     $res = Subject::where("is_del",0)->where("id",$live['child_id'])->select("subject_name")->first()['subject_name'];
                     if(!empty($res)){
                         $live['subject_child_name'] = $res;
@@ -412,12 +414,20 @@ class Live extends Model {
                         $query->where('ld_course.title','like','%'.$data['title'].'%');
                     }
                 })->get();
+
                 foreach($list as $k => $live){
+
                     $res = Subject::where("is_del",0)->where("id",$live['child_id'])->select("subject_name")->first()['subject_name'];
                     if(!empty($res)){
                         $live['subject_child_name'] = $res;
                     }else{
                         $live['subject_child_name'] = "";
+                    }
+                    $gl = CourseLiveResource::select("course_id")->where("is_del",0)->where("course_id",$live['id'])->where("resource_id",$data['resource_id'])->first();
+                    if(empty($gl)){
+                        $live['is_relevance'] = 0;
+                    }else{
+                        $live['is_relevance'] = 1;
                     }
                 }
             }
@@ -428,6 +438,7 @@ class Live extends Model {
         //资源关联课程
         public static function liveRelationLesson($data){
             //直播资源id
+            unset($data["/admin/liveRelationLesson"]);
             if(empty($data['resource_id']) || !isset($data['resource_id'])){
                 return ['code' => 201 , 'msg' => '直播资源id不能为空'];
             }
@@ -436,6 +447,15 @@ class Live extends Model {
             if(!isset($data['course_id'])){
                 return ['code' => 201 , 'msg' => '课程id不能为空'];
             }
+
+            //查询该班号是否有资料
+            $teacher = CourseLiveResource::where(["resource_id"=>$data['resource_id']])->first();
+            if(!empty($teacher)){
+                //删除所有之前关联的数据
+                CourseLiveResource::where(["resource_id"=>$data['resource_id']])->delete();
+            }
+
+
             $res = json_decode($data['course_id']);
             foreach($res as $k => $v){
                 $data[$k]['resource_id'] = $data['resource_id'];
