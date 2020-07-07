@@ -125,7 +125,6 @@ class OrderController extends Controller {
     public function ExcelExport(){
             return Excel::download(new \App\Exports\OrderExport(self::$accept_data), 'order.xlsx');
     }
-
     /*
          * @param  对接oa
          * @param  $order_id
