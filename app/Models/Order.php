@@ -70,9 +70,9 @@ class Order extends Model {
 //                    $query->where('ld_order.order_number',$data['order_number']);
 //                }
 //            })
-            ->whereBetween('ld_order.create_at', [$state_time, $end_time])
+//            ->whereBetween('ld_order.create_at', [$state_time, $end_time])
             ->orderByDesc('ld_order.id')
-            ->offset($offset)->limit($pagesize)->get();
+            ->offset($offset)->limit($pagesize)->get()->toArray();
         print_r($order);die;
         $schooltype = Article::schoolANDtype($role_id);
         $page=[
