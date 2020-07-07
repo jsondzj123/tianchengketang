@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Coures;
 use App\Models\Couresmethod;
 use App\Models\CouresSubject;
+use App\Models\Couresteacher;
 use App\Models\CourseRefResource;
 use App\Models\CourseSchool;
+use App\Models\Order;
 use App\Models\School;
+use App\Models\Teacher;
 
 class CourseController extends Controller {
     protected $school;
@@ -146,7 +149,34 @@ class CourseController extends Controller {
          * return  array
          */
     public function courseDetail(){
+        //课程基本信息
+        $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+        if(!$course){
+            return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+        }
+        //分类信息
+        $parent = CouresSubject::select('id','subject_name')->where(['id'=>$course['parent_id'],'parent_id'=>0,'is_del'=>0,'is_open'=>0])->first();
+        $child = CouresSubject::select('subject_name')->where(['id'=>$course['child_id'],'parent_id'=>$parent['id'],'is_del'=>0,'is_open'=>0])->first();
+        $course['parent_name'] = $parent['subject_name'];
+        $course['child_name'] = $child['subject_name'];
+        unset($course['parent_id']);
+        unset($course['child_id']);
+        //授课方式
+        $method = Couresmethod::select('method_id')->where(['course_id'=>$this->data['id']])->get()->toArray();
+        if(!empty($method)){
+            $course['method'] = $method;
+        }
+        //学习人数   基数+订单数
+        $ordernum = Order::where(['class_id'=>$this->data['id'],'status'=>2,'oa_status'=>1])->count();
+        $course['buy_num'] = $course['buy_num']+$ordernum;
+        //讲师信息
+        $teacher=[];
+        $teacherlist = Couresteacher::where(['course_id'=>$this->data['id'],'is_del'=>0])->get()->toArray();
+        if(!empty($teacherlist)){
+            foreach ($teacherlist as $k=>$v){
+                $oneteacher = Teacher::where(['id'=>$v['teacher_id'],'is_del'=>0])->first();
+            }
+        }
     }
-
 }
 

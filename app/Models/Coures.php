@@ -425,7 +425,7 @@ class Coures extends Model {
                 $v['name'] = $names['name'];
                 $shift_no = LiveClass::where(['resource_id'=>$v['resource_id'],'is_del'=>0,'is_forbid'=>0])->get()->toArray();
                 foreach ($shift_no as $ks=>&$vs){
-                    if($v['shift_id'] != ''){
+                    if($v['shift_id'] != '' || $v['shift_id'] != null){
                         array_push($checked,$v['shift_id']);
                     }else{
                         if($ks == 0){
