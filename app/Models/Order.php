@@ -383,7 +383,7 @@ class Order extends Model {
             //计算用户购买课程到期时间
             $validity = date('Y-m-d H:i:s',strtotime('+'.$lessons['ttl'].' day'));
             //修改订单状态 课程有效期 oa状态
-            $update = self::where(['id'=>$order['id'],'order_type'=>1])->update(['status'=>2,'validity_time'=>$validity,'oa_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+            $update = self::where(['id'=>$order['id']])->update(['status'=>2,'validity_time'=>$validity,'oa_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
             //修改用户报名状态
             Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1]);
         }else{
