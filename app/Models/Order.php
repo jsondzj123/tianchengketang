@@ -59,21 +59,20 @@ class Order extends Model {
             ->count();
         $order = self::select('ld_order.id','ld_order.order_number','ld_order.order_type','ld_order.price','ld_order.pay_status','ld_order.pay_type','ld_order.status','ld_order.create_at','ld_order.oa_status','ld_order.student_id','ld_student.phone','ld_student.real_name')
             ->leftJoin('ld_student','ld_student.id','=','ld_order.student_id')
-//            ->where(function($query) use ($data) {
-//                if(isset($data['school_id']) && !empty($data['school_id'])){
-//                    $query->where('ld_order.school_id',$data['school_id']);
-//                }
-//                if(isset($data['status'])&& is_numeric($data['status'])){
-//                    $query->where('ld_order.status',$data['status']);
-//                }
-//                if(isset($data['order_number'])&& !empty($data['order_number'])){
-//                    $query->where('ld_order.order_number',$data['order_number']);
-//                }
-//            })
-//            ->whereBetween('ld_order.create_at', [$state_time, $end_time])
+            ->where(function($query) use ($data) {
+                if(isset($data['school_id']) && !empty($data['school_id'])){
+                    $query->where('ld_order.school_id',$data['school_id']);
+                }
+                if(isset($data['status'])&& is_numeric($data['status'])){
+                    $query->where('ld_order.status',$data['status']);
+                }
+                if(isset($data['order_number'])&& !empty($data['order_number'])){
+                    $query->where('ld_order.order_number',$data['order_number']);
+                }
+            })
+            ->whereBetween('ld_order.create_at', [$state_time, $end_time])
             ->orderByDesc('ld_order.id')
             ->offset($offset)->limit($pagesize)->get()->toArray();
-        print_r($order);die;
         $schooltype = Article::schoolANDtype($role_id);
         $page=[
             'pageSize'=>$pagesize,
