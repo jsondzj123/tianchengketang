@@ -5,14 +5,17 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
 use App\Models\Coures;
+use App\Models\Coureschapters;
 use App\Models\Couresmethod;
 use App\Models\CouresSubject;
 use App\Models\Couresteacher;
+use App\Models\CourseLiveResource;
 use App\Models\CourseRefResource;
 use App\Models\CourseSchool;
 use App\Models\Order;
 use App\Models\School;
 use App\Models\Teacher;
+use App\Models\Video;
 
 class CourseController extends Controller {
     protected $school;
@@ -105,7 +108,7 @@ class CourseController extends Controller {
         $ref_course=[];
         //授权课程
         if($count2 != 0){
-            $ref_course = CourseSchool::select('ld_course_school.course_id','ld_course_school.title','ld_course_school.cover','ld_course_school.sale_price','ld_course_school.buy_num','ld_course_school.watch_num','ld_course_school.create_at')
+            $ref_course = CourseSchool::select('ld_course_school.course_id as id','ld_course_school.title','ld_course_school.cover','ld_course_school.sale_price','ld_course_school.buy_num','ld_course_school.watch_num','ld_course_school.create_at')
                 ->leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
                 ->where($wheres)->where(['ld_course_school.to_school_id'=>$school_id,'ld_course_school.is_del'=>0,'ld_course_school.status'=>1])
                 ->where('ld_course_school.title','like','%'.$name.'%')
@@ -165,7 +168,7 @@ class CourseController extends Controller {
         //授课方式
         $method = Couresmethod::select('method_id')->where(['course_id'=>$this->data['id']])->get()->toArray();
         if(!empty($method)){
-            $course['method'] = $method;
+            $course['method'] = array_column($method, 'method_id');
         }
         //学习人数   基数+订单数
         $ordernum = Order::where(['class_id'=>$this->data['id'],'status'=>2,'oa_status'=>1])->count();
@@ -182,8 +185,86 @@ class CourseController extends Controller {
         //是否购买
         $order = Order::where(['student_id'=>AdminLog::getAdminInfo()->admin_user->id,'class_id'=>$this->data['course_id'],'status'=>2])->count();
         $course['is_pay'] = $order > 0?1:0;
-        //直播目录
-//        if(in_array(['']))
+
+
+        //直播&录播列表
+        $course['livearr'] = [];
+        $course['recordedarr'] = [];
+        if($order > 0){
+            //直播目录
+            if(in_array(1,$course['method'])){
+
+            }
+            //录播目录
+            if(in_array(2,$course['method'])){
+                $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->get()->toArray();
+                if(!empty($recorde)){
+                    foreach ($recorde as $ks=>&$vs){
+                        $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>$vs['id']])->get()->toArray();
+                        foreach ($recorde as $key=>$val){
+                            //查询小节绑定的录播资源
+                            $ziyuan = Video::where(['id'=>$val['resource_id'],'is_del'=>0,'status'=>0])->first()->toArray();
+                            $val['ziyuan'] = $ziyuan;
+                        }
+                        $vs['chapters'] = $recorde;
+                    }
+                }
+            }
+        }
+    }
+    /*
+         * @param  课程直播列表
+         * @param  author  苏振文
+         * @param  ctime   2020/7/7 14:39
+         * return  array
+         */
+    public function livearr(){
+
+    }
+    /*
+         * @param  课程录播列表
+         * @param  author  苏振文
+         * @param  ctime   2020/7/7 14:39
+         * return  array
+         */
+    public function recordedarr(){
+        $recordedarr = [];
+        //课程基本信息
+        $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+        if(!$course){
+            return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+        }
+        //判断此课程是否免费
+            //免费课程  将此课程的所有录播内容查询出来
+        if($course['sale_price'] == 0){
+            $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->get()->toArray();
+            if(!empty($recorde)){
+                foreach ($recorde as $ks=>&$vs){
+                    $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>$vs['id']])->get()->toArray();
+                    foreach ($recorde as $key=>$val){
+                        //查询小节绑定的录播资源
+                        $ziyuan = Video::where(['id'=>$val['resource_id'],'is_del'=>0,'status'=>0])->first()->toArray();
+                        $val['ziyuan'] = $ziyuan;
+                    }
+                    $vs['chapters'] = $recorde;
+                }
+            }
+        }else{
+            //此课程不免费，先查询试听的章节
+            $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->get()->toArray();
+            foreach ($recorde as $ks=>&$vs){
+
+            }
+        }
+    }
+    /*
+         * @param  课程资料表
+         * @param  author  苏振文
+         * @param  ctime   2020/7/7 14:40
+         * return  array
+         */
+    public function material(){
+
     }
 }
 

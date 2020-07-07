@@ -32,6 +32,7 @@ class Order extends Model {
             $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
             $data['school_id'] = $school_id;
         }
+        print_r($data);die;
         $begindata=date('Y-m-01', strtotime(date("Y-m-d")));
         $enddate = date('Y-m-d',strtotime("$begindata +1 month -1 day"));
         $statetime = !empty($data['state_time'])?$data['state_time']:$begindata;
