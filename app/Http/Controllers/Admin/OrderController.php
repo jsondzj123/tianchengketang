@@ -108,6 +108,7 @@ class OrderController extends Controller {
     public function orderUpOaForId(){
         //获取提交的参数
         try{
+            file_put_contents('111111111111111.txt', '时间:'.date('Y-m-d H:i:s').print_r(self::$accept_data,true),FILE_APPEND);
             $data = Order::orderUpOaForId(self::$accept_data);
             return response()->json($data);
         } catch (Exception $ex) {
