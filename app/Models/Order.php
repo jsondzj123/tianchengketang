@@ -368,7 +368,7 @@ class Order extends Model {
             return ['code' => 201 , 'msg' => '参数为空或格式错误'];
         }
         if(empty($data['order_number'])){
-            return ['code' => 201 , 'msg' => '订单号错误'];
+            return ['code' => 201 , 'msg' => '订单号不能为空'];
         }
         if(!in_array($data['status'],['0','1'])){
             return ['code' => 201 , 'msg' => '状态传输错误'];
