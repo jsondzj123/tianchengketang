@@ -48,7 +48,7 @@ class TeacherController extends Controller {
 
 			foerach($teacherIds as $key=>$v){
 			//公开课
-
+				
 			//课程
 			}
 		}
