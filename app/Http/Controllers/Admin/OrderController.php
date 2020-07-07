@@ -1,7 +1,5 @@
 <?php
 namespace App\Http\Controllers\Admin;
-header('Content-Type: text/html;charset=utf-8');
-header('Access-Control-Allow-Origin:*'); // *代表允许任何网址请求
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
 use App\Models\Lesson;
@@ -12,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 class OrderController extends Controller {
-
     /*
          * @param  订单列表
          * @param  $school_id  分校id
