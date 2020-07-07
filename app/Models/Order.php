@@ -72,7 +72,7 @@ class Order extends Model {
             })
             ->whereBetween('ld_order.create_at', [$state_time, $end_time])
             ->orderByDesc('ld_order.id')
-            ->offset($offset)->limit($pagesize)->get();
+            ->offset($offset)->limit($pagesize)->get()->toArray();
         $schooltype = Article::schoolANDtype($role_id);
         $page=[
             'pageSize'=>$pagesize,
@@ -374,6 +374,9 @@ class Order extends Model {
             return ['code' => 201 , 'msg' => '状态传输错误'];
         }
         $order = self::where(['order_number'=>$data['order_number']])->first();
+        if(!$order){
+            return ['code' => 201 , 'msg' => '订单号错误'];
+        }
         if($data['status'] == 1){
             //修改学员报名  订单状态 课程有效期
             $lessons = Coures::where(['id'=>$order['class_id']])->first();

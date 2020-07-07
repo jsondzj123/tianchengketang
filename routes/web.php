@@ -129,9 +129,10 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->group(['prefix' => 'course'], function () use ($router) {
         $router->post('subjectList','CourseController@subjectList');//学科列表
         $router->post('courseList','CourseController@courseList');//课程列表
+        $router->post('courseDetail','CourseController@courseDetail');//课程详情
     });
 });
-// PC端口路由接口（lys） begin 
+// PC端口路由接口（lys） begin
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
     $router->group(['prefix' => 'index'], function () use ($router) {
         $router->post('teacherList','IndexController@teacherList');//我们的团队
@@ -551,7 +552,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     });
     //教学模块
     $router->group(['prefix' => 'teach'], function () use ($router) {
-        $router->post('getList', 'TeachController@getList');//教学列表 
+        $router->post('getList', 'TeachController@getList');//教学列表
         $router->post('startLiveChild', 'TeachController@startLive');  //启动直播
         $router->post('livePlayback','TeachController@livePlayback');  //课程回放
         $router->post('coursewareUpload','TeachController@courseUpload');  //课件上传
