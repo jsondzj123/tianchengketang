@@ -127,6 +127,10 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('subjectList','CourseController@subjectList');//学科列表
         $router->post('courseList','CourseController@courseList');//课程列表
         $router->post('courseDetail','CourseController@courseDetail');//课程详情
+        $router->post('courseIntroduce','CourseController@courseIntroduce');//课程简介
+        $router->post('livearr','CourseController@livearr');//课程直播列表
+        $router->post('recordedarr','CourseController@recordedarr');//课程录播列表
+        $router->post('material','CourseController@material');//课程资料列表
     });
 });
 // PC端口路由接口（lys） begin
