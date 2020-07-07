@@ -374,8 +374,9 @@ class Order extends Model {
             return ['code' => 201 , 'msg' => '状态传输错误'];
         }
         $order = self::where(['order_number'=>$data['order_number']])->first();
+        print_r($order);die;
         if(!$order){
-            return ['code' => 201 , 'msg' => '订单号错误'];
+            return ['code' => 201 , 'msg' => '订单号错误111111'];
         }
         if($data['status'] == 1){
             //修改学员报名  订单状态 课程有效期
