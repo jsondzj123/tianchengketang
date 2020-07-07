@@ -64,15 +64,16 @@ class OpenCourseController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
         try{
+        	unset($openCourseArr['/admin/opencourse/doInsertOpenCourse']);
 	        DB::beginTransaction();
 	        $openCourseArr['subject'] = json_decode($openCourseArr['subject'],1);
 	        $openCourseArr['parent_id'] = $openCourseArr['subject'][0]<0 ? 0: $openCourseArr['subject'][0];
-	        $openCourseArr['child_id'] = !isset($openCourseArr['subject'][1]) && $openCourseArr['subject'][1] ? 0 : $openCourseArr['subject'][1];
+	        $openCourseArr['child_id'] = !isset($openCourseArr['subject'][1]) && empty($openCourseArr['subject'][1]) ? 0 : $openCourseArr['subject'][1];
 	     	$eduTeacherArr = !isset($openCourseArr['edu_teacher_id']) && empty($openCourseArr['edu_teacher_id'])?[]:json_decode($openCourseArr['edu_teacher_id'],1);
 	        $lectTeacherId  = $openCourseArr['lect_teacher_id'];
 	        $time = json_decode($openCourseArr['time'],1);
-	        $openCourseArr['start_at']  = $time[0];
-	        $openCourseArr['end_at']  = $time[1];
+	        $openCourseArr['start_at']  = substr($time[0],0,10);
+	        $openCourseArr['end_at']  = substr($time[1],0,10); 
 	        unset($openCourseArr['edu_teacher_id']);
 	        unset($openCourseArr['lect_teacher_id']);
 	        unset($openCourseArr['subject']);
@@ -309,10 +310,14 @@ class OpenCourseController extends Controller {
 	    if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
 	    	return response()->json(['code'=>207,'msg'=>'直播中，无法修改']);
 	    }
+
 	    $data['data']['subject'] = [];
+
 	   	if($data['data']['parent_id']>0){
-	   		array_push($data['data']['subject'], $data['data']['parent_id']);
-	   	} 
+	   		array_push($data['data']['subject'],$data['data']['parent_id']);
+	   	}    
+
+	   	
 	   	if($data['data']['child_id']>0){
 	   		array_push($data['data']['subject'], $data['data']['child_id']);
 	   	}                
@@ -323,15 +328,17 @@ class OpenCourseController extends Controller {
     	$teacherData = Teacher::whereIn('id',$teacherArr)->where('is_del',0)->select('id','type')->get()->toArray();
     	$lectTeacherArr = $eduTeacherArr = [];
     	if(!empty($teacherData)){
+
     		foreach($teacherData as $key =>$v){
+
     			if($v['type'] == 1){
-    				array_push($eduTeacherArr,$v['id']);
+    				$data['data']['edu_teacher'] = Teacher::where('type',2)->select('id','real_name')->get();
     			}else if($v['type'] == 2){
-    				$data['data']['lect_teacher_id'] = $v['id'];
+    				$data['data']['lect_teacher'] = Teacher::where('type',2)->select('id','real_name')->first();
     			}
     		}
     	}
-    	$arr = ['openless'=>$data['data'],'eduteacher'=>$eduTeacherArr];
+    	$arr = ['openless'=>$data['data']];
     	return response()->json(['code'=>200,'msg'=>'获取成功','data'=>$arr]);
     }
     /*
