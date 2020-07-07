@@ -26,22 +26,15 @@ class IndexController extends Controller {
     //讲师列表
     public function teacherList(){
     	$limit = !isset($this->data['limit']) || empty($this->data['limit']) || $this->data['limit'] <= 0 ? 8 : $this->data['limit'];
-    	$recomendTeacherArr = Teacher::where(['school_id'=>$this->school_id['id'],'is_del'=>0,'type'=>2])->orderBy('number','desc')->select('id','head_icon','real_name','describe','number')->limit($limit)->get();
+    	$recomendTeacherArr = Teacher::where(['school_id'=>$this->school['id'],'is_del'=>0,'type'=>2])->orderBy('number','desc')->select('id','head_icon','real_name','describe','number')->limit($limit)->get()->toArray();
+
     	$count = count($recomendTeacherArr);
     	if($count<$limit){
-    		$teacherData = Teacher::where(['school_id'=>$this->school_id['id'],'is_del'=>0,'type'=>2])->orderBy('number','desc')->select('id','head_icon','real_name','describe','number')->limit($limit-$count)->get();
+    		$teacherData = Teacher::where(['school_id'=>$this->school['id'],'is_del'=>0,'type'=>2])->orderBy('number','desc')->select('id','head_icon','real_name','describe','number')->limit($limit-$count)->get()->toArray();
     		$recomendTeacherArr=array_merge($recomendTeacherArr,$teacherData);
     	}
-   		if(!empty($recomendTeacherArr)){
-   			foreach($recomendTeacherArr as $key=>&$v){
-   				if($key >= 0){
-   					$v['is_checked'] = true;
-   				}else{
-   					$v['is_checked'] = false;
-   				}
-   			}
-   		} 	
-    	return reponse()->json(['code'=>200,'msg'=>'Success','data'=>$recomendTeacherArr]);
+   		
+    	return response()->json(['code'=>200,'msg'=>'Success','data'=>$recomendTeacherArr]);
     }
     //新闻资讯
     public function newInformation(){
@@ -50,7 +43,7 @@ class IndexController extends Controller {
     	$news = Articletype::leftJoin('ld_article','ld_article.article_type_id','=','ld_article_type.id')
              ->where($where)
              ->limit($limit)->get();
-        return reponse()->json(['code'=>200,'msg'=>'Success','data'=>$recomendTeacherArr]);
+        return response()->json(['code'=>200,'msg'=>'Success','data'=>$news]);
     }
     //页脚
     public function footer(){
@@ -64,11 +57,11 @@ class IndexController extends Controller {
 		    	}
     		}
     	}
-    	return reponse()->json(['code'=>200,'msg'=>'Success','data'=>$footer]);
+    	return response()->json(['code'=>200,'msg'=>'Success','data'=>$footer]);
     }
     //精品课程
     public function course(){
-
+       
     	$course =  $zizengCourseData = $natureCourseData = [];
     	$subjectOne = CouresSubject::where(['school_id'=>$this->school['id'],'is_open'=>0,'is_del'=>0,'parent_id'=>0])->pluck('id')->toArray();//自增学科大类
     	$natureCourseIds = CourseSchool::where(['to_school_id'=>$this->school['id'],'is_del'=>0])->pluck('course_id')->toArray();//授权课程
@@ -95,6 +88,6 @@ class IndexController extends Controller {
     		}
     		$course['course'] = array_merge($natureCourseData,$zizengCourseData);
     	}
-    	return ['code'=>200,'msg'=>'Success','data'=>$course];
+        return response()->json(['code'=>200,'msg'=>'Success','data'=>$course]);
     }	
 }
