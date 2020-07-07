@@ -413,15 +413,21 @@ class Coures extends Model {
         if(!isset($data['id']) || empty($data['id'])){
             return ['code' => 201 , 'msg' => '课程id不能为空'];
         }
-        $list=[];
+        $list = [];
+        $first = [];
+        $checked = [];
         $count = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->count();
         if($count > 0){
             $list = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
             foreach ($list as $k=>&$v){
+                array_push($first,$v['id']);
                 $names = Live::select('name')->where(['id'=>$v['resource_id']])->first();
                 $v['name'] = $names['name'];
                 $shift_no = LiveClass::where(['resource_id'=>$v['resource_id'],'is_del'=>0,'is_forbid'=>0])->get()->toArray();
                 foreach ($shift_no as $ks=>&$vs){
+                    if($ks == 0){
+                        array_push($checked,$vs['id']);
+                    }
                     //查询课次
                     $class_num = LiveChild::where(['shift_no_id'=>$vs['id'],'is_del'=>0,'status'=>1])->count();
                     //课时
@@ -432,8 +438,7 @@ class Coures extends Model {
                 $v['shift_no'] = $shift_no;
             }
         }
-
-        return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$list,'first'=>$first,'checked'=>$checked];
     }
     //课程进行排课
     public static function liveToCourseshift($data){
