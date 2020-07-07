@@ -27,6 +27,7 @@ class UserController extends Controller {
                 $user_info['papers_name']  = $user_info['papers_type'] > 0 ? parent::getPapersNameByType($user_info['papers_type']) : '';
                 //余额
                 $user_info['balance']      = floatval($user_info['balance']);
+                $user_info['user_token']      = self::$accept_data['user_info']['user_token'];
                 return response()->json(['code' => 200 , 'msg' => '获取学员信息成功' , 'data' => ['user_info' => $user_info]]);
             } else {
                 return response()->json(['code' => 203 , 'msg' => '获取学员信息失败']);
