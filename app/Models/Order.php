@@ -375,7 +375,7 @@ class Order extends Model {
         }
         $order = self::where(['order_number'=>$data['order_number']])->first()->toArray();
         if(!$order){
-            return ['code' => 201 , 'msg' => '订单号错误111111'];
+            return ['code' => 201 , 'msg' => '订单号错误'];
         }
         if($data['status'] == 1){
             //修改学员报名  订单状态 课程有效期
@@ -396,7 +396,5 @@ class Order extends Model {
             DB::rollback();
             return ['code' => 202 , 'msg' => '修改失败'];
         }
-
     }
-
 }
