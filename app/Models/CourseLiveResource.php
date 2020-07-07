@@ -144,9 +144,11 @@ class CourseLiveResource extends Model {
                     self::where(['course_id'=>$data['course_id'],'resource_id'=>$v])->update(['is_del'=>0]);
                     Live::where(['id'=>$v])->update(['is_forbid'=>1,'update_at'=>date('Y-m-d H:i:s')]);
                 }else{
+                    $classid = CourseShiftNo::where(['resource_id'=>$v,'is_del'=>0,'is_forbid'=>0])->first()->toArray();
                     self::insert([
                         'resource_id' => $v,
-                        'course_id' => $data['course_id']
+                        'course_id' => $data['course_id'],
+                        'shift_id' => $classid['id']
                     ]);
                 }
             }
