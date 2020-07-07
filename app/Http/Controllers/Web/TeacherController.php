@@ -35,25 +35,39 @@ class TeacherController extends Controller {
 			foreach($teacherArr as $k=>&$v){
 				$course = Couresteacher::where('teacher_id',$v['id'])->pluck('course_id')->get()->toArray();
 				if(!empty($course)){
-					$v['student_num'] = Order::whereIn('class_id',$course)where(['school_id'=>$this->school['id'],'pay_type'=>2,'oa_status'=>1])->whereIn('pay_status',[3,4])->count();
+					$v['student_num'] = Order::whereIn('class_id',$course)->where(['school_id'=>$this->school['id'],'pay_type'=>2,'oa_status'=>1])->whereIn('pay_status',[3,4])->count();
 				}else{
 					$v['student_num'] = 0;
 				}
 			}
+		}     
+		//授权讲师
+		$teacherIds = CourseRefTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_ref_teacher.teacher_id')
+        						->where(['ld_course_teacher.course_id'=>$v['id'],'ld_lecturer_educationa.type'=>2])->get()->toArray();//授权公开课的讲师          
+		if(!empty($teacherIds)){
+
+			foerach($teacherIds as $key=>$v){
+			//公开课
+
+			//课程
+			}
 		}
-		$natureCourse = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
-                ->where(function($query) use ($body,$this->school) {
+		
+
+
+
+
+		$natureCourse = CourseSchool::where(function($query) use ($body,$this->school) {
                     $query->where('ld_course_school.to_school_id',$this->school['id']); //被授权学校  
                     $query->where('ld_course_school.is_del',0);
-            })->select('ld_course_school.course_id as id')->get()->toArray(); //授权课程
+            })->select('id')->get()->toArray(); //授权课程
         if(!empty($natureCourse)){
         	foreach($natureCourse as $key=>$v){
-        		$course = Couresteacher::where('course_id',$v['id'])->pluck('course_id')->get()->toArray();
-				if(!empty($course)){
-					$v['student_num'] = Order::whereIn('class_id',$course)where(['school_id'=>$this->school['id'],'pay_type'=>2,'oa_status'=>1])->whereIn('pay_status',[3,4])->count();
-				}else{
-					$v['student_num'] = 0;
-				}
+        		$teacher[] = Couresteacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_teacher.teacher_id')
+        						->where(['ld_course_teacher.course_id'=>$v['id'],'ld_lecturer_educationa.type'=>2])->first()->toArray();
+        	}
+        	foreach($teacher as $k=>$v){
+
         	}
         }
 		
