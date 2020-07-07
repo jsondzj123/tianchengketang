@@ -387,7 +387,7 @@ class Order extends Model {
             //修改用户报名状态
             Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1]);
         }else{
-            $update = self::where(['id'=>$order['id'],'order_type'=>1])->update(['status'=>3,'oa_status'=>$data['status'],'update_at'=>date('Y-m-d H:i:s')]);
+            $update = self::where(['id'=>$order['id']])->update(['status'=>3,'oa_status'=>$data['status'],'update_at'=>date('Y-m-d H:i:s')]);
         }
         if($update){
             DB::commit();
