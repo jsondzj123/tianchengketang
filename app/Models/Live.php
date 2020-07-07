@@ -447,6 +447,15 @@ class Live extends Model {
             if(!isset($data['course_id'])){
                 return ['code' => 201 , 'msg' => '课程id不能为空'];
             }
+
+            //查询该班号是否有资料
+            $teacher = CourseLiveResource::where(["resource_id"=>$data['resource_id']])->first();
+            if(!empty($teacher)){
+                //删除所有之前关联的数据
+                CourseLiveResource::where(["resource_id"=>$data['resource_id']])->delete();
+            }
+
+
             $res = json_decode($data['course_id']);
             foreach($res as $k => $v){
                 $data[$k]['resource_id'] = $data['resource_id'];

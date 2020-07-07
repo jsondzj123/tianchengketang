@@ -30,8 +30,8 @@ class SubjectController extends Controller {
         $all = [['id' => 0, 'name' => '全部', 'pid' => 0, 'childs' => []]];
         $data['subjects'] = array_merge($all, json_decode($subjects));
         $data['sort'] = [
-            ['sort_id' => 0, 'name' => '综合', 'type' => ['asc', 'desc']],
-            ['sort_id' => 1, 'name' => '按热度', 'type' => ['asc', 'desc']],
+            ['sort_id' => 0, 'name' => '综合'],
+            ['sort_id' => 1, 'name' => '按热度'],
             ['sort_id' => 2, 'name' => '按价格升', 'type' => ['asc']],
             ['sort_id' => 3, 'name' => '按价格降', 'type' => ['desc']],
         ];
