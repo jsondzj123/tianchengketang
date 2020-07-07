@@ -107,7 +107,11 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
 
     //题库部分
     $router->post('getBankList','BankController@getBankList');                  //全部题库接口
-    $router->post('getBankChaptersList','BankController@getBankChaptersList');  //题库章节接口
+    $router->group(['prefix' => 'bank' , 'middleware'=> 'user'], function () use ($router) {
+        $router->post('getBankChaptersList','BankController@getBankChaptersList');  //题库章节接口
+        $router->post('getExamSet','BankController@getExamSet');                    //做题设置接口
+        $router->post('doChapterExamList','BankController@doChapterExamList');      //章节练习随机生成试题接口
+    });
 });
 
 //PC端路由接口  需要登录
