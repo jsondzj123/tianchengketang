@@ -30,7 +30,7 @@ class CourseController extends Controller {
     public function __construct(){
         $this->data = $_REQUEST;
         $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
-        $this->userid = AdminLog::getAdminInfo()->admin_user->id;
+        $this->userid = isset(AdminLog::getAdminInfo()->admin_user->id)?AdminLog::getAdminInfo()->admin_user->id:0;
     }
     /*
          * @param  学科列表
@@ -40,11 +40,13 @@ class CourseController extends Controller {
          */
     public function subjectList(){
         //自增学科
-        $subject = CouresSubject::where(['school_id'=>$this->school,'parent_id'=>0,'is_open'=>0,'is_del'=>0])->get()->toArray();
+        $subject = CouresSubject::where(['school_id'=>$this->school['id'],'parent_id'=>0,'is_open'=>0,'is_del'=>0])->get()->toArray();
         if(!empty($subject)){
             foreach ($subject as $k=>&$v){
-                $subject = CouresSubject::where(['parent_id'=>$v['id'],'is_open'=>0,'is_del'=>0])->get()->toArray();
-                $v['son'] = $subject;
+                $subjects = CouresSubject::where(['parent_id'=>$v['id'],'is_open'=>0,'is_del'=>0])->get()->toArray();
+                if(!empty($subjects)){
+                    $v['son'] = $subjects;
+                }
             }
         }
         //授权学科
