@@ -22,7 +22,7 @@ class LessonController extends Controller {
         $pagesize = $request->input('pagesize') ?: 15;
         $page     = $request->input('page') ?: 1;
         $offset   = ($page - 1) * $pagesize;
-        $parent_id = $request->input('parent_id') ?: 0;
+        $parent_id = $request->input('subject_id') ?: 0;
         $child_id = $request->input('child_id') ?: 0;
         if($parent_id == 0 && $child_id == 0){
             $subjectId = 0;
