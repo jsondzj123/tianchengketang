@@ -24,7 +24,7 @@ class NewsController extends Controller {
         $this->school = School::where(['dns'=>$_SERVER['SERVER_NAME']])->first();
     }
     //列表
-    public function List(){
+    public function getList(){
     	$articleArr = [];
     	$pagesize = !isset($this->data['pagesize']) || $this->data['pagesize']  <= 0 ? 8:$this->data['pagesize'];   
     	$page = !isset($this->data['page']) || $this->data['page'] <= 0 ?1 :$this->data['page'];

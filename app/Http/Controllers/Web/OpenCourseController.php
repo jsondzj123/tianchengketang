@@ -168,4 +168,43 @@ class OpenCourseController extends Controller {
 		}
 		return response()->json(['code'=>200,'msg'=>'Success','data'=>$openCourseArr]);
     }
+    //详情
+    public function details(){
+    	if(!isset($this->data['course_id'])  || $this->data['course_id'] <=0){
+    		return response()->json(['code'=>201,'msg'=>'course_id为空或不合法']);
+    	}
+    	$openCourse = OpenLivesChilds::where(['lesson_id'=>$this->data['course_id'],'is_del'=>0,'is_forbid'=>0])->first();
+    	if(empty($openCourse)){
+    		return response()->json(['code'=>201,'msg'=>'非法请求！！！']);
+    	}
+    	if($openCourse['status'] == 1 || $openCourse['status'] == 2){
+    		$result=$this->startLive($openCourse['course_id']);
+    	}
+    	if($openCourse['status'] == 3){
+    		if($openCourse['playback'] == 0){
+    			$result =  ['code'=>202,'msg'=>'未生成回放，请耐心等待！！！']);
+    		}else{
+    			$result =  ['code'=>200,'msg'=>'Success','url'=>$openCourse['playbackUrl']]);
+    		}
+    	}
+    	return response()->json($result);
+
+    }
+     /**
+     * 启动直播
+     * @param
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function startLive($course_id)
+    {
+        
+        $MTCloud = new MTCloud();
+        $res = $MTCloud->courseLaunch($course_id);
+        Log::error('直播器启动:'.json_encode($res));
+        if(!array_key_exists('code', $res) && !$res["code"] == 0){
+            return $this->response('直播器启动失败', 500);
+        }
+        return $res['data'];
+    }
 }
