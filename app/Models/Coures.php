@@ -449,11 +449,16 @@ class Coures extends Model {
         if(!isset($data) || empty($data)){
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
-        if(!isset($data['shift']) || empty($data['shift'])){
-            return ['code' => 201 , 'msg' => '参数为空'];
+        if(!isset($data['first']) || empty($data['first'])){
+            return ['code' => 201 , 'msg' => 'first参数为空'];
         }
-        foreach ($data['shift'] as $k=>$v){
-            CourseLiveResource::where('id',$v['id'])->update(['shift_id'=>$v['shift_id'],'update_at'=>date('Y-m-d H:i:s')]);
+        if(!isset($data['checked']) || empty($data['checked'])){
+            return ['code' => 201 , 'msg' => 'checked参数为空'];
+        }
+        $first = json_decode($data['first'],true);
+        $checked = json_decode($data['checked'],true);
+        foreach ($first as $k=>$v){
+            CourseLiveResource::where('id',$v)->update(['shift_id'=>$checked[$k],'update_at'=>date('Y-m-d H:i:s')]);
         }
         $user_id = AdminLog::getAdminInfo()->admin_user->id;
         //添加日志操作
