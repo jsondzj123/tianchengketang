@@ -105,6 +105,9 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->post('doUserForgetPassword','AuthenticateController@doUserForgetPassword');              //找回密码接口
     $router->post('captchaInfo','AuthenticateController@captchaInfo');          //WEB生成图片验证码接口
 
+    //题库部分 
+    $router->post('getBankList','BankController@getBankList');                  //全部题库接口
+    $router->post('getBankChaptersList','BankController@getBankChaptersList');  //题库章节接口
 });
 
 //PC端路由接口
@@ -136,12 +139,11 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
 // PC端口路由接口（lys） begin
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
     $router->group(['prefix' => 'index'], function () use ($router) {
-        $router->post('teacherList','IndexController@teacherList');//我们的团队
+        $router->post('teacher','IndexController@teacherList');//我们的团队
         $router->post('news','IndexController@newInformation');//新闻资讯
         $router->post('footer','IndexController@footer');//页脚
         $router->post('course','IndexController@course');//精品课程
     });
-
 });
 //PC端口路由接口(LYS ) end
 //后台端路由接口

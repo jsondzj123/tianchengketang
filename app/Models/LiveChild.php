@@ -349,7 +349,7 @@ class LiveChild extends Model {
                         ->where(['ld_course_class_number.id'=>$data['class_id'],'ld_course_class_number.is_del'=>0,'ld_course_class_number.status'=>0,'ld_lecturer_educationa.type'=>2])
                         ->first();
             if(!$one){
-                return ['code' => 204 , 'msg' => '参数不正确'];
+                return ['code' => 204 , 'msg' => '课次已发布成功'];
             }
             $MTCloud = new MTCloud();
             $res = $MTCloud->courseAdd(
@@ -474,7 +474,7 @@ class LiveChild extends Model {
             }
             $total = CourseMaterial::where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>3])->get()->count();
             if($total > 0){
-                $list = CourseMaterial::select("id","type","material_name","material_size","material_url")->where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>3])->get();
+                $list = CourseMaterial::select("id","type","material_name as name","material_size as size","material_url as url")->where(['is_del'=>0,'parent_id'=>$data['parent_id'],'mold'=>3])->get();
                 foreach($list as $k => $v){
                     if($v['type'] == 1){
                         $v['typeName'] = "材料";
