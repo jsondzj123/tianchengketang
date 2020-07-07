@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminLog;
 use App\Models\Coures;
 use App\Models\Couresmethod;
 use App\Models\CouresSubject;
@@ -175,8 +176,14 @@ class CourseController extends Controller {
         if(!empty($teacherlist)){
             foreach ($teacherlist as $k=>$v){
                 $oneteacher = Teacher::where(['id'=>$v['teacher_id'],'is_del'=>0])->first();
+                array_push($teacher,$oneteacher);
             }
         }
+        //是否购买
+        $order = Order::where(['student_id'=>AdminLog::getAdminInfo()->admin_user->id,'class_id'=>$this->data['course_id'],'status'=>2])->count();
+        $course['is_pay'] = $order > 0?1:0;
+        //直播目录
+//        if(in_array(['']))
     }
 }
 
