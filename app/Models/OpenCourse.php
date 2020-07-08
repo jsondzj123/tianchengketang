@@ -71,9 +71,10 @@ class OpenCourse extends Model {
         $where['child_id'] =  !isset($body['child_id']) || empty($body['child_id']) ?'':$body['child_id'];
         $where['status'] =  !isset($body['status']) || empty($body['status']) ?'':$body['status'];
         $where['time']  =  !isset($body['time']) || empty($body['time']) ?[]:json_decode($body['time'],1);
+        $time = [];
         if(!empty($where['time']) ){
-            $where['start_at'] =  substt($where['time'][0],0,1);
-            $where['end_at']  = substr($where['time'][1],0,1);
+            $where['start_at'] =  substt($where['time'][0],0,10);
+            $where['end_at']  = substr($where['time'][0],0,10);
         } 
         $offset   = ($page - 1) * $pagesize;
         $open_less_count = self::where(function($query) use ($where,$school_id){
@@ -100,19 +101,7 @@ class OpenCourse extends Model {
             }
             $query->where('school_id',$school_id);
             $query->where('is_del',0);
-        });//自增公开课
-         $natureOpenCourse = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
-                            ->where(function($query) use ($data,$school_id) {
-                                if(!empty($data['subjectOne']) && $data['subjectOne'] != ''){
-                                    $query->where('ld_course_open.parent_id',$data['subjectOne']);
-                                }
-                                if(!empty($data['subjectTwo']) && $data['subjectTwo'] != ''){
-                                    $query->where('ld_course_open.child_id',$data['subjectTwo']);
-                                }
-                                $query->where('ld_course_ref_open.to_school_id',$data['school_id']);
-                                $query->where('ld_course_ref_open.from_school_id',$school_id);
-                                $query->where('ld_course_ref_open.is_del',0);
-                    })->select('ld_course_ref_open.course_id as id','ld_course_open.title','ld_course_open.cover','ld_course_open.status','ld_course_open.start_at','ld_course_open.end_at')->get()->toArray(); //授权公开课信息（分校）
+         })->count();
         
         $sum_page = ceil($open_less_count/$pagesize);
         if($open_less_count > 0){
