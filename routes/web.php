@@ -144,6 +144,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('getExamSet','BankController@getExamSet');                    //做题设置接口
         $router->post('doRandExamList','BankController@doRandExamList');            //随机生成试题接口
         $router->post('getExamPapersList','BankController@getExamPapersList');      //模拟真题试卷列表接口
+        $router->post('doCollectQuestion','BankController@doCollectQuestion');      //试题收藏/取消收藏接口
     });
 });
 
