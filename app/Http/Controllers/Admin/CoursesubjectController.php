@@ -36,12 +36,6 @@ class CoursesubjectController extends Controller {
        if(!isset($data['subject_name']) || empty($data['subject_name'])){
            return response()->json(['code' => 202 , 'msg' => '学科名称不能为空']);
        }
-//       if(!isset($data['description']) || empty($data['description'])){
-//           return response()->json(['code' => 202 , 'msg' => '学科描述不能为空']);
-//       }
-//       if(!isset($data['subject_cover']) || empty($data['subject_cover'])){
-//           return response()->json(['code' => 202 , 'msg' => '学科封面不能为空']);
-//       }
        if(!isset($data['parent_id']) || empty($data['parent_id'])){
            $data['parent_id'] = 0;
        }
