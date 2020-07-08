@@ -20,6 +20,7 @@ class CreateLdLecturerEducationaTable extends Migration
             $table->integer('admin_id')->default(0)->comment('操作员id');
             $table->integer('school_id')->default(0)->comment('网校id');
             $table->string('head_icon' , 255)->default('')->comment('头像');
+            $table->string('teacher_icon' , 255)->default('')->comment('讲师图片');
             $table->char('phone', 11)->default('')->comment('手机号');
             $table->string('real_name' , 255)->default('')->comment('讲师姓名');
             $table->unsignedTinyInteger('sex')->default(1)->comment('性别(1男,2女)');

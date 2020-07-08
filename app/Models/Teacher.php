@@ -111,7 +111,7 @@ class Teacher extends Model {
         }
 
         //根据id获取讲师或教务详细信息
-        $teacher_info = self::where('id',$body['teacher_id'])->select('head_icon','school_id','phone','real_name','sex','qq','wechat','parent_id','child_id','describe','content')->first()->toArray();
+        $teacher_info = self::where('id',$body['teacher_id'])->select('head_icon','teacher_icon','school_id','phone','real_name','sex','qq','wechat','parent_id','child_id','describe','content')->first()->toArray();
         //判断学科是否存在二级
         if($teacher_info['child_id'] && $teacher_info['child_id'] > 0){
             $teacher_info['parent_id'] = [$teacher_info['parent_id'] , $teacher_info['child_id']];
@@ -346,6 +346,7 @@ class Teacher extends Model {
         //讲师或教务数组信息追加
         $teacher_array = [
             'head_icon'  =>    isset($body['head_icon']) && !empty($body['head_icon']) ? $body['head_icon'] : '' ,
+            'teacher_icon' =>    isset($body['teacher_icon']) && !empty($body['teacher_icon']) ? $body['teacher_icon'] : '' ,
             'phone'      =>    isset($body['phone']) && !empty($body['phone']) ? $body['phone'] : '',
             'real_name'  =>    isset($body['real_name']) && !empty($body['real_name']) ? $body['real_name'] : '' ,
             'qq'         =>    isset($body['qq']) && !empty($body['qq']) ? $body['qq'] : '' ,
@@ -481,6 +482,7 @@ class Teacher extends Model {
         $teacher_array = [
             'type'       =>    $body['type'] ,
             'head_icon'  =>    isset($body['head_icon']) && !empty($body['head_icon']) ? $body['head_icon'] : '' ,
+            'teacher_icon' =>    isset($body['teacher_icon']) && !empty($body['teacher_icon']) ? $body['teacher_icon'] : '' ,
             'phone'      =>    isset($body['phone']) && !empty($body['phone']) ? $body['phone'] : '',
             'real_name'  =>    isset($body['real_name']) && !empty($body['real_name']) ? $body['real_name'] : '' ,
             'qq'         =>    isset($body['qq']) && !empty($body['qq']) ? $body['qq'] : '' ,
