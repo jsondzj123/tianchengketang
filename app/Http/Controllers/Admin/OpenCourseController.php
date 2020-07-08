@@ -383,7 +383,7 @@ class OpenCourseController extends Controller {
 	    if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
 	    	return response()->json(['code'=>207,'msg'=>'直播中，无法修改']);
 	    }
-	    if($data['data']['end_at'] <time(){
+	    if($data['data']['end_at'] <time()){
 	    	return response()->json(['code'=>207,'msg'=>'课程已结束，无法修改！！！']);
 	    }
 	     try{
