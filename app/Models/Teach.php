@@ -25,6 +25,7 @@ class Teach extends Model {
 	public static function getList($body){
 		$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
 		//公开课数据
+
 		$openCourseArr = OpenCourse::rightJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_open.id') 
 						->rightJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_open.id')
 						->rightJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_open_teacher.teacher_id')
@@ -68,7 +69,7 @@ class Teach extends Model {
 							$query->where('ld_lecturer_educationa.real_name','like',"%".$body['teacherSearch']."%");
 						}
 						if(isset($body['classSearch']) && !empty($body['classSearch'])){
-							$query->where('ld_course_open.title',$body['classSearch']);
+							$query->where('ld_course_open.title','like','%'.$body['classSearch'].'%');
 						}
 						$query->where('ld_course_open.nature',0);
 						$query->where('ld_course_open.is_del',0);
@@ -76,6 +77,9 @@ class Teach extends Model {
 						$query->where('ld_lecturer_educationa.type',2);
 					})->select('ld_course_open.title as class_name','ld_lecturer_educationa.real_name as teacher_name','ld_course_open.start_at','ld_course_open.end_at','ld_course_open_live_childs.watch_num')
 					->get()->toArray();
+			if(isset($body['classNoSearch']) && !empty($body['classNoSearch'])){
+				$openCourseArr = [];
+			}
 			//课程
 		$courseArr = CourseShiftNo::rightJoin('ld_course_class_number','ld_course_class_number.id','=','ld_course_shift_no.id')
 					->rightJoin('ld_course_class_teacher','ld_course_class_number.id','=','ld_course_class_teacher.class_id')
@@ -121,10 +125,10 @@ class Teach extends Model {
 							$query->where('ld_lecturer_educationa.real_name','like',"%".$body['teacherSearch']."%");
 						}
 						if(isset($body['classSearch']) && !empty($body['classSearch'])){
-							$query->where('ld_course_class_number.name',$body['classSearch']);
+							$query->where('ld_course_class_number.name','like','%'.$body['classSearch'].'%');
 						}
 						if(isset($body['classNoSearch']) && !empty($body['classNoSearch'])){ //
-							$query->where('ld_course_shift_no.name',$body['classNoSearch']);
+							$query->where('ld_course_shift_no.name','like','%'.$body['classNoSearch'].'%');
 						}
 						$query->where('ld_course_shift_no.is_del',0);
 						$query->where('ld_course_class_number.is_del',0);
