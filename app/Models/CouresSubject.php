@@ -28,7 +28,7 @@ class CouresSubject extends Model {
        $list =self::select('id','subject_name','description','is_open')
            ->where($where)
            ->orderByDesc('id')
-           ->get();
+           ->get()->toArray();
        print_r($list);die;
        foreach ($list as $k=>&$v){
            $sun = self::select('id','subject_name','is_open')
