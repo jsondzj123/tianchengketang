@@ -323,6 +323,7 @@ class OpenCourseController extends Controller {
 	   	}                
 	    $data['data']['start_at'] = date('Y-m-d H:i:s',$data['data']['start_at']);
 	    $data['data']['end_at'] = date('Y-m-d H:i:s',$data['data']['end_at']);
+	    $data['data']['openless_id'] = $data['data']['id'];
 	    $teacher_id = OpenCourseTeacher::where(['course_id'=>$data['data']['id'],'is_del'=>0])->get(['teacher_id'])->toArray();   
 	    $teacherArr = array_column($teacher_id,'teacher_id');	
     	$teacherData = Teacher::whereIn('id',$teacherArr)->where('is_del',0)->select('id','type')->get()->toArray();
@@ -377,6 +378,7 @@ class OpenCourseController extends Controller {
 	     try{
 	        DB::beginTransaction();
 	     
+	     	$openCourseArr['subject'] = json_decode($openCourseArr['subject'],1);
 	     	$time = json_decode($openCourseArr['time'],1);
 	     	$openCourseArr['parent_id'] = $openCourseArr['subject'][0]<0 ? 0: $openCourseArr['subject'][0];
 	        $openCourseArr['child_id'] = !isset($openCourseArr['subject'][1]) && $openCourseArr['subject'][1] ? 0 : $openCourseArr['subject'][1];
