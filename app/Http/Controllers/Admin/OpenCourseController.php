@@ -332,9 +332,9 @@ class OpenCourseController extends Controller {
     		foreach($teacherData as $key =>$v){	
 
     			if($v['type'] == 1){
-    				$data['data']['edu_teacher_id'] = Teacher::where(['type'=>1,'id'=>$v['id']])->select('id','real_name')->get();
+    				$data['data']['edu_teacher_id'] = Teacher::where(['type'=>1,'id'=>$v['id']])->select('id as teacher_id','real_name as teacher_name')->get();
     			}else if($v['type'] == 2){
-    				$data['data']['lect_teacher_id'] = Teacher::where(['type'=>2,'id'=>$v['id']])->select('id','real_name')->get();
+    				$data['data']['lect_teacher_id'] = Teacher::where(['type'=>2,'id'=>$v['id']])->select('id as teacher_id','real_name as teacher_name')->get();
     			}
     		}
     	}
