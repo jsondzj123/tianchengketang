@@ -383,17 +383,22 @@ class CourseController extends Controller {
             $count = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->count();
             $recorde =[];
             if($count > 0){
+                //章
                 $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->offset($offset)->limit($pagesize)->get();
                 if(!empty($recorde)){
+                    //循环章，拿下面的小节
                     foreach ($recorde as $ks=>&$vs){
-                        $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>$vs['id']])->get()->toArray();
-                        foreach ($recorde as $key=>&$val){
+                        //查询出所有的小节
+                        $recordes = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>$vs['id']])->get()->toArray();
+                        //循环小节 小节绑定录播资源
+                        foreach ($recordes as $key=>&$val){
                             //查询小节绑定的录播资源
                             $ziyuan = Video::where(['id'=>$val['resource_id'],'is_del'=>0,'status'=>0])->first()->toArray();
                             $val['ziyuan'] = $ziyuan;
                             //获取 学习时长
                             $MTCloud = new MTCloud();
-                            $use_duration  =  $MTCloud->coursePlaybackVisitorList($this->data['id'],1,50);
+                            $use_duration  =  $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'],1,50);
+                            print_r($use_duration);
                             if($use_duration['code'] == 1000){
                                 foreach ($use_duration['data'] as $kk=>$vv){
                                     if($vv['uid'] == $this->userid){
@@ -408,7 +413,7 @@ class CourseController extends Controller {
                                 $val['study'] = 0;
                             }
                         }
-                        $vs['chapters'] = $recorde;
+                        $vs['chapters'] = $recordes;
                     }
                 }
             }
