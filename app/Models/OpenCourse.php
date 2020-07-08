@@ -65,16 +65,16 @@ class OpenCourse extends Model {
          */
     public static function getList($body){
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
-        $pagesize = !isset($body['pagesize']) && $body['pagesize'] > 0 ? $body['pagesize'] : 15;
-        $page     = !isset($body['page']) && $body['page'] > 0 ? $body['page'] : 1;
+        $pagesize = !isset($body['pagesize']) || $body['pagesize'] < 0 ?  15:$body['pagesize'];
+      
+        $page     = !isset($body['page']) || $body['page'] < 0 ?1:$body['page'];
         $where['parent_id'] = !isset($body['parent_id'])|| empty($body['parent_id'])  ?'':$body['parent_id'];
         $where['child_id'] =  !isset($body['child_id']) || empty($body['child_id']) ?'':$body['child_id'];
         $where['status'] =  !isset($body['status']) || empty($body['status']) ?'':$body['status'];
         $where['time']  =  !isset($body['time']) || empty($body['time']) ?[]:json_decode($body['time'],1);
-        $time = [];
         if(!empty($where['time']) ){
             $where['start_at'] =  substt($where['time'][0],0,10);
-            $where['end_at']  = substr($where['time'][0],0,10);
+            $where['end_at']  = substr($where['time'][1],0,10);
         } 
         $offset   = ($page - 1) * $pagesize;
         $open_less_count = self::where(function($query) use ($where,$school_id){

@@ -381,7 +381,7 @@ class OpenCourseController extends Controller {
 	     	$openCourseArr['parent_id'] = $openCourseArr['subject'][0]<0 ? 0: $openCourseArr['subject'][0];
 	        $openCourseArr['child_id'] = !isset($openCourseArr['subject'][1]) && $openCourseArr['subject'][1] ? 0 : $openCourseArr['subject'][1];
 	        $openCourseArr['start_at']  = substr($time[0],0,10);
-	        $openCourseArr['end_at']  =  substr($time[1],0,10)
+	        $openCourseArr['end_at']  =  substr($time[1],0,10);
 	        if($openCourseArr['start_at']<time() || $openCourseArr['end_at'] <time()){
 	        	return response()->json(['code'=>207,'msg'=>'开始/结束时间不能小于当前时间']);
 	        }
