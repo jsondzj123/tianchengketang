@@ -24,6 +24,7 @@ class TeacherController extends Controller {
         // $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
         $this->school = School::where(['dns'=>$_SERVER['SERVER_NAME']])->first();
     }
+    //列表
 	public function getList(){
 		$type = !isset($this->data['type']) || $this->data['type']<=0 ?0:$this->data['type'];
 		if($type == 0 || $type != 1){
@@ -40,35 +41,18 @@ class TeacherController extends Controller {
 					$v['student_num'] = 0;
 				}
 			}
-		}     
-		//授权讲师
-		$teacherIds = CourseRefTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_ref_teacher.teacher_id')
-        						->where(['ld_course_teacher.course_id'=>$v['id'],'ld_lecturer_educationa.type'=>2])->get()->toArray();//授权公开课的讲师          
-		if(!empty($teacherIds)){
-
-			foerach($teacherIds as $key=>$v){
-			//公开课
-				
-			//课程
-			}
 		}
-		
+	}
+	//详情页
+	public function dateils(){
+		if(!isset($this->data['teacher_id']) || empty($this->data['teacher_id']) || $this->data['teacher_id'] < 0 ){
+			return response()->json(['code'=>201,'msg'=>'教师标识为空或类型不合法']);
+		}
+		if(!isset($this->data['is_nature']) || empty($this->data['is_nature'])){
+			return response()->json(['code'=>201,'msg'=>'类型标识为空或类型不合法']);
+		}
+		$teacherInfo = Teacher::where(['id'=>$thid->data['teacher_id'],'school_id'=>$this->school['id']])->get();
+		$teacherInfo['star'] = 5;
 
-
-
-
-		$natureCourse = CourseSchool::where(function($query) use ($body,$this->school) {
-                    $query->where('ld_course_school.to_school_id',$this->school['id']); //被授权学校  
-                    $query->where('ld_course_school.is_del',0);
-            })->select('id')->get()->toArray(); //授权课程
-        if(!empty($natureCourse)){
-        	foreach($natureCourse as $key=>$v){
-        		$teacher[] = Couresteacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_teacher.teacher_id')
-        						->where(['ld_course_teacher.course_id'=>$v['id'],'ld_lecturer_educationa.type'=>2])->first()->toArray();
-        	}
-        	foreach($teacher as $k=>$v){
-
-        	}
-        }
-		
+	}	     
 }
