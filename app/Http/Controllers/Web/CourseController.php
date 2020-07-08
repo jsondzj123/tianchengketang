@@ -363,7 +363,7 @@ class CourseController extends Controller {
         if(!isset($this->data['id'])||empty($this->data['id'])){
             return response()->json(['code' => 201 , 'msg' => '课程id为空']);
         }
-        $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+        $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first();
         if(!$course){
             return response()->json(['code' => 201 , 'msg' => '无查看权限']);
         }
@@ -394,8 +394,7 @@ class CourseController extends Controller {
                             //获取 学习时长
                             $MTCloud = new MTCloud();
                             $use_duration  =  $MTCloud->coursePlaybackVisitorList($this->data['id'],1,50);
-                            print_r($use_duration);
-                            if(!empty($use_duration)){
+                            if($use_duration['code'] == 1000){
                                 foreach ($use_duration['data'] as $kk=>$vv){
                                     if($vv['uid'] == $this->userid){
                                         if($vv['use_duration'] == 0){
