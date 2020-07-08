@@ -145,7 +145,7 @@ class CouresSubject extends Model {
         $school_status = AdminLog::getAdminInfo()->admin_user->school_status;
         $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
         $where['is_del'] = 0;
-        $where['is_open'] = 1;
+        $where['is_open'] = 0;
         if($school_status != 1){
             $where['school_id'] = $school_id;
         }
