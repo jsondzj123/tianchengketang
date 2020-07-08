@@ -32,23 +32,24 @@ class Teach extends Model {
 						if(isset($body['time']) && !empty($body['time'])){
 							switch ($body['time']) {
 								case '1': //今天
-									$query->where('ld_course_open.start_at','<',strtotime(date('Y-m-d')));
-									$query->where('ld_course_open.end_at','>',strtotime(date('Y-m-d 23:59:59')));
+									$query->where('ld_course_open.start_at','>',strtotime(date('Y-m-d')));
+									$query->where('ld_course_open.end_at','<',strtotime(date('Y-m-d 23:59:59')));
 									break;
 								case '2': //明天
-									$query->where('ld_course_open.start_at','<',strtotime(date("Y-m-d",strtotime("+1 day"))));
-									$query->where('ld_course_open.end','>',strtotime(date("Y-m-d 23:59:59",strtotime("+1 day"))));
+									$query->where('ld_course_open.start_at','>',strtotime(date("Y-m-d",strtotime("+1 day"))));
+									$query->where('ld_course_open.end_at','<',strtotime(date("Y-m-d 23:59:59",strtotime("+1 day"))));
 									break;
 								case '3': //昨天
-									$query->where('ld_course_open.start_at','<',strtotime(date("Y-m-d",strtotime("-1 day"))));
-									$query->where('ld_course_open.end','>',strtotime(date("Y-m-d 23:59:59",strtotime("-1 day"))));
+									$query->where('ld_course_open.start_at','>',strtotime(date("Y-m-d",strtotime("-1 day"))));
+									$query->where('ld_course_open.end_at','<',strtotime(date("Y-m-d 23:59:59",strtotime("-1 day"))));
 									break;
 							}
-							if(is_array($body['time'])){
-								$time = json_decode($body['time'],1);
-								$query->where('ld_course_open.start_at','<',$time[0]);
-								$query->where('ld_course_open.end','>',$time[1]);
-							}
+							
+						}
+						if(isset($body['timerange']) && !empty($body['timerange'])){
+							$time = json_decode($body['timerange'],1);
+							$query->where('ld_course_open.start_at','>',$time[0]);
+							$query->where('ld_course_open.end_at','<',$time[1]);
 						}
 						if(isset($body['status']) && !empty($body['status'])){
 							switch ($body['status']) {
@@ -85,23 +86,23 @@ class Teach extends Model {
 						if(isset($body['time']) && !empty($body['time'])){
 							switch ($body['time']) {
 								case '1': //今天
-									$query->where('ld_course_class_number.start_at','<',strtotime(date('Y-m-d')));
-									$query->where('ld_course_class_number.end_at','>',strtotime(date('Y-m-d 23:59:59')));
+									$query->where('ld_course_class_number.start_at','>',strtotime(date('Y-m-d')));
+									$query->where('ld_course_class_number.end_at','<',strtotime(date('Y-m-d 23:59:59')));
 									break;
 								case '2': //明天
-									$query->where('ld_course_class_number.start_at','<',strtotime(date("Y-m-d",strtotime("+1 day"))));
-									$query->where('ld_course_class_number.end','>',strtotime(date("Y-m-d 23:59:59",strtotime("+1 day"))));
+									$query->where('ld_course_class_number.start_at','>',strtotime(date("Y-m-d",strtotime("+1 day"))));
+									$query->where('ld_course_class_number.end_at','<',strtotime(date("Y-m-d 23:59:59",strtotime("+1 day"))));
 									break;
 								case '3': //昨天
-									$query->where('ld_course_class_number.start_at','<',strtotime(date("Y-m-d",strtotime("-1 day"))));
-									$query->where('ld_course_class_number.end','>',strtotime(date("Y-m-d 23:59:59",strtotime("-1 day"))));
+									$query->where('ld_course_class_number.start_at','>',strtotime(date("Y-m-d",strtotime("-1 day"))));
+									$query->where('ld_course_class_number.end_at','<',strtotime(date("Y-m-d 23:59:59",strtotime("-1 day"))));
 									break;
-							}
-							if(is_array($body['time'])){
-								$time = json_decode($body['time'],1);
-								$query->where('ld_course_class_number.start_at','<',$time[0]);
-								$query->where('ld_course_class_number.end','>',$time[1]);
-							}
+							}	
+						}
+						if(isset($body['timerange']) && !empty($body['timerange'])){
+								$time = json_decode($body['timerange'],1);
+								$query->where('ld_course_class_number.start_at','>',$time[0]);
+								$query->where('ld_course_class_number.end_at','<',$time[1]);
 						}
 						if(isset($body['status']) && !empty($body['status'])){
 							switch ($body['status']) {
