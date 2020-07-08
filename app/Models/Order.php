@@ -368,14 +368,14 @@ class Order extends Model {
             return ['code' => 201 , 'msg' => '参数为空或格式错误'];
         }
         if(empty($data['order_number'])){
-            return ['code' => 201 , 'msg' => '订单号错误'];
+            return ['code' => 201 , 'msg' => '订单号不能为空'];
         }
         if(!in_array($data['status'],['0','1'])){
             return ['code' => 201 , 'msg' => '状态传输错误'];
         }
         $order = self::where(['order_number'=>$data['order_number']])->first()->toArray();
         if(!$order){
-            return ['code' => 201 , 'msg' => '订单号错误111111'];
+            return ['code' => 201 , 'msg' => '订单号错误'];
         }
         if($data['status'] == 1){
             //修改学员报名  订单状态 课程有效期
@@ -387,7 +387,7 @@ class Order extends Model {
             //修改用户报名状态
             Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1]);
         }else{
-            $update = self::where(['id'=>$order['id'],'order_type'=>1])->update(['status'=>3,'oa_status'=>$data['status'],'update_at'=>date('Y-m-d H:i:s')]);
+            $update = self::where(['id'=>$order['id']])->update(['status'=>3,'oa_status'=>$data['status'],'update_at'=>date('Y-m-d H:i:s')]);
         }
         if($update){
             DB::commit();
@@ -396,7 +396,5 @@ class Order extends Model {
             DB::rollback();
             return ['code' => 202 , 'msg' => '修改失败'];
         }
-
     }
-
 }

@@ -50,7 +50,7 @@ class OpenCourse extends Model {
          * return  array
          */
     public static function getOpenLessById($where,$field = ['*']){
-        $openCourseInfo = self::where($where)->select($field)->first();
+        $openCourseInfo = self::where($where)->select($field)->first()->toArray();
         if($openCourseInfo){
             return ['code'=>200,'msg'=>'获取课程信息成功','data'=>$openCourseInfo];
         }else{

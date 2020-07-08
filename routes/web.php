@@ -97,6 +97,38 @@ $router->group(['prefix' => 'api', 'namespace' => 'Api', 'middleware'=> 'user'],
 
 //PC端路由接口
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
+    //begin (lys)
+    //首页
+     $router->group(['prefix' => 'index'], function () use ($router) {
+        $router->post('teacher','IndexController@teacherList');//我们的团队
+        $router->post('news','IndexController@newInformation');//新闻资讯
+        $router->post('footer','IndexController@footer');//页脚
+        $router->post('course','IndexController@course');//精品课程
+    });
+
+    $router->group(['prefix' => 'footer'], function () use ($router) {
+        $router->post('details','FooterController@details');//首页   页脚跳转  
+    });
+    //新闻资讯
+     $router->group(['prefix' => 'news'], function () use ($router) {
+        $router->post('List','NewsController@getList');//新闻资讯列表  
+        $router->post('hotList','NewsController@hotList');//热门新闻
+        $router->post('newestList','NewsController@newestList');//最新文章
+        $router->post('details','NewsController@details');//查看详情    
+    });
+     //公开课
+     $router->group(['prefix' => 'news'], function () use ($router) {
+        $router->post('hotList','OpenCourseController@getList');//大家都在看  
+        $router->post('PreStart','OpenCourseController@hotList');//预开始
+        $router->post('underway','OpenCourseController@underway');//直播中
+        $router->post('finish','OpenCourseController@end');//往期公开课程 (暂时没做分页) 
+        $router->post('details','NewsController@details');//查看详情    
+    });
+
+     //end (lys)
+
+
+
     $router->post('doUserRegister','AuthenticateController@doUserRegister');    //WEB注册接口
     $router->post('doUserLogin','AuthenticateController@doUserLogin');          //WEB登录接口
     $router->post('doSendSms','AuthenticateController@doSendSms');              //WEB发送短信接口
@@ -140,16 +172,6 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('material','CourseController@material');//课程资料列表
     });
 });
-// PC端口路由接口（lys） begin
-$router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
-    $router->group(['prefix' => 'index'], function () use ($router) {
-        $router->post('teacher','IndexController@teacherList');//我们的团队
-        $router->post('news','IndexController@newInformation');//新闻资讯
-        $router->post('footer','IndexController@footer');//页脚
-        $router->post('course','IndexController@course');//精品课程
-    });
-});
-//PC端口路由接口(LYS ) end
 //后台端路由接口
 /*****************start**********************/
 //后端登录注册接口
