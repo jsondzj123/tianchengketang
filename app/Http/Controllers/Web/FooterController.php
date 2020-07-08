@@ -16,8 +16,8 @@ use App\Models\Order;
 use App\Models\School;
 use App\Models\Teacher;
 use App\Models\Video;
-
-class CourseController extends Controller {
+use App\Models\FootConfig;
+class FooterController extends Controller {
     protected $school;
     protected $data;
 
