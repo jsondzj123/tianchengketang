@@ -377,6 +377,7 @@ class CourseController extends Controller {
         }else{
             $is_pay = 1;
         }
+
         //免费或者已经购买，展示全部
         if($course['sale_price'] == 0 || $is_pay == 0){
             //章总数
