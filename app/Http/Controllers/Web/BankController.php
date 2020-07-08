@@ -56,6 +56,39 @@ class BankController extends Controller {
     }
     
     /*
+     * @param description   判断用户是否有做题的权限
+     * @param $bank_id      题库id
+     * @param author    dzj
+     * @param ctime     2020-07-08
+     * return string
+     */
+    public static function verifyUserExamJurisdiction($bank_id){
+        //判断用户是否有做题的权限
+        $bank_info = Bank::where('id' , $bank_id)->where('is_del' , 0)->where('is_open' , 0)->first();
+        
+        //判断题库是否存在
+        if(!$bank_info || empty($bank_info)){
+            return ['code' => 209 , 'msg' => '您没有做题权限'];
+        }
+        
+        //通过学科大小类找到对应的课程
+        $course_list = Coures::where('parent_id' , $bank_info['parent_id'])->where('is_del' , 0)->get()->toArray();
+        if(count($course_list) <= 0){
+            return ['code' => 209 , 'msg' => '您没有做题权限'];
+        }
+        
+        //获取课程的id
+        $course_id_list = array_column($course_list , 'id');
+        
+        //通过订单表查询是否购买过
+        $order_count = Order::where('student_id' , self::$accept_data['user_info']['user_id'])->whereIn('class_id' , $course_id_list)->where('status' , 2)->count();
+        if($order_count <= 0){
+            return ['code' => 209 , 'msg' => '您没有做题权限'];
+        }
+        return ['code' => 200 , 'msg' => '可以做题啦'];
+    }
+    
+    /*
      * @param  description   题库章节列表接口
      * @param author    dzj
      * @param ctime     2020-07-07
@@ -65,24 +98,6 @@ class BankController extends Controller {
         $bank_id        = isset(self::$accept_data['bank_id']) && self::$accept_data['bank_id'] > 0 ? self::$accept_data['bank_id'] : 0;           //获取题库的id
         $subject_id     = isset(self::$accept_data['subject_id']) && self::$accept_data['subject_id'] > 0 ? self::$accept_data['subject_id'] : 0;  //获取题库科目的id
         
-        //判断用户是否有做题的权限
-        $bank_info = Bank::where('id' , $bank_id)->where('is_del' , 0)->where('is_open' , 0)->first();
-        
-        //通过学科大小类找到对应的课程
-        $course_list = Coures::where('parent_id' , $bank_info['parent_id'])->where('is_del' , 0)->get()->toArray();
-        if(count($course_list) <= 0){
-            return response()->json(['code' => 209 , 'msg' => '您没有做题权限']);
-        }
-        
-        //获取课程的id
-        $course_id_list = array_column($course_list , 'id');
-        
-        //通过订单表查询是否购买过
-        $order_count = Order::where('student_id' , self::$accept_data['user_info']['user_id'])->whereIn('class_id' , $course_id_list)->where('status' , 2)->count();
-        if($order_count <= 0){
-            return response()->json(['code' => 209 , 'msg' => '您没有做题权限']);
-        }
-        
         //判断题库的id是否传递合法
         if(!$bank_id || $bank_id <= 0){
             return response()->json(['code' => 202 , 'msg' => '题库id不合法']);
@@ -91,6 +106,12 @@ class BankController extends Controller {
         //判断科目的id是否传递合法
         if(!$subject_id || $subject_id <= 0){
             return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
+        }
+        
+        //检验用户是否有做题权限
+        $iurisdiction = self::verifyUserExamJurisdiction($bank_id);
+        if($iurisdiction['code'] == 209){
+            return response()->json(['code' => 209 , 'msg' => $iurisdiction['msg']]);
         }
         
         //章节新数组
@@ -135,12 +156,30 @@ class BankController extends Controller {
      * return string
      */
     public function getExamSet(){
+        $bank_id      = isset(self::$accept_data['bank_id']) && self::$accept_data['bank_id'] > 0 ? self::$accept_data['bank_id'] : 0;                    //获取题库的id
+        $subject_id   = isset(self::$accept_data['subject_id']) && self::$accept_data['subject_id'] > 0 ? self::$accept_data['subject_id'] : 0;           //获取题库科目的id
         $chapter_id   = isset(self::$accept_data['chapter_id']) && self::$accept_data['chapter_id'] > 0 ? self::$accept_data['chapter_id'] : 0;           //获取章的id
         $joint_id     = isset(self::$accept_data['joint_id']) && self::$accept_data['joint_id'] > 0 ? self::$accept_data['joint_id'] : 0;                 //获取节的id
+        
+        //判断题库的id是否传递合法
+        if(!$bank_id || $bank_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '题库id不合法']);
+        }
+        
+        //判断科目的id是否传递合法
+        if(!$subject_id || $subject_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
+        }
         
         //判断章的id是否传递合法
         if(!$chapter_id || $chapter_id <= 0){
             return response()->json(['code' => 202 , 'msg' => '章id不合法']);
+        }
+        
+        //检验用户是否有做题权限
+        $iurisdiction = self::verifyUserExamJurisdiction($bank_id);
+        if($iurisdiction['code'] == 209){
+            return response()->json(['code' => 209 , 'msg' => $iurisdiction['msg']]);
         }
         
         //设置题型数组
