@@ -312,7 +312,7 @@ class CourseController extends Controller {
             return response()->json(['code' => 201 , 'msg' => '无查看权限']);
         }
         //用户是否购买，如果购买，显示全部   班号 课次
-        $order = Order::where(['student_id'=>AdminLog::getAdminInfo()->admin_user->id,'class_id'=>$this->data['course_id'],'status'=>2])->count();
+        $order = Order::where(['student_id'=>AdminLog::getAdminInfo()->admin_user->id,'class_id'=>$this->data['id'],'status'=>2])->count();
         $courseArr=[];
         if($order > 0){
             //获取所有的班号
