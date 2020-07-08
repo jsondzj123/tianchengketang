@@ -14,6 +14,11 @@ class CourseController extends Controller {
         $list = CouresSubject::couresWhere();
         return response()->json($list);
     }
+    //资源模块学科
+    public function subjects(){
+        $list = CouresSubject::couresWheres();
+        return response()->json($list);
+    }
   /*
        * @param  课程列表
        * @param  author  苏振文

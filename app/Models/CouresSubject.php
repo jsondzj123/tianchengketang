@@ -145,6 +145,20 @@ class CouresSubject extends Model {
         $school_status = AdminLog::getAdminInfo()->admin_user->school_status;
         $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
         $where['is_del'] = 0;
+        $where['is_open'] = 1;
+        if($school_status != 1){
+            $where['school_id'] = $school_id;
+        }
+        $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where($where)->get()->toArray();
+        $list = self::demo($one,0,0);
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
+    }
+    //资源模块 条件显示
+    public static function couresWheres(){
+        //获取用户学校
+        $school_status = AdminLog::getAdminInfo()->admin_user->school_status;
+        $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
+        $where['is_del'] = 0;
         if($school_status != 1){
             $where['school_id'] = $school_id;
         }
