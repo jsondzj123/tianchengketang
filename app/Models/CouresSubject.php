@@ -29,7 +29,6 @@ class CouresSubject extends Model {
            ->where($where)
            ->orderByDesc('id')
            ->get()->toArray();
-       print_r($list);die;
        foreach ($list as $k=>&$v){
            $sun = self::select('id','subject_name','is_open')
                ->where(['parent_id'=>$v['id'],'is_del'=>0])->get();
