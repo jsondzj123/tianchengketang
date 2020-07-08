@@ -220,6 +220,9 @@ class SchoolController extends Controller {
                 'logo_url'  =>$data['logo_url'],
                 'introduce'  =>$data['introduce'],
                 'admin_id'  => CurrentAdmin::user()['id'],
+                'account_name'=>!isset($data['account_name']) || empty($data['account_name']) ?'':$data['account_name'],
+                'account_num'=>!isset($data['account_num']) || empty($data['account_num']) ?'':$data['account_num'],
+                'open_bank'=>!isset($data['open_bank']) || empty($data['open_bank']) ?'':$data['open_bank'],
                 'create_time'=>date('Y-m-d H:i:s')
             ];
             $school_id = School::insertGetId($school);
@@ -275,7 +278,7 @@ class SchoolController extends Controller {
         if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-        $school = School::where('id',$data['school_id'])->select('id','name','dns','logo_url','introduce')->first();
+        $school = School::where('id',$data['school_id'])->select('id','name','dns','logo_url','introduce','account_name','account_num','open_bank')->first();
         return response()->json(['code' => 200 , 'msg' => 'Success','data'=>$school]);
     }
     /*
@@ -312,6 +315,9 @@ class SchoolController extends Controller {
         if(isset($data['/admin/school/doSchoolUpdate'])){
             unset($data['/admin/school/doSchoolUpdate']);
         }
+        $data['account_name']  = isset($data['account_name']) && !empty($data['account_name'] ?$data['account_name'];
+        $data['account_num']  = isset($data['account_num']) && !empty($data['account_num'] ?$data['account_num'];
+        $data['open_bank']  = isset($data['open_bank']) && !empty($data['open_bank'] ?$data['open_bank'];
         $data['update_time'] = date('Y-m-d H:i:s');
         if(School::where('id',$data['id'])->update($data)){
                 AdminLog::insertAdminLog([

@@ -578,6 +578,10 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getOpenLessById', 'OpenCourseController@getOpenLessById');//修改(获取)
         $router->post('doOpenLessById', 'OpenCourseController@doOpenLessById');//修改
         $router->post('zhiboMethod', 'OpenCourseController@zhiboMethod');//直播类型
+        $router->post('test','OpenCourseController@test');//测试
+
+
+
     });
     //教学模块
     $router->group(['prefix' => 'teach'], function () use ($router) {
@@ -587,7 +591,9 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('coursewareUpload','TeachController@courseUpload');  //课件上传
         $router->post('details','TeachController@details');  //教学详情
         $router->post('coursewareDel','TeachController@coursewareDel');  //课件删除（欢拓）
+
     });
+    //测试
 
 
 
