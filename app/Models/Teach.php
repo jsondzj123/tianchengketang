@@ -44,12 +44,11 @@ class Teach extends Model {
 									$query->where('ld_course_open.end_at','<',strtotime(date("Y-m-d 23:59:59",strtotime("-1 day"))));
 									break;
 							}
-							
 						}
 						if(isset($body['timerange']) && !empty($body['timerange'])){
 							$time = json_decode($body['timerange'],1);
-							$query->where('ld_course_open.start_at','>',$time[0]);
-							$query->where('ld_course_open.end_at','<',$time[1]);
+							$query->where('ld_course_open.start_at','>',substr($time[0],0,10));
+							$query->where('ld_course_open.end_at','<',substr($time[1],0,10));
 						}
 						if(isset($body['status']) && !empty($body['status'])){
 							switch ($body['status']) {
@@ -101,8 +100,8 @@ class Teach extends Model {
 						}
 						if(isset($body['timerange']) && !empty($body['timerange'])){
 								$time = json_decode($body['timerange'],1);
-								$query->where('ld_course_class_number.start_at','>',$time[0]);
-								$query->where('ld_course_class_number.end_at','<',$time[1]);
+								$query->where('ld_course_class_number.start_at','>',substr($time[0],0,10));
+								$query->where('ld_course_class_number.end_at','<',substr($time[1],0,10));
 						}
 						if(isset($body['status']) && !empty($body['status'])){
 							switch ($body['status']) {
