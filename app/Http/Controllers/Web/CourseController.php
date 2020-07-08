@@ -406,10 +406,10 @@ class CourseController extends Controller {
                                         }else{
                                             $val['study'] =  sprintf("%01.2f", $vv['use_duration']/$vv['mt_duration']*100).'%';
                                         }
+                                    }else{
+                                        $val['study'] = 0;
                                     }
                                 }
-                            }else{
-                                $val['study'] = 0;
                             }
                         }
                         $vs['chapters'] = $recordes;
