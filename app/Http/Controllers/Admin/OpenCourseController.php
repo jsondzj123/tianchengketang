@@ -382,6 +382,9 @@ class OpenCourseController extends Controller {
 	    if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
 	    	return response()->json(['code'=>207,'msg'=>'直播中，无法修改']);
 	    }
+	    if($data['data']['end_at'] <time(){
+	    	return response()->json(['code'=>207,'msg'=>'课程已结束，无法修改！！！']);
+	    }
 	     try{
 	        DB::beginTransaction();
 	     	if(isset($openCourseArr['/admin/opencourse/doOpenLessById'])){
@@ -525,9 +528,9 @@ class OpenCourseController extends Controller {
                     'modetype' => $data['modetype'],
                 ]
             );
-            if(!array_key_exists('code', $res) && !$res["code"] == 0){
-                Log::error('欢拓更改失败:'.json_encode($res));
-                return false;
+            if(!array_key_exists('code', $res) && $res["code"] != 0){
+            	Log::error('欢拓更改失败:'.json_encode($res));
+            	return response()->json($res);
             }
             $update = [
             	'course_name'=>$res['data']['course_name'],

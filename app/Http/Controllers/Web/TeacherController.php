@@ -52,7 +52,10 @@ class TeacherController extends Controller {
 			return response()->json(['code'=>201,'msg'=>'类型标识为空或类型不合法']);
 		}
 		$teacherInfo = Teacher::where(['id'=>$thid->data['teacher_id'],'school_id'=>$this->school['id']])->get();
-		$teacherInfo['star'] = 5;
+		$teacherInfo['star'] = 5;//星数
+		$teacherInfo['grade'] = '5.0';//评分
+		$teacherInfo['evaluate'] = '5.0'; //评论数
+		
 
 	}	     
 }
