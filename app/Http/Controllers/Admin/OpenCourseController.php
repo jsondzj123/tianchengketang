@@ -332,9 +332,9 @@ class OpenCourseController extends Controller {
     		foreach($teacherData as $key =>$v){	
 
     			if($v['type'] == 1){
-    				$data['data']['edu_teacher_id'] = Teacher::where(['type'=>1,'id'=>$v['id']])->select('id as teacher_id','real_name as teacher_name')->get();
+    				$data['data']['edu_teacher_id'] = Teacher::where(['type'=>1,'id'=>$v['id']])->select('id as teacher_id','real_name')->get();
     			}else if($v['type'] == 2){
-    				$data['data']['lect_teacher_id'] = Teacher::where(['type'=>2,'id'=>$v['id']])->select('id as teacher_id','real_name as teacher_name')->get();
+    				$data['data']['lect_teacher_id'] = Teacher::where(['type'=>2,'id'=>$v['id']])->select('id as teacher_id','real_name')->get();
     			}
     		}
     	}
@@ -377,11 +377,11 @@ class OpenCourseController extends Controller {
 	     try{
 	        DB::beginTransaction();
 	     
-	     	$time = explode(',', $openCourseArr['time']);
+	     	$time = json_decode($openCourseArr['time'],1);
 	     	$openCourseArr['parent_id'] = $openCourseArr['subject'][0]<0 ? 0: $openCourseArr['subject'][0];
 	        $openCourseArr['child_id'] = !isset($openCourseArr['subject'][1]) && $openCourseArr['subject'][1] ? 0 : $openCourseArr['subject'][1];
-	        $openCourseArr['start_at']  = $time[0];
-	        $openCourseArr['end_at']  = $time[1];
+	        $openCourseArr['start_at']  = substr($time[0],0,10);
+	        $openCourseArr['end_at']  =  substr($time[1],0,10)
 	        if($openCourseArr['start_at']<time() || $openCourseArr['end_at'] <time()){
 	        	return response()->json(['code'=>207,'msg'=>'开始/结束时间不能小于当前时间']);
 	        }
