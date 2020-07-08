@@ -560,10 +560,7 @@ class OpenCourseController extends Controller {
 
 
 
-    //测试接口
-    public function test(){
-    		
-    }
+ 
 
 
 }
