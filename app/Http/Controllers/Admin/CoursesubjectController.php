@@ -19,7 +19,6 @@ class CoursesubjectController extends Controller {
        $list = CouresSubject::subjectList($school_status,$school_id);
        return response()->json($list);
    }
-
    /*
         * @param  学科大类添加
         * @param  author  苏振文
