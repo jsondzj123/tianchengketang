@@ -378,7 +378,7 @@ class CourseController extends Controller {
             $is_pay = 1;
         }
         //免费或者已经购买，展示全部
-        if($course['sale_price'] == 0 || $is_pay == 0){
+        if($course['sale_price'] == 0 || $is_pay == 1){
             //章总数
             $count = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->count();
             $recorde =[];
@@ -394,7 +394,6 @@ class CourseController extends Controller {
                             //获取 学习时长
                             $MTCloud = new MTCloud();
                             $use_duration  =  $MTCloud->coursePlaybackVisitorList($this->data['id'],1,50);
-                            print_r($use_duration);
                             if($use_duration['code'] == 1000){
                                 foreach ($use_duration['data'] as $kk=>$vv){
                                     if($vv['uid'] == $this->userid){
@@ -405,6 +404,8 @@ class CourseController extends Controller {
                                         }
                                     }
                                 }
+                            }else{
+                                $val['study'] = 0;
                             }
                         }
                         $vs['chapters'] = $recorde;
