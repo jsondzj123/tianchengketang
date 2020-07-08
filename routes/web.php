@@ -147,6 +147,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('getExamSet','BankController@getExamSet');                    //做题设置接口
         $router->post('doRandExamList','BankController@doRandExamList');            //随机生成试题接口
         $router->post('getExamPapersList','BankController@getExamPapersList');      //模拟真题试卷列表接口
+        $router->post('doCollectQuestion','BankController@doCollectQuestion');      //试题收藏/取消收藏接口
     });
 });
 
@@ -256,7 +257,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     /*
      * 科目模块(sxl)
     */
-    $router->post('subject', 'CourseController@subject');//学科列表(szw改)
+    $router->post('subject', 'CourseController@subject');//课程学科列表(szw改)
+    $router->post('subjects', 'CourseController@subjects');//学科列表(szw改)
 //    $router->post('subject', 'SubjectController@searchList');
     $router->post('subjectList', 'SubjectController@index');
     $router->post('subject/add', 'SubjectController@store');

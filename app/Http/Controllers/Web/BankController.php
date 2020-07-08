@@ -10,6 +10,7 @@ use App\Models\ExamOption;
 use App\Models\Papers;
 use App\Models\PapersExam;
 use App\Models\StudentDoTitle;
+use App\Models\StudentCollectQuestion;
 use App\Models\Coures;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
@@ -386,10 +387,12 @@ class BankController extends Controller {
                         'exam_id'             =>  $v['id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
+                        'text_analysis'       =>  $exam_info['text_analysis'] ,
                         'correct_answer'      =>  $exam_info['answer'] ,
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  '' ,
-                        'is_right'            =>  0
+                        'is_right'            =>  0 ,
+                        'is_collect'          =>  0
                     ];
                 }
             } else {
@@ -414,15 +417,20 @@ class BankController extends Controller {
                         $exam_type_name = "";
                     }
                     
+                    //判断学员是否收藏此题
+                    $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 1)->where('status' , 1)->count();
+                    
                     //试题随机展示
                     $exam_array[] = [
                         'exam_id'             =>  $v['exam_id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
+                        'text_analysis'       =>  $exam_info['text_analysis'] ,
                         'correct_answer'      =>  $exam_info['answer'] ,
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
-                        'is_right'            =>  $v['is_right']
+                        'is_right'            =>  $v['is_right'] ,
+                        'is_collect'          =>  $is_collect ? 1 : 0
                     ];
                 }
             }
@@ -474,10 +482,12 @@ class BankController extends Controller {
                         'exam_id'             =>  $v['id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
+                        'text_analysis'       =>  $exam_info['text_analysis'] ,
                         'correct_answer'      =>  $exam_info['answer'] ,
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  '' ,
-                        'is_right'            =>  0
+                        'is_right'            =>  0  ,
+                        'is_collect'          =>  0
                     ];
                 }
             } else {
@@ -502,15 +512,20 @@ class BankController extends Controller {
                         $exam_type_name = "";
                     }
                     
+                    //判断学员是否收藏此题
+                    $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 2)->where('status' , 1)->count();
+                    
                     //试题随机展示
                     $exam_array[] = [
                         'exam_id'             =>  $v['exam_id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
+                        'text_analysis'       =>  $exam_info['text_analysis'] ,
                         'correct_answer'      =>  $exam_info['answer'] ,
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
-                        'is_right'            =>  $v['is_right']
+                        'is_right'            =>  $v['is_right'] ,
+                        'is_collect'          =>  $is_collect ? 1 : 0
                     ];
                 }
             }
@@ -548,6 +563,9 @@ class BankController extends Controller {
                     $exam_type_name = "";
                 }
                 
+                //判断学员是否收藏此题
+                $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->where('status' , 1)->count();
+                
                 //根据条件获取此学生此题是否答了
                 $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("papers_id" , $papers_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->first();
 
@@ -556,10 +574,12 @@ class BankController extends Controller {
                     'exam_id'             =>  $v['exam_id'] ,
                     'exam_name'           =>  $exam_info['exam_content'] ,
                     'exam_type_name'      =>  $exam_type_name ,
+                    'text_analysis'       =>  $exam_info['text_analysis'] ,
                     'correct_answer'      =>  $exam_info['answer'] ,
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
-                    'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0
+                    'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
+                    'is_collect'          =>  $is_collect ? 1 : 0
                 ];
             }
         }
@@ -621,5 +641,91 @@ class BankController extends Controller {
             }
         }
         return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $array]);
+    }
+    
+    /*
+     * @param  description   收藏/取消收藏试题接口
+     * @param author    dzj
+     * @param ctime     2020-07-08
+     * return string
+     */
+    public function doCollectQuestion(){
+        $bank_id      = isset(self::$accept_data['bank_id']) && self::$accept_data['bank_id'] > 0 ? self::$accept_data['bank_id'] : 0;                    //获取题库id
+        $subject_id   = isset(self::$accept_data['subject_id']) && self::$accept_data['subject_id'] > 0 ? self::$accept_data['subject_id'] : 0;           //获取科目id
+        $exam_id      = isset(self::$accept_data['exam_id']) && self::$accept_data['exam_id'] > 0 ? self::$accept_data['exam_id'] : 0;                    //获取试题id
+        $type         = isset(self::$accept_data['type']) && self::$accept_data['type'] > 0 ? self::$accept_data['type'] : 0;                             //获取类型
+        
+        //判断题库的id是否传递合法
+        if(!$bank_id || $bank_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '题库id不合法']);
+        }
+        
+        //判断科目的id是否传递合法
+        if(!$subject_id || $subject_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
+        }
+        
+        //判断试题的id是否传递合法
+        if(!$exam_id || $exam_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '试题id不合法']);
+        }
+        
+        //判断类型是否传递
+        if($type <= 0 || !in_array($type , [1,2,3])){
+            return response()->json(['code' => 202 , 'msg' => '类型不合法']);
+        }
+        
+        //开启事务
+        DB::beginTransaction();
+        
+        //收藏试题操作
+        $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $exam_id)->where('type' , $type)->first();
+        if($is_collect && !empty($is_collect)){
+            if($is_collect['status'] == 1){
+                $res = StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $exam_id)->where('type' , $type)->update(['status' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
+                if($res && !empty($res)){
+                    //事务提交
+                    DB::commit();
+                    return response()->json(['code' => 200 , 'msg' => '取消收藏成功']);
+                } else {
+                    //事务回滚
+                    DB::rollBack();
+                    return response()->json(['code' => 200 , 'msg' => '取消收藏失败']);
+                }
+            } else {
+                $res = StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $exam_id)->where('type' , $type)->update(['status' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
+                if($res && !empty($res)){
+                    //事务提交
+                    DB::commit();
+                    return response()->json(['code' => 200 , 'msg' => '收藏成功']);
+                } else {
+                    //事务回滚
+                    DB::rollBack();
+                    return response()->json(['code' => 200 , 'msg' => '收藏失败']);
+                }
+            }
+        } else {
+            //收藏试题
+            $collect_id = StudentCollectQuestion::insertGetId([
+                'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                'bank_id'      =>   $bank_id ,
+                'subject_id'   =>   $subject_id ,
+                'exam_id'      =>   $exam_id ,
+                'type'         =>   $type ,
+                'status'       =>   1 ,
+                'create_at'    =>   date('Y-m-d H:i:s')
+            ]);
+            
+            //判断是否收藏成功
+            if($collect_id && $collect_id > 0){
+                //事务提交
+                DB::commit();
+                return response()->json(['code' => 200 , 'msg' => '收藏成功']);
+            } else {
+                //事务回滚
+                DB::rollBack();
+                return response()->json(['code' => 200 , 'msg' => '收藏失败']);
+            }
+        }
     }
 }
