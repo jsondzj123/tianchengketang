@@ -73,7 +73,7 @@ class OpenCourse extends Model {
         $where['status'] =  !isset($body['status']) || empty($body['status']) ?'':$body['status'];
         $where['time']  =  !isset($body['time']) || empty($body['time']) ?[]:json_decode($body['time'],1);
         if(!empty($where['time']) ){
-            $where['start_at'] =  substt($where['time'][0],0,10);
+            $where['start_at'] =  substr($where['time'][0],0,10);
             $where['end_at']  = substr($where['time'][1],0,10);
         } 
         $offset   = ($page - 1) * $pagesize;
