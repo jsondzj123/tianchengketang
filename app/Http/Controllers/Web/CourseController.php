@@ -396,6 +396,7 @@ class CourseController extends Controller {
                             $ziyuan = Video::where(['id'=>$val['resource_id'],'is_del'=>0,'status'=>0])->first()->toArray();
                             $val['ziyuan'] = $ziyuan;
                             //获取 学习时长
+
                             $MTCloud = new MTCloud();
                             $use_duration  =  $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'],1,50);
                             print_r($use_duration);
