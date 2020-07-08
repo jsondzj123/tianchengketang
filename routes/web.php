@@ -107,22 +107,22 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     });
 
     $router->group(['prefix' => 'footer'], function () use ($router) {
-        $router->post('details','FooterController@details');//首页   页脚跳转  
+        $router->post('details','FooterController@details');//首页   页脚跳转
     });
     //新闻资讯
      $router->group(['prefix' => 'news'], function () use ($router) {
-        $router->post('List','NewsController@getList');//新闻资讯列表  
+        $router->post('List','NewsController@getList');//新闻资讯列表
         $router->post('hotList','NewsController@hotList');//热门新闻
         $router->post('newestList','NewsController@newestList');//最新文章
-        $router->post('details','NewsController@details');//查看详情    
+        $router->post('details','NewsController@details');//查看详情
     });
      //公开课
      $router->group(['prefix' => 'news'], function () use ($router) {
-        $router->post('hotList','OpenCourseController@getList');//大家都在看  
+        $router->post('hotList','OpenCourseController@getList');//大家都在看
         $router->post('PreStart','OpenCourseController@hotList');//预开始
         $router->post('underway','OpenCourseController@underway');//直播中
-        $router->post('finish','OpenCourseController@end');//往期公开课程 (暂时没做分页) 
-        $router->post('details','NewsController@details');//查看详情    
+        $router->post('finish','OpenCourseController@end');//往期公开课程 (暂时没做分页)
+        $router->post('details','NewsController@details');//查看详情
     });
 
      //end (lys)
@@ -170,6 +170,17 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('livearr','CourseController@livearr');//课程直播列表
         $router->post('recordedarr','CourseController@recordedarr');//课程录播列表
         $router->post('material','CourseController@material');//课程资料列表
+    });
+    //对公购买模块（szw）
+    $router->group(['prefix' => 'publicpay'], function () use ($router) {
+        $router->post('Transfer','PublicpayController@Transfer');//对公转账
+        $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');//OA流转订单
+    });
+    //我的模块（szw）
+    $router->group(['prefix' => 'user'], function () use ($router) {
+        //个人设置模块
+        $router->post('userDetail','UserController@userDetail');//个人信息
+        //个人信息模块
     });
 });
 //后台端路由接口

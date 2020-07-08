@@ -11,9 +11,7 @@ use App\Models\Couresmethod;
 use App\Models\CouresSubject;
 use App\Models\Couresteacher;
 use App\Models\CourseLiveResource;
-use App\Models\CourseRefResource;
 use App\Models\CourseSchool;
-use App\Models\CourseShiftNo;
 use App\Models\LiveChild;
 use App\Models\LiveClass;
 use App\Models\LiveClassChildTeacher;
@@ -294,61 +292,6 @@ class CourseController extends Controller {
             return response()->json(['code' => 201 , 'msg' => '查询成功','data'=>$course]);
         }
     }
-
-    /*
-         * @param  课程直播列表
-         * @param  author  苏振文
-         * @param  ctime   2020/7/7 14:39
-         * return  array
-         */
-    public function livearr(){
-        //每页显示的条数
-        $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 2;
-        $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
-        $offset   = ($page - 1) * $pagesize;
-        //课程基本信息
-        $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
-        if(!$course){
-            return response()->json(['code' => 201 , 'msg' => '无查看权限']);
-        }
-        //用户是否购买，如果购买，显示全部   班号 课次
-        $order = Order::where(['student_id'=>AdminLog::getAdminInfo()->admin_user->id,'class_id'=>$this->data['id'],'status'=>2])->count();
-        $courseArr=[];
-        if($order = 0){
-            //获取所有的班号
-            $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get()->toArray();
-            print_r($courseArr);die;
-            if($courseArr != 0){
-                foreach ($courseArr as $k=>&$v){
-                    //获取班级信息
-                    $class = LiveClass::where(['id'=>$v['shift_id'],'is_del'=>0])->first()->toArray();
-                    $v['class_name'] = $class['name'];
-                    //获取所有的课次
-                    $classci = LiveChild::where(['shift_no_id'=>$v['shift_id'],'is_del'=>0,'status'=>1])->get()->toArray();
-                    //课次关联讲师
-                    if(!empty($classci)){
-                        foreach ($classci as $ks=>&$vs){
-                            //开课时间戳 start_at 结束时间戳转化 end_at
-                            $ymd = date('Y-m-s',$vs['start_at']);//年月日
-                            $start = date('H:i',$vs['start_at']);//开始时分
-                            $end = date('H:i',$vs['end_at']);//结束时分
-                            $weekarray = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-                            $xingqi = date("w", 1593414566);
-                            $week = $weekarray[$xingqi];
-                            $vs['times'] = $ymd.'&nbsp&nbsp'.$week.'&nbsp&nbsp'.$start.'-'.$end;
-                            $teacher = LiveClassChildTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_class_teacher.teacher_id')
-                                ->where(['ld_course_class_teacher.is_del'=>0,'ld_lecturer_educationa.is_del'=>0,'ld_lecturer_educationa.type'=>2,'ld_lecturer_educationa.is_forbid'=>0])
-                                ->first()->toArray();
-                            if(!empty($teacher)){
-                                $vs['teacher_name'] = $teacher['real_name'];
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$courseArr]);
-    }
     /*
          * @param  课程录播列表
          * @param  author  苏振文
@@ -455,6 +398,59 @@ class CourseController extends Controller {
         }
     }
     /*
+         * @param  课程直播列表
+         * @param  author  苏振文
+         * @param  ctime   2020/7/7 14:39
+         * return  array
+         */
+    public function livearr(){
+        //每页显示的条数
+        $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 2;
+        $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
+        $offset   = ($page - 1) * $pagesize;
+        //课程基本信息
+        $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+        if(!$course){
+            return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+        }
+        //用户是否购买，如果购买，显示全部   班号 课次
+        $order = Order::where(['student_id'=>AdminLog::getAdminInfo()->admin_user->id,'class_id'=>$this->data['id'],'status'=>2])->count();
+        $courseArr=[];
+        if($order = 0){
+            //获取所有的班号
+            $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get()->toArray();
+            if($courseArr != 0){
+                foreach ($courseArr as $k=>&$v){
+                    //获取班级信息
+                    $class = LiveClass::where(['id'=>$v['shift_id'],'is_del'=>0])->first()->toArray();
+                    $v['class_name'] = $class['name'];
+                    //获取所有的课次
+                    $classci = LiveChild::where(['shift_no_id'=>$v['shift_id'],'is_del'=>0,'status'=>1])->get()->toArray();
+                    //课次关联讲师
+                    if(!empty($classci)){
+                        foreach ($classci as $ks=>&$vs){
+                            //开课时间戳 start_at 结束时间戳转化 end_at
+                            $ymd = date('Y-m-s',$vs['start_at']);//年月日
+                            $start = date('H:i',$vs['start_at']);//开始时分
+                            $end = date('H:i',$vs['end_at']);//结束时分
+                            $weekarray = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+                            $xingqi = date("w", 1593414566);
+                            $week = $weekarray[$xingqi];
+                            $vs['times'] = $ymd.'&nbsp&nbsp'.$week.'&nbsp&nbsp'.$start.'-'.$end;
+                            $teacher = LiveClassChildTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_class_teacher.teacher_id')
+                                ->where(['ld_course_class_teacher.is_del'=>0,'ld_lecturer_educationa.is_del'=>0,'ld_lecturer_educationa.type'=>2,'ld_lecturer_educationa.is_forbid'=>0])
+                                ->first()->toArray();
+                            if(!empty($teacher)){
+                                $vs['teacher_name'] = $teacher['real_name'];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$courseArr]);
+    }
+    /*
          * @param  课程资料表
          * @param  author  苏振文
          * @param  ctime   2020/7/7 14:40
@@ -481,6 +477,24 @@ class CourseController extends Controller {
             'total'=>$count
         ];
         return ['code' => 200 , 'msg' => '查询成功','data'=>$ziyuan,'where'=>$where,'page'=>$page];
+    }
+
+
+    /**
+     * google api 二维码生成【QRcode可以存储最多4296个字母数字类型的任意文本，具体可以查看二维码数据格式】
+     * @param string $chl 二维码包含的信息，可以是数字、字符、二进制信息、汉字。
+    不能混合数据类型，数据必须经过UTF-8 URL-encoded
+     * @param int $widhtHeight 生成二维码的尺寸设置
+     * @param string $EC_level 可选纠错级别，QR码支持四个等级纠错，用来恢复丢失的、读错的、模糊的、数据。
+     *                            L-默认：可以识别已损失的7%的数据
+     *                            M-可以识别已损失15%的数据
+     *                            Q-可以识别已损失25%的数据
+     *                            H-可以识别已损失30%的数据
+     * @param int $margin 生成的二维码离图片边框的距离
+     */
+    function generateQRfromGoogle($chl,$widhtHeight ='150',$EC_level='L',$margin='0'){
+        $chl = urlencode($chl);
+        echo 'http://chart.apis.google.com/chart?chs='.$widhtHeight.'x'.$widhtHeight.'&cht=qr&chld='.$EC_level.'|'.$margin.'&chl='.$chl;
     }
 }
 
