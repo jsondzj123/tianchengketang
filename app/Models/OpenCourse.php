@@ -100,7 +100,19 @@ class OpenCourse extends Model {
             }
             $query->where('school_id',$school_id);
             $query->where('is_del',0);
-         })->count();
+        });//自增公开课
+         $natureOpenCourse = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
+                            ->where(function($query) use ($data,$school_id) {
+                                if(!empty($data['subjectOne']) && $data['subjectOne'] != ''){
+                                    $query->where('ld_course_open.parent_id',$data['subjectOne']);
+                                }
+                                if(!empty($data['subjectTwo']) && $data['subjectTwo'] != ''){
+                                    $query->where('ld_course_open.child_id',$data['subjectTwo']);
+                                }
+                                $query->where('ld_course_ref_open.to_school_id',$data['school_id']);
+                                $query->where('ld_course_ref_open.from_school_id',$school_id);
+                                $query->where('ld_course_ref_open.is_del',0);
+                    })->select('ld_course_ref_open.course_id as id','ld_course_open.title','ld_course_open.cover','ld_course_open.status','ld_course_open.start_at','ld_course_open.end_at')->get()->toArray(); //授权公开课信息（分校）
         
         $sum_page = ceil($open_less_count/$pagesize);
         if($open_less_count > 0){

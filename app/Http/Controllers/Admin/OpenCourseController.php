@@ -12,7 +12,7 @@ use App\Models\Teacher;
 use App\Tools\CurrentAdmin;
 use App\Tools\MTCloud;
 use App\Models\OpenLivesChilds;
-use App\Models\Article;
+
 class OpenCourseController extends Controller {
     /*
     * @param  公开课列表
@@ -328,13 +328,13 @@ class OpenCourseController extends Controller {
     	$teacherData = Teacher::whereIn('id',$teacherArr)->where('is_del',0)->select('id','type')->get()->toArray();
     	$lectTeacherArr = $eduTeacherArr = [];
     	if(!empty($teacherData)){
-
-    		foreach($teacherData as $key =>$v){
+    		
+    		foreach($teacherData as $key =>$v){	
 
     			if($v['type'] == 1){
-    				$data['data']['edu_teacher'] = Teacher::where('type',2)->select('id','real_name')->get();
+    				$data['data']['edu_teacher_id'] = Teacher::where(['type'=>1,'id'=>$v['id']])->select('id','real_name')->get();
     			}else if($v['type'] == 2){
-    				$data['data']['lect_teacher'] = Teacher::where('type',2)->select('id','real_name')->first();
+    				$data['data']['lect_teacher_id'] = Teacher::where(['type'=>2,'id'=>$v['id']])->select('id','real_name')->get();
     			}
     		}
     	}
@@ -556,11 +556,6 @@ class OpenCourseController extends Controller {
         }
         return true;
     }
-
-
-
-
- 
 
 
 }
