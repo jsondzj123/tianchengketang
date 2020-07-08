@@ -51,7 +51,7 @@ class OpenCourseController extends Controller {
                 [
                 	'subject' => 'required',
                 	'title' => 'required',
-                	'keywords' => 'required',
+                	// 'keywords' => 'required',
                 	'cover' => 'required',
                 	'time' => 'required',
                 	'is_barrage' => 'required',
@@ -63,6 +63,7 @@ class OpenCourseController extends Controller {
         if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
+        $openCourseArr['keywords'] = !isset($openCourseArr['keywords']) || empty($openCourseArr['keywords'])?'':$openCourseArr['keywords'];
         try{
         	unset($openCourseArr['/admin/opencourse/doInsertOpenCourse']);
 	        DB::beginTransaction();
@@ -362,7 +363,7 @@ class OpenCourseController extends Controller {
 	        	'openless_id' => 'required|integer',
 	       		'subject' =>'required',
             	'title' => 'required',
-            	'keywords' => 'required',
+            	// 'keywords' => 'required',
             	'cover' => 'required',
             	'time' => 'required',
             	'is_barrage' => 'required',
