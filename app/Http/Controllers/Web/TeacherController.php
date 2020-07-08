@@ -86,6 +86,10 @@ class TeacherController extends Controller {
 			return ['code'=>200,'msg'=>'Success','data'=>$teacherInfo]
 		}else{
 			//自增讲师
+			
+
+
+
 		}
 
 	}	     
