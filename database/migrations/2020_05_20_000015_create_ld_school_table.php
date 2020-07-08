@@ -20,9 +20,9 @@ class CreateLdSchoolTable extends Migration
             $table->string('logo_url')->comment('分校LOGO');
             $table->text('introduce')->comment('分校介绍');
             $table->string('dns', 100)->comment('分校域名');
-            $table->string('account_name',150)->comment('账户名称');
-            $table->integer('account_num', 11)->comment('账户号码');
-            $table->string('open_bank_url', 150)->comment('开户行');
+            // $table->string('account_name',150)->comment('账户名称');
+            // $table->integer('account_num', 11)->comment('账户号码');
+            // $table->string('open_bank_url', 150)->comment('开户行');
             $table->smallInteger('is_del')->default(1)->comment('是否删除：0是1否');
             $table->smallInteger('is_forbid')->default(1)->comment('是否禁用：0是1否');
             $table->dateTime('create_time')->comment('创建时间');

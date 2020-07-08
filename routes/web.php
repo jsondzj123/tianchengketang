@@ -117,14 +117,17 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('details','NewsController@details');//查看详情
     });
      //公开课
-     $router->group(['prefix' => 'news'], function () use ($router) {
+     $router->group(['prefix' => 'openclass'], function () use ($router) {
         $router->post('hotList','OpenCourseController@getList');//大家都在看
         $router->post('PreStart','OpenCourseController@hotList');//预开始
         $router->post('underway','OpenCourseController@underway');//直播中
         $router->post('finish','OpenCourseController@end');//往期公开课程 (暂时没做分页)
-        $router->post('details','NewsController@details');//查看详情
+        $router->post('details','OpenCourseController@details');//查看详情
     });
-
+    //教师
+    $router->group(['prefix' => 'teacher'], function () use ($router) {
+        $router->post('details','TeacherController@details');//查看详情
+    });
      //end (lys)
 
 
