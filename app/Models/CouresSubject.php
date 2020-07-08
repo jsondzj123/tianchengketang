@@ -66,6 +66,7 @@ class CouresSubject extends Model {
             return ['code' => 203 , 'msg' => '添加失败'];
         }
     }
+
     //删除
     public static function subjectDel($user_id,$data){
         $del = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
