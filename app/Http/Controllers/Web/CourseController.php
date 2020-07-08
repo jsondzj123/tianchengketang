@@ -301,6 +301,7 @@ class CourseController extends Controller {
          * @param  ctime   2020/7/7 14:39
          * return  array
          */
+
     public function livearr(){
         //每页显示的条数
         $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 2;
