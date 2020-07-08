@@ -105,7 +105,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('footer','IndexController@footer');//页脚
         $router->post('course','IndexController@course');//精品课程
     });
-
+     
     $router->group(['prefix' => 'footer'], function () use ($router) {
         $router->post('details','FooterController@details');//首页   页脚跳转
     });
