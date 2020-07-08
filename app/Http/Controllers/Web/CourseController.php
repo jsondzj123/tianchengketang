@@ -378,7 +378,7 @@ class CourseController extends Controller {
             $is_pay = 1;
         }
         //免费或者已经购买，展示全部
-        if($course['sale_price'] == 0 || $is_pay == 1){
+        if($course['sale_price'] == 0 || $is_pay == 0){
             //章总数
             $count = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->count();
             $recorde =[];
