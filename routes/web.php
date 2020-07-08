@@ -142,7 +142,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->group(['prefix' => 'bank' , 'middleware'=> 'user'], function () use ($router) {
         $router->post('getBankChaptersList','BankController@getBankChaptersList');  //题库章节接口
         $router->post('getExamSet','BankController@getExamSet');                    //做题设置接口
-        $router->post('doChapterExamList','BankController@doChapterExamList');      //章节练习随机生成试题接口
+        $router->post('doRandExamList','BankController@doRandExamList');            //随机生成试题接口
+        $router->post('getExamPapersList','BankController@getExamPapersList');      //模拟真题试卷列表接口
     });
 });
 
