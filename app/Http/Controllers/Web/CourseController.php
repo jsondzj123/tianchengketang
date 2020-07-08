@@ -394,7 +394,7 @@ class CourseController extends Controller {
                             //获取 学习时长
                             $MTCloud = new MTCloud();
                             $use_duration  =  $MTCloud->coursePlaybackVisitorList($this->data['id'],1,50);
-                            print_r($use_duration['data']);die;
+                            print_r($use_duration);die;
                             if(!empty($use_duration)){
                                 foreach ($use_duration as $kk=>$vv){
                                     if($vv['uid'] == $this->userid){
