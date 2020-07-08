@@ -48,8 +48,10 @@ class Teach extends Model {
 						}
 						if(isset($body['timerange']) && !empty($body['timerange'])){
 							$time = json_decode($body['timerange'],1);
-							$query->where('ld_course_open.start_at','>',substr($time[0],0,10));
-							$query->where('ld_course_open.end_at','<',substr($time[1],0,10));
+							if(!empty($time)){
+								$query->where('ld_course_open.start_at','>',substr($time[0],0,10));
+								$query->where('ld_course_open.end_at','<',substr($time[1],0,10));
+							}
 						}
 						if(isset($body['status']) && !empty($body['status'])){
 							switch ($body['status']) {
@@ -103,9 +105,12 @@ class Teach extends Model {
 							}	
 						}
 						if(isset($body['timerange']) && !empty($body['timerange'])){
-								$time = json_decode($body['timerange'],1);
+							
+							$time = json_decode($body['timerange'],1);
+							if(!empty($time)){
 								$query->where('ld_course_class_number.start_at','>',substr($time[0],0,10));
 								$query->where('ld_course_class_number.end_at','<',substr($time[1],0,10));
+							}
 						}
 						if(isset($body['status']) && !empty($body['status'])){
 							switch ($body['status']) {
