@@ -94,7 +94,7 @@ class UserController extends Controller {
     public function address(){
         $region_id = isset($this->data['region_id'])?$this->data['region_id']:0;
         $address = $this->getRegionDataList($region_id);
-        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$address]);
+        return response()->json($address);
     }
     //用户修改基本信息
     public function userUpDetail(){
