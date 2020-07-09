@@ -538,62 +538,67 @@ class Coures extends Model {
         if(empty($data) || !isset($data)){
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
-        $find = self::where(['id'=>$data['id']])->first();
-        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
-        if ($school_status != 1){
-            if($find['nature'] == 1){
-                return ['code' => 203 , 'msg' => '授权课程，无法修改'];
-            }
-        }
         DB::beginTransaction();
         try{
-        //修改 课程表 课程授课表 课程讲师表
-        $cousermethod = isset($data['method'])?$data['method']:'';
-        $couserteacher = isset($data['teacher'])?$data['teacher']:'';
-        unset($data['/admin/course/courseUpdate']);
-        unset($data['method']);
-        unset($data['teacher']);
-        unset($data['teachers']);
-        $parent = json_decode($data['parent'],true);
-        if(isset($parent[0]) && !empty($parent[0])){
-            $data['parent_id'] = $parent[0];
-        }
-        if(isset($parent[1]) && !empty($parent[1])){
-            $data['child_id'] = $parent[1];
-        }
-        unset($data['parent']);
-        $data['update_at'] = date('Y-m-d H:i:s');
-        self::where(['id'=>$data['id']])->update($data);
-        if(!empty($cousermethod)){
-            Couresmethod::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
-            $method = json_decode($cousermethod,true);
-            foreach ($method as $k=>$v){
-                $infor = Couresmethod::where(['course_id'=>$data['id'],'method_id'=>$v])->first();
-                if($infor){
-                     Couresmethod::where(['id'=>$infor['id']])->update(['is_del'=>0,'update_at'=>date('Y-m-d H:i:s')]);
-                }else{
-                    Couresmethod::insert([
-                        'course_id' => $data['id'],
-                        'method_id' => $v
-                    ]);
+                //修改 课程表 课程授课表 课程讲师表
+                $cousermethod = isset($data['method'])?$data['method']:'';
+                $couserteacher = isset($data['teacher'])?$data['teacher']:'';
+                unset($data['/admin/course/courseUpdate']);
+                unset($data['method']);
+                unset($data['teacher']);
+                unset($data['teachers']);
+                $parent = json_decode($data['parent'],true);
+                if(isset($parent[0]) && !empty($parent[0])){
+                    $data['parent_id'] = $parent[0];
                 }
-            }
-        }
-        if(!empty($couserteacher)){
-            Couresteacher::where(['course_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
-            $teacher = json_decode($couserteacher,true);
-            foreach ($teacher as $k=>$v){
-                $infor = Couresteacher::where(['course_id'=>$data['id'],'teacher_id'=>$v])->first();
-                if($infor){
-                     Couresteacher::where(['id'=>$infor['id']])->update(['is_del'=>0,'update_at'=>date('Y-m-d H:i:s')]);
-                }else{
-                    Couresteacher::insert([
-                        'course_id' => $data['id'],
-                        'teacher_id' => $v
-                    ]);
+                if(isset($parent[1]) && !empty($parent[1])){
+                    $data['child_id'] = $parent[1];
                 }
-            }
-        }
+                unset($data['parent']);
+
+                //判断自增还是授权
+                $nature = isset($data['nature'])?$data['nature']:0;
+                if($nature == 1){
+                    //只修改基本信息
+                    $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id)?AdminLog::getAdminInfo()->admin_user->school_id:0;
+                    $data['update_at'] = date('Y-m-d H:i:s');
+                    $id = $data['id'];
+                    unset($data['id']);
+                    CourseSchool::where(['to_school_id'=>$school_id,'course_id'=>$id])->update($data);
+                }else {
+                    $data['update_at'] = date('Y-m-d H:i:s');
+                    self::where(['id' => $data['id']])->update($data);
+                    if (!empty($cousermethod)) {
+                        Couresmethod::where(['course_id' => $data['id']])->update(['is_del' => 1, 'update_at' => date('Y-m-d H:i:s')]);
+                        $method = json_decode($cousermethod, true);
+                        foreach ($method as $k => $v) {
+                            $infor = Couresmethod::where(['course_id' => $data['id'], 'method_id' => $v])->first();
+                            if ($infor) {
+                                Couresmethod::where(['id' => $infor['id']])->update(['is_del' => 0, 'update_at' => date('Y-m-d H:i:s')]);
+                            } else {
+                                Couresmethod::insert([
+                                    'course_id' => $data['id'],
+                                    'method_id' => $v
+                                ]);
+                            }
+                        }
+                    }
+                    if (!empty($couserteacher)) {
+                        Couresteacher::where(['course_id' => $data['id']])->update(['is_del' => 1, 'update_at' => date('Y-m-d H:i:s')]);
+                        $teacher = json_decode($couserteacher, true);
+                        foreach ($teacher as $k => $v) {
+                            $infor = Couresteacher::where(['course_id' => $data['id'], 'teacher_id' => $v])->first();
+                            if ($infor) {
+                                Couresteacher::where(['id' => $infor['id']])->update(['is_del' => 0, 'update_at' => date('Y-m-d H:i:s')]);
+                            } else {
+                                Couresteacher::insert([
+                                    'course_id' => $data['id'],
+                                    'teacher_id' => $v
+                                ]);
+                            }
+                        }
+                    }
+                }
             $user_id = AdminLog::getAdminInfo()->admin_user->id;
             //添加日志操作
             AdminLog::insertAdminLog([
