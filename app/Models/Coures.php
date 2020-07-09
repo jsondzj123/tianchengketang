@@ -446,7 +446,7 @@ class Coures extends Model {
             }
         }else{
             // 总校删除 先查询授权分校库存，没有进行删除
-            $courseSchool = CourseStocks::where(['course_id'=>$data['id'],'add_number'=>'> 0'])->get();
+            $courseSchool = CourseStocks::where('course_id',$data['id'])->where('add_number','>',0)->get()->toArray();
             if(!empty($courseSchool)){
                 return ['code' => 203 , 'msg' => '此课程授权给分校，无法删除'];
             }
