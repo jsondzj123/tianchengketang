@@ -307,7 +307,11 @@ class CourseController extends Controller {
         if(!isset($this->data['id'])||empty($this->data['id'])){
             return response()->json(['code' => 201 , 'msg' => '课程id为空']);
         }
-        $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first();
+        if($this->data['nature'] == 1){
+            $course = CourseSchool ::where(['to_school_id'=>$this->school['id'],'course_id'=>$this->data['id'],'is_del'=>0])->first();
+        }else{
+            $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first();
+        }
         if(!$course){
             return response()->json(['code' => 201 , 'msg' => '无查看权限']);
         }
@@ -322,7 +326,7 @@ class CourseController extends Controller {
             $is_pay = 1;
         }
         //免费或者已经购买，展示全部
-        if($course['sale_price'] == 0 || $is_pay == 0){
+        if($course['sale_price'] == 0 || $is_pay == 1){
             //章总数
             $count = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->count();
             $recorde =[];
@@ -409,14 +413,18 @@ class CourseController extends Controller {
         $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
         //课程基本信息
-        $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+        if($this->data['nature'] == 1){
+            $course = CourseSchool ::where(['to_school_id'=>$this->school['id'],'course_id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+        }else{
+            $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+        }
         if(!$course){
             return response()->json(['code' => 201 , 'msg' => '无查看权限']);
         }
-        //用户是否购买，如果购买，显示全部   班号 课次
+        //课程是否免费或者用户是否购买，如果购买，显示全部班号课次
         $order = Order::where(['student_id'=>AdminLog::getAdminInfo()->admin_user->id,'class_id'=>$this->data['id'],'status'=>2])->count();
         $courseArr=[];
-        if($order == 0){
+        if($order > 0 || $course['sale_price'] == 0){
             //获取所有的班号
             $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get()->toArray();
             if($courseArr != 0){
