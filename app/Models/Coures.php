@@ -149,7 +149,7 @@ class Coures extends Model {
                     }
                 })
                     ->orderBy('id','desc')->get()->toArray();
-                foreach($list  as $k=>&$v){
+                foreach($list1  as $k=>&$v){
                     $where=[
                         'course_id'=>$v['id'],
                         'is_del'=>0
@@ -199,7 +199,7 @@ class Coures extends Model {
                     }
                 })
                     ->orderBy('id','desc')->get()->toArray();
-                foreach($list  as $k=>&$v){
+                foreach($list2  as $k=>&$v){
                     $v['nature'] = 1;
                     $where=[
                         'course_id'=>$v['course_id'],
