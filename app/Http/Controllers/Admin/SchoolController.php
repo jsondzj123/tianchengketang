@@ -315,9 +315,9 @@ class SchoolController extends Controller {
         if(isset($data['/admin/school/doSchoolUpdate'])){
             unset($data['/admin/school/doSchoolUpdate']);
         }
-        $data['account_name']  = isset($data['account_name']) && !empty($data['account_name'] ?$data['account_name'];
-        $data['account_num']  = isset($data['account_num']) && !empty($data['account_num'] ?$data['account_num'];
-        $data['open_bank']  = isset($data['open_bank']) && !empty($data['open_bank'] ?$data['open_bank'];
+        $data['account_name']  = !isset($data['account_name']) || empty($data['account_name']) ?'':$data['account_name'];
+        $data['account_num']  = !isset($data['account_num']) || empty($data['account_num']) ?'':$data['account_num'];
+        $data['open_bank']  = !isset($data['open_bank']) || empty($data['open_bank']) ?'':$data['open_bank'];
         $data['update_time'] = date('Y-m-d H:i:s');
         if(School::where('id',$data['id'])->update($data)){
                 AdminLog::insertAdminLog([
