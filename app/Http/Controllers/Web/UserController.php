@@ -60,8 +60,11 @@ class UserController extends Controller {
         if($verify_code != $this->data['verifycode']){
             return ['code' => 202 , 'msg' => '验证码错误'];
         }
-        $count = Student::where(['phone'=>$this->data['phone'],'is_forbid'=>1])->count();
-        if($count >0){
+        $first = Student::where(['phone'=>$this->data['phone']])->first()->toArray();
+        if(!empty($first)){
+            if($first['is_forbid'] == 2){
+                return response()->json(['code' => 201 , 'msg' => '手机号已被禁用']);
+            }
             return response()->json(['code' => 201 , 'msg' => '手机号已被占用']);
         }
         if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}$#', $this->data['phone'])) {
@@ -143,9 +146,6 @@ class UserController extends Controller {
     }
     //用户修改联系方式
     public function userUpRelation(){
-        if(!isset($this->data['phone']) || empty($this->data['phone'])){
-            return response()->json(['code' => 201 , 'msg' => '手机号不能为空']);
-        }
         if(!isset($this->data['family_phone']) || empty($this->data['family_phone'])){
             return response()->json(['code' => 201 , 'msg' => '座机号不能为空']);
         }
@@ -167,7 +167,6 @@ class UserController extends Controller {
         if(!isset($this->data['wechat']) || empty($this->data['wechat'])){
             return response()->json(['code' => 201 , 'msg' => '微信号不能为空']);
         }
-        $res['phone'] = $this->data['phone'];
         $res['family_phone'] = $this->data['family_phone'];
         $res['office_phone'] = $this->data['office_phone'];
         $res['contact_people'] = $this->data['contact_people'];
@@ -223,5 +222,16 @@ class UserController extends Controller {
             return response()->json(['code' => 203 , 'msg' => '修改失败']);
         }
     }
+
+    /*
+         * @param  个人信息
+         * @param  author  苏振文
+         * @param  ctime   2020/7/9 19:38
+         * return  array
+         */
+    //我的收藏
+    //我的题库
+    //我的课程
+    //我的订单
 }
 
