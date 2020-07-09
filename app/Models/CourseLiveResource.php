@@ -36,6 +36,7 @@ class CourseLiveResource extends Model {
             }
         }
         $livecast = Live::where($where)->orderByDesc('id')->get()->toArray();
+        print_r($livecast);die;
         foreach ($livecast as $k=>&$v){
             $ones = CouresSubject::where('id',$v['parent_id'])->first();
             $v['parent_name'] = $ones['subject_name'];
