@@ -32,11 +32,13 @@ class CourseStocks extends Model {
         unset($data['/admin/courstocks/getList']);
     	$info = self::where($data)->where(['school_pid'=>$school_id,'is_del'=>0])->orderBy('id','desc')->select('id','create_at','current_number','add_number','school_id')->get();
     	$sum_current_number = 0;
-    	$residue_number = Order::whereIn('pay_status',[3,4])->where(['class_id'=>$data['course_id'],'school_id'=>$info['school_id'],'oa_status'=>1])->count();
-    	foreach($info as $k=>$v){
-    		$sum_current_number += $v['add_number'];
-    	}
-    	$residue_number = $residue_number<=0 ?$sum_current_number:(int)$sum_current_number-(int)$residue_number;
+    	$residue_number = Order::whereIn('pay_status',[3,4])->where(['class_id'=>$data['course_id'],'school_id'=>$data['school_id'],'oa_status'=>1])->count();
+        if(!empty($info)){
+            foreach($info as $k=>$v){
+                $sum_current_number += $v['add_number'];
+            }
+        }
+    	$residue_number = $sum_current_number <= 0||$residue_number<=0 ?$sum_current_number:(int)$sum_current_number-(int)$residue_number;
     	return ['code'=>200,'msg'=>'success','data'=>$info,'sum_current_number'=>$sum_current_number,'residue_number'=>$residue_number];
     }
     /*
