@@ -96,7 +96,6 @@ class UserController extends Controller {
         $address = $this->getRegionDataList($this->data);
         return response()->json($address);
     }
-
     //用户修改基本信息
     public function userUpDetail(){
         if(!isset($this->data['real_name']) || empty($this->data['real_name'])){
@@ -224,8 +223,5 @@ class UserController extends Controller {
             return response()->json(['code' => 203 , 'msg' => '修改失败']);
         }
     }
-
-
-
 }
 
