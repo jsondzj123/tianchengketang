@@ -246,7 +246,6 @@ class CourseController extends Controller {
          * return  array
          */
     public function liveCourses(){
-        echo 011111111;
         try{
             $data = CourseLiveResource::selectFind(self::$accept_data);
             return response()->json($data);

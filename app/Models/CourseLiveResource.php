@@ -11,7 +11,6 @@ class CourseLiveResource extends Model {
     public $timestamps = false;
     //直播详情  szw
     public static function selectFind($data){
-        echo 111111;
         if(!isset($data) || empty($data)){
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
@@ -36,7 +35,6 @@ class CourseLiveResource extends Model {
             }
         }
         $livecast = Live::where($where)->orderByDesc('id')->get()->toArray();
-        print_r($livecast);die;
         foreach ($livecast as $k=>&$v){
             $ones = CouresSubject::where('id',$v['parent_id'])->first();
             $v['parent_name'] = $ones['subject_name'];
