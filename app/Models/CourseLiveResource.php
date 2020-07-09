@@ -24,7 +24,6 @@ class CourseLiveResource extends Model {
         }
         //取直播资源列表
         $where['is_del'] = 0;
-        $where['is_forbid'] = '< 2';
         if(isset($data['parent']) && !empty($data['parent'])){
             $parent = json_decode($data['parent'],true);
             if(isset($parent[0]) && !empty($parent[0])){
@@ -34,7 +33,7 @@ class CourseLiveResource extends Model {
                 $where['child_id'] = $parent[1];
             }
         }
-        $livecast = Live::where($where)->orderByDesc('id')->get()->toArray();
+        $livecast = Live::where($where)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
         foreach ($livecast as $k=>&$v){
             $ones = CouresSubject::where('id',$v['parent_id'])->first();
             $v['parent_name'] = $ones['subject_name'];
