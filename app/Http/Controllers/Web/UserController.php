@@ -222,7 +222,6 @@ class UserController extends Controller {
             return response()->json(['code' => 203 , 'msg' => '修改失败']);
         }
     }
-
     /*
          * @param  个人信息
          * @param  author  苏振文
