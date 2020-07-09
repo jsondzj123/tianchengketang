@@ -279,6 +279,7 @@ class BankController extends Controller {
         $joint_id     = isset(self::$accept_data['joint_id']) && self::$accept_data['joint_id'] > 0 ? self::$accept_data['joint_id'] : 0;                 //获取节的id
         $papers_id    = isset(self::$accept_data['papers_id']) && self::$accept_data['papers_id'] > 0 ? self::$accept_data['papers_id'] : 0;              //获取试卷的id
         $type         = isset(self::$accept_data['type']) && self::$accept_data['type'] > 0 ? self::$accept_data['type'] : 0;                             //获取类型(1代表章节练习2代表快速做题3代表模拟真题)
+        $model        = isset(self::$accept_data['model']) && self::$accept_data['model'] > 0 ? self::$accept_data['model'] : 0;                          //获取模式
         
         //判断类型是否传递
         if($type <= 0 || !in_array($type , [1,2,3])){
@@ -304,40 +305,6 @@ class BankController extends Controller {
             if(!$chapter_id || $chapter_id <= 0){
                 return response()->json(['code' => 202 , 'msg' => '章id不合法']);
             }
-
-            //获取题型[1,2]
-            $question_type = isset(self::$accept_data['question_type']) && !empty(self::$accept_data['question_type']) ? self::$accept_data['question_type'] : '';
-            if(!$question_type || empty($question_type)){
-                return response()->json(['code' => 201 , 'msg' => '请选择题型']);
-            }
-            $question_type = json_decode($question_type , true);
-            foreach ($question_type as $key=>$value){
-                if ($value === 5 || $value === 6)
-                  unset($question_type[$key]);
-            }
-
-            //获取分类
-            $exam_type = isset(self::$accept_data['exam_type']) && !empty(self::$accept_data['exam_type']) ? self::$accept_data['exam_type'] : '';
-            if(!$exam_type || empty($exam_type)){
-                return response()->json(['code' => 201 , 'msg' => '请选择分类']);
-            } 
-
-            //判断题型是否合法
-            if(!in_array($exam_type , [1,2,3])){
-                return response()->json(['code' => 202 , 'msg' => '分类不合法']);
-            }
-
-            //获取题量
-            $exam_count = isset(self::$accept_data['exam_count']) && !empty(self::$accept_data['exam_count']) ? self::$accept_data['exam_count'] : '';
-            if(!$exam_count || empty($exam_count)){
-                return response()->json(['code' => 201 , 'msg' => '请选择题量']);
-            } 
-
-            $exam_count_array = [1=>30,2=>60,3=>100];
-            //判断题量是否合法
-            if(!in_array($exam_count , [1,2,3])){
-                return response()->json(['code' => 202 , 'msg' => '题量不合法']);
-            }
             
             //新数组赋值
             $exam_array = [];            
@@ -345,6 +312,45 @@ class BankController extends Controller {
             //判断是否做完了随机生成的快速做题数量
             $rand_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('is_right' , 0)->where('type' , 1)->count();
             if($rand_exam_count <= 0){
+                //获取题型[1,2]
+                $question_type = isset(self::$accept_data['question_type']) && !empty(self::$accept_data['question_type']) ? self::$accept_data['question_type'] : '';
+                if(!$question_type || empty($question_type)){
+                    return response()->json(['code' => 201 , 'msg' => '请选择题型']);
+                }
+                $question_type = json_decode($question_type , true);
+                foreach ($question_type as $key=>$value){
+                    if ($value === 5 || $value === 6)
+                      unset($question_type[$key]);
+                }
+
+                //获取分类
+                $exam_type = isset(self::$accept_data['exam_type']) && !empty(self::$accept_data['exam_type']) ? self::$accept_data['exam_type'] : '';
+                if(!$exam_type || empty($exam_type)){
+                    return response()->json(['code' => 201 , 'msg' => '请选择分类']);
+                } 
+
+                //判断题型是否合法
+                if(!in_array($exam_type , [1,2,3])){
+                    return response()->json(['code' => 202 , 'msg' => '分类不合法']);
+                }
+
+                //获取题量
+                $exam_count = isset(self::$accept_data['exam_count']) && !empty(self::$accept_data['exam_count']) ? self::$accept_data['exam_count'] : '';
+                if(!$exam_count || empty($exam_count)){
+                    return response()->json(['code' => 201 , 'msg' => '请选择题量']);
+                } 
+
+                $exam_count_array = [1=>30,2=>60,3=>100];
+                //判断题量是否合法
+                if(!in_array($exam_count , [1,2,3])){
+                    return response()->json(['code' => 202 , 'msg' => '题量不合法']);
+                }
+
+                //判断选择模式是否合法
+                if(!in_array($model , [1,2])){
+                    return response()->json(['code' => 202 , 'msg' => '模式不合法']);
+                }
+
                 //根据设置的条件筛选试题
                 $exam_list = Exam::select("id")->where([['bank_id' , '=' , $bank_id] , ['subject_id' , '=' , $subject_id] , ['chapter_id' , '=' , $chapter_id] , ['joint_id' , '=' , $joint_id] , ['is_del' , '=' , 0] , ['is_publish' , '=' , 1]])->whereIn('type' , $question_type)->orderByRaw("RAND()")->limit($exam_count_array[$exam_count])->get();
                 if(!$exam_list || empty($exam_list)){
@@ -396,6 +402,9 @@ class BankController extends Controller {
                         'is_collect'          =>  0
                     ];
                 }
+                $model_key = "exam:user:model:".self::$accept_data['user_info']['user_id'].":bank:".$bank_id.":subject_id:".$subject_id.":chapter_id:".$chapter_id.":joint_id:".$joint_id;
+                //保存选择模式
+                Redis::set($model_key , $model);
             } else {
                 //查询还未做完的题列表
                 $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('type' , 1)->get();
@@ -584,7 +593,19 @@ class BankController extends Controller {
                 ];
             }
         }
-        return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $exam_array]);
+        
+        //判断是章节练习还是快速做题还是模拟真题
+        if($type == 1){
+            $model_key = "exam:user:model:".self::$accept_data['user_info']['user_id'].":bank:".$bank_id.":subject_id:".$subject_id.":chapter_id:".$chapter_id.":joint_id:".$joint_id;
+            //保存选择模式
+            $is_exists = Redis::get($model_key);
+            if($is_exists && !empty($is_exists)){
+                $model = $is_exists;
+            }
+            return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $exam_array , 'model' => $model]);
+        } else {
+            return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $exam_array]);
+        }
     }
     
     /*
@@ -1129,9 +1150,9 @@ class BankController extends Controller {
         
         //获取学员的做题记录列表
         if($type == 1){
-                
+            $make_exam_list = StudentDoTitle::selectRaw("chapter_id , joint_id , count('type') as t_count")->where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('is_right' , '>' , 0)->groupBy('chapter_id' , 'joint_id')->get();    
         } else if($type == 2){
-
+            
         } else if($type == 3){
             $make_exam_list = StudentDoTitle::selectRaw("papers_id , count('type') as t_count")->where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 3)->where('is_right' , '>' , 0)->groupBy('papers_id')->get();
         }
@@ -1140,7 +1161,35 @@ class BankController extends Controller {
         if($make_exam_list && !empty($make_exam_list)){
             $make_exam_list = $make_exam_list->toArray();
             if($type == 1){
-                
+                foreach($make_exam_list as $k=>$v){
+                    //判断节是否存在
+                    if($v['joint_id'] > 0){
+                        //通过节的id获取节的名称
+                        $name = Chapters::where('id' , $v['joint_id'])->where('type' , 1)->value('name');
+                        
+                        //获取学员作对的道数
+                        $collect_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('chapter_id' , $v['chapter_id'])->where('joint_id' , $v['joint_id'])->where('is_right' , 1)->count();
+                    
+                        //获取学员作错的道数
+                        $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('chapter_id' , $v['chapter_id'])->where('joint_id' , $v['joint_id'])->where('is_right' , 2)->count();
+                    } else {
+                        //通过章的id获取章的名称
+                        $name = Chapters::where('id' , $v['chapter_id'])->where('type' , 0)->value('name');
+                        
+                        //获取学员作对的道数
+                        $collect_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('chapter_id' , $v['chapter_id'])->where('is_right' , 1)->count();
+                    
+                        //获取学员作错的道数
+                        $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('chapter_id' , $v['chapter_id'])->where('is_right' , 2)->count();
+                    }
+
+                    //新数组赋值
+                    $new_array[] = [
+                        'name'          =>  $name ,
+                        'collect_count' =>  $collect_count ,
+                        'error_count'   =>  $error_count
+                    ];
+                }
             } else if($type == 2){
                 
             } else if($type == 3){
