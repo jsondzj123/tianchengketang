@@ -18,37 +18,114 @@ class Coures extends Model {
         $pagesize = (int)isset($data['pageSize']) && $data['pageSize'] > 0 ? $data['pageSize'] : 20;
         $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
-        $count = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
-            //判断总校 查询所有或一个分校
-            if($data['school_status'] == 1){
-                if(!empty($data['school_id']) && $data['school_id'] != ''){
-                    $query->where('school_id',$data['school_id']);
+        if(!isset($data['nature']) || empty($data['nature'])){
+            //自增
+            $count1 = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
+                //判断总校 查询所有或一个分校
+                if($data['school_status'] == 1){
+                    if(!empty($data['school_id']) && $data['school_id'] != ''){
+                        $query->where('school_id',$data['school_id']);
+                    }
+                }else{
+                    //分校查询当前学校
+                    $query->where('school_id',$school_id);
                 }
-            }else{
-                //分校查询当前学校
-                $query->where('school_id',$school_id);
-            }
-            //学科大类
-            if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
-                $query->where('parent_id',$data['coursesubjectOne']);
-            }
+                //学科大类
+                if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
+                    $query->where('parent_id',$data['coursesubjectOne']);
+                }
 
-            //学科小类
-            if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
-                $query->where('child_id',$data['coursesubjectTwo']);
-            }
-            //状态
-            if(!empty($data['status']) && $data['status'] != ''){
-                $query->where('status',$data['status']-1);
-            }
-            //属性
-            if(!empty($data['nature']) && $data['nature'] != ''){
-                $query->where('nature',$data['nature']-1);
-            }
-        })->count();
+                //学科小类
+                if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
+                    $query->where('child_id',$data['coursesubjectTwo']);
+                }
+                //状态
+                if(!empty($data['status']) && $data['status'] != ''){
+                    $query->where('status',$data['status']-1);
+                }
+            })->count();
+            //授权
+            $count2 = CourseSchool::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
+                //判断总校 查询所有或一个分校
+                if($data['school_status'] == 1){
+                    if(!empty($data['school_id']) && $data['school_id'] != ''){
+                        $query->where('to_school_id',$data['school_id']);
+                    }
+                }else{
+                    //分校查询当前学校
+                    $query->where('to_school_id',$school_id);
+                }
+                //学科大类
+                if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
+                    $query->where('parent_id',$data['coursesubjectOne']);
+                }
+                //学科小类
+                if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
+                    $query->where('child_id',$data['coursesubjectTwo']);
+                }
+                //状态
+                if(!empty($data['status']) && $data['status'] != ''){
+                    $query->where('status',$data['status']-1);
+                }
+            })->count();
+            $count = $count1 + $count2;
+        }else if($data['nature']-1 == 1){
+            //授权
+            $count = CourseSchool::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
+                //判断总校 查询所有或一个分校
+                if($data['school_status'] == 1){
+                    if(!empty($data['school_id']) && $data['school_id'] != ''){
+                        $query->where('to_school_id',$data['school_id']);
+                    }
+                }else{
+                    //分校查询当前学校
+                    $query->where('to_school_id',$school_id);
+                }
+                //学科大类
+                if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
+                    $query->where('parent_id',$data['coursesubjectOne']);
+                }
+                //学科小类
+                if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
+                    $query->where('child_id',$data['coursesubjectTwo']);
+                }
+                //状态
+                if(!empty($data['status']) && $data['status'] != ''){
+                    $query->where('status',$data['status']-1);
+                }
+            })->count();
+        }else{
+            //自增
+            $count = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
+                //判断总校 查询所有或一个分校
+                if($data['school_status'] == 1){
+                    if(!empty($data['school_id']) && $data['school_id'] != ''){
+                        $query->where('school_id',$data['school_id']);
+                    }
+                }else{
+                    //分校查询当前学校
+                    $query->where('school_id',$school_id);
+                }
+                //学科大类
+                if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
+                    $query->where('parent_id',$data['coursesubjectOne']);
+                }
+
+                //学科小类
+                if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
+                    $query->where('child_id',$data['coursesubjectTwo']);
+                }
+                //状态
+                if(!empty($data['status']) && $data['status'] != ''){
+                    $query->where('status',$data['status']-1);
+                }
+            })->count();
+        }
         $list=[];
         if($count > 0){
-            $list = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
+            if(!isset($data['nature']) || empty($data['nature'])){
+                //全部
+                $list1 = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
                     if($data['school_status'] == 1){
                         if(!empty($data['school_id']) && $data['school_id'] != ''){
@@ -70,37 +147,191 @@ class Coures extends Model {
                     if(!empty($data['status']) && $data['status'] != ''){
                         $query->where('status',$data['status']-1);
                     }
-                    //属性
-                    if(!empty($data['nature']) && $data['nature'] != ''){
-                        $query->where('nature',$data['nature'] -1);
+                })
+                    ->orderBy('id','desc')->get()->toArray();
+                foreach($list  as $k=>&$v){
+                    $where=[
+                        'course_id'=>$v['id'],
+                        'is_del'=>0
+                    ];
+                    if(!empty($data['method'])) {
+                        $where['method_id'] = $data['method'];
+                    }
+                    $method = Couresmethod::select('method_id')->where($where)->get()->toArray();
+                    if(!$method){
+                        unset($list[$k]);
+                    }else{
+                        foreach ($method as $key=>&$val){
+                            if($val['method_id'] == 1){
+                                $val['method_name'] = '直播';
+                            }
+                            if($val['method_id'] == 2){
+                                $val['method_name'] = '录播';
+                            }
+                            if($val['method_id'] == 3){
+                                $val['method_name'] = '其他';
+                            }
+                        }
+                        $v['method'] = $method;
+                    }
+                }
+                $list2 = CourseSchool::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
+                    //判断总校 查询所有或一个分校
+                    if($data['school_status'] == 1){
+                        if(!empty($data['school_id']) && $data['school_id'] != ''){
+                            $query->where('to_school_id',$data['school_id']);
+                        }
+                    }else{
+                        //分校查询当前学校
+                        $query->where('to_school_id',$data['school_id']);
+                    }
+                    //学科大类
+                    if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
+                        $query->where('parent_id',$data['coursesubjectOne']);
+                    }
+                    //学科小类
+                    if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
+                        $query->where('child_id',$data['coursesubjectTwo']);
+                    }
+                    //状态
+                    if(!empty($data['status']) && $data['status'] != ''){
+                        $query->where('status',$data['status']-1);
                     }
                 })
-                ->orderBy('id','desc')
-                ->offset($offset)->limit($pagesize)->get();
-            foreach($list  as $k=>&$v){
-                $where=[
-                    'course_id'=>$v['id'],
-                    'is_del'=>0
-                ];
-                if(!empty($data['method'])) {
-                   $where['method_id'] = $data['method'];
+                    ->orderBy('id','desc')->get()->toArray();
+                foreach($list  as $k=>&$v){
+                    $v['nature'] = 1;
+                    $where=[
+                        'course_id'=>$v['course_id'],
+                        'is_del'=>0
+                    ];
+                    if(!empty($data['method'])) {
+                        $where['method_id'] = $data['method'];
+                    }
+                    $method = Couresmethod::select('method_id')->where($where)->get()->toArray();
+                    if(!$method){
+                        unset($list[$k]);
+                    }else{
+                        foreach ($method as $key=>&$val){
+                            if($val['method_id'] == 1){
+                                $val['method_name'] = '直播';
+                            }
+                            if($val['method_id'] == 2){
+                                $val['method_name'] = '录播';
+                            }
+                            if($val['method_id'] == 3){
+                                $val['method_name'] = '其他';
+                            }
+                        }
+                        $v['method'] = $method;
+                    }
                 }
-                $method = Couresmethod::select('method_id')->where($where)->get()->toArray();
-                if(!$method){
-                    unset($list[$k]);
-                }else{
-                    foreach ($method as $key=>&$val){
-                        if($val['method_id'] == 1){
-                            $val['method_name'] = '直播';
+                $list =array_slice(array_merge($list1,$list2),($page - 1) * $pagesize, $pagesize);
+            }else if($data['nature']-1 == 1){
+                //授权
+                $list = CourseSchool::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
+                    //判断总校 查询所有或一个分校
+                    if($data['school_status'] == 1){
+                        if(!empty($data['school_id']) && $data['school_id'] != ''){
+                            $query->where('to_school_id',$data['school_id']);
                         }
-                        if($val['method_id'] == 2){
-                            $val['method_name'] = '录播';
+                    }else{
+                        //分校查询当前学校
+                        $query->where('to_school_id',$data['school_id']);
+                    }
+                    //学科大类
+                    if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
+                        $query->where('parent_id',$data['coursesubjectOne']);
+                    }
+                    //学科小类
+                    if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
+                        $query->where('child_id',$data['coursesubjectTwo']);
+                    }
+                    //状态
+                    if(!empty($data['status']) && $data['status'] != ''){
+                        $query->where('status',$data['status']-1);
+                    }
+                })->orderBy('id','desc')
+                    ->offset($offset)->limit($pagesize)->get()->toArray();
+                    foreach($list  as $k=>&$v){
+                        $v['nature'] = 1;
+                        $where=[
+                            'course_id'=>$v['course_id'],
+                            'is_del'=>0
+                        ];
+                        if(!empty($data['method'])) {
+                            $where['method_id'] = $data['method'];
                         }
-                        if($val['method_id'] == 3){
-                            $val['method_name'] = '其他';
+                        $method = Couresmethod::select('method_id')->where($where)->get()->toArray();
+                        if(!$method){
+                            unset($list[$k]);
+                        }else{
+                            foreach ($method as $key=>&$val){
+                                if($val['method_id'] == 1){
+                                    $val['method_name'] = '直播';
+                                }
+                                if($val['method_id'] == 2){
+                                    $val['method_name'] = '录播';
+                                }
+                                if($val['method_id'] == 3){
+                                    $val['method_name'] = '其他';
+                                }
+                            }
+                            $v['method'] = $method;
                         }
                     }
-                    $v['method'] = $method;
+            }else{
+                //自增
+                $list = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
+                    //判断总校 查询所有或一个分校
+                    if($data['school_status'] == 1){
+                        if(!empty($data['school_id']) && $data['school_id'] != ''){
+                            $query->where('school_id',$data['school_id']);
+                        }
+                    }else{
+                        //分校查询当前学校
+                        $query->where('school_id',$data['school_id']);
+                    }
+                    //学科大类
+                    if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
+                        $query->where('parent_id',$data['coursesubjectOne']);
+                    }
+                    //学科小类
+                    if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
+                        $query->where('child_id',$data['coursesubjectTwo']);
+                    }
+                    //状态
+                    if(!empty($data['status']) && $data['status'] != ''){
+                        $query->where('status',$data['status']-1);
+                    }
+                })
+                    ->orderBy('id','desc')
+                    ->offset($offset)->limit($pagesize)->get()->toArray();
+                foreach($list  as $k=>&$v){
+                    $where=[
+                        'course_id'=>$v['id'],
+                        'is_del'=>0
+                    ];
+                    if(!empty($data['method'])) {
+                        $where['method_id'] = $data['method'];
+                    }
+                    $method = Couresmethod::select('method_id')->where($where)->get()->toArray();
+                    if(!$method){
+                        unset($list[$k]);
+                    }else{
+                        foreach ($method as $key=>&$val){
+                            if($val['method_id'] == 1){
+                                $val['method_name'] = '直播';
+                            }
+                            if($val['method_id'] == 2){
+                                $val['method_name'] = '录播';
+                            }
+                            if($val['method_id'] == 3){
+                                $val['method_name'] = '其他';
+                            }
+                        }
+                        $v['method'] = $method;
+                    }
                 }
             }
         }
@@ -207,7 +438,7 @@ class Coures extends Model {
         if(!isset($data['id']) || empty($data['id'])){
             return ['code' => 201 , 'msg' => '请选择学科大类'];
         }
-        $find = self::where(['id'=>$data['id']])->first();
+        $find = self::where(['id'=>$data['id']])->first()->toArray();
         $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
         if($school_status != 1){
             if($find['nature'] == 1){
@@ -215,7 +446,7 @@ class Coures extends Model {
             }
         }else{
             // 总校删除 先查询授权分校库存，没有进行删除
-            $courseSchool = CourseStocks::where(['course_id'=>$data['id'],'add_number'=>'> 0'])->get();
+            $courseSchool = CourseStocks::where('course_id',$data['id'])->where('add_number','>',0)->get()->toArray();
             if(!empty($courseSchool)){
                 return ['code' => 203 , 'msg' => '此课程授权给分校，无法删除'];
             }
