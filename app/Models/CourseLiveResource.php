@@ -46,13 +46,13 @@ class CourseLiveResource extends Model {
             ->leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
             ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0,'ld_course_live_resource.course_id'=>$data['course_id']])
             ->orderByDesc('ld_course_live_resource.id')->get()->toArray();
-        print_r($existLive);die;
         //加入课程总数
         $count = self::leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
             ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0])->count();
         $res=[];
         foreach($existLive as $item) $tmpArr[$item['id']] = $item;
         foreach($livecast as $v) if(! isset($tmpArr[$v['id']])) $res[] = $v;
+        print_r($res);die;
         return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$res,'existlive'=>$existLive,'count'=>$count];
     }
     //删除直播资源  szw
