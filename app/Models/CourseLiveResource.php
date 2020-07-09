@@ -33,8 +33,8 @@ class CourseLiveResource extends Model {
                 $where['child_id'] = $parent[1];
             }
         }
-        print_r($where);die;
         $livecast = Live::where($where)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
+        print_r($livecast);die;
         foreach ($livecast as $k=>&$v){
             $ones = CouresSubject::where('id',$v['parent_id'])->first();
             $v['parent_name'] = $ones['subject_name'];
