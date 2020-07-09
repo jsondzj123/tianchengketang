@@ -359,7 +359,7 @@ class School extends Model {
      * @param  ctime   2020/7/5
      * return  array
      */
-    public static function getSubjecList($data){
+    public static function getSubjectList($data){
         $arr = $subjectArr  = $newIdsArr = $subjectIdsArr = $subjectIdsData = $natureSubjectIdsData = [];
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登陆学校id
         $subjectIdsArr = $zizengSubject = CouresSubject::where(['school_id'=>$data['school_id'],'is_open'=>0,'is_del'=>0])->select('id','parent_id','subject_name')->get()->toArray();
@@ -384,17 +384,23 @@ class School extends Model {
         if(!empty($natureSubject)){
             $arr =array_unique($natureSubject, SORT_REGULAR);
             foreach($arr as $k=>$v){
-                 $subjectArr [] = CourseRefSubject::where(['to_school_id'=>$data['school_id'],'from_school_id'=>$school_id,'is_del'=>0,'parent_id'=>$v['parent_id'],'child_id'=>$v['child_id']])->select('parent_id','child_id')->get()->toArray();
+                 $subjectArr  = CourseRefSubject::where(['to_school_id'=>$data['school_id'],'from_school_id'=>$school_id,'is_del'=>0,'parent_id'=>$v['parent_id'],'child_id'=>$v['child_id']])->select('parent_id','child_id')->get()->toArray();
             }
+
             if(!empty($subjectArr)){
+                   
                 foreach($subjectArr as $k=>$v){
-                    array_push($v['parent_id'],$newIdsArr);
-                    array_psuh($v['child_id'],$newIdsArr);
+                       
+                    array_push($newIdsArr,$v['parent_id']);
+                    array_push($newIdsArr,$v['child_id']);
+                    
+                 
                 }
                 $newIdsArr = array_unique($newIdsArr);
-                $natureSubjectIdsData = CouresSubject::whereIn('id',$newIdsArr)->where(['is_oepn'=>0,'is_del'=>0])->select('id','parent_id','subject_name')->get();
+                $natureSubjectIdsData = CouresSubject::whereIn('id',$newIdsArr)->where(['is_open'=>0,'is_del'=>0])->select('id','parent_id','subject_name')->get()->toArray();
             }
         }
+       
         if(!empty($zizengSubject)){
             $subjectIdsArr = array_merge($natureSubjectIdsData,$zizengSubject);
             

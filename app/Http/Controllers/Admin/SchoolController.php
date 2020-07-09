@@ -594,7 +594,7 @@ class SchoolController extends Controller {
             return response()->json($result);
     }
 
-    public function getSubjecList(){
+    public function getSubjectList(){
             $validator = Validator::make(self::$accept_data, 
                 [
                   'school_id' => 'required|integer',
@@ -604,7 +604,7 @@ class SchoolController extends Controller {
             if ($validator->fails()) {
                 return response()->json(json_decode($validator->errors()->first(),1));
             }
-            $result = School::getSubjecList(self::$accept_data);
+            $result = School::getSubjectList(self::$accept_data);
             return response()->json($result);
     }
 
