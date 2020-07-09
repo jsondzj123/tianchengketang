@@ -413,7 +413,8 @@ class CourseController extends Controller {
         $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
         //课程基本信息
-        if($this->data['nature'] == 1){
+        $nature = isset($this->data['nature'])?$this->data['nature']:0;
+        if($nature == 1){
             $course = CourseSchool ::where(['to_school_id'=>$this->school['id'],'course_id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
         }else{
             $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
