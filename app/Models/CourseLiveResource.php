@@ -41,6 +41,7 @@ class CourseLiveResource extends Model {
             $twos = CouresSubject::where('id',$v['child_id'])->first();
             $v['chind_name'] = $twos['subject_name'];
         }
+        print_r($livecast);die;
         //已经加入的直播资源
         $existLive = self::select('ld_course_livecast_resource.*')
             ->leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
