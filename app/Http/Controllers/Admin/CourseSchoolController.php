@@ -129,9 +129,22 @@ class CourseSchoolController extends Controller {
        $data = self::$accept_data; //课程id
        //学校id
        if($data['course_id']){
-            $nature = CourseSchool::where(['from_school_id'=>$school_id,'course_id'=>$data,'is_del'=>1])->get()->toArray();
-            if(!empty($nature)){
-               
+            $nature = CourseSchool::where(['from_school_id'=>$school_id,'course_id'=>$data['course_id'],'is_del'=>1])->get()->toArray();
+            if(!empty($nature)){    
+                foreach($nature as $key=>&$v){
+                    $v['nature_buy_sum']  = Order::where(['school_id'=>$v['to_school_id'],'class_ld'=>$v['course_id']])->count();
+                    $v['course_stocks_sum'] = CourseStocks::where(['school_id'=>$v['to_school_id'],'course_id'=>$v['course_id']])->sum('add_number'); 
+                    $v['teacher'] = Couresteacher::where(['course_id'=>$v['course_id'],'is_del'=>1])->pluck('teacher_id')->toArray();
+                    $v['lvboResource'] = CourseVideoResource::where(['school_id'=>$v['to_school_id'],'lesson_id'=>$v['course_id'],'is_del'=>0])->first(['id as lvboResourceId']);
+                    $v['zhiboResource'] = CourseLiveResource::where(['course_id',$v['course_id']])->pluck('resource_id')->toArray();
+                }
+                foreach($nature as $key=>&$v){
+                    if($v['nature_buy_sum']>=$v['course_stocks_sum']){
+                        CourseRefteacher::where(['to_school_id'=>$v['to_school_id'],'is_public'=>0])->whereIn('teacher_id',$v['teacher'])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+                        CourseRefResource::where(['resource_id'=>$v['lvboResource'],'to_school_id'=>$v['to_school_id'],'is_type'=>2])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+                        CourseRefResource::where(['to_school_id'=>$v['to_school_id'],'is_type'=>1])->whereIn('resource_id',$v['zhiboResource'])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+                    }   
+                }
             }   
        }
     }
