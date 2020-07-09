@@ -416,7 +416,7 @@ class CourseController extends Controller {
         //用户是否购买，如果购买，显示全部   班号 课次
         $order = Order::where(['student_id'=>AdminLog::getAdminInfo()->admin_user->id,'class_id'=>$this->data['id'],'status'=>2])->count();
         $courseArr=[];
-        if($order = 0){
+        if($order == 0){
             //获取所有的班号
             $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get()->toArray();
             if($courseArr != 0){
