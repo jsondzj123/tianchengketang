@@ -93,6 +93,7 @@ class UserController extends Controller {
     //地区三级联动
     public function address(){
         $region_id = isset($this->data['region_id'])?$this->data['region_id']:0;
+        echo $region_id;die;
         $address = $this->getRegionDataList($region_id);
         return response()->json($address);
     }
