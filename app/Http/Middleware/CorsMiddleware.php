@@ -22,6 +22,7 @@ class CorsMiddleware
         $this->allow_origin = [
             'http://localhost',
             'http://localhost:8080',
+            'http://localhost:8081',
             'http://192.168.1.12:8080',
             'http://test.admin.longde999.cn',
             'http://admin.longde999.cn',

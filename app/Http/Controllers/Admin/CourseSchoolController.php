@@ -124,6 +124,10 @@ class CourseSchoolController extends Controller {
             $result = CourseSchool::getNatureSubjectTwoByid(self::$accept_data);
             return response()->json($result);
     }
+    //取消课程授权
+    public function natureCourseDel(){
+   
+    }
 
 
 }
