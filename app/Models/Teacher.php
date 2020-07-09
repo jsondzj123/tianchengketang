@@ -195,6 +195,7 @@ class Teacher extends Model {
     public static function getTeacherSearchList($body=[]) {
         //获取讲师或教务列表
         $teacher_list = self::where(function($query) use ($body){
+            $query->where('is_forbid' , '=' , 0);
             $query->where('is_del' , '=' , 0);
             //判断学科分类是否选择
             if(isset($body['parent_id']) && !empty($body['parent_id'])){
