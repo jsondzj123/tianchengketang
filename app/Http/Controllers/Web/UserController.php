@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
+use App\Models\Region;
 use App\Models\School;
+use App\Models\Student;
 
 class UserController extends Controller {
     protected $school;
@@ -22,7 +24,22 @@ class UserController extends Controller {
          * return  array
          */
     public function userDetail(){
-        
+        $user = Student::where(['id'=>$this->userid,'is_forbid'=>1])->first()->toArray();
+        if(!empty($user)){
+            return response()->json(['code' => 201 , 'msg' => '成员不存在']);
+        }
+        unset($user['token']);
+        unset($user['password']);
+        //查询省
+        if($user['province_id'] != ''){
+            $province = Region::where(['id'=>$user['province_id']])->first();
+            $user['province'] = $province['name'];
+        }
+        if($user['city_id'] != ''){
+            $city = Region::where(['id'=>$user['city_id']])->first();
+            $user['city'] = $city['name'];
+        }
+        return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$user]);
     }
 }
 
