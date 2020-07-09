@@ -215,6 +215,7 @@ class School extends Model {
                     }
                 })->select('id','title','cover','nature','status','pricing','school_id')
                 ->orderBy('id','desc')->get()->toArray();//自增课程
+
             $natureCourse = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
                             ->where(function($query) use ($data,$school_id) {
                                 if(!empty($data['subjectOne']) && $data['subjectOne'] != ''){
@@ -228,6 +229,7 @@ class School extends Model {
                                 $query->where('ld_course_school.is_del',0);
                     })->select('ld_course_school.course_id as id','ld_course_school.title','ld_course_school.cover','ld_course_school.pricing','ld_course.status')
                     ->get()->toArray(); //授权课程信息（分校）
+
             if(!empty($course)){
                 foreach($course as $key=>$v){
                     $course[$key]['nature'] = 0; //自增
@@ -240,6 +242,7 @@ class School extends Model {
             }
             if(!empty($course) || !empty($natureCourse)){
                 $arr = array_merge($course,$natureCourse);
+
                 foreach($arr  as $k=>&$v){
                     $v['buy_nember'] = Order::whereIn('pay_status',[3,4])->whereIn('nature',[0,1])->where(['class_id'=>$v['id'],'status'=>2,'oa_status'=>1])->count();
                     $v['sum_nember'] = 0;
@@ -250,8 +253,8 @@ class School extends Model {
                         'course_id'=>$v['id'],
                         'is_del'=>0
                     ];
-                    if(!empty($data['method'])) {
-                       $where['method_id'] = $data['method'];
+                    if(!empty($data['type'])) {
+                       $where['method_id'] = $data['type'];
                     }
                     $method = Couresmethod::select('method_id')->where($where)->get()->toArray();
                     if(!$method){
@@ -271,16 +274,17 @@ class School extends Model {
                         $v['method'] = $method;
                     }
                 }
+
             }
             $start=($page-1)*$pagesize;
             $limit_s=$start+$pagesize;
-            $data=[];
+            $info=[];
             for($i=$start;$i<$limit_s;$i++){
                 if(!empty($arr[$i])){
-                    array_push($data,$arr[$i]);
+                    array_push($info,$arr[$i]);
                 }
             }
-            return ['code' => 200 , 'msg' => '查询成功','data'=>$data,'total'=>count($arr)];
+            return ['code' => 200 , 'msg' => '查询成功','data'=>$info,'total'=>count($arr)];
         }
     
 
@@ -368,20 +372,20 @@ class School extends Model {
                     })->select('ld_course_open.parent_id','ld_course_open.child_id')->get()->toArray(); //授权公开课信息（分校）
         }
         if($data['is_public'] == 0){//课程
-            $natureCourse = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
+            $natureSubject = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
                             ->where(function($query) use ($data,$school_id) {
                                 $query->where('ld_course_school.to_school_id',$data['school_id']);
                                 $query->where('ld_course_school.from_school_id',$school_id);
                                 $query->where('ld_course_school.is_del',0);
                     })->select('ld_course.parent_id','ld_course.child_id')
                     ->get()->toArray(); //授权课程信息（分校）
+
         }
         if(!empty($natureSubject)){
             $arr =array_unique($natureSubject, SORT_REGULAR);
             foreach($arr as $k=>$v){
                  $subjectArr [] = CourseRefSubject::where(['to_school_id'=>$data['school_id'],'from_school_id'=>$school_id,'is_del'=>0,'parent_id'=>$v['parent_id'],'child_id'=>$v['child_id']])->select('parent_id','child_id')->get()->toArray();
             }
-           
             if(!empty($subjectArr)){
                 foreach($subjectArr as $k=>$v){
                     array_push($v['parent_id'],$newIdsArr);

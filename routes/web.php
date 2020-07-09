@@ -570,7 +570,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getLessonList', 'SchoolController@getLessonLists');      //获取分校课程列表
         $router->post('getOpenLessonList', 'SchoolController@getOpenLessonList');      //获取分校公开课列表
         $router->post('getSubjecList', 'SchoolController@getSubjecList');      //获取课程/公开课学科大类小类
-
     });
 
     $router->group(['prefix' => 'courschool'], function () use ($router) {
@@ -587,7 +586,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getList', 'CourseStocksController@getList');  //库存列表
         $router->post('doInsertStocks', 'CourseStocksController@doInsertStocks');  //添加库存
     });
-
+         
     //end 网校系统     lys
 
     //课程模块（重构）【公开课】（lys）
