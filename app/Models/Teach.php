@@ -210,6 +210,8 @@ class Teach extends Model {
 				}
 				$openCourseArr['courseware'] = $newArr;  //欢拓课件信息
 			}
+			$openCourseArr['class_id'] = $body['class_id'];
+			$openCourseArr['is_public'] = $body['is_public'];
 			return ['code'=>200,'msg'=>'Success','data'=>$openCourseArr];
 		}
 		if($body['is_public'] == 0){  //课程
@@ -227,7 +229,7 @@ class Teach extends Model {
 			$eduTeacherName = Teacher::whereIn('id',$teacherIds)->where('type',1)->pluck('real_name')->toArray(); //教务
 			$live['edu_teacher_name'] = '';
 			if(!empty($eduTeacherName)){
-				$live['edu_teachre_name'] = implode(',', $eduTeacherName);
+				$live['edu_teacher_name'] = implode(',', $eduTeacherName);
 			}
 			$MTCloud = new MTCloud();
 			$res =$MTCloud->courseDocumentList($liveChildClassArr['course_id'],1);
@@ -249,7 +251,10 @@ class Teach extends Model {
 				'duration'=>timetodate((int)$liveChildClassArr['end_at']-(int)$liveChildClassArr['start_at']),
 				'courseware'=>$live['courseware'],
 				'lect_teacher_name'=>$live['lect_teacher_name'],
-				'edu_teachre_name'=>$live['edu_teachre_name']
+				'edu_teacher_name'=>$live['edu_teacher_name'],
+				'is_public' =>$body['is_public'],
+				'classno_id' =>$body['classno_id'],
+				'class_id'=>$body['class_id']
 			];
 			return ['code'=>200,'msg'=>'Success','data'=>$live];
 		}
