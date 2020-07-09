@@ -438,17 +438,15 @@ class Coures extends Model {
         if(!isset($data['id']) || empty($data['id'])){
             return ['code' => 201 , 'msg' => '请选择学科大类'];
         }
-        $find = self::where(['id'=>$data['id']])->first()->toArray();
+        if($data['nature'] == 1){
+            return ['code' => 203, 'msg' => '授权课程，无法删除'];
+        }
         $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
-        if($school_status != 1){
-            if($find['nature'] == 1){
-                return ['code' => 203 , 'msg' => '授权课程，无法删除'];
-            }
-        }else{
+        if($school_status == 1){
             // 总校删除 先查询授权分校库存，没有进行删除
             $courseSchool = CourseStocks::where('course_id',$data['id'])->where('add_number','>',0)->get()->toArray();
-            if(!empty($courseSchool)){
-                return ['code' => 203 , 'msg' => '此课程授权给分校，无法删除'];
+            if(!empty($courseSchool)) {
+                return ['code' => 203, 'msg' => '此课程授权给分校，无法删除'];
             }
         }
         $del = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
@@ -475,34 +473,64 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
         if(!isset($data['id']) || empty($data['id'])){
-            return ['code' => 201 , 'msg' => '请选择学科大类'];
+            return ['code' => 201 , 'msg' => '请选择课程'];
         }
-        $find = self::where(['id'=>$data['id'],'is_del'=>0])->first();
-        if(!$find){
-            return ['code' => 201 , 'msg' => '此数据不存在'];
-        }
-        //查询授权课程
-        $method= Couresmethod::select('method_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
-        $find['method'] = array_column($method, 'method_id');
-        $where = [];
-        if($find['parent_id'] > 0){
-            $where[0] = $find['parent_id'];
-        }
-        if($find['parent_id'] > 0 && $find['child_id'] > 0){
-            $where[1] = $find['child_id'];
-        }
-        $find['parent'] = $where;
-        unset($find['parent_id'],$find['child_id']);
-        //查询讲师
-        $teachers = $teacher = Couresteacher::select('teacher_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
-        if(!empty($teachers)){
-            foreach ($teachers as $k=>&$v){
-                $name = Lecturer::select('real_name')->where(['id'=>$v['teacher_id'],'is_del'=>0,'type'=>2])->first();
-                $v['real_name'] = $name['real_name'];
+        $nature = isset($data['nature'])?$data['nature']:0;
+        if($nature == 1){
+            $find = CourseSchool::where(['id'=>$data['id'],'is_del'=>0])->first();
+            if(!$find){
+                return ['code' => 201 , 'msg' => '此数据不存在'];
             }
+            //查询授课方式
+            $method= Couresmethod::select('method_id')->where(['course_id'=>$find['course_id'],'is_del'=>0])->get()->toArray();
+            $find['method'] = array_column($method, 'method_id');
+            $where = [];
+            if($find['parent_id'] > 0){
+                $where[0] = $find['parent_id'];
+            }
+            if($find['parent_id'] > 0 && $find['child_id'] > 0){
+                $where[1] = $find['child_id'];
+            }
+            $find['parent'] = $where;
+            unset($find['parent_id'],$find['child_id']);
+            //查询讲师
+            $teachers = $teacher = Couresteacher::select('teacher_id')->where(['course_id'=>$find['course_id'],'is_del'=>0])->get()->toArray();
+            if(!empty($teachers)){
+                foreach ($teachers as $k=>&$v){
+                    $name = Lecturer::select('real_name')->where(['id'=>$v['teacher_id'],'is_del'=>0,'type'=>2])->first();
+                    $v['real_name'] = $name['real_name'];
+                }
+            }
+            $find['teacher'] = array_column($teacher, 'teacher_id');
+            $find['teachers'] = $teachers;
+        }else{
+            $find = self::where(['id'=>$data['id'],'is_del'=>0])->first();
+            if(!$find){
+                return ['code' => 201 , 'msg' => '此数据不存在'];
+            }
+            //查询授课方式
+            $method= Couresmethod::select('method_id')->where(['course_id'=>$find['id'],'is_del'=>0])->get()->toArray();
+            $find['method'] = array_column($method, 'method_id');
+            $where = [];
+            if($find['parent_id'] > 0){
+                $where[0] = $find['parent_id'];
+            }
+            if($find['parent_id'] > 0 && $find['child_id'] > 0){
+                $where[1] = $find['child_id'];
+            }
+            $find['parent'] = $where;
+            unset($find['parent_id'],$find['child_id']);
+            //查询讲师
+            $teachers = $teacher = Couresteacher::select('teacher_id')->where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
+            if(!empty($teachers)){
+                foreach ($teachers as $k=>&$v){
+                    $name = Lecturer::select('real_name')->where(['id'=>$v['teacher_id'],'is_del'=>0,'type'=>2])->first();
+                    $v['real_name'] = $name['real_name'];
+                }
+            }
+            $find['teacher'] = array_column($teacher, 'teacher_id');
+            $find['teachers'] = $teachers;
         }
-        $find['teacher'] = array_column($teacher, 'teacher_id');
-        $find['teachers'] = $teachers;
         return ['code' => 200 , 'msg' => '查询成功','data'=>$find];
     }
     //修改
@@ -586,10 +614,20 @@ class Coures extends Model {
     }
     //修改推荐状态
     public static function courseComment($data){
-        $id = $data['id'];
-        $find = self::where(['id'=>$id])->first();
-        $recommend = $find['is_recommend'] == 1 ? 0:1;
-        $up = self::where(['id'=>$id])->update(['is_recommend'=>$recommend,'update_at'=>date('Y-m-d H:i:s')]);
+        if(!isset($data['id']) || empty($data['id'])){
+            return ['code' => 201 , 'msg' => 'id为空'];
+        }
+        $nature = isset($data['nature'])?$data['nature']:0;
+        if($nature == 1){
+            $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+            $find = CourseSchool::where(['to_school_id'=>$school_id,'course_id'=>$data['id']])->first()->toArray();
+            $recommend = $find['is_recommend'] == 1 ? 0:1;
+            $up = CourseSchool::where(['id'=>$find['id']])->update(['is_recommend'=>$recommend,'update_at'=>date('Y-m-d H:i:s')]);
+        }else{
+            $find = self::where(['id'=>$data['id']])->first()->toArray();
+            $recommend = $find['is_recommend'] == 1 ? 0:1;
+            $up = self::where(['id'=>$data['id']])->update(['is_recommend'=>$recommend,'update_at'=>date('Y-m-d H:i:s')]);
+        }
         if($up){
             $user_id = AdminLog::getAdminInfo()->admin_user->id;
             //添加日志操作
