@@ -383,7 +383,7 @@ class BankController extends Controller {
                     }
                     
                     //试题随机展示
-                    $exam_array[] = [
+                    $exam_array[$exam_info['type']][] = [
                         'exam_id'             =>  $v['id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
@@ -421,7 +421,7 @@ class BankController extends Controller {
                     $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 1)->where('status' , 1)->count();
                     
                     //试题随机展示
-                    $exam_array[] = [
+                    $exam_array[$exam_info['type']][] = [
                         'exam_id'             =>  $v['exam_id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
@@ -478,7 +478,7 @@ class BankController extends Controller {
                     }
                     
                     //试题随机展示
-                    $exam_array[] = [
+                    $exam_array[$exam_info['type']][] = [
                         'exam_id'             =>  $v['id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
@@ -516,7 +516,7 @@ class BankController extends Controller {
                     $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 2)->where('status' , 1)->count();
                     
                     //试题随机展示
-                    $exam_array[] = [
+                    $exam_array[$exam_info['type']][] = [
                         'exam_id'             =>  $v['exam_id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
@@ -570,7 +570,7 @@ class BankController extends Controller {
                 $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("papers_id" , $papers_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->first();
 
                 //试题随机展示
-                $exam_array[] = [
+                $exam_array[$exam_info['type']][] = [
                     'exam_id'             =>  $v['exam_id'] ,
                     'exam_name'           =>  $exam_info['exam_content'] ,
                     'exam_type_name'      =>  $exam_type_name ,
