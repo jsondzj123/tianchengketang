@@ -153,6 +153,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('getMyCollectExamList','BankController@getMyCollectExamList');  //我的收藏列表接口
         $router->post('getMyErrorExamList','BankController@getMyErrorExamList');      //错题本列表接口
         $router->post('getMyMakeExamList','BankController@getMyMakeExamList');        //做题记录列表接口
+        $router->post('getMakeExamInfo','BankController@getMakeExamInfo');            //做题记录详情接口
     });
 });
 
