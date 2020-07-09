@@ -34,7 +34,6 @@ class CourseLiveResource extends Model {
             }
         }
         $livecast = Live::where($where)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
-        print_r($livecast);die;
         foreach ($livecast as $k=>&$v){
             $ones = CouresSubject::where('id',$v['parent_id'])->first();
             $v['parent_name'] = $ones['subject_name'];
@@ -49,10 +48,7 @@ class CourseLiveResource extends Model {
         //加入课程总数
         $count = self::leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
             ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0])->count();
-        $res=[];
-        if(empty($existLive)){
-            $res  = $livecast;
-        }else{
+        if(!empty($existLive)){
             $existLiveid = array_column($existLive, 'id');
             foreach ($livecast as $ks=>$vs){
                 if(in_array($vs['id'],$existLiveid)){
@@ -60,7 +56,7 @@ class CourseLiveResource extends Model {
                 }
             }
         }
-        return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$res,'existlive'=>$existLive,'count'=>$count];
+        return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$livecast,'existlive'=>$existLive,'count'=>$count];
     }
     //删除直播资源  szw
     public static function delLiveCourse($data){
