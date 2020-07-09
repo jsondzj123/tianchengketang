@@ -105,7 +105,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('footer','IndexController@footer');//页脚
         $router->post('course','IndexController@course');//精品课程
     });
-     
+
     $router->group(['prefix' => 'footer'], function () use ($router) {
         $router->post('details','FooterController@details');//首页   页脚跳转
     });
@@ -575,7 +575,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseStore', 'CourseSchoolController@store');  //批量添加
         $router->post('getNatureSubjectList', 'CourseSchoolController@getNatureSubjectOneByid');  //授权课程列表大类
         $router->post('getNatureSubjectByid', 'CourseSchoolController@getNatureSubjectTwoByid');  //授权课程列表小类
-
+        $router->post('natureCourseDel','CourseSchoolController@natureCourseDel');//取消课程授权 
 
     });
     $router->group(['prefix' => 'courstocks'], function () use ($router) {
@@ -606,9 +606,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('details','TeachController@details');  //教学详情
         $router->post('coursewareDel','TeachController@coursewareDel');  //课件删除（欢拓）
     });
-
-
-
 
 });
 /*****************end**********************/

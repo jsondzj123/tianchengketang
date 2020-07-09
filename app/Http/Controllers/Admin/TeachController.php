@@ -104,7 +104,7 @@ class TeachController extends Controller {
   		$data = self::$accept_data;
       $validator = Validator::make($data, [
       	'is_public'=>'required',
-        'id' => 'required', //课次id 
+        'class_id' => 'required', //公开课 课程id  课程 课次id
       ],Teach::message());
       if ($validator->fails()) {
           return response()->json(json_decode($validator->errors()->first(),1));
@@ -133,10 +133,10 @@ class TeachController extends Controller {
           			'file'=>$_SERVER['DOCUMENT_ROOT']."/upload/editor/" . date('Y-m-d') . '/'.$filename,
           		);
           	if($data['is_public'] == 1){ //公开课
-			        $live = OpenLivesChilds::where('lesson_id',$data['id'])->select('course_id')->first();
+			        $live = OpenLivesChilds::where('lesson_id',$data['class_id'])->select('course_id')->first();
 		        }
 		       	if($data['is_public']== 0){  //课程
-		 			    $live = LiveChild::where('class_id',$data['id'])->select('course_id')->first();
+		 			    $live = LiveChild::where('class_id',$data['class_id'])->select('course_id')->first();
 		       	}
 		       	$MTCloud = new MTCloud();	
 		       	$res = $MTCloud->courseDocumentUpload($live['course_id'],$file);

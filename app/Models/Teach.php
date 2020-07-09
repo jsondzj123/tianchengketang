@@ -25,7 +25,6 @@ class Teach extends Model {
 	public static function getList($body){
 		$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
 		//公开课数据
-
 		$openCourseArr = OpenCourse::rightJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_open.id') 
 						->rightJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_open.id')
 						->rightJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_open_teacher.teacher_id')
@@ -211,6 +210,8 @@ class Teach extends Model {
 				}
 				$openCourseArr['courseware'] = $newArr;  //欢拓课件信息
 			}
+			$openCourseArr['class_id'] = $body['class_id'];
+			$openCourseArr['is_public'] = $body['is_public'];
 			return ['code'=>200,'msg'=>'Success','data'=>$openCourseArr];
 		}
 		if($body['is_public'] == 0){  //课程
@@ -218,15 +219,17 @@ class Teach extends Model {
 				return ['code'=>201,'data'=>'班号标识为空或者不合法'];
 			}
 			$live = []; 
-			$LiveChildArr  = LiveChild::where('id',$body['class_id'])->selelct('name')->first();//课次名称
-			$liveChildClassArr	= LiveClassChild::where('class_id',$body['classno_id'])->selelct('start_at','end_at','watch_num','status','course_id')->first();//开始/结束时间/时长/观看人数/课程id(欢拓)
+			$LiveChildArr  = LiveChild::where('id',$body['class_id'])->select('name')->first();//课次名称
+			$liveChildClassArr	= CourseLiveClassChild::where('class_id',$body['class_id'])->select('start_time as start_at','end_time as end_at','watch_num','status','course_id')->first();//开始/结束时间/时长/观看人数/课程id(欢拓)
 			$classno_id = LiveClass::where('id',$body['classno_id'])->select('name')->first();//班号名称
-			$teacherIds = LiveClassChildTeacher::where('course_id',$openCourseArr['id'])->pluck('teacher_id'); //教师id组
-			$live['lect_teacher_name'] = Teacher::whereIn(['id'=>$teacherIds,'type'=>'1'])->select('real_name')->first()['real_name'];//讲师
-			$eduTeacherName = Teacher::whereIn(['id'=>$teacherIds,'type'=>'2'])->pluck('real_name'); //教务
+
+			$teacherIds = LiveClassChildTeacher::where('class_id',$body['class_id'])->pluck('teacher_id'); //教师id组
+		
+			$live['lect_teacher_name'] = Teacher::whereIn('id',$teacherIds)->where('type',2)->select('real_name')->first()['real_name'];//讲师
+			$eduTeacherName = Teacher::whereIn('id',$teacherIds)->where('type',1)->pluck('real_name')->toArray(); //教务
 			$live['edu_teacher_name'] = '';
 			if(!empty($eduTeacherName)){
-				$live['edu_teachre_name'] = implode(',', $eduTeacherName);
+				$live['edu_teacher_name'] = implode(',', $eduTeacherName);
 			}
 			$MTCloud = new MTCloud();
 			$res =$MTCloud->courseDocumentList($liveChildClassArr['course_id'],1);
@@ -237,7 +240,7 @@ class Teach extends Model {
 					$newArr[] =$arr['data'];
 				}
 				$live['courseware'] = $newArr;  //欢拓课件信息
-			}
+			}	
 			$live = [
 				'class_name'=>$classno_id['name'],
 				'title'=>$LiveChildArr['name'],
@@ -246,6 +249,12 @@ class Teach extends Model {
 				'watch_num'=>$liveChildClassArr['watch_num'],
 				'status'=> $liveChildClassArr['status'] == 1?'预直播':($liveChildClassArr['status']==2?'直播中':'直播已结束'),
 				'duration'=>timetodate((int)$liveChildClassArr['end_at']-(int)$liveChildClassArr['start_at']),
+				'courseware'=>$live['courseware'],
+				'lect_teacher_name'=>$live['lect_teacher_name'],
+				'edu_teacher_name'=>$live['edu_teacher_name'],
+				'is_public' =>$body['is_public'],
+				'classno_id' =>$body['classno_id'],
+				'class_id'=>$body['class_id']
 			];
 			return ['code'=>200,'msg'=>'Success','data'=>$live];
 		}
