@@ -11,6 +11,7 @@ class CourseLiveResource extends Model {
     public $timestamps = false;
     //直播详情  szw
     public static function selectFind($data){
+        echo 111111;
         if(!isset($data) || empty($data)){
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
