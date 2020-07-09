@@ -92,9 +92,8 @@ class UserController extends Controller {
     }
     //地区三级联动
     public function address(){
-        $region_id = isset($this->data['region_id'])?$this->data['region_id']:0;
-        echo $region_id;die;
-        $address = $this->getRegionDataList($region_id);
+        $this->data['region_id'] = isset($this->data['region_id'])?$this->data['region_id']:0;
+        $address = $this->getRegionDataList($this->data);
         return response()->json($address);
     }
     //用户修改基本信息
