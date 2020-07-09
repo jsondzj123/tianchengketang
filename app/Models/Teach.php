@@ -255,7 +255,7 @@ class Teach extends Model {
 				'is_public' =>$body['is_public'],
 				'classno_id' =>$body['classno_id'],
 				'class_id'=>$body['class_id'],
-				'time' = timetodate((int)$openCourseArr['end_at']-(int)$openCourseArr['start_at'])//时长
+				'time' => timetodate((int)$openCourseArr['end_at']-(int)$openCourseArr['start_at'])//时长
 			];
 			return ['code'=>200,'msg'=>'Success','data'=>$live];
 		}
