@@ -438,7 +438,7 @@ class Coures extends Model {
         if(!isset($data['id']) || empty($data['id'])){
             return ['code' => 201 , 'msg' => '请选择学科大类'];
         }
-        $find = self::where(['id'=>$data['id']])->first();
+        $find = self::where(['id'=>$data['id']])->first()->toArray();
         $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
         if($school_status != 1){
             if($find['nature'] == 1){
