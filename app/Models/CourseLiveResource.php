@@ -24,7 +24,6 @@ class CourseLiveResource extends Model {
         }
         //取直播资源列表
         $where['is_del'] = 0;
-        $where['is_forbid'] = '< 2';
         if(isset($data['parent']) && !empty($data['parent'])){
             $parent = json_decode($data['parent'],true);
             if(isset($parent[0]) && !empty($parent[0])){
@@ -34,7 +33,7 @@ class CourseLiveResource extends Model {
                 $where['child_id'] = $parent[1];
             }
         }
-        $livecast = Live::where($where)->orderByDesc('id')->get()->toArray();
+        $livecast = Live::where($where)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
         foreach ($livecast as $k=>&$v){
             $ones = CouresSubject::where('id',$v['parent_id'])->first();
             $v['parent_name'] = $ones['subject_name'];
@@ -49,14 +48,15 @@ class CourseLiveResource extends Model {
         //加入课程总数
         $count = self::leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
             ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0])->count();
-        $res=[];
-        if(empty($existLive)){
-            $res  = $livecast;
-        }else{
-            foreach($existLive as $item) $tmpArr[$item['id']] = $item;
-            foreach($livecast as $v) if(! isset($tmpArr[$v['id']])) $res[] = $v;
+        if(!empty($existLive)){
+            $existLiveid = array_column($existLive, 'id');
+            foreach ($livecast as $ks=>$vs){
+                if(in_array($vs['id'],$existLiveid)){
+                    unset($livecast[$ks]);
+                }
+            }
         }
-        return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$res,'existlive'=>$existLive,'count'=>$count];
+        return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$livecast,'existlive'=>$existLive,'count'=>$count];
     }
     //删除直播资源  szw
     public static function delLiveCourse($data){

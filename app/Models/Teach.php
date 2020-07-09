@@ -254,7 +254,8 @@ class Teach extends Model {
 				'edu_teacher_name'=>$live['edu_teacher_name'],
 				'is_public' =>$body['is_public'],
 				'classno_id' =>$body['classno_id'],
-				'class_id'=>$body['class_id']
+				'class_id'=>$body['class_id'],
+				'time' => timetodate((int)$liveChildClassArr['end_at']-(int)$liveChildClassArr['start_at'])//时长
 			];
 			return ['code'=>200,'msg'=>'Success','data'=>$live];
 		}

@@ -190,6 +190,13 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->group(['prefix' => 'user'], function () use ($router) {
         //个人设置模块
         $router->post('userDetail','UserController@userDetail');//个人信息
+        $router->post('userUpPhone','UserController@userUpPhone');//修改手机号
+        $router->post('userUpEmail','UserController@userUpEmail');//修改邮箱
+        $router->post('address','UserController@address');//地区三级联动
+        $router->post('userUpDetail','UserController@userUpDetail');//修改基本信息
+        $router->post('userUpRelation','UserController@userUpRelation');//修改基本联系方式
+        $router->post('userUpImg','UserController@userUpImg');//修改用户头像
+        $router->post('userUpPass','UserController@userUpPass');//修改用户密码
         //个人信息模块
     });
 });
@@ -579,7 +586,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseStore', 'CourseSchoolController@store');  //批量添加
         $router->post('getNatureSubjectList', 'CourseSchoolController@getNatureSubjectOneByid');  //授权课程列表大类
         $router->post('getNatureSubjectByid', 'CourseSchoolController@getNatureSubjectTwoByid');  //授权课程列表小类
-        $router->post('natureCourseDel','CourseSchoolController@natureCourseDel');//取消课程授权 
+        $router->post('natureCourseDel','CourseSchoolController@natureCourseDel');//取消课程授权
 
     });
     $router->group(['prefix' => 'courstocks'], function () use ($router) {

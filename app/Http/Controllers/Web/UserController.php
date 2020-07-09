@@ -7,6 +7,7 @@ use App\Models\AdminLog;
 use App\Models\Region;
 use App\Models\School;
 use App\Models\Student;
+use Illuminate\Support\Facades\Redis;
 
 class UserController extends Controller {
     protected $school;
@@ -41,11 +42,23 @@ class UserController extends Controller {
         }
         return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$user]);
     }
-
     //用户更改手机号
     public function userUpPhone(){
         if(!isset($this->data['phone'])|| empty($this->data['phone'])){
             return response()->json(['code' => 201 , 'msg' => '手机号不能为空']);
+        }
+        //判断验证码是否为空
+        if(!isset($this->data['verifycode']) || empty($this->data['verifycode'])){
+            return response()->json(['code' => 201 , 'msg' => '请输入验证码']);
+        }
+        //验证码合法验证
+        $verify_code = Redis::get('user:register:'.$this->data['phone']);
+        if(!$verify_code || empty($verify_code)){
+            return ['code' => 201 , 'msg' => '请先获取验证码'];
+        }
+        //判断验证码是否一致
+        if($verify_code != $this->data['verifycode']){
+            return ['code' => 202 , 'msg' => '验证码错误'];
         }
         $count = Student::where(['phone'=>$this->data['phone'],'is_forbid'=>1])->count();
         if($count >0){
@@ -77,16 +90,100 @@ class UserController extends Controller {
             return response()->json(['code' => 201 , 'msg' => '邮箱格式不正确']);
         }
     }
+    //地区三级联动
+    public function address(){
+        $this->data['region_id'] = isset($this->data['region_id'])?$this->data['region_id']:0;
+        $address = $this->getRegionDataList($this->data);
+        return response()->json($address);
+    }
 
     //用户修改基本信息
     public function userUpDetail(){
-
+        if(!isset($this->data['real_name']) || empty($this->data['real_name'])){
+            return response()->json(['code' => 201 , 'msg' => '姓名不能为空']);
+        }
+        if(!isset($this->data['sex']) || empty($this->data['sex'])){
+            return response()->json(['code' => 201 , 'msg' => '性别不能为空']);
+        }
+        if(!isset($this->data['nickname']) || empty($this->data['nickname'])){
+            return response()->json(['code' => 201 , 'msg' => '昵称不能为空']);
+        }
+        if(!isset($this->data['age']) || empty($this->data['age'])){
+            return response()->json(['code' => 201 , 'msg' => '年龄不能为空']);
+        }
+        if(!isset($this->data['papers_type']) || empty($this->data['papers_type'])){
+            return response()->json(['code' => 201 , 'msg' => '证件类型不能为空']);
+        }
+        if(!isset($this->data['educational']) || empty($this->data['educational'])){
+            return response()->json(['code' => 201 , 'msg' => '最高学历不能为空']);
+        }
+        if(!isset($this->data['papers_num']) || empty($this->data['papers_num'])){
+            return response()->json(['code' => 201 , 'msg' => '证件号不能为空']);
+        }
+        if(!isset($this->data['address_locus']) || empty($this->data['address_locus'])){
+            return response()->json(['code' => 201 , 'msg' => '户口地址不能为空']);
+        }
+        $res['real_name'] = $this->data['real_name'];
+        $res['sex'] = $this->data['sex'];
+        $res['nickname'] = $this->data['nickname'];
+        $res['age'] = $this->data['age'];
+        $res['sex'] = $this->data['sex'];
+        $res['papers_type'] = $this->data['papers_type'];
+        $res['educational'] = $this->data['educational'];
+        $res['papers_num'] = $this->data['papers_num'];
+        $res['address_locus'] = $this->data['address_locus'];
+        if(isset($this->data['sign'])){
+            $res['sign'] = $this->data['sign'];
+        }
+        $up = Student::where(['id'=>$this->userid])->update($res);
+        if($up){
+            return response()->json(['code' => 200 , 'msg' => '修改成功']);
+        }else{
+            return response()->json(['code' => 203 , 'msg' => '修改失败']);
+        }
     }
     //用户修改联系方式
     public function userUpRelation(){
+        if(!isset($this->data['phone']) || empty($this->data['phone'])){
+            return response()->json(['code' => 201 , 'msg' => '手机号不能为空']);
+        }
+        if(!isset($this->data['family_phone']) || empty($this->data['family_phone'])){
+            return response()->json(['code' => 201 , 'msg' => '座机号不能为空']);
+        }
+        if(!isset($this->data['office_phone']) || empty($this->data['office_phone'])){
+            return response()->json(['code' => 201 , 'msg' => '办公电话不能为空']);
+        }
+        if(!isset($this->data['contact_people']) || empty($this->data['contact_people'])){
+            return response()->json(['code' => 201 , 'msg' => '紧急联系人不能为空']);
+        }
+        if(!isset($this->data['contact_phone']) || empty($this->data['contact_phone'])){
+            return response()->json(['code' => 201 , 'msg' => '紧急联系电话不能为空']);
+        }
+        if(!isset($this->data['email']) || empty($this->data['email'])){
+            return response()->json(['code' => 201 , 'msg' => '邮箱不能为空']);
+        }
+        if(!isset($this->data['qq']) || empty($this->data['qq'])){
+            return response()->json(['code' => 201 , 'msg' => 'qq号不能为空']);
+        }
+        if(!isset($this->data['wechat']) || empty($this->data['wechat'])){
+            return response()->json(['code' => 201 , 'msg' => '微信号不能为空']);
+        }
+        $res['phone'] = $this->data['phone'];
+        $res['family_phone'] = $this->data['family_phone'];
+        $res['office_phone'] = $this->data['office_phone'];
+        $res['contact_people'] = $this->data['contact_people'];
+        $res['contact_phone'] = $this->data['contact_phone'];
+        $res['email'] = $this->data['email'];
+        $res['qq'] = $this->data['qq'];
+        $res['wechat'] = $this->data['wechat'];
+        $up = Student::where(['id'=>$this->userid])->update($res);
+        if($up){
+            return response()->json(['code' => 200 , 'msg' => '修改成功']);
+        }else{
+            return response()->json(['code' => 203 , 'msg' => '修改失败']);
+        }
 
     }
-
     //用户修改头像
     public function userUpImg(){
         if(!isset($this->data['head_icon']) || empty($this->data['head_icon'])){

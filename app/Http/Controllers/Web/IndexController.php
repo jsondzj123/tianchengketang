@@ -51,7 +51,7 @@ class IndexController extends Controller {
     	$admin = Admin::where('school_id',$this->school['id'])->select('school_status')->first();
     	if(!empty($admin)){
     		if($admin['school_status'] > 0){
-    			$footer = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0])->get();
+    			$footer = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0])->select('id','parent_id','name','url','text','create_at')->get();
 		    	if(!empty($footer)){
 		    		$footer = getParentsList($footer);
 		    	}
@@ -64,29 +64,40 @@ class IndexController extends Controller {
        
     	$course =  $zizengCourseData = $natureCourseData = [];
     	$subjectOne = CouresSubject::where(['school_id'=>$this->school['id'],'is_open'=>0,'is_del'=>0,'parent_id'=>0])->pluck('id')->toArray();//自增学科大类
+
     	$natureCourseIds = CourseSchool::where(['to_school_id'=>$this->school['id'],'is_del'=>0])->pluck('course_id')->toArray();//授权课程
 
+        $natuerSubjectOne =[];
     	if(empty($subjectOne) && empty($natureCourseIds) ){
     		$course = [];
     	}else{
     		if(!empty($natureCourseIds)){
-    			$natuerSubjectOne = Course::whereIn('id',$natureCourseIds)->where(['is_del'=>0,'status'=>1])->pluck('parent_id as id')->toArray();//授权学科大类
+    			$natuerSubjectOne = Coures::whereIn('id',$natureCourseIds)->where(['is_del'=>0,'status'=>1])->pluck('parent_id as id')->toArray();//授权学科大类
+                
     			foreach($natuerSubjectOne as $key=>$v){
-    				$natureCourseData[$v][] = $natureCourseData[] = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
+    				 $natureCourseData[] = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
 				            ->where('ld_course_school.from_school_id',$this->school['id']) //授权学校
 				            ->where('ld_course_school.is_del',0)
 				            ->select('ld_course_school.course_id as id','ld_course.parent_id','ld_course.child_id','ld_course.title')->limit(8)->get()->toArray(); //授权课程
     			}
        		}
     		$subjectIds = array_merge($subjectOne,$natuerSubjectOne);
+
     		$subjectIds	= array_unique($subjectIds);
+
     		$course['subjectOne'] = CouresSubject::whereIn('id',$subjectIds)->where(['is_del'=>0,'is_open'=>0])->select('id','subject_name')->get();//授权/自增学科大类	
     		if(!empty($subjectOne)){
     			foreach($subjectOne as $key=>$v){
-    				$zizengCourseData[$v][] = Course::where(['parent_id'=>$v,'status'=>1,'is_del'=>0])->limit(8)->get();
+    				$zizengCourseData[$v] = Coures::where(['parent_id'=>$v,'status'=>1,'is_del'=>0])->limit(8)->get()->toArray();
     			}
     		}
-    		$course['course'] = array_merge($natureCourseData,$zizengCourseData);
+
+            if(!empty($natureCourseData)){
+                $course['course'] = array_merge($natureCourseData,$zizengCourseData);
+            }else{
+                 $course['course'] =$zizengCourseData;
+            }
+    		
     	}
         return response()->json(['code'=>200,'msg'=>'Success','data'=>$course]);
     }	
