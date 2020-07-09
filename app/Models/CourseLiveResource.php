@@ -26,7 +26,6 @@ class CourseLiveResource extends Model {
         $where['is_del'] = 0;
         if(isset($data['parent']) && !empty($data['parent'])){
             $parent = json_decode($data['parent'],true);
-            print_r($parent);die;
             if(isset($parent[0]) && !empty($parent[0])){
                 $where['parent_id'] = $parent[0];
             }
