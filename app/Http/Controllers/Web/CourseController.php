@@ -455,7 +455,9 @@ class CourseController extends Controller {
                             }
                             //查询资料
                             $material = Couresmaterial::where(['mold'=>3,'is_del'=>0,'course_id'=>$this->data['id'],'parent_id'=>$vs['id']])->get()->toArray();
-                            $vs['material'] = $material;
+                            if(!empty($material)){
+                                $vs['material'] = $material;
+                            }
                         }
                         $v['keci'] = $classci;
                     }
