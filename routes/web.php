@@ -117,9 +117,9 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('details','NewsController@details');//查看详情
     });
      //公开课
-     $router->group(['prefix' => 'openclass'], function () use ($router) {
-        $router->post('hotList','OpenCourseController@getList');//大家都在看
-        $router->post('PreStart','OpenCourseController@hotList');//预开始
+    $router->group(['prefix' => 'openclass'], function () use ($router) {
+        $router->post('hotList','OpenCourseController@hotList');//大家都在看
+        $router->post('preStart','OpenCourseController@preStart');//预开始
         $router->post('underway','OpenCourseController@underway');//直播中
         $router->post('finish','OpenCourseController@end');//往期公开课程 (暂时没做分页)
         $router->post('details','OpenCourseController@details');//查看详情
@@ -579,7 +579,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseStore', 'CourseSchoolController@store');  //批量添加
         $router->post('getNatureSubjectList', 'CourseSchoolController@getNatureSubjectOneByid');  //授权课程列表大类
         $router->post('getNatureSubjectByid', 'CourseSchoolController@getNatureSubjectTwoByid');  //授权课程列表小类
-        $router->post('natureCourseDel','CourseSchoolController@natureCourseDel');//取消课程授权 
+      
 
     });
     $router->group(['prefix' => 'courstocks'], function () use ($router) {

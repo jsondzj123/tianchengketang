@@ -202,19 +202,6 @@ class School extends Model {
         $pagesize = (int)isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 20;
         $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
-        // $count = $list = Coures::where(function($query) use ($data) {
-        //     $query->where('school_id',$data['school_id']);
-        //     //学科大类
-        //     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
-        //         $query->where('parent_id',$data['coursesubjectOne']);
-        //     }
-        //     //学科小类
-        //     if(!empty($data['coursesubjectTwo']) && $data['coursesubjectTwo'] != ''){
-        //         $query->where('child_id',$data['coursesubjectTwo']);
-        //     }
-        // })->count();
-      
-        // if($count > 0){
         $arr = [];
             $course = Coures::where(function($query) use ($data) {
                     $query->where('school_id',$data['school_id']);
@@ -228,7 +215,6 @@ class School extends Model {
                     }
                 })->select('id','title','cover','nature','status','pricing','school_id')
                 ->orderBy('id','desc')->get()->toArray();//自增课程
-                // ->offset($offset)->limit($pagesize)->get();
             $natureCourse = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
                             ->where(function($query) use ($data,$school_id) {
                                 if(!empty($data['subjectOne']) && $data['subjectOne'] != ''){
@@ -286,7 +272,15 @@ class School extends Model {
                     }
                 }
             }
-            return ['code' => 200 , 'msg' => '查询成功','data'=>$arr];
+            $start=($page-1)*$pagesize;
+            $limit_s=$start+$pagesize;
+            $data=[];
+            for($i=$start;$i<$limit_s;$i++){
+                if(!empty($arr[$i])){
+                    array_push($data,$arr[$i]);
+                }
+            }
+            return ['code' => 200 , 'msg' => '查询成功','data'=>$data,'total'=>count($arr)];
         }
     
 
@@ -296,9 +290,10 @@ class School extends Model {
      * @param  author  lys
      * @param  ctime   2020/7/4
      * return  array
-     */ //暂时不考虑分页
+     */ 
     public static function getOpenLessonList($data){
-
+        $pagesize = (int)isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 20;
+        $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登陆学校id
         $arr = [];
         $openCourse = OpenCourse::where(function($query) use ($data) {//自增
@@ -344,7 +339,15 @@ class School extends Model {
                 $arr[$k]['end_at']   = date('Y-m-d H:i:s',$v['end_at']);
             }
         }
-        return ['code' => 200 , 'msg' => '查询成功','data'=>$arr]; 
+        $start=($page-1)*$pagesize;
+        $limit_s=$start+$pagesize;
+        $data=[];
+        for($i=$start;$i<$limit_s;$i++){
+            if(!empty($arr[$i])){
+                array_push($data,$arr[$i]);
+            }
+        }
+        return ['code' => 200 , 'msg' => '查询成功','data'=>$arr,'total'=>count($arr)]; 
     }
      /*
      * @param  获取学科列表

@@ -14,7 +14,6 @@ use App\Models\FootConfig;
 use App\Models\Admin;
 use App\Models\CouresSubject;
 use App\Models\Article;
-use App\Models\Teacher;
 use App\Models\CourseRefTeacher;
 class TeacherController extends Controller {
 	protected $school;
