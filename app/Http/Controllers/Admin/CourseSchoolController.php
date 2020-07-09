@@ -126,7 +126,14 @@ class CourseSchoolController extends Controller {
     }
     //取消课程授权
     public function natureCourseDel(){
-   
+       $data = self::$accept_data; //课程id
+       //学校id
+       if($data['course_id']){
+            $nature = CourseSchool::where(['from_school_id'=>$school_id,'course_id'=>$data,'is_del'=>1])->get()->toArray();
+            if(!empty($nature)){
+               
+            }   
+       }
     }
 
 

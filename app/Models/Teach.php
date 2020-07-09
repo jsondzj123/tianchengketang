@@ -217,11 +217,12 @@ class Teach extends Model {
 				return ['code'=>201,'data'=>'班号标识为空或者不合法'];
 			}
 			$live = []; 
-			$LiveChildArr  = LiveChild::where('id',$body['class_id'])->selelct('name')->first();//课次名称
-			$liveChildClassArr	= CourseLiveClassChild::where('class_id',$body['classno_id'])->selelct('start_at','end_at','watch_num','status','course_id')->first();//开始/结束时间/时长/观看人数/课程id(欢拓)
-
+			$LiveChildArr  = LiveChild::where('id',$body['class_id'])->select('name')->first();//课次名称
+			$liveChildClassArr	= CourseLiveClassChild::where('class_id',$body['classno_id'])->select('start_time as start_at','end_time as end_at','watch_num','status','course_id')->first();//开始/结束时间/时长/观看人数/课程id(欢拓)
 			$classno_id = LiveClass::where('id',$body['classno_id'])->select('name')->first();//班号名称
+			print_r($liveChildClassArr);die;
 			$teacherIds = LiveClassChildTeacher::where('course_id',$liveChildClassArr['course_id'])->pluck('teacher_id'); //教师id组
+			print_r($teacherIds);die;
 			$live['lect_teacher_name'] = Teacher::whereIn(['id'=>$teacherIds,'type'=>'1'])->select('real_name')->first()['real_name'];//讲师
 			$eduTeacherName = Teacher::whereIn(['id'=>$teacherIds,'type'=>'2'])->pluck('real_name'); //教务
 			$live['edu_teacher_name'] = '';
