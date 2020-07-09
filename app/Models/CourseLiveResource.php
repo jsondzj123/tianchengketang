@@ -52,8 +52,12 @@ class CourseLiveResource extends Model {
         if(empty($existLive)){
             $res  = $livecast;
         }else{
-            foreach($existLive as $item) $tmpArr[$item['id']] = $item;
-            foreach($livecast as $v) if(! isset($tmpArr[$v['id']])) $res[] = $v;
+            $existLiveid = array_column($existLive, 'id');
+            foreach ($livecast as $ks=>$vs){
+                if(in_array($vs['id'],$existLiveid)){
+                    unset($livecast[$ks]);
+                }
+            }
         }
         return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$res,'existlive'=>$existLive,'count'=>$count];
     }
