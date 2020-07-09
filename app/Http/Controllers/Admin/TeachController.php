@@ -140,9 +140,9 @@ class TeachController extends Controller {
 		       	}
 		       	$MTCloud = new MTCloud();	
 		       	$res = $MTCloud->courseDocumentUpload($live['course_id'],$file);
-		       	  if(!array_key_exists('code', $res) && !$res["code"] == 0){
-                 return $this->response('课件上传失败', 500);
-              }
+	       	  if(array_key_exists('code', $res) && $res["code"] != 0){
+               return  response()->json($res);
+            }
             return  response()->json(['code'=>200,'msg'=>'上传课件成功']);
           } else {
               return response()->json(['code' => 203 , 'msg' => '上传课件失败']);

@@ -5,7 +5,6 @@ use Illuminate\Database\Eloquent\Model;
 use PHPUnit\Framework\Constraint\ExceptionMessage;
 
 class CourseLiveResource extends Model {
-
     //指定别的表名
     public $table = 'ld_course_live_resource';
     //时间戳设置
@@ -51,8 +50,12 @@ class CourseLiveResource extends Model {
         $count = self::leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
             ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0])->count();
         $res=[];
-        foreach($existLive as $item) $tmpArr[$item['id']] = $item;
-        foreach($livecast as $v) if(! isset($tmpArr[$v['id']])) $res[] = $v;
+        if(empty($existLive)){
+            $res  = $livecast;
+        }else{
+            foreach($existLive as $item) $tmpArr[$item['id']] = $item;
+            foreach($livecast as $v) if(! isset($tmpArr[$v['id']])) $res[] = $v;
+        }
         return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$res,'existlive'=>$existLive,'count'=>$count];
     }
     //删除直播资源  szw
@@ -144,12 +147,20 @@ class CourseLiveResource extends Model {
                     self::where(['course_id'=>$data['course_id'],'resource_id'=>$v])->update(['is_del'=>0]);
                     Live::where(['id'=>$v])->update(['is_forbid'=>1,'update_at'=>date('Y-m-d H:i:s')]);
                 }else{
-                    $classid = CourseShiftNo::where(['resource_id'=>$v,'is_del'=>0,'is_forbid'=>0])->first()->toArray();
-                    self::insert([
-                        'resource_id' => $v,
-                        'course_id' => $data['course_id'],
-                        'shift_id' => $classid['id']
-                    ]);
+                    $classid = CourseShiftNo::where(['resource_id'=>$v,'is_del'=>0,'is_forbid'=>0])->first();
+                    if(!empty($classid)){
+                        self::insert([
+                            'resource_id' => $v,
+                            'course_id' => $data['course_id'],
+                            'shift_id' => $classid['id']
+                        ]);
+                    }else{
+                        self::insert([
+                            'resource_id' => $v,
+                            'course_id' => $data['course_id'],
+                            'shift_id' => 0
+                        ]);
+                    }
                 }
             }
         }
