@@ -10,6 +10,7 @@ use App\Models\Student;
 use App\Models\Order;
 use App\Models\Subject;
 use App\Models\CourseSchool;
+use App\Models\CourseRefOpen;
 use App\Models\LessonTeacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -73,24 +74,53 @@ class IndexController extends Controller {
      * @param ctime     2020-05-25
      * return string
      */
-    public function getOpenClassList() {
+    public function getOpenClassList(Request $request) {
         //获取提交的参数
         try{
             //判断公开课列表是否为空
             $open_class_count = OpenCourse::where('status' , 1)->where('is_del' , 0)->where('is_recommend', 1)->count();
             if($open_class_count && $open_class_count > 0){
-                //获取公开课列表
-                $open_class_list = OpenCourse::join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                //登录状态
+                //获取请求的平台端
+                $platform = verifyPlat() ? verifyPlat() : 'pc';
+                //获取用户token值
+                $token = $request->input('user_token');
+                //hash中token赋值
+                $token_key   = "user:regtoken:".$platform.":".$token;
+                //判断token值是否合法
+                $redis_token = Redis::hLen($token_key);
+                if($redis_token && $redis_token > 0) {
+                    //解析json获取用户详情信息
+                    $json_info = Redis::hGetAll($token_key);
+                    //登录显示用户分校
+                    //获取公开课列表
+                    if($json_info['school_id'] == 1){
+                        $open_class_list = OpenCourse::join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
                         ->select('ld_course_open.id' , 'ld_course_open.cover' ,"ld_course_open_live_childs.course_id", 'ld_course_open.start_at' , 'ld_course_open.end_at')
-                        ->where('ld_course_open.status' , 1)->where('ld_course_open.is_del' , 0)->where('ld_course_open.is_recommend', 1)
+                        ->where('ld_course_open.status' , 1)->where('ld_course_open.is_del' , 0)->where('ld_course_open.is_recommend', 1)->where('ld_course_open.school_id', 1)
                         ->orderBy('ld_course_open.start_at' , 'ASC')->offset(0)->limit(3)->get()->toArray();
+
+                    }else{
+                        $open_class_list = CourseRefOpen::join("ld_course_open","ld_course_ref_open.course_id","=","ld_course_open.id")
+                        ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                        ->select('ld_course_open.id' , 'ld_course_open.cover' ,"ld_course_open_live_childs.course_id", 'ld_course_open.start_at' , 'ld_course_open.end_at')
+                        ->where('ld_course_open.status' , 1)->where('ld_course_open.is_del' , 0)->where('ld_course_open.is_recommend', 1)->where('ld_course_ref_open.to_school_id',$json_info['school_id'])
+                        ->orderBy('ld_course_open.start_at' , 'ASC')->offset(0)->limit(3)->get()->toArray();
+                    }
+                }else{
+                    //未登录显示总校
+                    //获取公开课列表
+                    $open_class_list = OpenCourse::join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                    ->select('ld_course_open.id' , 'ld_course_open.cover' ,"ld_course_open_live_childs.course_id", 'ld_course_open.start_at' , 'ld_course_open.end_at')
+                    ->where('ld_course_open.status' , 1)->where('ld_course_open.is_del' , 0)->where('ld_course_open.is_recommend', 1)->where('ld_course_open.school_id', 1)
+                    ->orderBy('ld_course_open.start_at' , 'ASC')->offset(0)->limit(3)->get()->toArray();
+                }
                 //新数组赋值
                 $lession_array = [];
                 //循环公开课列表
                 foreach($open_class_list as $k=>$v){
                     //根据课程id获取讲师姓名
                     $info = DB::table('ld_course_open')
-
                     ->select("ld_lecturer_educationa.real_name")->where("ld_course_open.id" , $v['id'])->leftJoin('ld_course_open_teacher' , function($join){
                         $join->on('ld_course_open.id', '=', 'ld_course_open_teacher.course_id');
                     })->leftJoin("ld_lecturer_educationa" , function($join){
@@ -230,7 +260,7 @@ class IndexController extends Controller {
      * @param ctime     2020-05-25
      * return string
      */
-    public function getOpenPublicList() {
+    public function getOpenPublicList(Request $request) {
         //获取提交的参数
         try{
             $pagesize = isset(self::$accept_data['pagesize']) && self::$accept_data['pagesize'] > 0 ? self::$accept_data['pagesize'] : 15;
@@ -240,21 +270,73 @@ class IndexController extends Controller {
             $tomorrow_class  = [];
             $over_class      = [];
             $arr             = [];
-            $lession_list= DB::table('ld_course_open')
-            ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
-            ->select(
-                 DB::raw("any_value(ld_course_open.id) as id") ,
-                 DB::raw("any_value(ld_course_open.cover) as cover") ,
-                 DB::raw("any_value(ld_course_open.start_at) as start_at") ,
-                 DB::raw("any_value(ld_course_open.end_at) as end_at") ,
-                 DB::raw("any_value(ld_course_open_live_childs.course_id) as course_id") ,
-                 DB::raw("from_unixtime(ld_course_open.start_at , '%Y-%m-%d') as start_time")
-                 )
-                 ->where('ld_course_open.is_del',0)
-                 ->where('ld_course_open.status',1)
-                 ->orderBy('ld_course_open.start_at' , 'DESC')
-                 ->groupBy('ld_course_open.start_at')
-                 ->offset($offset)->limit($pagesize)->get()->toArray();
+            //登录状态
+                //获取请求的平台端
+                $platform = verifyPlat() ? verifyPlat() : 'pc';
+                //获取用户token值
+                $token = $request->input('user_token');
+                //hash中token赋值
+                $token_key   = "user:regtoken:".$platform.":".$token;
+                //判断token值是否合法
+                $redis_token = Redis::hLen($token_key);
+                if($redis_token && $redis_token > 0) {
+                    //解析json获取用户详情信息
+                    $json_info = Redis::hGetAll($token_key);
+                    if($json_info['school_id'] == 1){
+                        $lession_list= DB::table('ld_course_open')
+                        ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                        ->select(
+                        DB::raw("any_value(ld_course_open.id) as id") ,
+                        DB::raw("any_value(ld_course_open.cover) as cover") ,
+                        DB::raw("any_value(ld_course_open.start_at) as start_at") ,
+                        DB::raw("any_value(ld_course_open.end_at) as end_at") ,
+                        DB::raw("any_value(ld_course_open_live_childs.course_id) as course_id") ,
+                        DB::raw("from_unixtime(ld_course_open.start_at , '%Y-%m-%d') as start_time")
+                        )
+                        ->where('ld_course_open.school_id',1)
+                        ->where('ld_course_open.is_del',0)
+                        ->where('ld_course_open.status',1)
+                        ->orderBy('ld_course_open.start_at' , 'DESC')
+                        ->groupBy('ld_course_open.start_at')
+                        ->offset($offset)->limit($pagesize)->get()->toArray();
+                    }else{
+                        $lession_list= DB::table('ld_course_ref_open')
+                        ->join("ld_course_open","ld_course_ref_open.course_id","=","ld_course_open.id")
+                        ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                        ->select(
+                            DB::raw("any_value(ld_course_open.id) as id") ,
+                            DB::raw("any_value(ld_course_open.cover) as cover") ,
+                            DB::raw("any_value(ld_course_open.start_at) as start_at") ,
+                            DB::raw("any_value(ld_course_open.end_at) as end_at") ,
+                            DB::raw("any_value(ld_course_open_live_childs.course_id) as course_id") ,
+                            DB::raw("from_unixtime(ld_course_open.start_at , '%Y-%m-%d') as start_time")
+                        )
+                        ->where('ld_course_ref_open.to_school_id',$json_info['school_id'])
+                        ->where('ld_course_open.is_del',0)
+                        ->where('ld_course_open.status',1)
+                        ->orderBy('ld_course_open.start_at' , 'DESC')
+                        ->groupBy('ld_course_open.start_at')
+                        ->offset($offset)->limit($pagesize)->get()->toArray();
+                    }
+                }else{
+                    $lession_list= DB::table('ld_course_open')
+                    ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                    ->select(
+                        DB::raw("any_value(ld_course_open.id) as id") ,
+                        DB::raw("any_value(ld_course_open.cover) as cover") ,
+                        DB::raw("any_value(ld_course_open.start_at) as start_at") ,
+                        DB::raw("any_value(ld_course_open.end_at) as end_at") ,
+                        DB::raw("any_value(ld_course_open_live_childs.course_id) as course_id") ,
+                        DB::raw("from_unixtime(ld_course_open.start_at , '%Y-%m-%d') as start_time")
+                        )
+                        ->where('ld_course_open.school_id',1)
+                        ->where('ld_course_open.is_del',0)
+                        ->where('ld_course_open.status',1)
+                        ->orderBy('ld_course_open.start_at' , 'DESC')
+                        ->groupBy('ld_course_open.start_at')
+                        ->offset($offset)->limit($pagesize)->get()->toArray();
+                }
+
             //判读公开课列表是否为空
             if($lession_list && !empty($lession_list)){
                 foreach($lession_list as $k=>$v){
