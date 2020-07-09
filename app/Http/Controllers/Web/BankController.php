@@ -279,6 +279,7 @@ class BankController extends Controller {
         $joint_id     = isset(self::$accept_data['joint_id']) && self::$accept_data['joint_id'] > 0 ? self::$accept_data['joint_id'] : 0;                 //获取节的id
         $papers_id    = isset(self::$accept_data['papers_id']) && self::$accept_data['papers_id'] > 0 ? self::$accept_data['papers_id'] : 0;              //获取试卷的id
         $type         = isset(self::$accept_data['type']) && self::$accept_data['type'] > 0 ? self::$accept_data['type'] : 0;                             //获取类型(1代表章节练习2代表快速做题3代表模拟真题)
+        $model        = isset(self::$accept_data['model']) && self::$accept_data['model'] > 0 ? self::$accept_data['model'] : 0;                          //获取模式
         
         //判断类型是否传递
         if($type <= 0 || !in_array($type , [1,2,3])){
@@ -304,40 +305,6 @@ class BankController extends Controller {
             if(!$chapter_id || $chapter_id <= 0){
                 return response()->json(['code' => 202 , 'msg' => '章id不合法']);
             }
-
-            //获取题型[1,2]
-            $question_type = isset(self::$accept_data['question_type']) && !empty(self::$accept_data['question_type']) ? self::$accept_data['question_type'] : '';
-            if(!$question_type || empty($question_type)){
-                return response()->json(['code' => 201 , 'msg' => '请选择题型']);
-            }
-            $question_type = json_decode($question_type , true);
-            foreach ($question_type as $key=>$value){
-                if ($value === 5 || $value === 6)
-                  unset($question_type[$key]);
-            }
-
-            //获取分类
-            $exam_type = isset(self::$accept_data['exam_type']) && !empty(self::$accept_data['exam_type']) ? self::$accept_data['exam_type'] : '';
-            if(!$exam_type || empty($exam_type)){
-                return response()->json(['code' => 201 , 'msg' => '请选择分类']);
-            } 
-
-            //判断题型是否合法
-            if(!in_array($exam_type , [1,2,3])){
-                return response()->json(['code' => 202 , 'msg' => '分类不合法']);
-            }
-
-            //获取题量
-            $exam_count = isset(self::$accept_data['exam_count']) && !empty(self::$accept_data['exam_count']) ? self::$accept_data['exam_count'] : '';
-            if(!$exam_count || empty($exam_count)){
-                return response()->json(['code' => 201 , 'msg' => '请选择题量']);
-            } 
-
-            $exam_count_array = [1=>30,2=>60,3=>100];
-            //判断题量是否合法
-            if(!in_array($exam_count , [1,2,3])){
-                return response()->json(['code' => 202 , 'msg' => '题量不合法']);
-            }
             
             //新数组赋值
             $exam_array = [];            
@@ -345,6 +312,45 @@ class BankController extends Controller {
             //判断是否做完了随机生成的快速做题数量
             $rand_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('is_right' , 0)->where('type' , 1)->count();
             if($rand_exam_count <= 0){
+                //获取题型[1,2]
+                $question_type = isset(self::$accept_data['question_type']) && !empty(self::$accept_data['question_type']) ? self::$accept_data['question_type'] : '';
+                if(!$question_type || empty($question_type)){
+                    return response()->json(['code' => 201 , 'msg' => '请选择题型']);
+                }
+                $question_type = json_decode($question_type , true);
+                foreach ($question_type as $key=>$value){
+                    if ($value === 5 || $value === 6)
+                      unset($question_type[$key]);
+                }
+
+                //获取分类
+                $exam_type = isset(self::$accept_data['exam_type']) && !empty(self::$accept_data['exam_type']) ? self::$accept_data['exam_type'] : '';
+                if(!$exam_type || empty($exam_type)){
+                    return response()->json(['code' => 201 , 'msg' => '请选择分类']);
+                } 
+
+                //判断题型是否合法
+                if(!in_array($exam_type , [1,2,3])){
+                    return response()->json(['code' => 202 , 'msg' => '分类不合法']);
+                }
+
+                //获取题量
+                $exam_count = isset(self::$accept_data['exam_count']) && !empty(self::$accept_data['exam_count']) ? self::$accept_data['exam_count'] : '';
+                if(!$exam_count || empty($exam_count)){
+                    return response()->json(['code' => 201 , 'msg' => '请选择题量']);
+                } 
+
+                $exam_count_array = [1=>30,2=>60,3=>100];
+                //判断题量是否合法
+                if(!in_array($exam_count , [1,2,3])){
+                    return response()->json(['code' => 202 , 'msg' => '题量不合法']);
+                }
+
+                //判断选择模式是否合法
+                if(!in_array($model , [1,2])){
+                    return response()->json(['code' => 202 , 'msg' => '模式不合法']);
+                }
+
                 //根据设置的条件筛选试题
                 $exam_list = Exam::select("id")->where([['bank_id' , '=' , $bank_id] , ['subject_id' , '=' , $subject_id] , ['chapter_id' , '=' , $chapter_id] , ['joint_id' , '=' , $joint_id] , ['is_del' , '=' , 0] , ['is_publish' , '=' , 1]])->whereIn('type' , $question_type)->orderByRaw("RAND()")->limit($exam_count_array[$exam_count])->get();
                 if(!$exam_list || empty($exam_list)){
@@ -396,6 +402,9 @@ class BankController extends Controller {
                         'is_collect'          =>  0
                     ];
                 }
+                $model_key = "exam:user:model:".self::$accept_data['user_info']['user_id'].":bank:".$bank_id.":subject_id:".$subject_id.":chapter_id:".$chapter_id.":joint_id:".$joint_id;
+                //保存选择模式
+                Redis::set($model_key , $model);
             } else {
                 //查询还未做完的题列表
                 $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('type' , 1)->get();
@@ -584,7 +593,19 @@ class BankController extends Controller {
                 ];
             }
         }
-        return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $exam_array]);
+        
+        //判断是章节练习还是快速做题还是模拟真题
+        if($type == 1){
+            $model_key = "exam:user:model:".self::$accept_data['user_info']['user_id'].":bank:".$bank_id.":subject_id:".$subject_id.":chapter_id:".$chapter_id.":joint_id:".$joint_id;
+            //保存选择模式
+            $is_exists = Redis::get($model_key);
+            if($is_exists && !empty($is_exists)){
+                $model = $is_exists;
+            }
+            return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $exam_array , 'model' => $model]);
+        } else {
+            return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $exam_array]);
+        }
     }
     
     /*
@@ -1129,20 +1150,76 @@ class BankController extends Controller {
         
         //获取学员的做题记录列表
         if($type == 1){
-                
+            $make_exam_list = StudentDoTitle::select("chapter_id" , "joint_id")->where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('is_right' , '>' , 0)->groupBy('chapter_id' , 'joint_id')->get();    
         } else if($type == 2){
-
+            $make_exam_list = StudentDoTitle::select("subject_id")->where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where('type' , 2)->where('is_right' , '>' , 0)->groupBy('subject_id')->get();
         } else if($type == 3){
             $make_exam_list = StudentDoTitle::selectRaw("papers_id , count('type') as t_count")->where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 3)->where('is_right' , '>' , 0)->groupBy('papers_id')->get();
         }
         
         //判断信息是否为空
         if($make_exam_list && !empty($make_exam_list)){
-            $make_exam_list = $make_exam_list->toArray();
             if($type == 1){
-                
+                foreach($make_exam_list as $k=>$v){
+                    //判断节是否存在
+                    if($v['joint_id'] > 0){
+                        //通过节的id获取节的名称
+                        $name = Chapters::where('id' , $v['joint_id'])->where('type' , 1)->value('name');
+                        
+                        //获取学员作对的道数
+                        $collect_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('chapter_id' , $v['chapter_id'])->where('joint_id' , $v['joint_id'])->where('is_right' , 1)->count();
+                    
+                        //获取学员作错的道数
+                        $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('chapter_id' , $v['chapter_id'])->where('joint_id' , $v['joint_id'])->where('is_right' , 2)->count();
+                        
+                        //获取日期
+                        $make_date = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('chapter_id' , $v['chapter_id'])->where('joint_id' , $v['joint_id'])->orderBy('update_at' , 'DESC')->value('update_at');
+                    } else {
+                        //通过章的id获取章的名称
+                        $name = Chapters::where('id' , $v['chapter_id'])->where('type' , 0)->value('name');
+                        
+                        //获取学员作对的道数
+                        $collect_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('chapter_id' , $v['chapter_id'])->where('is_right' , 1)->count();
+                    
+                        //获取学员作错的道数
+                        $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('chapter_id' , $v['chapter_id'])->where('is_right' , 2)->count();
+                        
+                        //获取日期
+                        $make_date = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('chapter_id' , $v['chapter_id'])->orderBy('update_at' , 'DESC')->value('update_at');
+                    }
+
+                    //新数组赋值
+                    $new_array[] = [
+                        'name'          =>  $name ,
+                        'make_date'     =>  date('Y-m-d' ,strtotime($make_date)) ,
+                        'make_time'     =>  date('H:i:s' ,strtotime($make_date)) ,
+                        'collect_count' =>  $collect_count ,
+                        'error_count'   =>  $error_count
+                    ];
+                }
             } else if($type == 2){
+                foreach($make_exam_list as $k=>$v){
+                    //根据科目的id获取科目名称
+                    $subject_info = QuestionSubject::where("id" , $v['subject_id'])->first();
                 
+                    //获取学员作对的道数
+                    $collect_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 2)->where('is_right' , 1)->count();
+                    
+                    //获取学员作错的道数
+                    $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 2)->where('is_right' , 2)->count();
+                    
+                    //获取日期
+                    $make_date = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 2)->orderBy('update_at' , 'DESC')->value('update_at');
+                    
+                    //新数组赋值
+                    $new_array[] = [
+                        'name'          =>  $subject_info['subject_name'] ,
+                        'make_date'     =>  date('Y-m-d' ,strtotime($make_date)) ,
+                        'make_time'     =>  date('H:i:s' ,strtotime($make_date)) ,
+                        'collect_count' =>  $collect_count ,
+                        'error_count'   =>  $error_count
+                    ];
+                }
             } else if($type == 3){
                 foreach($make_exam_list as $k=>$v){
                     //根据试卷的id获取试卷名称
@@ -1171,5 +1248,351 @@ class BankController extends Controller {
         } else {
             return response()->json(['code' => 203 , 'msg' => '暂无做题记录']);
         }
+    }
+    
+    
+    /*
+     * @param  description   做题记录详情接口
+     * @param author    dzj
+     * @param ctime     2020-07-09
+     * return string
+     */
+    public function getMakeExamInfo(){
+        $bank_id      = isset(self::$accept_data['bank_id']) && self::$accept_data['bank_id'] > 0 ? self::$accept_data['bank_id'] : 0;                    //获取题库id
+        $subject_id   = isset(self::$accept_data['subject_id']) && self::$accept_data['subject_id'] > 0 ? self::$accept_data['subject_id'] : 0;           //获取科目id
+        $chapter_id   = isset(self::$accept_data['chapter_id']) && self::$accept_data['chapter_id'] > 0 ? self::$accept_data['chapter_id'] : 0;           //获取章的id
+        $joint_id     = isset(self::$accept_data['joint_id']) && self::$accept_data['joint_id'] > 0 ? self::$accept_data['joint_id'] : 0;                 //获取节的id
+        $papers_id    = isset(self::$accept_data['papers_id']) && self::$accept_data['papers_id'] > 0 ? self::$accept_data['papers_id'] : 0;              //获取试卷的id
+        $type         = isset(self::$accept_data['type']) && self::$accept_data['type'] > 0 ? self::$accept_data['type'] : 0;                             //获取类型(1代表章节练习2代表快速做题3代表模拟真题)
+        $model        = isset(self::$accept_data['model']) && self::$accept_data['model'] > 0 ? self::$accept_data['model'] : 0;                          //获取模式
+        
+        //判断类型是否传递
+        if($type <= 0 || !in_array($type , [1,2,3])){
+            return response()->json(['code' => 202 , 'msg' => '类型不合法']);
+        }
+
+        //判断题库的id是否传递合法
+        if(!$bank_id || $bank_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '题库id不合法']);
+        }
+        
+        //判断科目的id是否传递合法
+        if(!$subject_id || $subject_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
+        }
+        
+        //题型数组
+        $exam_type_arr = [1=>'单选题',2=>'多选题',3=>'判断题',4=>'不定项',5=>'填空题',6=>'简答题'];
+        
+        //判断是否为章节练习
+        if($type == 1){
+            //判断章的id是否传递合法
+            if(!$chapter_id || $chapter_id <= 0){
+                return response()->json(['code' => 202 , 'msg' => '章id不合法']);
+            }
+            
+            //新数组赋值
+            $exam_array = [];            
+
+            //查询还未做完的题列表
+            $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('type' , 1)->where('is_right' , '>' , 0)->get();
+            foreach($exam_list as $k=>$v){
+                //根据试题的id获取试题详情
+                $exam_info = Exam::where('id' , $v['exam_id'])->first();
+
+                //单选题,多选题,不定项
+                if(in_array($exam_info['type'] , [1,2,4])){
+                    //根据试题的id获取选项
+                    $option_info = ExamOption::where("exam_id" , $v['exam_id'])->first();
+
+                    //选项转化
+                    $option_content = json_decode($option_info['option_content'] , true);
+
+                    //获取试题类型
+                    $exam_type_name = $exam_type_arr[$exam_info['type']];
+                } else {
+                    $option_content = [];
+                    $exam_type_name = "";
+                }
+
+                //判断学员是否收藏此题
+                $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 1)->where('status' , 1)->count();
+
+                //试题随机展示
+                $exam_array[$exam_info['type']][] = [
+                    'exam_id'             =>  $v['exam_id'] ,
+                    'exam_name'           =>  $exam_info['exam_content'] ,
+                    'exam_type_name'      =>  $exam_type_name ,
+                    'text_analysis'       =>  $exam_info['text_analysis'] ,
+                    'correct_answer'      =>  $exam_info['answer'] ,
+                    'option_list'         =>  $option_content ,
+                    'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
+                    'is_right'            =>  $v['is_right'] ,
+                    'is_collect'          =>  $is_collect ? 1 : 0
+                ];
+            }
+        } else if($type == 2){  //快速做题
+            //新数组赋值
+            $exam_array = [];            
+            
+            //查询还未做完的题列表
+            $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 2)->where('is_right' , '>' , 0)->get();
+            foreach($exam_list as $k=>$v){
+                //根据试题的id获取试题详情
+                $exam_info = Exam::where('id' , $v['exam_id'])->first();
+
+                //单选题,多选题,不定项
+                if(in_array($exam_info['type'] , [1,2,4])){
+                    //根据试题的id获取选项
+                    $option_info = ExamOption::where("exam_id" , $v['exam_id'])->first();
+
+                    //选项转化
+                    $option_content = json_decode($option_info['option_content'] , true);
+
+                    //获取试题类型
+                    $exam_type_name = $exam_type_arr[$exam_info['type']];
+                } else {
+                    $option_content = [];
+                    $exam_type_name = "";
+                }
+
+                //判断学员是否收藏此题
+                $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 2)->where('status' , 1)->count();
+
+                //试题随机展示
+                $exam_array[$exam_info['type']][] = [
+                    'exam_id'             =>  $v['exam_id'] ,
+                    'exam_name'           =>  $exam_info['exam_content'] ,
+                    'exam_type_name'      =>  $exam_type_name ,
+                    'text_analysis'       =>  $exam_info['text_analysis'] ,
+                    'correct_answer'      =>  $exam_info['answer'] ,
+                    'option_list'         =>  $option_content ,
+                    'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
+                    'is_right'            =>  $v['is_right'] ,
+                    'is_collect'          =>  $is_collect ? 1 : 0
+                ];
+            }
+        } else if($type == 3){  //模拟真题
+            //新数组赋值
+            $exam_array = [];
+            
+            //判断试卷的id是否合法
+            if(!$papers_id || $papers_id <= 0){
+                return response()->json(['code' => 202 , 'msg' => '试卷id不合法']);
+            }
+            
+            //获取做过得试题
+            $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 3)->where('is_right' , '>' , 0)->get();
+            
+            foreach($exam_list as $k=>$v){
+                //根据试题的id获取试题详情
+                $exam_info = Exam::where('id' , $v['exam_id'])->first();
+
+                //单选题,多选题,不定项
+                if(in_array($exam_info['type'] , [1,2,4])){
+                    //根据试题的id获取选项
+                    $option_info = ExamOption::where("exam_id" , $v['exam_id'])->first();
+
+                    //选项转化
+                    $option_content = json_decode($option_info['option_content'] , true);
+                    
+                    //获取试题类型
+                    $exam_type_name = $exam_type_arr[$exam_info['type']];
+                } else {
+                    $option_content = [];
+                    $exam_type_name = "";
+                }
+                
+                //判断学员是否收藏此题
+                $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->where('status' , 1)->count();
+                
+                //根据条件获取此学生此题是否答了
+                $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("papers_id" , $papers_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->first();
+
+                //试题随机展示
+                $exam_array[$exam_info['type']][] = [
+                    'exam_id'             =>  $v['exam_id'] ,
+                    'exam_name'           =>  $exam_info['exam_content'] ,
+                    'exam_type_name'      =>  $exam_type_name ,
+                    'text_analysis'       =>  $exam_info['text_analysis'] ,
+                    'correct_answer'      =>  $exam_info['answer'] ,
+                    'option_list'         =>  $option_content ,
+                    'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
+                    'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
+                    'is_collect'          =>  $is_collect ? 1 : 0
+                ];
+            }
+        }
+        return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $exam_array]);
+    }
+    
+    
+    /*
+     * @param  description   做题交卷接口
+     * @param author    dzj
+     * @param ctime     2020-07-09
+     * return string
+     */
+    public function doHandInPapers(){
+        $bank_id      = isset(self::$accept_data['bank_id']) && self::$accept_data['bank_id'] > 0 ? self::$accept_data['bank_id'] : 0;                    //获取题库id
+        $subject_id   = isset(self::$accept_data['subject_id']) && self::$accept_data['subject_id'] > 0 ? self::$accept_data['subject_id'] : 0;           //获取科目id
+        $chapter_id   = isset(self::$accept_data['chapter_id']) && self::$accept_data['chapter_id'] > 0 ? self::$accept_data['chapter_id'] : 0;           //获取章的id
+        $joint_id     = isset(self::$accept_data['joint_id']) && self::$accept_data['joint_id'] > 0 ? self::$accept_data['joint_id'] : 0;                 //获取节的id
+        $papers_id    = isset(self::$accept_data['papers_id']) && self::$accept_data['papers_id'] > 0 ? self::$accept_data['papers_id'] : 0;              //获取试卷的id
+        $type         = isset(self::$accept_data['type']) && self::$accept_data['type'] > 0 ? self::$accept_data['type'] : 0;                             //获取类型(1代表章节练习2代表快速做题3代表模拟真题)
+       
+        //判断类型是否传递
+        if($type <= 0 || !in_array($type , [1,2,3])){
+            return response()->json(['code' => 202 , 'msg' => '类型不合法']);
+        }
+
+        //判断题库的id是否传递合法
+        if(!$bank_id || $bank_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '题库id不合法']);
+        }
+        
+        //判断科目的id是否传递合法
+        if(!$subject_id || $subject_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
+        }
+        
+        //判断是否为章节练习
+        if($type == 1){
+            //判断章的id是否传递合法
+            if(!$chapter_id || $chapter_id <= 0){
+                return response()->json(['code' => 202 , 'msg' => '章id不合法']);
+            }
+            
+            $answer_time  = isset(self::$accept_data['answer_time']) && !empty(self::$accept_data['answer_time']) ? self::$accept_data['answer_time'] : '';   //答题时间
+            if(!$answer_time || empty($answer_time)){
+                return response()->json(['code' => 201 , 'msg' => '耗时时间为空']);
+            }
+            
+            //新数组赋值
+            $exam_array = [];            
+
+            //查询还未做完的题列表
+            $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('type' , 1)->where('is_right' , 0)->get()->toArray();
+            if($exam_list && !empty($exam_list)){
+                //将没有做得题得状态进行更新
+                $no_title_id = array_column($exam_list , 'id');
+                //批量更新未做得试题
+                $rs = StudentDoTitle::whereIn("id" , $no_title_id)->update(['update_at' => date('Y-m-d H:i:s') , 'is_right' => 2 , 'answer' => '']);
+                if($rs && !empty($rs)){
+                    //判断学员是否做过此试卷
+                    $count =  StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->count();
+                    if(!$count || $count <= 0){
+                        StudentPapers::insertGetId([
+                            'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                            'bank_id'      =>   $bank_id ,
+                            'subject_id'   =>   $subject_id ,
+                            'chapter_id'    =>  $chapter_id ,
+                            'joint_id'     =>   $joint_id ,
+                            'answer_time'  =>   $answer_time ,
+                            'answer_score' =>   0 ,
+                            'create_at'    =>   date('Y-m-d H:i:s')
+                        ]);
+                    }
+                    return response()->json(['code' => 200 , 'msg' => '交卷成功' , 'data' => ['answer_time' => $answer_time , 'answer_score' => 0]]);
+                } else {
+                    return response()->json(['code' => 203 , 'msg' => '交卷失败']);
+                }
+            } else {
+                //判断学员是否做过此试卷
+                $info =  StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->first();
+                return response()->json(['code' => 200 , 'msg' => '交卷成功' , 'data' => ['answer_time' => $info['answer_time'] , 'answer_score' => 0]]);
+            }
+        } else if($type == 2){  //快速做题
+            //新数组赋值
+            $exam_array = [];            
+            
+            //查询还未做完的题列表
+            $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 2)->where('is_right' , 0)->get()->toArray();
+            if($exam_list && !empty($exam_list)){
+                //将没有做得题得状态进行更新
+                $no_title_id = array_column($exam_list , 'id');
+                //批量更新未做得试题
+                $rs = StudentDoTitle::whereIn("id" , $no_title_id)->update(['update_at' => date('Y-m-d H:i:s') , 'is_right' => 2 , 'answer' => '']);
+                if($rs && !empty($rs)){
+                    return response()->json(['code' => 200 , 'msg' => '交卷成功']);
+                } else {
+                    return response()->json(['code' => 203 , 'msg' => '交卷失败']);
+                }
+            } else {
+                return response()->json(['code' => 203 , 'msg' => '交卷失败']);
+            }
+        } else if($type == 3){  //模拟真题
+            //新数组赋值
+            $exam_array = [];
+            
+            //判断试卷的id是否合法
+            if(!$papers_id || $papers_id <= 0){
+                return response()->json(['code' => 202 , 'msg' => '试卷id不合法']);
+            }
+            
+            $answer_time  = isset(self::$accept_data['answer_time']) && !empty(self::$accept_data['answer_time']) ? self::$accept_data['answer_time'] : '';   //答题时间
+            if(!$answer_time || empty($answer_time)){
+                return response()->json(['code' => 201 , 'msg' => '耗时时间为空']);
+            }
+            
+            //通过试卷id获取试卷详情
+            $papers_info = Papers::where("id" , $papers_id)->first();
+            
+            $sum_score = [];
+            
+            //获取做过得试题
+            $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 3)->where('is_right' , 0)->get()->toArray();
+            if($exam_list && !empty($exam_list)){
+                //将没有做得题得状态进行更新
+                $no_title_id = array_column($exam_list , 'id');
+                //批量更新未做得试题
+                $rs = StudentDoTitle::whereIn("id" , $no_title_id)->update(['update_at' => date('Y-m-d H:i:s') , 'is_right' => 2 , 'answer' => '']);
+                if($rs && !empty($rs)){
+                    //判断学员是否做过此试卷
+                    $count =  StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->count();
+                    if(!$count || $count <= 0){
+                        $list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 3)->where('is_right' , 1)->get()->toArray();
+                        if(!$list || empty($list)){
+                            $answer_score = 0;
+                        } else {
+                            foreach($list as $k=>$v){
+                                //根据试题的id获取试题信息
+                                $exam_info = Exam::where("id" , $v['exam_id'])->first();
+                                
+                                //单选题
+                                if($exam_info['type'] == 1){
+                                    $score = $papers_info['signle_score'];
+                                } elseif($exam_info['type'] == 2){
+                                    $score = $papers_info['more_score'];
+                                } elseif($exam_info['type'] == 3){
+                                    $score = $papers_info['judge_score'];
+                                } elseif($exam_info['type'] == 4){
+                                    $score = $papers_info['options_score'];
+                                }
+                                $sum_score[] = $score;
+                            }
+                        }
+                        $answer_score = count($sum_score) > 0 ? array_sum($sum_score) : 0;
+                        StudentPapers::insertGetId([
+                            'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                            'bank_id'      =>   $bank_id ,
+                            'subject_id'   =>   $subject_id ,
+                            'papers_id'    =>   $papers_id ,
+                            'answer_time'  =>   $answer_time ,
+                            'answer_score' =>   $answer_score ,
+                            'create_at'    =>   date('Y-m-d H:i:s')
+                        ]);
+                    }
+                    return response()->json(['code' => 200 , 'msg' => '交卷成功' , 'data' => ['answer_time' => $answer_time , 'answer_score' => $answer_score]]);
+                } else {
+                    return response()->json(['code' => 203 , 'msg' => '交卷失败']);
+                }
+            } else {
+                //判断学员是否做过此试卷
+                $info =  StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->first();
+                return response()->json(['code' => 200 , 'msg' => '交卷成功' , 'data' => ['answer_time' => $info['answer_time'] , 'answer_score' => (double)$info['answer_score']]]);
+            }
+        }
+        return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $exam_array]);
     }
 }

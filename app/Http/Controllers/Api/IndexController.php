@@ -9,7 +9,10 @@ use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\Order;
 use App\Models\Subject;
+use App\Models\CourseSchool;
+use App\Models\CourseRefOpen;
 use App\Models\LessonTeacher;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
@@ -71,24 +74,53 @@ class IndexController extends Controller {
      * @param ctime     2020-05-25
      * return string
      */
-    public function getOpenClassList() {
+    public function getOpenClassList(Request $request) {
         //获取提交的参数
         try{
             //判断公开课列表是否为空
             $open_class_count = OpenCourse::where('status' , 1)->where('is_del' , 0)->where('is_recommend', 1)->count();
             if($open_class_count && $open_class_count > 0){
-                //获取公开课列表
-                $open_class_list = OpenCourse::join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                //登录状态
+                //获取请求的平台端
+                $platform = verifyPlat() ? verifyPlat() : 'pc';
+                //获取用户token值
+                $token = $request->input('user_token');
+                //hash中token赋值
+                $token_key   = "user:regtoken:".$platform.":".$token;
+                //判断token值是否合法
+                $redis_token = Redis::hLen($token_key);
+                if($redis_token && $redis_token > 0) {
+                    //解析json获取用户详情信息
+                    $json_info = Redis::hGetAll($token_key);
+                    //登录显示用户分校
+                    //获取公开课列表
+                    if($json_info['school_id'] == 1){
+                        $open_class_list = OpenCourse::join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
                         ->select('ld_course_open.id' , 'ld_course_open.cover' ,"ld_course_open_live_childs.course_id", 'ld_course_open.start_at' , 'ld_course_open.end_at')
-                        ->where('ld_course_open.status' , 1)->where('ld_course_open.is_del' , 0)->where('ld_course_open.is_recommend', 1)
+                        ->where('ld_course_open.status' , 1)->where('ld_course_open.is_del' , 0)->where('ld_course_open.is_recommend', 1)->where('ld_course_open.school_id', 1)
                         ->orderBy('ld_course_open.start_at' , 'ASC')->offset(0)->limit(3)->get()->toArray();
+
+                    }else{
+                        $open_class_list = CourseRefOpen::join("ld_course_open","ld_course_ref_open.course_id","=","ld_course_open.id")
+                        ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                        ->select('ld_course_open.id' , 'ld_course_open.cover' ,"ld_course_open_live_childs.course_id", 'ld_course_open.start_at' , 'ld_course_open.end_at')
+                        ->where('ld_course_open.status' , 1)->where('ld_course_open.is_del' , 0)->where('ld_course_open.is_recommend', 1)->where('ld_course_ref_open.to_school_id',$json_info['school_id'])
+                        ->orderBy('ld_course_open.start_at' , 'ASC')->offset(0)->limit(3)->get()->toArray();
+                    }
+                }else{
+                    //未登录显示总校
+                    //获取公开课列表
+                    $open_class_list = OpenCourse::join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                    ->select('ld_course_open.id' , 'ld_course_open.cover' ,"ld_course_open_live_childs.course_id", 'ld_course_open.start_at' , 'ld_course_open.end_at')
+                    ->where('ld_course_open.status' , 1)->where('ld_course_open.is_del' , 0)->where('ld_course_open.is_recommend', 1)->where('ld_course_open.school_id', 1)
+                    ->orderBy('ld_course_open.start_at' , 'ASC')->offset(0)->limit(3)->get()->toArray();
+                }
                 //新数组赋值
                 $lession_array = [];
                 //循环公开课列表
                 foreach($open_class_list as $k=>$v){
                     //根据课程id获取讲师姓名
                     $info = DB::table('ld_course_open')
-
                     ->select("ld_lecturer_educationa.real_name")->where("ld_course_open.id" , $v['id'])->leftJoin('ld_course_open_teacher' , function($join){
                         $join->on('ld_course_open.id', '=', 'ld_course_open_teacher.course_id');
                     })->leftJoin("ld_lecturer_educationa" , function($join){
@@ -185,7 +217,7 @@ class IndexController extends Controller {
         try {
             //获取请求的平台端
             $platform = verifyPlat() ? verifyPlat() : 'android';
-            
+
             //判断是否是安卓平台还是ios平台
             if($platform == 'android'){
                 //获取渠道码
@@ -193,21 +225,20 @@ class IndexController extends Controller {
                 if(!$channelCode || empty($channelCode)){
                     return response()->json(['code' => 201 , 'msg' => '渠道码为空']);
                 }
-                
+
                 //通过渠道码获取所在的信息
                 $channel_info = DB::table('ld_channel')->where("code" , $channelCode)->first();
                 if(!$channel_info || empty($channel_info)){
                     return response()->json(['code' => 203 , 'msg' => '此渠道不存在']);
                 }
-                
+
                 //获取版本的最新更新信息
                 $version_info = DB::table('ld_version')->select('is_online','is_mustup','version','content','download_url')->orderBy('create_at' , 'DESC')->first();
-                
                 //判断两个版本是否相等
-                if(empty($channel_info['version']) || $version_info['version'] != $channel_info['version']){
+                if(empty($channel_info->version) || $version_info->version != $channel_info->version){
                     $version_info->content = json_decode($version_info->content , true);
                     //根据渠道码更新版本号
-                    DB::table('ld_channel')->where("code" , $channelCode)->update(['version' => $version_info['version']]);
+                    DB::table('ld_channel')->where("code" , $channelCode)->update(['version' => $version_info->version]);
                     return response()->json(['code' => 200 , 'msg' => '获取版本升级信息成功' , 'data' => $version_info]);
                 } else {
                     return response()->json(['code' => 205 , 'msg' => '已是最新版本']);
@@ -229,7 +260,7 @@ class IndexController extends Controller {
      * @param ctime     2020-05-25
      * return string
      */
-    public function getOpenPublicList() {
+    public function getOpenPublicList(Request $request) {
         //获取提交的参数
         try{
             $pagesize = isset(self::$accept_data['pagesize']) && self::$accept_data['pagesize'] > 0 ? self::$accept_data['pagesize'] : 15;
@@ -239,21 +270,73 @@ class IndexController extends Controller {
             $tomorrow_class  = [];
             $over_class      = [];
             $arr             = [];
-            $lession_list= DB::table('ld_course_open')
-            ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
-            ->select(
-                 DB::raw("any_value(ld_course_open.id) as id") ,
-                 DB::raw("any_value(ld_course_open.cover) as cover") ,
-                 DB::raw("any_value(ld_course_open.start_at) as start_at") ,
-                 DB::raw("any_value(ld_course_open.end_at) as end_at") ,
-                 DB::raw("any_value(ld_course_open_live_childs.course_id) as course_id") ,
-                 DB::raw("from_unixtime(ld_course_open.start_at , '%Y-%m-%d') as start_time")
-                 )
-                 ->where('ld_course_open.is_del',0)
-                 ->where('ld_course_open.status',1)
-                 ->orderBy('ld_course_open.start_at' , 'DESC')
-                 ->groupBy('ld_course_open.start_at')
-                 ->offset($offset)->limit($pagesize)->get()->toArray();
+            //登录状态
+                //获取请求的平台端
+                $platform = verifyPlat() ? verifyPlat() : 'pc';
+                //获取用户token值
+                $token = $request->input('user_token');
+                //hash中token赋值
+                $token_key   = "user:regtoken:".$platform.":".$token;
+                //判断token值是否合法
+                $redis_token = Redis::hLen($token_key);
+                if($redis_token && $redis_token > 0) {
+                    //解析json获取用户详情信息
+                    $json_info = Redis::hGetAll($token_key);
+                    if($json_info['school_id'] == 1){
+                        $lession_list= DB::table('ld_course_open')
+                        ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                        ->select(
+                        DB::raw("any_value(ld_course_open.id) as id") ,
+                        DB::raw("any_value(ld_course_open.cover) as cover") ,
+                        DB::raw("any_value(ld_course_open.start_at) as start_at") ,
+                        DB::raw("any_value(ld_course_open.end_at) as end_at") ,
+                        DB::raw("any_value(ld_course_open_live_childs.course_id) as course_id") ,
+                        DB::raw("from_unixtime(ld_course_open.start_at , '%Y-%m-%d') as start_time")
+                        )
+                        ->where('ld_course_open.school_id',1)
+                        ->where('ld_course_open.is_del',0)
+                        ->where('ld_course_open.status',1)
+                        ->orderBy('ld_course_open.start_at' , 'DESC')
+                        ->groupBy('ld_course_open.start_at')
+                        ->offset($offset)->limit($pagesize)->get()->toArray();
+                    }else{
+                        $lession_list= DB::table('ld_course_ref_open')
+                        ->join("ld_course_open","ld_course_ref_open.course_id","=","ld_course_open.id")
+                        ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                        ->select(
+                            DB::raw("any_value(ld_course_open.id) as id") ,
+                            DB::raw("any_value(ld_course_open.cover) as cover") ,
+                            DB::raw("any_value(ld_course_open.start_at) as start_at") ,
+                            DB::raw("any_value(ld_course_open.end_at) as end_at") ,
+                            DB::raw("any_value(ld_course_open_live_childs.course_id) as course_id") ,
+                            DB::raw("from_unixtime(ld_course_open.start_at , '%Y-%m-%d') as start_time")
+                        )
+                        ->where('ld_course_ref_open.to_school_id',$json_info['school_id'])
+                        ->where('ld_course_open.is_del',0)
+                        ->where('ld_course_open.status',1)
+                        ->orderBy('ld_course_open.start_at' , 'DESC')
+                        ->groupBy('ld_course_open.start_at')
+                        ->offset($offset)->limit($pagesize)->get()->toArray();
+                    }
+                }else{
+                    $lession_list= DB::table('ld_course_open')
+                    ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                    ->select(
+                        DB::raw("any_value(ld_course_open.id) as id") ,
+                        DB::raw("any_value(ld_course_open.cover) as cover") ,
+                        DB::raw("any_value(ld_course_open.start_at) as start_at") ,
+                        DB::raw("any_value(ld_course_open.end_at) as end_at") ,
+                        DB::raw("any_value(ld_course_open_live_childs.course_id) as course_id") ,
+                        DB::raw("from_unixtime(ld_course_open.start_at , '%Y-%m-%d') as start_time")
+                        )
+                        ->where('ld_course_open.school_id',1)
+                        ->where('ld_course_open.is_del',0)
+                        ->where('ld_course_open.status',1)
+                        ->orderBy('ld_course_open.start_at' , 'DESC')
+                        ->groupBy('ld_course_open.start_at')
+                        ->offset($offset)->limit($pagesize)->get()->toArray();
+                }
+
             //判读公开课列表是否为空
             if($lession_list && !empty($lession_list)){
                 foreach($lession_list as $k=>$v){
@@ -462,7 +545,7 @@ class IndexController extends Controller {
      * @param ctime     2020-06-02
      * return string
      */
-    public function getTeacherLessonList(){
+    public function getTeacherLessonList(Request $request){
         //获取提交的参数
         try{
             //获取名师id
@@ -477,16 +560,66 @@ class IndexController extends Controller {
             $offset   = ($page - 1) * $pagesize;
 
             //获取名师课程列表
-            $teacher_lesson_list = Lesson::join('ld_course_teacher','ld_course_teacher.course_id','=','ld_course.id')
-                    ->select('ld_course.id', 'admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'ld_course.is_del')
-                    ->where(['ld_course.is_del'=> 0, 'ld_course.status' => 1,'ld_course_teacher.teacher_id'=>$teacher_id])
-                    ->groupBy("ld_course.id")
-                    ->offset($offset)->limit($pagesize)->get()->toArray();
-            foreach($teacher_lesson_list as $k => &$v){
-                //获取授课模式
-                $v['methods'] = DB::table('ld_course')->select('method_id as id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
-            }
-            foreach($teacher_lesson_list as $k => &$v){
+
+             //获取请求的平台端
+             $platform = verifyPlat() ? verifyPlat() : 'pc';
+             //获取用户token值
+             $token = $request->input('user_token');
+             //hash中token赋值
+             $token_key   = "user:regtoken:".$platform.":".$token;
+             //判断token值是否合法
+             $redis_token = Redis::hLen($token_key);
+             if($redis_token && $redis_token > 0) {
+                 //解析json获取用户详情信息
+                 $json_info = Redis::hGetAll($token_key);
+                 //自增课程
+                 $teacher_lesson_list = Lesson::join('ld_course_teacher','ld_course_teacher.course_id','=','ld_course.id')
+                 ->select('ld_course.id', 'admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'ld_course.is_del')
+                 ->where(['ld_course.is_del'=> 0, 'ld_course.status' => 1,'ld_course.school_id' => $json_info['school_id'],'ld_course_teacher.teacher_id'=>$teacher_id])
+                 ->groupBy("ld_course.id")
+                 ->get()->toArray();
+                 foreach($teacher_lesson_list as $k => &$v){
+                     //获取授课模式
+                     $v['methods'] = DB::table('ld_course')->select('method_id as id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
+                 }
+                 //授权课程   先取授权课程  通过course_id 获取讲师
+                 $teacher_lesson_accredit_list = CourseSchool::join('ld_course_teacher','ld_course_teacher.course_id','=','ld_course_school.course_id')
+                 ->select('ld_course_school.id', 'admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'ld_course_school.is_del')
+                 ->where(['ld_course_school.is_del'=> 0, 'ld_course_school.status' => 1,'ld_course_school.to_school_id' => $json_info['school_id'],'ld_course_teacher.teacher_id'=>$teacher_id])
+                 ->groupBy("ld_course_school.id")
+                 ->get()->toArray();
+                 foreach($teacher_lesson_list as $k => &$v){
+                     //获取授课模式
+                     $v['methods'] = DB::table('ld_course')->select('method_id as id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
+                 }
+
+                 foreach($teacher_lesson_accredit_list as $k => &$v){
+                    //获取授课模式
+                    $v['methods'] = DB::table('ld_course_school')->select('method_id as id')->join("ld_course_method","ld_course_school.course_id","=","ld_course_method.course_id")->where(['ld_course_school.id'=>$v['id']])->get();
+                }
+                $teacher_lesson_list = array_merge($teacher_lesson_list,$teacher_lesson_accredit_list);
+                //数据分页
+                $start =($page - 1) * $pagesize;
+                $limit_s= $start + $pagesize;
+                $teacher_lesson = [];
+                for ($i = $start; $i < $limit_s; $i++) {
+                    if (!empty($teacher_lesson_list[$i])) {
+                            array_push($teacher_lesson, $teacher_lesson_list[$i]);
+                        }
+                }
+             }else{
+                 //未登录  显示主校课程
+                $teacher_lesson = Lesson::join('ld_course_teacher','ld_course_teacher.course_id','=','ld_course.id')
+                ->select('ld_course.id', 'admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'ld_course.is_del')
+                ->where(['ld_course.is_del'=> 0, 'ld_course.status' => 1,'ld_course.school_id' => 1,'ld_course_teacher.teacher_id'=>$teacher_id])
+                ->groupBy("ld_course.id")
+                ->offset($offset)->limit($pagesize)->get()->toArray();
+                foreach($teacher_lesson as $k => &$v){
+                    //获取授课模式
+                    $v['methods'] = DB::table('ld_course')->select('method_id as id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
+                }
+             }
+            foreach($teacher_lesson as $k => &$v){
                 foreach($v['methods'] as $kk => &$vv){
                     if($vv->id == 1){
                         $vv->name = "直播";
@@ -497,8 +630,8 @@ class IndexController extends Controller {
                     }
                 }
             }
-            if($teacher_lesson_list && !empty($teacher_lesson_list)){
-                return response()->json(['code' => 200 , 'msg' => '获取名师课程列表成功' , 'data' => $teacher_lesson_list]);
+            if($teacher_lesson && !empty($teacher_lesson)){
+                return response()->json(['code' => 200 , 'msg' => '获取名师课程列表成功' , 'data' => $teacher_lesson]);
             } else {
                 return response()->json(['code' => 200 , 'msg' => '获取名师课程列表成功' , 'data' => []]);
             }
@@ -531,49 +664,117 @@ class IndexController extends Controller {
      * @param ctime     2020-05-28
      * @return string
      */
-    public function getLessonList() {
+    public function getLessonList(Request $request) {
         //获取提交的参数
         try{
-            $subject = Subject::select('id', 'subject_name as name')
+                //获取请求的平台端
+                $platform = verifyPlat() ? verifyPlat() : 'pc';
+                //获取用户token值
+                $token = $request->input('user_token');
+                //hash中token赋值
+                $token_key   = "user:regtoken:".$platform.":".$token;
+                //判断token值是否合法
+                $redis_token = Redis::hLen($token_key);
+                if($redis_token && $redis_token > 0) {
+                    //解析json获取用户详情信息
+                    $json_info = Redis::hGetAll($token_key);
+                    //登录显示属于分校的课程
+                    $subject = Subject::select('id', 'subject_name as name')
                         ->where(['is_del' => 0,'parent_id' => 0])
                         ->limit(4)
                         ->get()->toArray();
-            $lessons = [];
-                foreach($subject as $k =>$v){
+                        $lessons = [];
+                        foreach($subject as $k =>$v){
 
-                    $lesson = Lesson::join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
-                    ->select('ld_course.id', 'ld_course.title', 'ld_course.cover', 'ld_course.buy_num', 'ld_course.pricing as old_price', 'ld_course.sale_price as favorable_price')
-                    ->where(['ld_course.is_del' => 0, 'ld_course.is_recommend' => 1, 'ld_course.status' => 1,'ld_course.parent_id' => $v['id']])
-                    ->get();
-                    if(!empty($lesson->toArray())){
-                        $arr = [
-                            'subject' => $v,
-                            'lesson' => $lesson,
-                        ];
-                        $lessons[] = $arr;
-                    }
-                }
-                foreach($lessons as $k => $v){
+                            $lesson = Lesson::join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
+                            ->select('ld_course.id', 'ld_course.title', 'ld_course.cover', 'ld_course.buy_num', 'ld_course.pricing as old_price', 'ld_course.sale_price as favorable_price')
+                            ->where(['ld_course.is_del' => 0,'ld_course.school_id' => $json_info['school_id'], 'ld_course.is_recommend' => 1, 'ld_course.status' => 1,'ld_course.parent_id' => $v['id']])
+                            ->get();
+                            $lesson_school = CourseSchool::join("ld_course_subject","ld_course_subject.id","=","ld_course_school.parent_id")
+                            ->select('ld_course_school.id', 'ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.buy_num', 'ld_course_school.pricing as old_price', 'ld_course_school.sale_price as favorable_price')
+                            ->where(['ld_course_school.is_del' => 0,'ld_course_school.to_school_id' => $json_info['school_id'], 'ld_course_school.is_recommend' => 1, 'ld_course_school.status' => 1,'ld_course_school.parent_id' => $v['id']])
+                            ->get();
 
-                    foreach($v['lesson'] as $kk => $vv){
-
-                        $token = isset($_REQUEST['user_token']) ? $_REQUEST['user_token'] : 0;
-                        $student = Student::where('token', $token)->first();
-                        //是否收藏
-                        //购买人数  基数加真是购买人数
-                        $vv['sold_num'] =  Order::where(['oa_status'=>1,'class_id'=>$vv['id']])->count() + $vv['buy_num'];
-                        if(!empty($student)){
-                            $num = Order::where(['student_id'=>$student['id'],'status'=>2,'class_id'=>$vv['id']])->count();
-                            if($num > 0){
-                                $vv['is_buy'] = 1;
-                            }else{
-                                $vv['is_buy'] = 0;
+                            if(!empty($lesson->toArray())){
+                                $arr = [
+                                    'subject' => $v,
+                                    'lesson' => $lesson,
+                                ];
+                                $lessons[] = $arr;
                             }
-                        }else{
-                            $vv['is_buy'] = 0;
+
+                            if(!empty($lesson_school->toArray())){
+                                $arr = [
+                                    'subject' => $v,
+                                    'lesson' => $lesson_school,
+                                ];
+                                $lessons[] = $arr;
+                            }
                         }
-                    }
+                        foreach($lessons as $k => $v){
+
+                            foreach($v['lesson'] as $kk => $vv){
+
+                                $token = isset($_REQUEST['user_token']) ? $_REQUEST['user_token'] : 0;
+                                $student = Student::where('token', $token)->first();
+                                //购买人数  基数加真是购买人数
+                                $vv['sold_num'] =  Order::where(['oa_status'=>1,'class_id'=>$vv['id']])->count() + $vv['buy_num'];
+                                if(!empty($student)){
+                                    $num = Order::where(['student_id'=>$student['id'],'status'=>2,'class_id'=>$vv['id']])->count();
+                                    if($num > 0){
+                                        $vv['is_buy'] = 1;
+                                    }else{
+                                        $vv['is_buy'] = 0;
+                                    }
+                                }else{
+                                    $vv['is_buy'] = 0;
+                                }
+                            }
+                        }
+
+                } else {
+                        //未登录显示主校自己的课程
+                        $subject = Subject::select('id', 'subject_name as name')
+                        ->where(['is_del' => 0,'parent_id' => 0])
+                        ->limit(4)
+                        ->get()->toArray();
+                        $lessons = [];
+                        foreach($subject as $k =>$v){
+
+                            $lesson = Lesson::join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
+                            ->select('ld_course.id', 'ld_course.title', 'ld_course.cover', 'ld_course.buy_num', 'ld_course.pricing as old_price', 'ld_course.sale_price as favorable_price')
+                            ->where(['ld_course.is_del' => 0,'ld_course.school_id' => 1, 'ld_course.is_recommend' => 1, 'ld_course.status' => 1,'ld_course.parent_id' => $v['id']])
+                            ->get();
+                            if(!empty($lesson->toArray())){
+                                $arr = [
+                                    'subject' => $v,
+                                    'lesson' => $lesson,
+                                ];
+                                $lessons[] = $arr;
+                            }
+                        }
+                        foreach($lessons as $k => $v){
+
+                            foreach($v['lesson'] as $kk => $vv){
+
+                                $token = isset($_REQUEST['user_token']) ? $_REQUEST['user_token'] : 0;
+                                $student = Student::where('token', $token)->first();
+                                //购买人数  基数加真是购买人数
+                                $vv['sold_num'] =  Order::where(['oa_status'=>1,'class_id'=>$vv['id']])->count() + $vv['buy_num'];
+                                if(!empty($student)){
+                                    $num = Order::where(['student_id'=>$student['id'],'status'=>2,'class_id'=>$vv['id']])->count();
+                                    if($num > 0){
+                                        $vv['is_buy'] = 1;
+                                    }else{
+                                        $vv['is_buy'] = 0;
+                                    }
+                                }else{
+                                    $vv['is_buy'] = 0;
+                                }
+                            }
+                        }
                 }
+
             return $this->response($lessons);
         } catch (Exception $ex) {
             return $this->response($ex->getMessage());
