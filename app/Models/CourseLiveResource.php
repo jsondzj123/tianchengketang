@@ -24,6 +24,7 @@ class CourseLiveResource extends Model {
         }
         //取直播资源列表
         $where['is_del'] = 0;
+        print_r($data['parent']);die;
         if(isset($data['parent']) && !empty($data['parent'])){
             $parent = json_decode($data['parent'],true);
             print_r($parent);die;
