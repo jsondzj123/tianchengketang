@@ -247,7 +247,6 @@ class LessonController extends Controller {
         $token_key   = "user:regtoken:".$platform.":".$token;
         //判断token值是否合法
         $redis_token = Redis::hLen($token_key);
-
         if($redis_token && $redis_token > 0) {
              //解析json获取用户详情信息
                 $json_info = Redis::hGetAll($token_key);
@@ -318,7 +317,6 @@ class LessonController extends Controller {
                         }
                     }
                     $lesson['url'] = $newhello;
-
                     //授权课程
                     CourseSchool::where('course_id', $request->input('id'))->update(['watch_num' => DB::raw('watch_num + 1'),'update_at'=>date('Y-m-d H:i:s')]);
                 }else{
@@ -353,7 +351,7 @@ class LessonController extends Controller {
                     $arrclass = [];
                     $childclass = [];
                     $arr = [];
-
+                    $newhello = [];
                     //录播小节
                     $knobble = Couresmaterial::where(["course_id"=>$lesson['id'],"mold"=>1])->get();
                     if(!empty($knobble)){
@@ -405,7 +403,7 @@ class LessonController extends Controller {
             $arrclass = [];
             $childclass = [];
             $arr = [];
-
+            $newhello = [];
             //录播小节
             $knobble = Couresmaterial::where(["course_id"=>$lesson['id'],"mold"=>1])->get();
             if(!empty($knobble)){
