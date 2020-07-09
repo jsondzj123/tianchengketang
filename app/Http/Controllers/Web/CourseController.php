@@ -475,12 +475,15 @@ class CourseController extends Controller {
         $classlist = CourseLiveResource::where(['is_del'=>0,'course_id'=>$this->data['id']])->get()->toArray();
         $shift = array_column($classlist, 'shift_id');
         $where['is_del'] = 0;
-        $where['mold'] = 1;
+        $where['mold'] = 2;
         if(isset($this->data['type']) && !empty($this->data['type'])){
             $where['type'] = $this->data['type'];
         }
+        $ziyuan=[];
         $count = Couresmaterial::whereIn('parent_id', $shift)->where($where)->count();
-        $ziyuan = Couresmaterial::whereIn('parent_id', $shift)->where($where)->orderByDesc('id')->offset($offset)->limit($pagesize)->get()->toArray();
+        if($count > 0){
+            $ziyuan = Couresmaterial::whereIn('parent_id', $shift)->where($where)->orderByDesc('id')->offset($offset)->limit($pagesize)->get()->toArray();
+        }
         $page=[
             'pageSize'=>$pagesize,
             'page' =>$page,
