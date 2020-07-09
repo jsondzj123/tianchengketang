@@ -435,7 +435,9 @@ class CourseController extends Controller {
                     $v['class_name'] = $class['name'];
                     //获取所有的课次
                     $classci = LiveChild::where(['shift_no_id'=>$v['shift_id'],'is_del'=>0,'status'=>1])->get()->toArray();
+                    print_r($classci);die;
                     //课次关联讲师
+
                     if(!empty($classci)){
                         foreach ($classci as $ks=>&$vs){
                             //开课时间戳 start_at 结束时间戳转化 end_at
