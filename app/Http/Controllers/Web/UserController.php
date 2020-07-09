@@ -41,5 +41,6 @@ class UserController extends Controller {
         }
         return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$user]);
     }
+
 }
 
