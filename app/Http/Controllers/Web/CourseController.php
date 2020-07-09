@@ -428,7 +428,6 @@ class CourseController extends Controller {
         if($order == 0 || $course['sale_price'] == 0){
             //获取所有的班号
             $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get()->toArray();
-            print_r($courseArr);die;
             if($courseArr != 0){
                 foreach ($courseArr as $k=>&$v){
                     //获取班级信息
