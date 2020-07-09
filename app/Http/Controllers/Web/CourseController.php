@@ -436,7 +436,7 @@ class CourseController extends Controller {
                     //获取所有的课次
                     $classci = LiveChild::where(['shift_no_id'=>$v['shift_id'],'is_del'=>0,'status'=>1])->get()->toArray();
                     if(!empty($classci)){
-                        //课次关联讲师  时间戳转换
+                        //课次关联讲师  时间戳转换   查询所有资料
                         foreach ($classci as $ks=>&$vs){
                             //开课时间戳 start_at 结束时间戳转化 end_at
                             $ymd = date('Y-m-s',$vs['start_at']);//年月日
@@ -446,12 +446,16 @@ class CourseController extends Controller {
                             $xingqi = date("w", 1593414566);
                             $week = $weekarray[$xingqi];
                             $vs['times'] = $ymd.'&nbsp&nbsp'.$week.'&nbsp&nbsp'.$start.'-'.$end;
+                            //查询讲师
                             $teacher = LiveClassChildTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_class_teacher.teacher_id')
                                 ->where(['ld_course_class_teacher.is_del'=>0,'ld_lecturer_educationa.is_del'=>0,'ld_lecturer_educationa.type'=>2,'ld_lecturer_educationa.is_forbid'=>0])
                                 ->first()->toArray();
                             if(!empty($teacher)){
                                 $vs['teacher_name'] = $teacher['real_name'];
                             }
+                            //查询资料
+                            $material = Couresmaterial::where(['mold'=>3,'is_del'=>0,'course_id'=>$this->data['id'],'parent_id'=>$vs['id']])->get()->toArray();
+                            $vs['material'] = $material;
                         }
                         $v['keci'] = $classci;
                     }
@@ -461,7 +465,7 @@ class CourseController extends Controller {
         return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$courseArr]);
     }
     /*
-         * @param  课程资料表
+         * @param  课程资料表   录播  直播班号 课程小节
          * @param  author  苏振文
          * @param  ctime   2020/7/7 14:40
          * return  array
