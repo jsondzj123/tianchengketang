@@ -7,6 +7,7 @@ use App\Models\AdminLog;
 use App\Models\Region;
 use App\Models\School;
 use App\Models\Student;
+use Illuminate\Support\Facades\Redis;
 
 class UserController extends Controller {
     protected $school;
@@ -41,11 +42,23 @@ class UserController extends Controller {
         }
         return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$user]);
     }
-
     //用户更改手机号
     public function userUpPhone(){
         if(!isset($this->data['phone'])|| empty($this->data['phone'])){
             return response()->json(['code' => 201 , 'msg' => '手机号不能为空']);
+        }
+        //判断验证码是否为空
+        if(!isset($this->data['verifycode']) || empty($this->data['verifycode'])){
+            return response()->json(['code' => 201 , 'msg' => '请输入验证码']);
+        }
+        //验证码合法验证
+        $verify_code = Redis::get('user:register:'.$this->data['phone']);
+        if(!$verify_code || empty($verify_code)){
+            return ['code' => 201 , 'msg' => '请先获取验证码'];
+        }
+        //判断验证码是否一致
+        if($verify_code != $this->data['verifycode']){
+            return ['code' => 202 , 'msg' => '验证码错误'];
         }
         $count = Student::where(['phone'=>$this->data['phone'],'is_forbid'=>1])->count();
         if($count >0){
@@ -77,7 +90,6 @@ class UserController extends Controller {
             return response()->json(['code' => 201 , 'msg' => '邮箱格式不正确']);
         }
     }
-
     //用户修改基本信息
     public function userUpDetail(){
 
@@ -86,7 +98,6 @@ class UserController extends Controller {
     public function userUpRelation(){
 
     }
-
     //用户修改头像
     public function userUpImg(){
         if(!isset($this->data['head_icon']) || empty($this->data['head_icon'])){
