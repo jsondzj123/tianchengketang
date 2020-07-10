@@ -201,6 +201,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         //个人信息模块
         $router->post('myOrder','UserController@myOrder');//我的订单
         $router->post('orderFind','UserController@orderFind');//我的订单单条记录
+        $router->post('myCollect','UserController@myCollect');//我的收藏
     });
 });
 //后台端路由接口
