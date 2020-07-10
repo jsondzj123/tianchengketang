@@ -216,6 +216,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->get('liveCallBack', 'LiveChildController@listenLive');
     $router->post('liveCallBack', 'LiveChildController@listenLive');//直播回调状态
     $router->post('orderUpOaForId', 'OrderController@orderUpOaForId');//订单修改oa状态
+    $router->post('orderUpinvalid', 'OrderController@orderUpinvalid');//订单无效修改
 });
 //后端登录权限认证相关接口
 $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors']], function () use ($router) {
