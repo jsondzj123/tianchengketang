@@ -154,29 +154,21 @@ class School extends Model {
     public static function getSchoolTeacherList($data){
             $school= School::find($data['school_id']);  //获取学校信息 
             $teacher = Teacher::where(['school_id'=>$data['school_id'],'is_del' =>0,'type'=>2])->select('id','head_icon','real_name','describe','school_id')->get()->toArray();//学校自己添加的讲师
-            $teacher_id   =  Admin::select('*')
-                            ->RightJoin('ld_role_auth','ld_role_auth.id','=','ld_admin.role_id')
-                            ->select('ld_admin.teacher_id')
-                            ->where(function($query) use($data){
-                                if($data['school_id'] != ''){
-                                    $query->where ('ld_admin.school_id',$data['school_id']);
-                                }
-                                    $query->where ('ld_role_auth.is_super',1);
-                                    $query->where('ld_role_auth.is_del',1);  
-                            })
-                            ->first(); //获取总校信息讲师
-            if(!empty($teacher_id)){
-                $teacheIdArr   = explode(',', $teacher_id);
-                $zong_teacher = Teacher::whereIn('id',$teacheIdArr)->where('type',2)->select('id','head_icon','real_name','describe','school_id')->get()->toArray();
-                $teacher = array_merge($teacher,$zong_teacher);
-            }
-            foreach($teacher as $key => &$v){
-                if($v['school_id'] != $data['school_id']){
-                    $teacher[$key]['school_status'] = '总校讲师';
-                }else{
-                    $teacher[$key]['school_status'] = '分校讲师';
+            $natureTeacher = CourseRefTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_ref_teacher.teacher_id')
+                            ->where(['ld_lecturer_educationa.type'=>2,'ld_course_ref_teacher.to_school_id'=>$data['school_id'],'ld_course_ref_teacher.is_del'=>0])
+                            ->select('ld_lecturer_educationa.id','ld_lecturer_educationa.head_icon','ld_lecturer_educationa.real_name','ld_lecturer_educationa.describe','ld_lecturer_educationa.school_id')
+                            ->get()->toArray();
+            if(!empty($teacher)){
+                foreach($teacher as $key => &$v){
+                    $v['school_status'] ='分校讲师';
                 }
-            }   
+            }
+             if(!empty($natureTeacher)){
+                foreach($natureTeacher as $key => &$vv){
+                    $vv['school_status'] ='总校讲师';
+                }
+            }
+            $teacher = array_merge($teacher,$natureTeacher);
             $arr = [
                     'code'=>200,
                     'msg'=>'Success',

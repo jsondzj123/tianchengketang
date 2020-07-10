@@ -221,7 +221,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('orderUpinvalid', 'OrderController@orderUpinvalid');//订单无效修改
 });
 //后端登录权限认证相关接口
-$router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors']], function () use ($router) {
+$router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors','api']], function () use ($router) {
     /*
      * 授课方式(sxl)
     */
@@ -594,14 +594,11 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseStore', 'CourseSchoolController@store');  //批量添加
         $router->post('getNatureSubjectList', 'CourseSchoolController@getNatureSubjectOneByid');  //授权课程列表大类
         $router->post('getNatureSubjectByid', 'CourseSchoolController@getNatureSubjectTwoByid');  //授权课程列表小类
-
-
     });
     $router->group(['prefix' => 'courstocks'], function () use ($router) {
         $router->post('getList', 'CourseStocksController@getList');  //库存列表
         $router->post('doInsertStocks', 'CourseStocksController@doInsertStocks');  //添加库存
     });
-
     //end 网校系统     lys
 
     //课程模块（重构）【公开课】（lys）
