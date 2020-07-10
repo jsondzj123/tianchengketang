@@ -11,7 +11,6 @@ class Order extends Model {
     public $table = 'ld_order';
     //时间戳设置
     public $timestamps = false;
-
     /*
          * @param  订单列表
          * @param  $school_id  分校id
