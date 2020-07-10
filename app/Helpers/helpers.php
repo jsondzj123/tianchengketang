@@ -186,6 +186,18 @@ function verifyPlat(){
         }
         return $duration;
     }
+    
+/*
+ * @param  descriptsion    字符串排序
+ * @param  author          dzj
+ * @param  ctime           2020-07-10
+ * return  array
+ */
+ function stringSort($string){
+    $split_str = str_split($string);
+    sort($split_str);
+    return implode($split_str);
+ }
 
 
 /*
