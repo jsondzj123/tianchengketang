@@ -299,6 +299,7 @@ class CourseController extends Controller {
             Redis::set($keys,json_encode($course),300);
             return response()->json(['code' => 201 , 'msg' => '查询成功','data'=>$course]);
         }
+
     }
     /*
          * @param  课程录播列表
