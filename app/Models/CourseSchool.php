@@ -114,6 +114,7 @@ class CourseSchool extends Model {
             }
             
         if($body['is_public'] == 0){//课程
+            $CourseArr = [];
             $zizengCourse = Coures::where(['school_id'=>$school_id,'nature'=>0])  //自增课程(总校)
                 ->where(function($query) use ($body) {
                     if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
@@ -131,13 +132,13 @@ class CourseSchool extends Model {
             $natureCourse = self::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
                 ->where(function($query) use ($body,$school_id) {
                     if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
-                        $query->where('ld_course_open.parent_id',$body['subjectOne']);
+                        $query->where('ld_course.parent_id',$body['subjectOne']);
                     }
                     if(!empty($body['subjectTwo']) && $body['subjectTwo'] != ''){
-                        $query->where('ld_course_open.child_id',$body['subjectTwo']);
+                        $query->where('ld_course.child_id',$body['subjectTwo']);
                     }
                     if(!empty($body['search']) && $body['search'] != ''){
-                        $query->where('ld_course_open.title','like',"%".$body['search']."%");
+                        $query->where('ld_course.title','like',"%".$body['search']."%");
                     }
                     $query->where('ld_course_school.to_school_id',$body['school_id']); //被授权学校
                     $query->where('ld_course_school.from_school_id',$school_id); //授权学校
