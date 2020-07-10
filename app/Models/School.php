@@ -244,6 +244,7 @@ class School extends Model {
                 $arr = array_merge($course,$natureCourse);
 
                 foreach($arr  as $k=>&$v){
+                    $v['school_dns'] = School::where('id',$data['school_id'])->select('dns')->first();
                     $v['buy_nember'] = Order::whereIn('pay_status',[3,4])->whereIn('nature',[0,1])->where(['class_id'=>$v['id'],'status'=>2,'oa_status'=>1])->count();
                     $v['sum_nember'] = 0;
                     if($v['nature'] == 1){
@@ -314,7 +315,7 @@ class School extends Model {
             })->select('id','title','cover','nature','status','school_id','start_at','end_at')
             ->orderBy('id','desc')
             ->get()->toArray();
-        print_r($openCourse);die;
+
         $natureOpenCourse = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
                             ->where(function($query) use ($data,$school_id) {
                                 if(!empty($data['subjectOne']) && $data['subjectOne'] != ''){
@@ -340,6 +341,7 @@ class School extends Model {
         if(!empty($openCourse) || !empty($natureOpenCourse)){
             $arr = array_merge($openCourse,$natureOpenCourse);
             foreach($arr as $k =>$v){
+                $arr[$k]['school_dns'] =  School::where('id',$data['school_id'])->select('dns')->first();
                 $watch_num = OpenLivesChilds::where('lesson_id',$v['id'])->where(['is_del'=>0])->select('watch_num')->first();
                 $arr[$k]['watch_num'] = empty($watch_num) || $watch_num['watch_num'] <=0 ?0:$watch_num['watch_num'];
                 $arr[$k]['start_at'] = date('Y-m-d H:i:s',$v['start_at']);
