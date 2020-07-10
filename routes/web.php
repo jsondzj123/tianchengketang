@@ -583,6 +583,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getLessonList', 'SchoolController@getLessonLists');      //获取分校课程列表
         $router->post('getOpenLessonList', 'SchoolController@getOpenLessonList');      //获取分校公开课列表
         $router->post('getSubjectList', 'SchoolController@getSubjectList');      //获取课程/公开课学科大类小类
+        $router->post('details','SchoolController@details'); //获取网校详情
+
     });
 
     $router->group(['prefix' => 'courschool'], function () use ($router) {

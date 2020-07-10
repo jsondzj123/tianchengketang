@@ -17,6 +17,18 @@ use Illuminate\Support\Facades\DB;
 use App\Models\CouresSubject;
 class SchoolController extends Controller {
   
+
+    public function details(){
+        $data = self::$accept_data;
+        $validator = Validator::make($data, 
+                ['school_id' => 'required|integer'],
+                School::message());
+        if($validator->fails()) {
+            return response()->json(json_decode($validator->errors()->first(),1));
+        }
+        $arr = School::where(['id'=>$data['school_id'],'is_del'=>1])->select('name','logo_url','introduce','dns')->first();
+        return response()->json(['code'=>200,'msg'=>'success','data'=>$arr]);
+    }
      /*
      * @param  description 获取分校列表  
      * @param  参数说明       body包含以下参数[
