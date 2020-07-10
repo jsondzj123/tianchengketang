@@ -31,20 +31,17 @@ class ApiAuthToken {
             return response()->json(['code'=>403,'msg'=>'无此用户，请联系管理员']);
         }
         $authid = Authrules::getAuthOne($url);//获取权限id
-        
-        if(isset($authid['id'])&&$authid['id'] >0 ){
-
+      
+        if(isset($authid)&&$authid['id'] >0 ){
             $role = Roleauth::getRoleOne($userlist['data']['role_id']);//获取角色权限
-           
             if(!strpos($role['data']['auth_id'],(string)$authid['id'])){
                 
                return response()->json(['code'=>403,'msg'=>'此用户没有权限！']);
             }else{
-               
                return $next($request);
             }
         }else{
-            return response()->json(['code'=>403,'msg'=>'此用户没有权限']);
+            return response()->json(['code'=>403,'msg'=>'此用户没有权限???']);
 
         }
 
