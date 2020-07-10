@@ -107,17 +107,15 @@ class CourseController extends Controller {
                     if (!empty($parent[1]) && $parent[1] != '') {
                         $query->where('child_id', $parent[1]);
                     }
-
                 })->count();
-            $count2 = CourseSchool::leftJoin('ld_course', 'ld_course.id', '=', 'ld_course_school.course_id')
-                ->where(['ld_course_school.to_school_id' => $school_id, 'ld_course_school.is_del' => 0])
+            $count2 = CourseSchool::where(['to_school_id' => $school_id, 'is_del' => 0,'status'=>1])
                 ->where('title', 'like', '%' . $name . '%')
                 ->where(function ($query) use ($parent) {
                     if (!empty($parent[0]) && $parent[0] != '') {
-                        $query->where('ld_courseparent_id', $parent[0]);
+                        $query->where('parent_id', $parent[0]);
                     }
                     if (!empty($parent[1]) && $parent[1] != '') {
-                        $query->where('ld_coursechild_id', $parent[1]);
+                        $query->where('child_id', $parent[1]);
                     }
                 })->count();
             $count = $count1 + $count2;
@@ -159,17 +157,17 @@ class CourseController extends Controller {
             $ref_course = [];
             //授权课程
             if ($count2 != 0) {
-                $ref_course = CourseSchool::select('ld_course_school.course_id as id', 'ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.sale_price', 'ld_course_school.buy_num', 'ld_course_school.watch_num', 'ld_course_school.create_at')
-                    ->leftJoin('ld_course', 'ld_course.id', '=', 'ld_course_school.course_id')
+                $ref_course = CourseSchool::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'watch_num', 'create_at')
                     ->where(function ($query) use ($parent) {
                         if (!empty($parent[0]) && $parent[0] != '') {
-                            $query->where('ld_course.parent_id', $parent[0]);
+                            $query->where('parent_id', $parent[0]);
                         }
                         if (!empty($parent[1]) && $parent[1] != '') {
-                            $query->where('ld_course.child_id', $parent[1]);
+                            $query->where('child_id', $parent[1]);
                         }
-                    })->where(['ld_course_school.to_school_id' => $school_id, 'ld_course_school.is_del' => 0, 'ld_course_school.status' => 1])
-                    ->where('ld_course_school.title', 'like', '%' . $name . '%')
+                    })
+                    ->where(['to_school_id' => $school_id, 'is_del' => 0, 'status' => 1])
+                    ->where('title', 'like', '%' . $name . '%')
                     ->get()->toArray();
                 foreach ($ref_course as $ks => &$vs) {
                     $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])->where($methodwhere)->get()->toArray();
