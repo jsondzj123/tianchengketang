@@ -457,7 +457,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     });
     //课程模块（重构）（szw）
     $router->group(['prefix' => 'course'], function () use ($router) {
-       $router->post('subject', 'CourseController@subject');//学科列表   7 11 lys
+       // $router->post('subject', 'CourseController@subject');//学科列表   7 11 lys
 
         $router->post('courseList', 'CourseController@courseList');//课程列表
         $router->post('courseAdd', 'CourseController@courseAdd');//课程添加
