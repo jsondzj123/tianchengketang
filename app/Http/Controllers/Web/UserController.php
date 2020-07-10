@@ -284,7 +284,7 @@ class UserController extends Controller {
             }else{
                 $course = Coures::select('title')->where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
             }
-            $course['title'] = isset($course['title'])?$course['title']:'';
+            $order['title'] = isset($course['title'])?$course['title']:'';
         }
         return response()->json(['code' => 200, 'msg' => '获取成功','data'=>$order]);
     }
