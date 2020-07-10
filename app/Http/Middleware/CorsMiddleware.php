@@ -29,7 +29,7 @@ class CorsMiddleware
             'http://testwo.admin.longde999.cn',
             'http://pay.manage.longde99.com',
             'http://ketang.longde999.cn',
-            'http://tiancheng.admin.longde999.cn'
+          
         ];
         $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 
