@@ -131,9 +131,9 @@ class OpenCourse extends Model {
                 $teacherIdArr = OpenCourseTeacher::where('course_id',$v['id'])->where('is_del',0)->get(['teacher_id']);
                 $v['teacher_name'] = Teacher::whereIn('id',$teacherIdArr)->where('is_del',0)->where('type',2)->first()['real_name'];
             }
-            return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => $open_less_arr , 'total' => $open_less_count ]];          
+            return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => $open_less_arr , 'total' => $open_less_count  ,'page'=>$page]];          
         }
-        return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => [] , 'total' => 0 ]];
+        return ['code'=>200,'msg'=>'Success','data'=>['open_less_list' => [] , 'total' => 0, 'page'=>$page ]];
     }
 
 }
