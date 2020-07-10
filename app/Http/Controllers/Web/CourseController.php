@@ -158,7 +158,7 @@ class CourseController extends Controller {
             $ref_course = [];
             //授权课程
             if ($count2 != 0) {
-                $ref_course = CourseSchool::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'watch_num', 'create_at')
+                $ref_course = CourseSchool::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'watch_num', 'create_at','course_id')
                     ->where(function ($query) use ($parent) {
                         if (!empty($parent[0]) && $parent[0] != '') {
                             $query->where('parent_id', $parent[0]);
