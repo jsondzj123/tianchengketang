@@ -190,8 +190,8 @@ class CourseController extends Controller {
                                 $val['method_name'] = '其他';
                             }
                         }
-                        $v['method'] = $method;
-                        $v['nature'] = 1;
+                        $vs['method'] = $method;
+                        $vs['nature'] = 1;
                     } else {
                         unset($ref_course[$ks]);
                     }
