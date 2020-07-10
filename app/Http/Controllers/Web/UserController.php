@@ -232,5 +232,8 @@ class UserController extends Controller {
     //我的题库
     //我的课程
     //我的订单
+    public function myOrder(){
+
+    }
 }
 

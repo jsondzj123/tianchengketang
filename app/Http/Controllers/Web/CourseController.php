@@ -241,7 +241,7 @@ class CourseController extends Controller {
         }
         //修改观看数
         Coures::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
-        $keys = $this->data.$this->userid;
+        $keys = json_encode($this->data).$this->userid;
         if(Redis::get($keys)){
             return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>json_decode(Redis::get($keys),true)]);
         }else {
