@@ -57,7 +57,6 @@ class Order extends Model {
             })
             ->whereBetween('ld_order.create_at', [$state_time, $end_time])
             ->count();
-        print_r($data['status']);
         $order = self::select('ld_order.id','ld_order.order_number','ld_order.order_type','ld_order.price','ld_order.pay_status','ld_order.pay_type','ld_order.status','ld_order.create_at','ld_order.oa_status','ld_order.student_id','ld_student.phone','ld_student.real_name')
             ->leftJoin('ld_student','ld_student.id','=','ld_order.student_id')
             ->where(function($query) use ($data) {
