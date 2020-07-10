@@ -76,11 +76,11 @@ class CourseController extends Controller {
          * return  array
      */
     public function courseList(){
-        $keys = json_encode($this->data).$this->school['id'];
-        if(Redis::get($keys)){
-            $data = json_decode(Redis::get($keys),true);
-            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$data[0],'page'=>$data[1],'where'=>$data[2]]);
-        }else {
+//        $keys = json_encode($this->data).$this->school['id'];
+//        if(Redis::get($keys)){
+//            $data = json_decode(Redis::get($keys),true);
+//            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$data[0],'page'=>$data[1],'where'=>$data[2]]);
+//        }else {
             $school_id = $this->school['id'];
             //每页显示的条数
             $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 20;
@@ -106,6 +106,7 @@ class CourseController extends Controller {
                         $query->where('child_id', $parent[1]);
                     }
                 })->count();
+
             $count2 = CourseSchool::leftJoin('ld_course', 'ld_course.id', '=', 'ld_course_school.course_id')
                 ->where(['ld_course_school.to_school_id' => $school_id, 'ld_course_school.is_del' => 0])
                 ->where(function ($query) use ($parent) {
@@ -116,6 +117,8 @@ class CourseController extends Controller {
                         $query->where('ld_coursechild_id', $parent[1]);
                     }
                 })->count();
+            echo $count1;
+            echo $count2;
             $count = $count1 + $count2;
             //自增课程
             $name = isset($this->data['name']) ? $this->data['name'] : '';
@@ -204,7 +207,7 @@ class CourseController extends Controller {
                 $date = array_column($all, 'watch_num');
                 array_multisort($date, SORT_DESC, $all);
             }
-            $res = array_slice($all, ($page - 1) * $pagesize, $pagesize);
+            $res = array_slice($all, $offset, $pagesize);
             $page = [
                 'pageSize' => $pagesize,
                 'page' => $page,
@@ -215,9 +218,9 @@ class CourseController extends Controller {
                 1=>$page,
                 2=>$this->data,
             ];
-            Redis::set($keys,json_encode($datas),300);
+//            Redis::set($keys,json_encode($datas),300);
             return response()->json(['code' => 200, 'msg' => '获取成功', 'data' => $res, 'page' => $page, 'where' => $this->data]);
-        }
+//        }
     }
     /*
          * @param  课程详情
