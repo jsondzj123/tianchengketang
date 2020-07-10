@@ -184,7 +184,10 @@ class OrderController extends Controller {
         file_put_contents('payorderinvalid', '时间:'.date('Y-m-d H:i:s').print_r($order,true),FILE_APPEND);
         if(!empty($order)){
             foreach ($order as $k=>$v){
-                Order::where(['id'=>$v['id']])->update(['status'=>5]);
+                $a = Order::where(['id'=>$v['id']])->update(['status'=>5]);
+                if(!$a){
+                    return ['code' => 201 , 'msg' => '错误','data'=>$a];
+                }
             }
         }
     }
