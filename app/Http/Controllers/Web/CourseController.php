@@ -118,6 +118,7 @@ class CourseController extends Controller {
                         $query->where('child_id', $parent[1]);
                     }
                 })->count();
+            echo $count1;
             $count = $count1 + $count2;
             //自增课程
             $course = [];
