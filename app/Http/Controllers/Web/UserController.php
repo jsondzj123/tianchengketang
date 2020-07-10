@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
+use App\Models\Coures;
+use App\Models\CourseSchool;
+use App\Models\Order;
 use App\Models\Region;
 use App\Models\School;
 use App\Models\Student;
@@ -231,9 +234,33 @@ class UserController extends Controller {
     //我的收藏
     //我的题库
     //我的课程
-    //我的订单
+    //我的订单  status 1已完成2未完成3已失效
     public function myOrder(){
-
+        $where=[];
+        if(isset($this->data['status']) || !empty($this->data['status'])){
+            if($this->data['status'] == 1){
+                $where['status'] = 2;
+            }
+            if($this->data['status'] == 2){
+                $where['status'] = '< 0';
+            }
+            if($this->data['status'] == 3){
+                $where['status'] = 5;
+            }
+        }
+        $where['student_id'] = $this->userid;
+        $order = Order::where($where)->orderByDesc('id')->get()->toArray();
+        if(!empty($order)){
+            foreach ($order as $k=>&$v){
+                if($v['nature'] == 1){
+                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+                }else{
+                    $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+                }
+                $v['title'] = isset($course['title'])?$course['title']:'';
+            }
+        }
+        return response()->json(['code' => 203 , 'msg' => '获取成功','data'=>$order]);
     }
 }
 
