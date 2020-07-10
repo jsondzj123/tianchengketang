@@ -19,7 +19,7 @@ class UserController extends Controller {
     public function __construct(){
         $this->data = $_REQUEST;
         $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
-        $this->userid = isset(AdminLog::getAdminInfo()->admin_user->id)?AdminLog::getAdminInfo()->admin_user->id:0;
+        $this->userid = isset($this->data['user_info']['user_id'])?$this->data['user_info']['user_id']:0;
     }
     /*
          * @param  个人信息
@@ -232,6 +232,9 @@ class UserController extends Controller {
          * return  array
          */
     //我的收藏
+    public function myCollect(){
+
+    }
     //我的题库
     //我的课程
     //我的订单  status 1已完成2未完成3已失效
