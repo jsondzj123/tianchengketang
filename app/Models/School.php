@@ -314,6 +314,7 @@ class School extends Model {
             })->select('id','title','cover','nature','status','school_id','start_at','end_at')
             ->orderBy('id','desc')
             ->get()->toArray();
+        print_r($openCourse);die;
         $natureOpenCourse = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
                             ->where(function($query) use ($data,$school_id) {
                                 if(!empty($data['subjectOne']) && $data['subjectOne'] != ''){
