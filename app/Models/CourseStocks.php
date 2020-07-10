@@ -51,6 +51,7 @@ class CourseStocks extends Model {
      * return  array
      */
    	public static function doInsertStocks($data){
+        unset($data['/admin/courstocks/doInsertStocks']);
    		$data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;//当前登录账号id
    		$data['school_pid'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;//当前登录学校id
    		$sum_current_number = self::where($data)->where(['school_pid'=>$data['school_pid'],'is_del'=>0])->orderBy('id','desc')->sum('add_number');//当前已经添加总库存
