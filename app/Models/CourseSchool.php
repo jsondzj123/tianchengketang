@@ -106,8 +106,6 @@ class CourseSchool extends Model {
                     $OpenCourseArr = array_merge($zizengOpenCourse,$natureOpenCourse);
 
                     foreach ($OpenCourseArr as $key => $v) {
-                        $watch_num = OpenLivesChilds::where('lesson_id',$v['lesson_id'])->where(['is_del'=>0])->first(['watch_num']);
-                        $OpenCourseArr[$key]['watch_num'] = empty($watch_num) || $watch_num <=0 ?0:$watch_num;
                         $OpenCourseArr[$key]['subjectNameOne'] = !isset($subjectArr[$v['parent_id']])?'':$subjectArr[$v['parent_id']];
                         $OpenCourseArr[$key]['subjectNameTwo'] = !isset($subjectArr[$v['child_id']])?'':$subjectArr[$v['child_id']];
                         $OpenCourseArr[$key]['method'] = ['直播'];

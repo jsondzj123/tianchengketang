@@ -339,6 +339,8 @@ class School extends Model {
         if(!empty($openCourse) || !empty($natureOpenCourse)){
             $arr = array_merge($openCourse,$natureOpenCourse);
             foreach($arr as $k =>$v){
+                $watch_num = OpenLivesChilds::where('lesson_id',$v['id'])->where(['is_del'=>0])->select('watch_num')->first();
+                $arr[$k]['watch_num'] = empty($watch_num) || $watch_num['watch_num'] <=0 ?0:$watch_num['watch_num'];
                 $arr[$k]['start_at'] = date('Y-m-d H:i:s',$v['start_at']);
                 $arr[$k]['end_at']   = date('Y-m-d H:i:s',$v['end_at']);
             }
