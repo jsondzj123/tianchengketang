@@ -35,7 +35,7 @@ class ApiAuthToken {
         }
         $role = Roleauth::getRoleOne($userlist['data']['role_id']);//获取角色权限
         if(!strpos($role['data']['auth_id'],(string)$authid['id'])){
-           return response()->json(['code'=>403,'msg'=>'此用户没有权限']);
+           return response()->json(['code'=>403,'msg'=>'此用户没有权限！']);
         }else{
            return $next($request);
         }
