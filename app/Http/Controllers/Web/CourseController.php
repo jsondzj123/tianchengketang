@@ -97,7 +97,7 @@ class CourseController extends Controller {
                 $methodwhere = $this->data['method'];
             }
             //总条数
-            $count1 = Coures::where(['school_id' => $school_id, 'is_del' => 0])
+            $count1 = Coures::where(['school_id' => $school_id, 'is_del' => 0,'status'=>1])
                 ->where(function ($query) use ($parent) {
                     if (!empty($parent[0]) && $parent[0] != '') {
                         $query->where('parent_id', $parent[0]);
