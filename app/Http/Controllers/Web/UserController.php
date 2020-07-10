@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\Region;
 use App\Models\School;
 use App\Models\Student;
+use App\Models\StudentCollect;
 use Illuminate\Support\Facades\Redis;
 
 class UserController extends Controller {
@@ -233,7 +234,10 @@ class UserController extends Controller {
          */
     //我的收藏
     public function myCollect(){
+        $collect = StudentCollect::where(['student_id'=>$this->userid,'status'=>0])->get()->toArray();
+        foreach ($collect as $k=>&$v){
 
+        }
     }
     //我的题库
     //我的课程
