@@ -668,13 +668,12 @@ class BankController extends Controller {
         }
         
         //通过题库和科目id查询试卷的列表
-        $exam_array = Papers::where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where("is_del" , 0)->where("is_publish" , 1)->get();
+        $exam_array = Papers::where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where("is_del" , 0)->where("is_publish" , 1)->get()->toArray();
         if(!$exam_array || empty($exam_array)){
             return response()->json(['code' => 203 , 'msg' => '暂无对应的试卷']);
         }
         
-        //数组转化
-        $exam_array = $exam_array->toArray();
+        //循环数据
         foreach($exam_array as $k=>$v){
             //判断学员是否提交了试卷
             $info = StudentPapers::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $v['id'])->where('type' , 3)->first();
