@@ -375,37 +375,59 @@ class School extends Model {
                                 $query->where('ld_course_ref_open.from_school_id',$school_id);
                                 $query->where('ld_course_ref_open.is_del',0);
                     })->select('ld_course_open.parent_id','ld_course_open.child_id')->get()->toArray(); //授权公开课信息（分校）
-
+            if(!empty($natureSubject)){
+                $arr =array_unique($natureSubject, SORT_REGULAR); 
+                if(!empty($arr)){     
+                    foreach($arr as $k=>$v){   
+                        array_push($newIdsArr,$v['parent_id']);
+                        array_push($newIdsArr,$v['child_id']);
+                    } 
+                    $newIdsArr = array_unique($newIdsArr);
+                    $natureSubjectIdsData = CouresSubject::whereIn('id',$newIdsArr)->where(['is_open'=>0,'is_del'=>0])->select('id','parent_id','subject_name')->get()->toArray();
+                }
+            }
+            $subjectIdsArr = array_merge($natureSubjectIdsData,$zizengSubject);
+           
+            if(!empty($subjectIdsArr)){
+                $subjectIdsData = getParentsList($subjectIdsArr);
+            }      
+            return ['code'=>200,'msg'=>'Success','data'=>$subjectIdsData];
         }
         if($data['is_public'] == 0){//课程
-            $natureSubject = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
-                            ->where(function($query) use ($data,$school_id) {
-                                $query->where('ld_course_school.to_school_id',$data['school_id']);
-                                $query->where('ld_course_school.from_school_id',$school_id);
-                                $query->where('ld_course_school.is_del',0);
-                    })->select('ld_course.parent_id','ld_course.child_id')
+            $natureSubject = CourseSchool::where(function($query) use ($data,$school_id) {
+                                $query->where('to_school_id',$data['school_id']);
+                                $query->where('from_school_id',$school_id);
+                                $query->where('is_del',0);
+                    })->select('parent_id','child_id')
                     ->get()->toArray(); //授权课程信息（分校）
 
-        }
-        if(!empty($natureSubject)){
-            $arr =array_unique($natureSubject, SORT_REGULAR);
-            foreach($arr as $k=>$v){
-                 $subjectArr  = CourseRefSubject::where(['to_school_id'=>$data['school_id'],'is_del'=>0,'parent_id'=>$v['parent_id'],'child_id'=>$v['child_id']])->select('parent_id','child_id')->get()->toArray();
+            if(!empty($natureSubject)){
+                $arr =array_unique($natureSubject, SORT_REGULAR);
+               
+                // foreach($arr as $k=>$v){
+                //      $subjectArr  = CourseRefSubject::where(['to_school_id'=>$data['school_id'],'is_del'=>0,'parent_id'=>$v['parent_id'],'child_id'=>$v['child_id']])->select('parent_id','child_id')->get()->toArray();
+                // }  
+
+                if(!empty($arr)){     
+                    foreach($arr as $k=>$v){   
+                        array_push($newIdsArr,$v['parent_id']);
+                        array_push($newIdsArr,$v['child_id']);
+                    } 
+                    $newIdsArr = array_unique($newIdsArr);
+                    $natureSubjectIdsData = CouresSubject::whereIn('id',$newIdsArr)->where(['is_open'=>0,'is_del'=>0])->select('id','parent_id','subject_name')->get()->toArray();
+                }
             }
-            if(!empty($subjectArr)){     
-                foreach($subjectArr as $k=>$v){   
-                    array_push($newIdsArr,$v['parent_id']);
-                    array_push($newIdsArr,$v['child_id']);
-                } 
-                $newIdsArr = array_unique($newIdsArr);
-                $natureSubjectIdsData = CouresSubject::whereIn('id',$newIdsArr)->where(['is_open'=>0,'is_del'=>0])->select('id','parent_id','subject_name')->get()->toArray();
-            }
+
+            $subjectIdsArr = array_merge($natureSubjectIdsData,$zizengSubject);
+           
+            if(!empty($subjectIdsArr)){
+                $subjectIdsData = getParentsList($subjectIdsArr);
+            }      
+ 
+            return ['code'=>200,'msg'=>'Success','data'=>$subjectIdsData];
+
         }
-        $subjectIdsArr = array_merge($natureSubjectIdsData,$zizengSubject);
-        if(!empty($subjectIdsArr)){
-            $subjectIdsData = getParentsList($subjectIdsArr);
-        }      
-        return ['code'=>200,'msg'=>'Success','data'=>$subjectIdsData];
+
     }
 
 
