@@ -11,7 +11,6 @@ class Order extends Model {
     public $table = 'ld_order';
     //时间戳设置
     public $timestamps = false;
-
     /*
          * @param  订单列表
          * @param  $school_id  分校id
@@ -48,7 +47,7 @@ class Order extends Model {
                 if(isset($data['school_id']) && !empty($data['school_id'])){
                     $query->where('ld_order.school_id',$data['school_id']);
                 }
-                if(isset($data['status'])&& !empty($data['status'] && $data['status'] != -1)){
+                if(isset($data['status']) && $data['status'] != -1){
                     $query->where('ld_order.status',$data['status']);
                 }
                 if(isset($data['order_number'])&& !empty($data['order_number'])){
@@ -63,7 +62,7 @@ class Order extends Model {
                 if(isset($data['school_id']) && !empty($data['school_id'])){
                     $query->where('ld_order.school_id',$data['school_id']);
                 }
-                if(isset($data['status'])&& is_numeric($data['status']&& $data['status'] != -1)){
+                if(isset($data['status'])&& $data['status'] != -1){
                     $query->where('ld_order.status',$data['status']);
                 }
                 if(isset($data['order_number'])&& !empty($data['order_number'])){
@@ -112,7 +111,7 @@ class Order extends Model {
             return ['code' => 201 , 'msg' => '原价为空或格式不对'];
         }
         //判断付款类型
-        if(!isset($arr['payment_type']) || empty($arr['payment_type']) || !in_array($arr['payment_type'],[1,2,3,4])){
+        if(!isset($arr['payment_type']) || empty($arr['payment_type']) || !in_array(  $arr['payment_type'],[1,2,3,4])){
             return ['code' => 201 , 'msg' => '付款类型为空或格式不对'];
         }
         //判断原价
