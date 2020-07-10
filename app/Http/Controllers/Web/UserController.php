@@ -233,12 +233,12 @@ class UserController extends Controller {
          * return  array
          */
     //我的收藏
-    public function myCollect(){
-        $collect = StudentCollect::where(['student_id'=>$this->userid,'status'=>0])->get()->toArray();
-        foreach ($collect as $k=>&$v){
-
-        }
-    }
+//    public function myCollect(){
+//        $collect = StudentCollect::where(['student_id'=>$this->userid,'status'=>0])->get()->toArray();
+//        foreach ($collect as $k=>&$v){
+//
+//        }
+//    }
     //我的题库
     //我的课程
     //我的订单  status 1已完成2未完成3已失效
