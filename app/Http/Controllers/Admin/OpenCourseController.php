@@ -85,9 +85,8 @@ class OpenCourseController extends Controller {
 	        if($openCourseArr['start_at'] >  $openCourseArr['end_at'] ){
 	        	return response()->json(['code'=>207,'msg'=>'开始时间不能大于结束时间']); 
 	        }
-	        if(strtotime(date('Y-m-d 00:00:00')) < $openCourseArr['start_at'] && strtotime(date('Y-m-d 23:59:59')) > $openCourseArr['end_at']){
-	        	continue;
-	        }else{
+
+	        if(!(strtotime(date('Y-m-d')) < $openCourseArr['start_at'] && strtotime(date('Y-m-d 23:59:59')) > $openCourseArr['end_at'])){
 	        	return response()->json(['code'=>207,'msg'=>'开始时间和结束时间必须在同一天']);
 	        }
 	        $openCourseArr['school_id']  = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0 ;
