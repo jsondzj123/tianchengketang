@@ -191,9 +191,9 @@ class CourseSchool extends Model {
     public static function store($body){
 
         $arr = $subjectArr = $bankids = $questionIds = $InsertTeacherRef = $InsertSubjectRef = $InsertRecordVideoArr = $InsertZhiboVideoArr = $InsertQuestionArr =  [];
-        $courseIds=$body['course_id'];
+        // $courseIds=$body['course_id'];
     	// $courseIds = explode(',',$body['course_id']);
-     //    $courseIds = json_decode($body['course_id'],1);
+        $courseIds = json_decode($body['course_id'],1); //前端传值
     	$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
     	$user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0; //当前登录的用户id
         if($body['is_public'] == 1){ //公开课
@@ -254,7 +254,7 @@ class CourseSchool extends Model {
                     return ['code'=>203,'msg'=>'公开课授权未成功'];
                 }
                 $subjectRes = CourseRefSubject::insert($arr);
-               
+
                 if(!$subjectRes){
                     DB::rollback();
                     return ['code'=>203,'msg'=>'公开课授权未成功！'];
