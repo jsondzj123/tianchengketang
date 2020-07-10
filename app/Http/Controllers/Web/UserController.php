@@ -254,9 +254,9 @@ class UserController extends Controller {
         if(!empty($order)){
             foreach ($order as $k=>&$v){
                 if($v['nature'] == 1){
-                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+                    $course = CourseSchool::select('title')->where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
                 }else{
-                    $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+                    $course = Coures::select('title')->where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
                 }
                 $v['title'] = isset($course['title'])?$course['title']:'';
             }
@@ -270,7 +270,23 @@ class UserController extends Controller {
             1=>!empty($unfinished)?$unfinished:0,
             2=>!empty($error)?$error:0
         ];
-        return response()->json(['code' => 203 , 'msg' => '获取成功','data'=>$order,'count'=>$count]);
+        return response()->json(['code' => 200, 'msg' => '获取成功','data'=>$order,'count'=>$count]);
+    }
+    //订单单条详情
+    public function orderFind(){
+        if(!isset($this->data['id'])||empty($this->data['id'])){
+            return response()->json(['code' => 201 , 'msg' => '订单id为空']);
+        }
+        $order = Order::where('id',$this->data['id'])->first()->toArray();
+        if(!empty($order)){
+            if($order['nature'] == 1){
+                $course = CourseSchool::select('title')->where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+            }else{
+                $course = Coures::select('title')->where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+            }
+            $course['title'] = isset($course['title'])?$course['title']:'';
+        }
+        return response()->json(['code' => 200, 'msg' => '获取成功','data'=>$order]);
     }
 }
 

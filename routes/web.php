@@ -199,6 +199,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('userUpPass','UserController@userUpPass');//修改密码
         //个人信息模块
         $router->post('myOrder','UserController@myOrder');//我的订单
+        $router->post('orderFind','UserController@orderFind');//我的订单单条记录
     });
 });
 //后台端路由接口
