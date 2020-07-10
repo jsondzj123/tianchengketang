@@ -96,6 +96,7 @@ class CourseController extends Controller {
             if (!empty($this->data['method'])) {
                 $methodwhere = $this->data['method'];
             }
+            $name = isset($this->data['name']) ? $this->data['name'] : '';
             //总条数
             $count1 = Coures::where(['school_id' => $school_id, 'is_del' => 0,'status'=>1])
                 ->where(function ($query) use ($parent) {
@@ -105,8 +106,8 @@ class CourseController extends Controller {
                     if (!empty($parent[1]) && $parent[1] != '') {
                         $query->where('child_id', $parent[1]);
                     }
-                })->count();
 
+                })->where('title', 'like', '%' . $name . '%')->count();
             $count2 = CourseSchool::leftJoin('ld_course', 'ld_course.id', '=', 'ld_course_school.course_id')
                 ->where(['ld_course_school.to_school_id' => $school_id, 'ld_course_school.is_del' => 0])
                 ->where(function ($query) use ($parent) {
@@ -116,12 +117,9 @@ class CourseController extends Controller {
                     if (!empty($parent[1]) && $parent[1] != '') {
                         $query->where('ld_coursechild_id', $parent[1]);
                     }
-                })->count();
-            echo $count1;
-            echo $count2;
+                })->where('title', 'like', '%' . $name . '%')->count();
             $count = $count1 + $count2;
             //自增课程
-            $name = isset($this->data['name']) ? $this->data['name'] : '';
             $course = [];
             if ($count1 != 0) {
                 $course = Coures::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'nature', 'watch_num', 'create_at')
