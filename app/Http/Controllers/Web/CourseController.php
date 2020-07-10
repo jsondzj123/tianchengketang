@@ -287,7 +287,7 @@ class CourseController extends Controller {
          * return  array
          */
     public function courseIntroduce(){
-        $keys = $this->data;
+        $keys = json_encode($this->data).$this->userid;
         if(Redis::get($keys)){
             return response()->json(['code' => 201 , 'msg' => '查询成功','data'=>json_decode(Redis::get($keys),true)]);
         }else{
