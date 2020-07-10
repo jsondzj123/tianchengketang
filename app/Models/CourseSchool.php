@@ -389,7 +389,7 @@ class CourseSchool extends Model {
     }
     //授权课程列表小类
     public static function getNatureSubjectTwoByid($data){
-        $subjectTwoArr = CouresSubject::where(['parent_id'=>$data['id'],'is_del'=>0,'is_open'=>0])->select('id','subject_name')->get();
+        $subjectTwoArr = CouresSubject::where(['parent_id'=>$data['subjectOne'],'is_del'=>0,'is_open'=>0])->select('id','subject_name')->get();
         return ['code'=>200,'msg'=>'Success','data'=>$subjectTwoArr];
     }
 }
