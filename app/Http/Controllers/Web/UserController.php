@@ -236,20 +236,21 @@ class UserController extends Controller {
     //我的课程
     //我的订单  status 1已完成2未完成3已失效
     public function myOrder(){
-        $where=[];
-        if(isset($this->data['status']) || !empty($this->data['status'])){
-            if($this->data['status'] == 1){
-                $where['status'] = 2;
-            }
-            if($this->data['status'] == 2){
-                $where['status'] = '< 2';
-            }
-            if($this->data['status'] == 3){
-                $where['status'] = 5;
-            }
-        }
-        $where['student_id'] = $this->userid;
-        $order = Order::where($where)->orderByDesc('id')->get()->toArray();
+        $status = isset($this->data['status'])?$this->data['status']:'';
+        $order = Order::where(['student_id'=>$this->userid])
+            ->where(function($query) use ($status) {
+                //状态判断
+                if($status == 1){
+                    $query->where('status',2);
+                }
+                if($status == 2){
+                    $query->where('status','<',2);
+                }
+                if($status == 3){
+                    $query->where('status',5);
+                }
+            })
+            ->orderByDesc('id')->get()->toArray();
         if(!empty($order)){
             foreach ($order as $k=>&$v){
                 if($v['nature'] == 1){
