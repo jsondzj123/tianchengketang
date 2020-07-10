@@ -92,10 +92,7 @@ class CourseController extends Controller {
                 $parent = json_decode($this->data['parent'], true);
             }
             //授课类型条件
-            $methodwhere = '';
-            if (!empty($this->data['method'])) {
-                $methodwhere = $this->data['method'];
-            }
+            $methodwhere = isset($this->data['method'])?$this->data['method']:'';
             $name = isset($this->data['name']) ? $this->data['name'] : '';
             //总条数
             $count1 = Coures::where(['school_id' => $school_id, 'is_del' => 0,'status'=>1])
@@ -118,7 +115,6 @@ class CourseController extends Controller {
                         $query->where('child_id', $parent[1]);
                     }
                 })->count();
-            echo $count1;
             $count = $count1 + $count2;
             //自增课程
             $course = [];
@@ -136,7 +132,12 @@ class CourseController extends Controller {
                     ->where('title', 'like', '%' . $name . '%')
                     ->get()->toArray();
                 foreach ($course as $k => &$v) {
-                    $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])->get()->toArray();
+                    $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])
+                        ->where(function ($query) use ($methodwhere) {
+                            if($methodwhere != ''){
+                                $query->where('method_id', $methodwhere);
+                            }
+                        })->get()->toArray();
                     if (!empty($method)) {
                         foreach ($method as $key => &$val) {
                             if ($val['method_id'] == 1) {
@@ -171,7 +172,12 @@ class CourseController extends Controller {
                     ->where('title', 'like', '%' . $name . '%')
                     ->get()->toArray();
                 foreach ($ref_course as $ks => &$vs) {
-                    $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])->where($methodwhere)->get()->toArray();
+                    $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])
+                        ->where(function ($query) use ($methodwhere) {
+                            if($methodwhere != ''){
+                                $query->where('method_id', $methodwhere);
+                            }
+                        })->get()->toArray();
                     if (!empty($method)) {
                         foreach ($method as $key => &$val) {
                             if ($val['method_id'] == 1) {
