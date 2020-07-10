@@ -266,9 +266,9 @@ class UserController extends Controller {
         $unfinished = Order::where(['student_id'=>$this->userid])->where('status','<',2)->count();
         $error = Order::where(['student_id'=>$this->userid,'status'=>5])->count();
         $count = [
-            0=>$success,
-            1=>$unfinished,
-            2=>$error
+            0=>!empty($success)?$success:0,
+            1=>!empty($unfinished)?$unfinished:0,
+            2=>!empty($error)?$error:0
         ];
         return response()->json(['code' => 203 , 'msg' => '获取成功','data'=>$order,'count'=>$count]);
     }
