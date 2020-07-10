@@ -261,7 +261,16 @@ class UserController extends Controller {
                 $v['title'] = isset($course['title'])?$course['title']:'';
             }
         }
-        return response()->json(['code' => 203 , 'msg' => '获取成功','data'=>$order]);
+        //所有总数
+        $success = Order::where(['student_id'=>$this->userid,'status'=>2])->count();
+        $unfinished = Order::where(['student_id'=>$this->userid])->where('status','<',2)->count();
+        $error = Order::where(['student_id'=>$this->userid,'status'=>5])->count();
+        $count = [
+            0=>$success,
+            1=>$unfinished,
+            2=>$error
+        ];
+        return response()->json(['code' => 203 , 'msg' => '获取成功','data'=>$order,'count'=>$count]);
     }
 }
 
