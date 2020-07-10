@@ -357,14 +357,27 @@ class BankController extends Controller {
                     return response()->json(['code' => 203 , 'msg' => '暂无随机生成的试题']);
                 }
                 
+                //保存章节试卷得信息
+                $papers_id = StudentPapers::insertGetId([
+                    'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                    'bank_id'      =>   $bank_id ,
+                    'subject_id'   =>   $subject_id ,
+                    'chapter_id'   =>   $chapter_id ,
+                    'joint_id'     =>   $joint_id ,
+                    'model'        =>   $model ,
+                    'type'         =>   1 ,
+                    'create_at'    =>   date('Y-m-d H:i:s')
+                ]);
+                
                 //保存随机生成的试题
                 foreach($exam_list as $k=>$v){
                     //循环插入试题
-                    StudentDoTitle::insertGetId([
+                    $rand_exam_id = StudentDoTitle::insertGetId([
                         'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
                         'bank_id'      =>   $bank_id ,
                         'subject_id'   =>   $subject_id ,
                         'chapter_id'   =>   $chapter_id ,
+                        'papers_id'    =>   $papers_id ,
                         'joint_id'     =>   $joint_id ,
                         'exam_id'      =>   $v['id'] ,
                         'type'         =>   1 ,
@@ -391,6 +404,7 @@ class BankController extends Controller {
                     
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
+                        'papers_id'           =>  $papers_id ,
                         'exam_id'             =>  $v['id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
@@ -402,12 +416,14 @@ class BankController extends Controller {
                         'is_collect'          =>  0
                     ];
                 }
-                $model_key = "exam:user:model:".self::$accept_data['user_info']['user_id'].":bank:".$bank_id.":subject_id:".$subject_id.":chapter_id:".$chapter_id.":joint_id:".$joint_id;
-                //保存选择模式
-                Redis::set($model_key , $model);
             } else {
+                //查询还未做完的试卷
+                $student_papers_info = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('type' , 1)->where('is_over' , 0)->first();
+                //试卷id
+                $papers_id = $student_papers_info['id'];
+                
                 //查询还未做完的题列表
-                $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('type' , 1)->get();
+                $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("papers_id" , $papers_id)->where('type' , 1)->get();
                 foreach($exam_list as $k=>$v){
                     //根据试题的id获取试题详情
                     $exam_info = Exam::where('id' , $v['exam_id'])->first();
@@ -428,10 +444,11 @@ class BankController extends Controller {
                     }
                     
                     //判断学员是否收藏此题
-                    $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 1)->where('status' , 1)->count();
+                    $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("papers_id" , $v['papers_id'])->where('exam_id' , $v['exam_id'])->where('type' , 1)->where('status' , 1)->count();
                     
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
+                        'papers_id'           =>  $v['papers_id'] ,
                         'exam_id'             =>  $v['exam_id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
@@ -457,13 +474,23 @@ class BankController extends Controller {
                     return response()->json(['code' => 203 , 'msg' => '暂无随机生成的试题']);
                 }
                 
+                //保存章节试卷得信息
+                $papers_id = StudentPapers::insertGetId([
+                    'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                    'bank_id'      =>   $bank_id ,
+                    'subject_id'   =>   $subject_id ,
+                    'type'         =>   2 ,
+                    'create_at'    =>   date('Y-m-d H:i:s')
+                ]);
+                
                 //保存随机生成的试题
                 foreach($exam_list as $k=>$v){
                     //循环插入试题
-                    StudentDoTitle::insertGetId([
+                    $rand_exam_id = StudentDoTitle::insertGetId([
                         'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
                         'bank_id'      =>   $bank_id ,
                         'subject_id'   =>   $subject_id ,
+                        'papers_id'    =>   $papers_id ,
                         'exam_id'      =>   $v['id'] ,
                         'type'         =>   2 ,
                         'create_at'    =>   date('Y-m-d H:i:s')
@@ -489,6 +516,7 @@ class BankController extends Controller {
                     
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
+                        'papers_id'           =>  $papers_id ,
                         'exam_id'             =>  $v['id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
@@ -501,8 +529,13 @@ class BankController extends Controller {
                     ];
                 }
             } else {
+                //查询还未做完的试卷
+                $student_papers_info = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 2)->where('is_over' , 0)->first();
+                //试卷id
+                $papers_id = $student_papers_info['id'];
+                
                 //查询还未做完的题列表
-                $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 2)->get();
+                $exam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("papers_id" , $papers_id)->where('type' , 2)->get();
                 foreach($exam_list as $k=>$v){
                     //根据试题的id获取试题详情
                     $exam_info = Exam::where('id' , $v['exam_id'])->first();
@@ -523,10 +556,11 @@ class BankController extends Controller {
                     }
                     
                     //判断学员是否收藏此题
-                    $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 2)->where('status' , 1)->count();
+                    $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("papers_id" , $v['papers_id'])->where('exam_id' , $v['exam_id'])->where('type' , 2)->where('status' , 1)->count();
                     
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
+                        'papers_id'           =>  $v['papers_id'] ,
                         'exam_id'             =>  $v['exam_id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
@@ -574,13 +608,14 @@ class BankController extends Controller {
                 }
                 
                 //判断学员是否收藏此题
-                $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->where('status' , 1)->count();
+                $is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("papers_id" , $papers_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->where('status' , 1)->count();
                 
                 //根据条件获取此学生此题是否答了
                 $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("papers_id" , $papers_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->first();
 
                 //试题随机展示
                 $exam_array[$exam_info['type']][] = [
+                    'papers_id'           =>  $papers_id ,
                     'exam_id'             =>  $v['exam_id'] ,
                     'exam_name'           =>  $exam_info['exam_content'] ,
                     'exam_type_name'      =>  $exam_type_name ,
@@ -594,18 +629,8 @@ class BankController extends Controller {
             }
         }
         
-        //判断是章节练习还是快速做题还是模拟真题
-        if($type == 1){
-            $model_key = "exam:user:model:".self::$accept_data['user_info']['user_id'].":bank:".$bank_id.":subject_id:".$subject_id.":chapter_id:".$chapter_id.":joint_id:".$joint_id;
-            //保存选择模式
-            $is_exists = Redis::get($model_key);
-            if($is_exists && !empty($is_exists)){
-                $model = $is_exists;
-            }
-            return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $exam_array , 'model' => $model]);
-        } else {
-            return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $exam_array]);
-        }
+        //返回数据信息
+        return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $exam_array]);
     }
     
     /*
@@ -637,44 +662,26 @@ class BankController extends Controller {
         //数组转化
         $exam_array = $exam_array->toArray();
         foreach($exam_array as $k=>$v){
-            //单选题数量
-            $exam_type_list = PapersExam::selectRaw("type , count('type') as t_count")->where("papers_id" , $v['id'])->where('is_del' , 0)->whereIn('type' , [1,2,3,4])->groupBy('type')->get()->toArray();
-            if($exam_type_list && !empty($exam_type_list)){
-                foreach($exam_type_list as $k1=>$v1){
-                    if($v1['type'] == 1){
-                        $exam_type_list[$k1]['sum_score'] = $v['signle_score'] * $v1['t_count'];
-                    } else if($v1['type'] == 2){
-                        $exam_type_list[$k1]['sum_score'] = $v['more_score'] * $v1['t_count'];
-                    } else if($v1['type'] == 3){
-                        $exam_type_list[$k1]['sum_score'] = $v['judge_score'] * $v1['t_count'];
-                    } else if($v1['type'] == 4){
-                        $exam_type_list[$k1]['sum_score'] = $v['options_score'] * $v1['t_count'];
-                    }
-                }
-                
-                //判断学员是否提交了试卷
-                $info = StudentPapers::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $v['id'])->first();
-                if($info && !empty($info)){
-                    $sum_score    =  $info['answer_score'];
-                    $answer_time  =  $info['answer_time'];
-                    $is_over      =  1;
-                } else {
-                    $sum_score    =  0;
-                    $answer_time  =  '';
-                    $is_over      =  0;
-                }
-                
-                $array[] = [
-                    'papers_id'    =>  $v['id'] ,
-                    'papers_name'  =>  $v['papers_name'] ,
-                    'papers_time'  =>  $v['papers_time'] ,
-                    'answer_time'  =>  $answer_time ,
-                    'sum_score'    =>  (float)$sum_score ,
-                    'is_over'      =>  $is_over
-                ];
+            //判断学员是否提交了试卷
+            $info = StudentPapers::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $v['id'])->where('type' , 3)->first();
+            if($info && !empty($info)){
+                $sum_score    =  !empty($info['answer_score']) ? $info['answer_score'] : 0;
+                $answer_time  =  !empty($info['answer_time']) ? $info['answer_time'] : '';
+                $is_over      =  $info['is_over'];
             } else {
-                $array = [];
+                $sum_score    =  0;
+                $answer_time  =  '';
+                $is_over      =  0;
             }
+
+            $array[] = [
+                'papers_id'    =>  $v['id'] ,
+                'papers_name'  =>  $v['papers_name'] ,
+                'papers_time'  =>  $v['papers_time'] ,
+                'answer_time'  =>  $answer_time ,
+                'sum_score'    =>  (float)$sum_score ,
+                'is_over'      =>  $is_over
+            ];
         }
         return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $array]);
     }
