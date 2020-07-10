@@ -238,9 +238,7 @@ class CourseController extends Controller {
         if(!isset($this->data['id']) || empty($this->data['id'])){
             return response()->json(['code' => 201 , 'msg' => '课程id不能为空']);
         }
-//        if(!isset($this->data['nature']) || empty($this->data['nature'])){
-//            return response()->json(['code' => 201 , 'msg' => '课程属性不能为空']);
-//        }
+        $this->data['nature'] = isset($this->data['nature'])?$this->data['nature']:0;
         $keys = json_encode($this->data).$this->userid;
         if(Redis::get($keys)){
             return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>json_decode(Redis::get($keys),true)]);
