@@ -178,16 +178,13 @@ class OrderController extends Controller {
     //订单未支付超过24小时  修改为无效订单
     public function orderUpinvalid(){
         //获取当前时间
-        $validity = date('Y-m-d H:i:s',strtotime('- 24day'));
-        $order = Order::where('create_at','<=',$validity)->where(['oa_status'=>0,'status'=>0])->get()->toArray();
+        $validity = date('Y-m-d H:i:s',strtotime('- 1day'));
+        $order = Order::where('create_at','<',$validity)->where(['oa_status'=>0,'status'=>0])->get()->toArray();
         //计划日志 失效订单
         file_put_contents('payorderinvalid', '时间:'.date('Y-m-d H:i:s').print_r($order,true),FILE_APPEND);
         if(!empty($order)){
             foreach ($order as $k=>$v){
-                $a = Order::where(['id'=>$v['id']])->update(['status'=>5]);
-                if(!$a){
-                    return ['code' => 201 , 'msg' => '错误','data'=>$a];
-                }
+                Order::where(['id'=>$v['id']])->update(['status'=>5,'update_at'=>date('Y-m-d H:i:s')]);
             }
         }
     }
