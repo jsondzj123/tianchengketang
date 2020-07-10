@@ -256,7 +256,6 @@ class CourseSchool extends Model {
                     return ['code'=>203,'msg'=>'公开课授权未成功'];
                 }
                 $subjectRes = CourseRefSubject::insert($arr);
-
                 if(!$subjectRes){
                     DB::rollback();
                     return ['code'=>203,'msg'=>'公开课授权未成功！'];
