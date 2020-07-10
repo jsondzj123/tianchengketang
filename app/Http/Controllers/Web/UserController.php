@@ -242,7 +242,7 @@ class UserController extends Controller {
                 $where['status'] = 2;
             }
             if($this->data['status'] == 2){
-                $where['status'] = '< 0';
+                $where['status'] = '< 2';
             }
             if($this->data['status'] == 3){
                 $where['status'] = 5;
