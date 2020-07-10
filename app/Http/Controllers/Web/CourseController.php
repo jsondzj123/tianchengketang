@@ -17,6 +17,7 @@ use App\Models\LiveClass;
 use App\Models\LiveClassChildTeacher;
 use App\Models\Order;
 use App\Models\School;
+use App\Models\StudentCollect;
 use App\Models\Teacher;
 use App\Models\Video;
 use App\Tools\MTCloud;
@@ -76,11 +77,11 @@ class CourseController extends Controller {
          * return  array
      */
     public function courseList(){
-        $keys = json_encode($this->data).$this->school['id'];
-        if(Redis::get($keys)){
-            $data = json_decode(Redis::get($keys),true);
-            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$data[0],'page'=>$data[1],'where'=>$data[2]]);
-        }else {
+//        $keys = json_encode($this->data).$this->school['id'];
+//        if(Redis::get($keys)){
+//            $data = json_decode(Redis::get($keys),true);
+//            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$data[0],'page'=>$data[1],'where'=>$data[2]]);
+//        }else {
             $school_id = $this->school['id'];
             //每页显示的条数
             $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 20;
@@ -92,12 +93,11 @@ class CourseController extends Controller {
                 $parent = json_decode($this->data['parent'], true);
             }
             //授课类型条件
-            $methodwhere = '';
-            if (!empty($this->data['method'])) {
-                $methodwhere = $this->data['method'];
-            }
+            $methodwhere = isset($this->data['method'])?$this->data['method']:'';
+            $name = isset($this->data['name']) ? $this->data['name'] : '';
             //总条数
-            $count1 = Coures::where(['school_id' => $school_id, 'is_del' => 0])
+            $count1 = Coures::where(['school_id' => $school_id, 'is_del' => 0,'status'=>1])
+                ->where('title', 'like', '%' . $name . '%')
                 ->where(function ($query) use ($parent) {
                     if (!empty($parent[0]) && $parent[0] != '') {
                         $query->where('parent_id', $parent[0]);
@@ -106,19 +106,18 @@ class CourseController extends Controller {
                         $query->where('child_id', $parent[1]);
                     }
                 })->count();
-            $count2 = CourseSchool::leftJoin('ld_course', 'ld_course.id', '=', 'ld_course_school.course_id')
-                ->where(['ld_course_school.to_school_id' => $school_id, 'ld_course_school.is_del' => 0])
+            $count2 = CourseSchool::where(['to_school_id' => $school_id, 'is_del' => 0,'status'=>1])
+                ->where('title', 'like', '%' . $name . '%')
                 ->where(function ($query) use ($parent) {
                     if (!empty($parent[0]) && $parent[0] != '') {
-                        $query->where('ld_courseparent_id', $parent[0]);
+                        $query->where('parent_id', $parent[0]);
                     }
                     if (!empty($parent[1]) && $parent[1] != '') {
-                        $query->where('ld_coursechild_id', $parent[1]);
+                        $query->where('child_id', $parent[1]);
                     }
                 })->count();
             $count = $count1 + $count2;
             //自增课程
-            $name = isset($this->data['name']) ? $this->data['name'] : '';
             $course = [];
             if ($count1 != 0) {
                 $course = Coures::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'nature', 'watch_num', 'create_at')
@@ -134,7 +133,12 @@ class CourseController extends Controller {
                     ->where('title', 'like', '%' . $name . '%')
                     ->get()->toArray();
                 foreach ($course as $k => &$v) {
-                    $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])->get()->toArray();
+                    $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])
+                        ->where(function ($query) use ($methodwhere) {
+                            if($methodwhere != ''){
+                                $query->where('method_id', $methodwhere);
+                            }
+                        })->get()->toArray();
                     if (!empty($method)) {
                         foreach ($method as $key => &$val) {
                             if ($val['method_id'] == 1) {
@@ -156,20 +160,25 @@ class CourseController extends Controller {
             $ref_course = [];
             //授权课程
             if ($count2 != 0) {
-                $ref_course = CourseSchool::select('ld_course_school.course_id as id', 'ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.sale_price', 'ld_course_school.buy_num', 'ld_course_school.watch_num', 'ld_course_school.create_at')
-                    ->leftJoin('ld_course', 'ld_course.id', '=', 'ld_course_school.course_id')
+                $ref_course = CourseSchool::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'watch_num', 'create_at','course_id')
                     ->where(function ($query) use ($parent) {
                         if (!empty($parent[0]) && $parent[0] != '') {
-                            $query->where('ld_course.parent_id', $parent[0]);
+                            $query->where('parent_id', $parent[0]);
                         }
                         if (!empty($parent[1]) && $parent[1] != '') {
-                            $query->where('ld_course.child_id', $parent[1]);
+                            $query->where('child_id', $parent[1]);
                         }
-                    })->where(['ld_course_school.to_school_id' => $school_id, 'ld_course_school.is_del' => 0, 'ld_course_school.status' => 1])
-                    ->where('ld_course_school.title', 'like', '%' . $name . '%')
+                    })
+                    ->where(['to_school_id' => $school_id, 'is_del' => 0, 'status' => 1])
+                    ->where('title', 'like', '%' . $name . '%')
                     ->get()->toArray();
                 foreach ($ref_course as $ks => &$vs) {
-                    $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])->where($methodwhere)->get()->toArray();
+                    $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])
+                        ->where(function ($query) use ($methodwhere) {
+                            if($methodwhere != ''){
+                                $query->where('method_id', $methodwhere);
+                            }
+                        })->get()->toArray();
                     if (!empty($method)) {
                         foreach ($method as $key => &$val) {
                             if ($val['method_id'] == 1) {
@@ -182,8 +191,8 @@ class CourseController extends Controller {
                                 $val['method_name'] = '其他';
                             }
                         }
-                        $v['method'] = $method;
-                        $v['nature'] = 1;
+                        $vs['method'] = $method;
+                        $vs['nature'] = 1;
                     } else {
                         unset($ref_course[$ks]);
                     }
@@ -204,7 +213,7 @@ class CourseController extends Controller {
                 $date = array_column($all, 'watch_num');
                 array_multisort($date, SORT_DESC, $all);
             }
-            $res = array_slice($all, ($page - 1) * $pagesize, $pagesize);
+            $res = array_slice($all, $offset, $pagesize);
             $page = [
                 'pageSize' => $pagesize,
                 'page' => $page,
@@ -215,9 +224,9 @@ class CourseController extends Controller {
                 1=>$page,
                 2=>$this->data,
             ];
-            Redis::set($keys,json_encode($datas),300);
+//            Redis::set($keys,json_encode($datas),300);
             return response()->json(['code' => 200, 'msg' => '获取成功', 'data' => $res, 'page' => $page, 'where' => $this->data]);
-        }
+//        }
     }
     /*
          * @param  课程详情
@@ -226,31 +235,73 @@ class CourseController extends Controller {
          * return  array
          */
     public function courseDetail(){
-        //课程基本信息
-        $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
-        if(!$course){
-            return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+        if(!isset($this->data['id']) || empty($this->data['id'])){
+            return response()->json(['code' => 201 , 'msg' => '课程id不能为空']);
         }
-        //修改观看数
-        Coures::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
-        $keys = $this->data.$this->userid;
+        if(!isset($this->data['nature']) || empty($this->data['nature'])){
+            return response()->json(['code' => 201 , 'msg' => '课程属性不能为空']);
+        }
+        $keys = json_encode($this->data).$this->userid;
         if(Redis::get($keys)){
             return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>json_decode(Redis::get($keys),true)]);
         }else {
-            //分类信息
-            $parent = CouresSubject::select('id', 'subject_name')->where(['id' => $course['parent_id'], 'parent_id' => 0, 'is_del' => 0, 'is_open' => 0])->first();
-            $child = CouresSubject::select('subject_name')->where(['id' => $course['child_id'], 'parent_id' => $parent['id'], 'is_del' => 0, 'is_open' => 0])->first();
-            $course['parent_name'] = $parent['subject_name'];
-            $course['child_name'] = $child['subject_name'];
-            unset($course['parent_id']);
-            unset($course['child_id']);
+        //课程基本信息
+        //授权
+        if($this->data['nature'] == 1){
+            $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+            if(!$course){
+                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+            }
+            //修改观看数
+            CourseSchool::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
             //授课方式
-            $method = Couresmethod::select('method_id')->where(['course_id' => $this->data['id']])->get()->toArray();
+            $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id']])->get()->toArray();
             if (!empty($method)) {
                 $course['method'] = array_column($method, 'method_id');
             }
             //学习人数   基数+订单数
-            $ordernum = Order::where(['class_id' => $this->data['id'], 'status' => 2, 'oa_status' => 1])->count();
+            $ordernum = Order::where(['class_id' => $course['course_id'], 'status' => 2, 'oa_status' => 1,'nature'=>1])->count();
+            $course['buy_num'] = $course['buy_num'] + $ordernum;
+            //讲师信息
+            $teacher = [];
+            $teacherlist = Couresteacher::where(['course_id' => $course['course_id'], 'is_del' => 0])->get()->toArray();
+            if (!empty($teacherlist)) {
+                foreach ($teacherlist as $k => $v) {
+                    $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first();
+                    array_push($teacher, $oneteacher);
+                }
+            }
+            //是否购买
+            if ($course['sale_price'] > 0) {
+                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['course_id'], 'status' => 2,'nature'=>1])->count();
+                $course['is_pay'] = $order > 0 ? 1 : 0;
+            } else {
+                $course['is_pay'] = 1;
+            }
+            //收藏数量
+            $collect = StudentCollect::where(['course_id'=>$course['course_id']])->count();
+            $course['collect'] = $collect;
+            //判断用户是否收藏
+            $collect = StudentCollect::where(['course_id'=>$course['course_id'],'student_id'=>$this->userid,'status'=>0])->count();
+            if($collect != 0){
+                $course['is_collect'] = 1;
+            }else{
+                $course['is_collect'] = 0;
+            }
+        }else{
+            $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+            if(!$course){
+                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+            }
+            //修改观看数
+            Coures::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
+            //授课方式
+            $method = Couresmethod::select('method_id')->where(['course_id' =>$this->data['id']])->get()->toArray();
+            if (!empty($method)) {
+                $course['method'] = array_column($method, 'method_id');
+            }
+            //学习人数   基数+订单数
+            $ordernum = Order::where(['class_id' => $this->data['id'], 'status' => 2, 'oa_status' => 1,'nature'=>0])->count();
             $course['buy_num'] = $course['buy_num'] + $ordernum;
             //讲师信息
             $teacher = [];
@@ -263,13 +314,52 @@ class CourseController extends Controller {
             }
             //是否购买
             if ($course['sale_price'] > 0) {
-                $order = Order::where(['student_id' => $this->userid, 'class_id' => $this->data['id'], 'status' => 2])->count();
+                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
                 $course['is_pay'] = $order > 0 ? 1 : 0;
             } else {
                 $course['is_pay'] = 1;
             }
-            Redis::set($keys,json_encode($course),300);
-            return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
+            //收藏数量
+            $collect = StudentCollect::where(['course_id'=>$this->data['id']])->count();
+            $course['collect'] = $collect;
+            //判断用户是否收藏
+            $collect = StudentCollect::where(['course_id'=>$this->data['id'],'student_id'=>$this->userid,'status'=>0])->count();
+            if($collect != 0){
+                $course['is_collect'] = 1;
+            }else{
+                $course['is_collect'] = 0;
+            }
+        }
+        //分类信息
+        $parent = CouresSubject::select('id', 'subject_name')->where(['id' => $course['parent_id'], 'parent_id' => 0, 'is_del' => 0, 'is_open' => 0])->first();
+        $child = CouresSubject::select('subject_name')->where(['id' => $course['child_id'], 'parent_id' => $parent['id'], 'is_del' => 0, 'is_open' => 0])->first();
+        $course['parent_name'] = $parent['subject_name'];
+        $course['child_name'] = $child['subject_name'];
+        unset($course['parent_id']);
+        unset($course['child_id']);
+        Redis::set($keys,json_encode($course),60);
+        return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
+        }
+    }
+    //课程收藏
+    public function collect(){
+        if(!isset($this->data['id'])||empty($this->data['id'])){
+            return response()->json(['code' => 201, 'msg' => '课程id为空']);
+        }
+        $list = StudentCollect::where(['course_id'=>$this->data['id'],'student_id'=>$this->userid])->first()->toArray();
+        if($list){
+            $status = $list['status'] == 1?0:1;
+            $add = StudentCollect::where('id',$list['id'])->update(['status'=>$status,'update_at'=>date('Y-m-d H:i:s')]);
+        }else{
+            $add = StudentCollect::insert([
+                'course_id' => $this->data['id'],
+                'student_id' => $this->userid
+            ]);
+        }
+        if($add){
+            return response()->json(['code' => 200, 'msg' => '操作成功']);
+        }else{
+            return response()->json(['code' => 203, 'msg' => '操作失败']);
         }
     }
     /*
@@ -279,18 +369,28 @@ class CourseController extends Controller {
          * return  array
          */
     public function courseIntroduce(){
-        $keys = $this->data;
+        $keys = json_encode($this->data).$this->userid;
         if(Redis::get($keys)){
             return response()->json(['code' => 201 , 'msg' => '查询成功','data'=>json_decode(Redis::get($keys),true)]);
         }else{
-            //课程基本信息
-            $course = Coures::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
-            if(!$course){
-                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+            $nature = $this->data['nature'];
+            if($nature == 1){
+                //课程基本信息
+                $course = CourseSchool::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+                if(!$course){
+                    return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+                }
+            }else{
+                //课程基本信息
+                $course = Coures::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+                if(!$course){
+                    return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+                }
             }
             Redis::set($keys,json_encode($course),300);
             return response()->json(['code' => 201 , 'msg' => '查询成功','data'=>$course]);
         }
+
     }
     /*
          * @param  课程录播列表

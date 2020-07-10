@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
+use App\Models\Coures;
+use App\Models\CourseSchool;
+use App\Models\Order;
 use App\Models\Region;
 use App\Models\School;
 use App\Models\Student;
@@ -222,7 +225,6 @@ class UserController extends Controller {
             return response()->json(['code' => 203 , 'msg' => '修改失败']);
         }
     }
-
     /*
          * @param  个人信息
          * @param  author  苏振文
@@ -232,6 +234,59 @@ class UserController extends Controller {
     //我的收藏
     //我的题库
     //我的课程
-    //我的订单
+    //我的订单  status 1已完成2未完成3已失效
+    public function myOrder(){
+        $status = isset($this->data['status'])?$this->data['status']:'';
+        $order = Order::where(['student_id'=>$this->userid])
+            ->where(function($query) use ($status) {
+                //状态判断
+                if($status == 1){
+                    $query->where('status',2);
+                }
+                if($status == 2){
+                    $query->where('status','<',2);
+                }
+                if($status == 3){
+                    $query->where('status',5);
+                }
+            })
+            ->orderByDesc('id')->get()->toArray();
+        if(!empty($order)){
+            foreach ($order as $k=>&$v){
+                if($v['nature'] == 1){
+                    $course = CourseSchool::select('title')->where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+                }else{
+                    $course = Coures::select('title')->where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+                }
+                $v['title'] = isset($course['title'])?$course['title']:'';
+            }
+        }
+        //所有总数
+        $success = Order::where(['student_id'=>$this->userid,'status'=>2])->count();
+        $unfinished = Order::where(['student_id'=>$this->userid])->where('status','<',2)->count();
+        $error = Order::where(['student_id'=>$this->userid,'status'=>5])->count();
+        $count = [
+            0=>!empty($success)?$success:0,
+            1=>!empty($unfinished)?$unfinished:0,
+            2=>!empty($error)?$error:0
+        ];
+        return response()->json(['code' => 200, 'msg' => '获取成功','data'=>$order,'count'=>$count]);
+    }
+    //订单单条详情
+    public function orderFind(){
+        if(!isset($this->data['id'])||empty($this->data['id'])){
+            return response()->json(['code' => 201 , 'msg' => '订单id为空']);
+        }
+        $order = Order::where('id',$this->data['id'])->first()->toArray();
+        if(!empty($order)){
+            if($order['nature'] == 1){
+                $course = CourseSchool::select('title')->where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+            }else{
+                $course = Coures::select('title')->where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+            }
+            $order['title'] = isset($course['title'])?$course['title']:'';
+        }
+        return response()->json(['code' => 200, 'msg' => '获取成功','data'=>$order]);
+    }
 }
 
