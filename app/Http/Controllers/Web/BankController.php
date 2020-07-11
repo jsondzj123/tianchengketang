@@ -1198,21 +1198,22 @@ class BankController extends Controller {
                     //根据试卷的id获取试卷名称
                     $name = Papers::where("id" , $papers_id)->value('papers_name');
                 }
-                
-                //获取学员作对的道数
-                $collect_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , 1)->count();
-
-                //获取学员做错的道数
-                $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , 2)->count();
 
                 //判断如果学员没有做完题则展示最近做题的时间
                 if($v['is_over'] == 1){
+                    //获取学员作对的道数
+                    $collect_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , 1)->count();
+                    //获取学员做错的道数
+                    $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , 2)->count();
+                    
                     $make_date   =   date('Y-m-d' ,strtotime($v['update_at']));
                     $make_time   =   date('H:i:s' ,strtotime($v['update_at']));
                 } else {
                     $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->orderBy('update_at' , 'DESC')->first();
                     $make_date   =   date('Y-m-d' ,strtotime($info['update_at']));
                     $make_time   =   date('H:i:s' ,strtotime($info['update_at']));
+                    $collect_count = 0;
+                    $error_count   = 0;
                 }
                 
                 //新数组赋值
