@@ -191,10 +191,6 @@ class Article extends Model {
         if(empty($data['description']) || !isset($data['description'])){
             return ['code' => 201 , 'msg' => '摘要不能为空'];
         }
-        //判断正文
-        if(empty($data['text']) || !isset($data['text'])){
-            return ['code' => 201 , 'msg' => '正文不能为空'];
-        }
         //缓存查出用户id和分校id
         $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
         if($role_id != 1){
