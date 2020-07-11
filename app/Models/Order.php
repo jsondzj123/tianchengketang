@@ -418,11 +418,23 @@ class Order extends Model {
                 if($v['status'] == 0){
                     $v['learning'] = "未支付";
                 }
+                if($v['status'] == 1){
+                    $v['learning'] = "待审核";
+                }
                 if($v['status'] == 2){
                     if($v['pay_status'] != 4){
                         $v['learning'] = "尾款未付清";
                     }
                     $v['learning'] = "已开课";
+                }
+                if($v['status'] == 3){
+                    $v['learning'] = "审核失败";
+                }
+                if($v['status'] == 4){
+                    $v['learning'] = "已退款";
+                }
+                if($v['status'] == 5){
+                    $v['learning'] = "以失效";
                 }
             }
         }
