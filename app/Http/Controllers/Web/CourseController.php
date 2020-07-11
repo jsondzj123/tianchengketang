@@ -18,7 +18,6 @@ use App\Models\LiveClass;
 use App\Models\LiveClassChildTeacher;
 use App\Models\Order;
 use App\Models\School;
-use App\Models\StudentCollect;
 use App\Models\Teacher;
 use App\Models\Video;
 use App\Tools\MTCloud;
@@ -515,6 +514,7 @@ class CourseController extends Controller {
         $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
         //课程基本信息
+        print_r($this->data);die;
         if(!isset($this->data['id'])||empty($this->data['id'])){
             return response()->json(['code' => 201 , 'msg' => '课程id为空']);
         }
