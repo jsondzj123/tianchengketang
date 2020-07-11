@@ -413,7 +413,8 @@ class Order extends Model {
                 }else{
                     $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
                 }
-                $v['course'] = $course;
+                $v['course_cover'] = $course['cover'];
+                $v['course_title'] = $course['title'];
             }
         }
         return ['code' => 200 , 'msg' => '完成' , 'data'=>$order];
