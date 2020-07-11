@@ -1243,7 +1243,7 @@ class BankController extends Controller {
                         $make_time   =   date('H:i:s' ,strtotime($v['update_at']));
                         $is_over     =   1;
                     } else {
-                        $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->orderBy('update_at' , 'DESC')->first();
+                        $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , '>' , 0)->orderBy('update_at' , 'DESC')->first();
                         if($info && !empty($info)){
                             $make_date   =   date('Y-m-d' ,strtotime($info['update_at']));
                             $make_time   =   date('H:i:s' ,strtotime($info['update_at']));
