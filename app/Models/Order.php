@@ -408,7 +408,7 @@ class Order extends Model {
         $order = self::where(['status'=>2,'oa_status'=>1])->get()->toArray();
         if(!empty($order)){
             foreach ($order as $k=>&$v){
-                if($order['nature'] == 1){
+                if($v['nature'] == 1){
                     $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
                 }else{
                     $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
