@@ -405,7 +405,7 @@ class Order extends Model {
         if(empty($data['student_id'])){
             return ['code' => 201 , 'msg' => '学员id为空'];
         }
-        $order = self::where(['status'=>2,'oa_status'=>1])->get()->toArray();
+        $order = self::where(['status'=>2,'oa_status'=>1,'student_id'=>$data['student_id']])->get()->toArray();
         if(!empty($order)){
             foreach ($order as $k=>&$v){
                 if($v['nature'] == 1){
