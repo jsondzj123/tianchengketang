@@ -341,7 +341,6 @@ class CourseController extends Controller {
     }
     //课程收藏
     public function collect(){
-        echo 11111;die;
         if(!isset($this->data['id'])||empty($this->data['id'])){
             return response()->json(['code' => 201, 'msg' => '课程id为空']);
         }
