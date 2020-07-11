@@ -220,6 +220,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('liveCallBack', 'LiveChildController@listenLive');//直播回调状态
     $router->post('orderUpOaForId', 'OrderController@orderUpOaForId');//订单修改oa状态
     $router->post('orderUpinvalid', 'OrderController@orderUpinvalid');//订单无效修改
+    $router->post('listType', 'ArticleController@listType');//分类列表
 
 });
 //后端登录权限认证相关接口
@@ -498,7 +499,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('editDelToId', 'ArticleController@editDelToId');//文章删除
         $router->post('findToId', 'ArticleController@findToId');//获取单条文章数据
         $router->post('exitForId', 'ArticleController@exitForId');//文章修改
-        $router->post('listType', 'ArticleController@listType');//分类列表
         /*------------文章分类模块------------------*/
         $router->post('addType', 'ArticletypeController@addType');//文章分类添加
         $router->post('getTypeList', 'ArticletypeController@getTypeList');//获取文章分类列表
