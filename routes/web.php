@@ -223,6 +223,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('listType', 'ArticleController@listType');//分类列表
     $router->post('schoolLists', 'ArticleController@schoolLists');//学校列表
     $router->post('courseType', 'CourseController@courseType');//根据分类查课程
+    $router->post('subjects', 'CourseController@subjects');//学科列表(szw改)
 
 });
 //后端登录权限认证相关接口
@@ -281,7 +282,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
      * 科目模块(sxl)
     */
     $router->post('subject', 'CourseController@subject');//课程学科列表(szw改)
-    $router->post('subjects', 'CourseController@subjects');//学科列表(szw改)
+
 //    $router->post('subject', 'SubjectController@searchList');
     $router->post('subjectList', 'SubjectController@index');
     $router->post('subject/add', 'SubjectController@store');
