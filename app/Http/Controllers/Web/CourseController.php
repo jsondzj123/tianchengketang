@@ -351,7 +351,7 @@ class CourseController extends Controller {
         }else{
             $add = Collection::insert([
                 'lesson_id' => $this->data['id'],
-                'student_id' => $this->userid
+                'student_id' => 39
             ]);
         }
         if($add){
