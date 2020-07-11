@@ -417,24 +417,31 @@ class Order extends Model {
                 $v['course_title'] = $course['title'];
                 if($v['status'] == 0){
                     $v['learning'] = "未支付";
+                    $v['bgcolor'] = '#26A4FD';
                 }
                 if($v['status'] == 1){
                     $v['learning'] = "待审核";
+                    $v['bgcolor'] = '#FDA426';
                 }
                 if($v['status'] == 2){
                     if($v['pay_status'] != 4){
                         $v['learning'] = "尾款未付清";
+                        $v['bgcolor'] = '#FF4545';
                     }
                     $v['learning'] = "已开课";
+                    $v['bgcolor'] = '#909399';
                 }
                 if($v['status'] == 3){
                     $v['learning'] = "审核失败";
+                    $v['bgcolor'] = '#26A4FD';
                 }
                 if($v['status'] == 4){
                     $v['learning'] = "已退款";
+                    $v['bgcolor'] = '#FDA426';
                 }
                 if($v['status'] == 5){
                     $v['learning'] = "以失效";
+                    $v['bgcolor'] = '#FF4545';
                 }
             }
         }
