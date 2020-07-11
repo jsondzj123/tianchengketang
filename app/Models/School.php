@@ -114,6 +114,12 @@ class School extends Model {
         }
         $update = [];
         if(isset($data['password']) && isset($data['pwd'])){
+            if(strlen($data['password']) <8){
+                return response()->json(['code'=>207,'msg'=>'密码长度不能小于8位']);
+            }
+            if(preg_match('/[\x{4e00}-\x{9fa5}]/u', $data['password'])) {
+                return response()->json(['code'=>207,'msg'=>'密码格式不正确，请重新输入']);
+            }
             if(!empty($data['password'])|| !empty($data['pwd']) ){
                if($data['password'] != $data['pwd'] ){
                     return ['code'=>206,'msg'=>'两个密码不一致'];
