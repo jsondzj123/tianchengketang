@@ -35,6 +35,25 @@ class CourseController extends Controller {
       }
   }
   /*
+       * @param  courseType
+       * @param  author  苏振文
+       * @param  ctime   2020/7/11 12:04
+       * return  array
+       */
+      public function courseType(){
+        $parent = self::$accept_data;
+        $list = Coures::where(['is_del'=>0,'status'=>1])
+             ->where(function ($query) use ($parent) {
+                if (!empty($parent[0]) && $parent[0] != '') {
+                    $query->where('parent_id', $parent[0]);
+                }
+                if (!empty($parent[1]) && $parent[1] != '') {
+                    $query->where('child_id', $parent[1]);
+                }
+            })->get()->toArray();
+          return response()->json(['code' => 200 , 'msg' => '成功','data'=>$list]);
+      }
+  /*
        * @param  课程添加
        * @param  author  苏振文
        * @param  ctime   2020/6/28 11:08
