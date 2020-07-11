@@ -1173,7 +1173,7 @@ class BankController extends Controller {
         $new_array = [];
         
         //获取学员的做题记录列表
-        $make_exam_list = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , $type)->where('is_over' , 1)->get()->toArray();
+        $make_exam_list = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , $type)->get()->toArray();
         
         //判断信息是否为空
         if($make_exam_list && !empty($make_exam_list)){
