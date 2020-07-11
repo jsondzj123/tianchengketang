@@ -158,7 +158,7 @@ class AdminUserController extends Controller {
         if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-        $data['teacher_id'] = !isset($data['teacher_id'])  || empty($data['teacher_id']) || $data['teacher']<=0 ? 0: $data['teacher_id'];
+        $data['teacher_id'] = !isset($data['teacher_id'])  || empty($data['teacher_id']) || $data['teacher_id']<=0 ? 0: $data['teacher_id'];
         if(strlen($data['password']) <8){
             return response()->json(['code'=>207,'msg'=>'密码长度不能小于8位']);
         }
