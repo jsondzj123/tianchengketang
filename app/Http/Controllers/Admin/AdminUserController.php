@@ -150,8 +150,8 @@ class AdminUserController extends Controller {
                     'realname' => 'required',
                     'mobile' => 'required|regex:/^1[3456789][0-9]{9}$/',
                     'sex' => 'required|integer',
-                    'password' => 'required',
-                    'pwd' => 'required',
+                    'password'=>'required',
+                    'pwd'=>'required',
                     'role_id' => 'required|integer',
                 ],
                 Adminuser::message());
@@ -159,22 +159,24 @@ class AdminUserController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
         $data['teacher_id'] = !isset($data['teacher_id'])  || empty($data['teacher_id']) || $data['teacher_id']<=0 ? 0: $data['teacher_id'];
+        
         if(strlen($data['password']) <8){
             return response()->json(['code'=>207,'msg'=>'密码长度不能小于8位']);
         }
         if(preg_match('/[\x{4e00}-\x{9fa5}]/u', $data['password'])) {
             return response()->json(['code'=>207,'msg'=>'密码格式不正确，请重新输入']);
         }
-        if(!empty($data['password']) && !empty($data['pwd'])){
-            if($data['password'] != $data['pwd']){
-                return response()->json(['code'=>206,'msg'=>'登录密码不一致']);
-            }
-        }  
+        if($data['password'] != $data['pwd']){
+            return response()->json(['code'=>206,'msg'=>'登录密码不一致']);
+        }
+        if(isset($data['pwd'])){
+            unset($data['pwd']);
+        }
         $count  = Adminuser::where('username',$data['username'])->where('school_id',$data['school_id'])->where('is_del',1)->count();
         if($count>0){
             return response()->json(['code'=>205,'msg'=>'用户名已存在']);
         }
-        unset($data['pwd']);
+       
         if(isset($data['/admin/adminuser/doInsertAdminUser'])){
             unset($data['/admin/adminuser/doInsertAdminUser']);
         }
@@ -262,8 +264,7 @@ class AdminUserController extends Controller {
                 'realname' => 'required',
                 'mobile' => 'required|regex:/^1[3456789][0-9]{9}$/',
                 'sex' => 'required|integer',
-                'password' => 'required',
-                'pwd' => 'required',
+             
                 'role_id' => 'required|integer',
                 ],
                 Adminuser::message());
@@ -271,11 +272,24 @@ class AdminUserController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
         $data['teacher_id']= !isset($data['teacher_id']) || empty($data['teacher_id']) || $data['teacher_id']<=0 ?0 :$data['teacher_id'];
-        if(!empty($data['password']) && !empty($data['pwd'])){
-            if($data['password'] != $data['pwd']){
-                return response()->json(['code'=>206,'msg'=>'登录密码不一致']);
+        
+        if(isset($data['password']) && isset($data['pwd'])){
+            if(strlen($data['password']) <8){
+                return response()->json(['code'=>207,'msg'=>'密码长度不能小于8位']);
             }
+            if(preg_match('/[\x{4e00}-\x{9fa5}]/u', $data['password'])) {
+                return response()->json(['code'=>207,'msg'=>'密码格式不正确，请重新输入']);
+            }
+            if(!empty($data['password'])|| !empty($data['pwd']) ){
+               if($data['password'] != $data['pwd'] ){
+                    return ['code'=>206,'msg'=>'两个密码不一致'];
+                }else{
+                    $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+                }
+            }
+            unset($data['pwd']);
         }
+
         
         if(isset($data['/admin/adminuser/doAdminUserUpdate'])){
             unset($data['/admin/adminuser/doAdminUserUpdate']);
@@ -288,7 +302,7 @@ class AdminUserController extends Controller {
              return response()->json(['code'=>205,'msg'=>'用户名已存在']);
         }  
         $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
-        unset($data['pwd']);
+        // unset($data['pwd']);
         $admin_id  = CurrentAdmin::user()['id'];
       
             DB::beginTransaction();
