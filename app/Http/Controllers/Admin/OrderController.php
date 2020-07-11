@@ -50,6 +50,7 @@ class OrderController extends Controller {
          */
     public function orderForStudent(){
         $data = Order::orderForStudent(self::$accept_data);
+        return response()->json($data);
     }
     /*
          * @param  审核  通过/不通过
