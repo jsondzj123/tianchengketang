@@ -220,6 +220,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('liveCallBack', 'LiveChildController@listenLive');//直播回调状态
     $router->post('orderUpOaForId', 'OrderController@orderUpOaForId');//订单修改oa状态
     $router->post('orderUpinvalid', 'OrderController@orderUpinvalid');//订单无效修改
+    $router->post('listType', 'ArticleController@listType');//分类列表
 
 });
 //后端登录权限认证相关接口
