@@ -221,6 +221,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('orderUpOaForId', 'OrderController@orderUpOaForId');//订单修改oa状态
     $router->post('orderUpinvalid', 'OrderController@orderUpinvalid');//订单无效修改
     $router->post('listType', 'ArticleController@listType');//分类列表
+    $router->post('schoolLists', 'ArticleController@schoolLists');//学校列表
 
 });
 //后端登录权限认证相关接口
@@ -512,6 +513,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('orderList', 'OrderController@orderList');//订单列表
         $router->post('findOrderForId', 'OrderController@findOrderForId');//订单详情
         $router->post('auditToId', 'OrderController@auditToId');//订单审核通过/不通过
+        $router->post('orderForStudent', 'OrderController@orderForStudent');//订单通过学员查询
 
         $router->post('ExcelExport', 'OrderController@ExcelExport');//订单导出
         $router->post('buttOa', 'OrderController@buttOa');//对接oa

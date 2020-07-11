@@ -396,4 +396,9 @@ class Order extends Model {
             return ['code' => 202 , 'msg' => '修改失败'];
         }
     }
+
+    //根据用户查询订单
+    public static function orderForStudent($data){
+
+    }
 }

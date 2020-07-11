@@ -39,7 +39,18 @@ class ArticleController extends Controller {
         }else{
             $school = School::select('id as value','name as label')->where(['id'=>$school_id,'is_forbid'=>1,'is_del'=>1])->get()->toArray();
         }
-        return ['code' => 200 , 'msg' => '获取成功','data'=>$typelist,'school'=>$school];
+        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$typelist,'school'=>$school]);
+    }
+    public function schoolLists(){
+        $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        //获取分校列表
+        if($role_id == 1){
+            $school = School::select('id as value','name as label')->where(['is_forbid'=>1,'is_del'=>1])->get()->toArray();
+        }else{
+            $school = School::select('id as value','name as label')->where(['id'=>$school_id,'is_forbid'=>1,'is_del'=>1])->get()->toArray();
+        }
+        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$school]);
     }
     /*
          * @param  新增文章
