@@ -351,7 +351,8 @@ class CourseController extends Controller {
         }else{
             $add = Collection::insert([
                 'lesson_id' => $this->data['id'],
-                'student_id' => 39
+                'student_id' => 39,
+                'created_at' => date('Y-m-d H:i:s')
             ]);
         }
         if($add){
