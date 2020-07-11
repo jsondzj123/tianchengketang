@@ -345,7 +345,6 @@ class CourseController extends Controller {
             return response()->json(['code' => 201, 'msg' => '课程id为空']);
         }
         $list = StudentCollect::where(['course_id'=>$this->data['id'],'student_id'=>$this->userid])->first()->toArray();
-        print_r($list);die;
         if($list){
             $status = $list['status'] == 1?0:1;
             $add = StudentCollect::where('id',$list['id'])->update(['status'=>$status,'update_at'=>date('Y-m-d H:i:s')]);
