@@ -1171,20 +1171,20 @@ class BankController extends Controller {
         
         //新数组赋值
         $new_array = [];
+
+        //获取学员的做题记录列表
+        $make_exam_list = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , $type)->get()->toArray();
         
-        //判断是否有答过题的数量了
-        $is_right_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , '>' , 0)->count();
-        if($is_right_count && $is_right_count > 0){
-            //获取学员的做题记录列表
-            $make_exam_list = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , $type)->get()->toArray();
-
-            //判断信息是否为空
-            if($make_exam_list && !empty($make_exam_list)){
-                foreach($make_exam_list as $k=>$v){
-                    //试卷id
-                    $papers_id = $type == 3 ? $v['papers_id'] : $v['id'];
-
-                    //判断是否是章节
+        //判断信息是否为空
+        if($make_exam_list && !empty($make_exam_list)){
+            foreach($make_exam_list as $k=>$v){
+                //试卷id
+                $papers_id = $type == 3 ? $v['papers_id'] : $v['id'];
+                
+                //判断是否有答过题的数量了
+                $is_right_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , '>' , 0)->count();
+                if($is_right_count && $is_right_count > 0){
+                   //判断是否是章节
                     if($type == 1){
                         //判断节是否存在
                         if($v['joint_id'] > 0){
@@ -1231,10 +1231,8 @@ class BankController extends Controller {
                         'error_count'   =>  $error_count
                     ];
                 }
-                return response()->json(['code' => 200 , 'msg' => '返回做题记录列表成功' , 'data' => $new_array]);
-            } else {
-                return response()->json(['code' => 203 , 'msg' => '暂无做题记录']);
             }
+            return response()->json(['code' => 200 , 'msg' => '返回做题记录列表成功' , 'data' => $new_array]);
         } else {
             return response()->json(['code' => 203 , 'msg' => '暂无做题记录']);
         }
