@@ -257,7 +257,7 @@ class SchoolController extends Controller {
                 DB::rollBack();
                 return response()->json(['code' => 203 , 'msg' => '创建账号未成功!']);
             } 
-            $schoolRes = School::where('school_id',$school_id)->update(['super_id'=>$admin_id,'update_time'=>date('Y-m-d H:i:s')]); 
+            $schoolRes = School::where('id',$school_id)->update(['super_id'=>$admin_id,'update_time'=>date('Y-m-d H:i:s')]); 
             if(!$schoolRes){
                 DB::rollBack();
                 return response()->json(['code' => 203 , 'msg' => '创建账号未成功!!']);
