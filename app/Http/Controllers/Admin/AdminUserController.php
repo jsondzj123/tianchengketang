@@ -367,4 +367,68 @@ class AdminUserController extends Controller {
         }
         return ['code'=>200,'msg'=>'success','data'=>$adminRuths['data']];
     }
+    
+    /*
+     * @param  description   后台用户修改密码
+     * @param  参数说明       body包含以下参数[
+     *     oldpassword       旧密码
+     *     newpassword       新密码
+     *     repassword        确认密码
+     * ]
+     * @param author    dzj
+     * @param ctime     2020-07-11
+     */
+    public function doAdminUserUpdatePwd(){
+        $data =  self::$accept_data;
+        //判断传过来的数组数据是否为空
+        if(!$data || !is_array($data)){
+            return ['code' => 202 , 'msg' => '传递数据不合法'];
+        }
+        
+        //判断旧密码是否为空
+        if(!isset($data['oldpassword']) || empty($data['oldpassword'])){
+            return ['code' => 201 , 'msg' => '旧密码为空'];
+        }
+        
+        //判断新密码是否为空
+        if(!isset($data['newpassword']) || empty($data['newpassword'])){
+            return ['code' => 201 , 'msg' => '新密码为空'];
+        }
+        
+        //判断确认密码是否为空
+        if(!isset($data['repassword']) || empty($data['repassword'])){
+            return ['code' => 201 , 'msg' => '确认密码为空'];
+        }
+        
+        //判断两次输入的密码是否相等
+        if($data['newpassword'] != $data['repassword']){
+            return ['code' => 202 , 'msg' => '两次密码输入不一致'];
+        }
+        
+        //获取后端的用户id
+        $admin_id  = CurrentAdmin::user()['id'];
+        
+        //根据用户的id获取用户详情
+        $admin_info = Adminuser::where('id' , $admin_id)->first();
+        
+        //判断输入的旧密码是否正确
+        if(password_verify($data['oldpassword']  , $admin_info['password']) === false){
+            return response()->json(['code' => 203 , 'msg' => '旧密码错误']);
+        }
+        
+        //开启事务
+        DB::beginTransaction();
+        
+        //更改后台用户的密码
+        $rs = Adminuser::where('id' , $admin_id)->update(['password' => password_hash($data['newpassword'], PASSWORD_DEFAULT) , 'updated_at' => date('Y-m-d H:i:s')]);
+        if($rs && !empty($rs)){
+            //事务提交
+            DB::commit();
+            return response()->json(['code' => 200 , 'msg' => '更改成功']);
+        } else {
+            //事务回滚
+            DB::rollBack();
+            return response()->json(['code' => 203 , 'msg' => '更改失败']);
+        }
+    }
 }

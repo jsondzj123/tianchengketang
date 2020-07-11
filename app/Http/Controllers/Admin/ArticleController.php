@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
 use App\Models\Article;
 use App\Models\Articletype;
+use App\Models\School;
 
 class ArticleController extends Controller {
     //获取分类和学校
@@ -14,6 +15,42 @@ class ArticleController extends Controller {
         $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
         $data = Article::schoolANDtype($role_id,$school_id);
         return response()->json(['code' => 200 , 'msg' =>'成功','school'=>$data[0],'type'=>$data[1]]);
+    }
+
+    public function listType(){
+        //获取用户网校id
+        $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        $where['is_del'] = 1;
+        if($role_id == 1){
+            $data = self::$accept_data;
+//            if(!empty($data['school_id']) && $data['school_id'] != ''){
+                $where['school_id'] = isset($data['school_id'])?$data['school_id']:1;
+//            }
+        }else{
+            $where['school_id'] = $school_id;
+        }
+        $typelist = Articletype::select('id as value','typename as label')
+            ->where($where)
+            ->get()->toArray();
+        //获取分校列表
+        if($role_id == 1){
+            $school = School::select('id as value','name as label')->where(['is_forbid'=>1,'is_del'=>1])->get()->toArray();
+        }else{
+            $school = School::select('id as value','name as label')->where(['id'=>$school_id,'is_forbid'=>1,'is_del'=>1])->get()->toArray();
+        }
+        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$typelist,'school'=>$school]);
+    }
+    public function schoolLists(){
+        $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        //获取分校列表
+        if($role_id == 1){
+            $school = School::select('id as value','name as label')->where(['is_forbid'=>1,'is_del'=>1])->get()->toArray();
+        }else{
+            $school = School::select('id as value','name as label')->where(['id'=>$school_id,'is_forbid'=>1,'is_del'=>1])->get()->toArray();
+        }
+        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$school]);
     }
     /*
          * @param  新增文章

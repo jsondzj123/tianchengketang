@@ -413,7 +413,8 @@ class BankController extends Controller {
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  '' ,
                         'is_right'            =>  0 ,
-                        'is_collect'          =>  0
+                        'is_collect'          =>  0 ,
+                        'type'                =>  1
                     ];
                 }
             } else {
@@ -457,7 +458,8 @@ class BankController extends Controller {
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                         'is_right'            =>  $v['is_right'] ,
-                        'is_collect'          =>  $is_collect ? 1 : 0
+                        'is_collect'          =>  $is_collect ? 1 : 0 ,
+                        'type'                =>  1
                     ];
                 }
                 //模式返回
@@ -527,7 +529,8 @@ class BankController extends Controller {
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  '' ,
                         'is_right'            =>  0  ,
-                        'is_collect'          =>  0
+                        'is_collect'          =>  0  ,
+                        'type'                =>  2
                     ];
                 }
             } else {
@@ -571,7 +574,8 @@ class BankController extends Controller {
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                         'is_right'            =>  $v['is_right'] ,
-                        'is_collect'          =>  $is_collect ? 1 : 0
+                        'is_collect'          =>  $is_collect ? 1 : 0 ,
+                        'type'                =>  2
                     ];
                 }
             }
@@ -632,7 +636,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
                     'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
-                    'is_collect'          =>  $is_collect ? 1 : 0
+                    'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'type'                =>  3
                 ];
             }
         }
@@ -673,6 +678,9 @@ class BankController extends Controller {
             return response()->json(['code' => 203 , 'msg' => '暂无对应的试卷']);
         }
         
+        //数组赋值
+        $papers_score_score = [];
+
         //循环数据
         foreach($exam_array as $k=>$v){
             //判断学员是否提交了试卷
@@ -686,12 +694,39 @@ class BankController extends Controller {
                 $answer_time  =  '';
                 $is_over      =  0;
             }
+            
+            
+            
+            //算出试卷的总得分
+            $info = PapersExam::where("subject_id" , $subject_id)->where("papers_id" , $v['id'])->where('is_del' , 0)->get()->toArray();
+            if($info && !empty($info)){
+                foreach($info as $k1=>$v1){
+                    //获取试题的详细信息
+                    $exam_info = Exam::where('id' , $v1['exam_id'])->first();
+
+                    //判断题型
+                    if($exam_info['type'] == 1){
+                        $score = $v['signle_score'];
+                    } elseif($exam_info['type'] == 2){
+                        $score = $v['more_score'];
+                    } elseif($exam_info['type'] == 3){
+                        $score = $v['judge_score'];
+                    } elseif($exam_info['type'] == 4){
+                        $score = $v['options_score'];
+                    } else {
+                        $score = 0;
+                    }
+                    $papers_score_score[] = $score;
+                }
+            }
+            
 
             $array[] = [
                 'papers_id'    =>  $v['id'] ,
                 'papers_name'  =>  $v['papers_name'] ,
                 'papers_time'  =>  $v['papers_time'] ,
                 'answer_time'  =>  $answer_time ,
+                'papers_sum_score' =>  count($papers_score_score) > 0 ?array_sum($papers_score_score) : 0 ,
                 'sum_score'    =>  (float)$sum_score ,
                 'is_over'      =>  $is_over
             ];
@@ -1059,7 +1094,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
                     'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
-                    'is_collect'          =>  1
+                    'is_collect'          =>  1 ,
+                    'type'                =>  $v['type']
                 ];
             }
             return response()->json(['code' => 200 , 'msg' => '获取收藏列表成功' , 'data' => $exam_array]);
@@ -1134,7 +1170,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
                     'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
-                    'is_collect'          =>  $is_collect ? 1 : 0
+                    'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'type'                =>  $v['type']
                 ];
             }
             return response()->json(['code' => 200 , 'msg' => '获取错题本列表成功' , 'data' => $exam_array]);
@@ -1182,7 +1219,7 @@ class BankController extends Controller {
                 $papers_id = $type == 3 ? $v['papers_id'] : $v['id'];
                 
                 //判断是否有答过题的数量了
-                $is_right_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , '>' , 0)->count();
+                $is_right_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->count();
                 if($is_right_count && $is_right_count > 0){
                    //判断是否是章节
                     if($type == 1){
@@ -1211,10 +1248,17 @@ class BankController extends Controller {
 
                         $make_date   =   date('Y-m-d' ,strtotime($v['update_at']));
                         $make_time   =   date('H:i:s' ,strtotime($v['update_at']));
+                        $is_over     =   1;
                     } else {
-                        $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->orderBy('update_at' , 'DESC')->first();
-                        $make_date   =   date('Y-m-d' ,strtotime($info['update_at']));
-                        $make_time   =   date('H:i:s' ,strtotime($info['update_at']));
+                        $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , '>' , 0)->orderBy('update_at' , 'DESC')->first();
+                        if($info && !empty($info)){
+                            $make_date   =   date('Y-m-d' ,strtotime($info['update_at']));
+                            $make_time   =   date('H:i:s' ,strtotime($info['update_at']));
+                        } else {
+                            $make_date   =   "";
+                            $make_time   =   "";
+                        }
+                        $is_over       = 0;
                         $collect_count = 0;
                         $error_count   = 0;
                     }
@@ -1228,7 +1272,8 @@ class BankController extends Controller {
                         'make_date'     =>  $make_date ,
                         'make_time'     =>  $make_time ,
                         'collect_count' =>  $collect_count ,
-                        'error_count'   =>  $error_count
+                        'error_count'   =>  $error_count ,
+                        'is_over'       =>  $is_over
                     ];
                 }
             }
@@ -1316,7 +1361,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                     'is_right'            =>  $v['is_right'] ,
-                    'is_collect'          =>  $is_collect ? 1 : 0
+                    'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'type'                =>  1
                 ];
             }
         } else if($type == 2){  //快速做题
@@ -1357,7 +1403,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                     'is_right'            =>  $v['is_right'] ,
-                    'is_collect'          =>  $is_collect ? 1 : 0
+                    'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'type'                =>  2
                 ];
             }
         } else if($type == 3){  //模拟真题
@@ -1407,7 +1454,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
                     'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
-                    'is_collect'          =>  $is_collect ? 1 : 0
+                    'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'type'                =>  3
                 ];
             }
         }

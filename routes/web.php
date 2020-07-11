@@ -203,6 +203,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('myOrder','UserController@myOrder');//我的订单
         $router->post('orderFind','UserController@orderFind');//我的订单单条记录
         $router->post('myCollect','UserController@myCollect');//我的收藏
+        $router->post('myCourse','UserController@myCourse');//我的课程
     });
 });
 //后台端路由接口
@@ -219,6 +220,10 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('liveCallBack', 'LiveChildController@listenLive');//直播回调状态
     $router->post('orderUpOaForId', 'OrderController@orderUpOaForId');//订单修改oa状态
     $router->post('orderUpinvalid', 'OrderController@orderUpinvalid');//订单无效修改
+    $router->post('listType', 'ArticleController@listType');//分类列表
+    $router->post('schoolLists', 'ArticleController@schoolLists');//学校列表
+    $router->post('courseType', 'CourseController@courseType');//根据分类查课程
+    $router->post('subjects', 'CourseController@subjects');//学科列表(szw改)
 
 });
 //后端登录权限认证相关接口
@@ -277,7 +282,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
      * 科目模块(sxl)
     */
     $router->post('subject', 'CourseController@subject');//课程学科列表(szw改)
-    $router->post('subjects', 'CourseController@subjects');//学科列表(szw改)
+
 //    $router->post('subject', 'SubjectController@searchList');
     $router->post('subjectList', 'SubjectController@index');
     $router->post('subject/add', 'SubjectController@store');
@@ -459,7 +464,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     //课程模块（重构）（szw）
     $router->group(['prefix' => 'course'], function () use ($router) {
        // $router->post('subject', 'CourseController@subject');//学科列表   7 11 lys
-        $router->post('courseType', 'CourseController@courseType');//根据分类查课程
         $router->post('courseList', 'CourseController@courseList');//课程列表
         $router->post('courseAdd', 'CourseController@courseAdd');//课程添加
         $router->post('courseDel', 'CourseController@courseDel');//课程删除
@@ -510,6 +514,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('orderList', 'OrderController@orderList');//订单列表
         $router->post('findOrderForId', 'OrderController@findOrderForId');//订单详情
         $router->post('auditToId', 'OrderController@auditToId');//订单审核通过/不通过
+        $router->post('orderForStudent', 'OrderController@orderForStudent');//订单通过学员查询
 
         $router->post('ExcelExport', 'OrderController@ExcelExport');//订单导出
         $router->post('buttOa', 'OrderController@buttOa');//对接oa
@@ -534,7 +539,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getAuthList', 'AdminUserController@getAuthList');                      //获取角色列表方法 √
         $router->post('getAdminUserUpdate', 'AdminUserController@getAdminUserUpdate');        //获取账号信息（编辑） √√√
         $router->post('doAdminUserUpdate', 'AdminUserController@doAdminUserUpdate');          //编辑账号信息  √√  5.9  +1
-
+        $router->post('doAdminUserUpdatePwd', 'AdminUserController@doAdminUserUpdatePwd');    //修改用户密码的接口
     });
 
     $router->group(['prefix' => 'payset'], function () use ($router) {

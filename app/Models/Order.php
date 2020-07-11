@@ -396,4 +396,26 @@ class Order extends Model {
             return ['code' => 202 , 'msg' => '修改失败'];
         }
     }
+
+    //根据用户查询订单
+    public static function orderForStudent($data){
+        if(!$data || empty($data)){
+            return ['code' => 201 , 'msg' => '参数为空或格式错误'];
+        }
+        if(empty($data['student_id'])){
+            return ['code' => 201 , 'msg' => '学员id为空'];
+        }
+        $order = self::where(['status'=>2,'oa_status'=>1])->get()->toArray();
+        if(!empty($order)){
+            foreach ($order as $k=>&$v){
+                if($order['nature'] == 1){
+                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                }else{
+                    $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                }
+                $v['course'] = $course;
+            }
+        }
+        return ['code' => 200 , 'msg' => '完成' , 'data'=>$order];
+    }
 }

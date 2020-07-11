@@ -41,6 +41,17 @@ class OrderController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
+
+    /*
+         * @param  用户订单
+         * @param  author  苏振文
+         * @param  ctime   2020/7/11 16:16
+         * return  array
+         */
+    public function orderForStudent(){
+        $data = Order::orderForStudent(self::$accept_data);
+        return response()->json($data);
+    }
     /*
          * @param  审核  通过/不通过
          * @param  $user_id     参数
