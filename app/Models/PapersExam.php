@@ -57,9 +57,24 @@ class PapersExam extends Model {
             return ['code' => 201 , 'msg' => '请选择试题'];
         }
         
+        //新数组赋值
+        $exam_arr = [];
+        
+        //去掉删除的试题信息
+        foreach($exam_array as $k=>$v){
+            if($v['is_del'] <= 0){
+                $exam_arr[] = $v;
+            }
+        }
+        
+        //判断是否有试题提交过来
+        if(count($exam_arr) <= 0){
+            return ['code' => 201 , 'msg' => '请选择试题'];
+        }
+
         //根据试卷的id更新试题类型的每题分数
         $papers_info = Papers::where("id" , $body['papers_id'])->first();
-        foreach($exam_array as $k=>$v){
+        foreach($exam_arr as $k=>$v){
             //判断此试题在试卷中是否存在
             $exam_count = self::where("subject_id" , $body['subject_id'])->where("papers_id" , $body['papers_id'])->where("exam_id" , $v['exam_id'])->count();
             

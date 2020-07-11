@@ -673,6 +673,9 @@ class BankController extends Controller {
             return response()->json(['code' => 203 , 'msg' => '暂无对应的试卷']);
         }
         
+        //数组赋值
+        $papers_score_score = [];
+
         //循环数据
         foreach($exam_array as $k=>$v){
             //判断学员是否提交了试卷
@@ -686,12 +689,39 @@ class BankController extends Controller {
                 $answer_time  =  '';
                 $is_over      =  0;
             }
+            
+            
+            
+            //算出试卷的总得分
+            $info = PapersExam::where("subject_id" , $subject_id)->where("papers_id" , $v['id'])->where('is_del' , 0)->get()->toArray();
+            if($info && !empty($info)){
+                foreach($info as $k1=>$v1){
+                    //获取试题的详细信息
+                    $exam_info = Exam::where('id' , $v1['exam_id'])->first();
+
+                    //判断题型
+                    if($exam_info['type'] == 1){
+                        $score = $v['signle_score'];
+                    } elseif($exam_info['type'] == 2){
+                        $score = $v['more_score'];
+                    } elseif($exam_info['type'] == 3){
+                        $score = $v['judge_score'];
+                    } elseif($exam_info['type'] == 4){
+                        $score = $v['options_score'];
+                    } else {
+                        $score = 0;
+                    }
+                    $papers_score_score[] = $score;
+                }
+            }
+            
 
             $array[] = [
                 'papers_id'    =>  $v['id'] ,
                 'papers_name'  =>  $v['papers_name'] ,
                 'papers_time'  =>  $v['papers_time'] ,
                 'answer_time'  =>  $answer_time ,
+                'papers_sum_score' =>  count($papers_score_score) > 0 ?array_sum($papers_score_score) : 0 ,
                 'sum_score'    =>  (float)$sum_score ,
                 'is_over'      =>  $is_over
             ];
