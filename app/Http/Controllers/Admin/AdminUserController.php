@@ -91,9 +91,6 @@ class AdminUserController extends Controller {
         if( !isset($data['id']) || empty($data['id']) || is_int($data['id']) ){
             return response()->json(['code'=>201,'msg'=>'账号id为空或缺少或类型不合法']);
         }
-        if()
-
-
         $userInfo = Adminuser::findOrFail($data['id']);
         $userInfo->is_del = 0;
         if($userInfo->save()){
@@ -304,7 +301,7 @@ class AdminUserController extends Controller {
         if($count >=1 ){
              return response()->json(['code'=>205,'msg'=>'用户名已存在']);
         }  
-        // $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         // unset($data['pwd']);
         $admin_id  = CurrentAdmin::user()['id'];
       
