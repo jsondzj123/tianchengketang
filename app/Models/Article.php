@@ -232,25 +232,19 @@ class Article extends Model {
         if(empty($data['id']) || !isset($data['id'])){
             return ['code' => 201 , 'msg' => '参数为空'];
         }
-        //缓存
         $schooltype = self::schoolANDtype($role_id);
-        $key = 'article_findOne_'.$data['id'];
-        if(Redis::get($key)) {
-            return ['code' => 200 , 'msg' => '获取成功','data'=>json_decode(Redis::get($key),true),'school'=>$schooltype[0],'type'=>$schooltype[1]];
+        $find = self::select('ld_article.*','ld_school.name','ld_article_type.typename')
+            ->leftJoin('ld_school','ld_school.id','=','ld_article.school_id')
+            ->leftJoin('ld_article_type','ld_article_type.id','=','ld_article.article_type_id')
+            ->where(['ld_article.id'=>$data['id'],'ld_article.is_del'=>1,'ld_school.is_del'=>1])
+            ->first();
+        if($find){
+            unset($find['user_id'],$find['share'],$find['status'],$find['is_del'],$find['create_at'],$find['update_at']);
+            return ['code' => 200 , 'msg' => '获取成功','data'=>$find,'school'=>$schooltype[0],'type'=>$schooltype[1]];
         }else{
-            $find = self::select('ld_article.*','ld_school.name','ld_article_type.typename')
-                ->leftJoin('ld_school','ld_school.id','=','ld_article.school_id')
-                ->leftJoin('ld_article_type','ld_article_type.id','=','ld_article.article_type_id')
-                ->where(['ld_article.id'=>$data['id'],'ld_article.is_del'=>1,'ld_school.is_del'=>1])
-                ->first();
-            if($find){
-                unset($find['user_id'],$find['share'],$find['status'],$find['is_del'],$find['create_at'],$find['update_at']);
-                Redis::setex($key,60,json_encode($find));
-                return ['code' => 200 , 'msg' => '获取成功','data'=>$find,'school'=>$schooltype[0],'type'=>$schooltype[1]];
-            }else{
-                return ['code' => 202 , 'msg' => '获取失败'];
-            }
+            return ['code' => 202 , 'msg' => '获取失败'];
         }
+
     }
     /*
          * @param  单条修改
