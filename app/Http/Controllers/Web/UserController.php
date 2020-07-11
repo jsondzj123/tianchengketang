@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
 use App\Models\Coures;
+use App\Models\Couresmethod;
 use App\Models\CourseSchool;
 use App\Models\Order;
 use App\Models\Region;
@@ -233,12 +234,69 @@ class UserController extends Controller {
          * return  array
          */
     //我的收藏
-//    public function myCollect(){
-//        $collect = StudentCollect::where(['student_id'=>$this->userid,'status'=>0])->get()->toArray();
-//        foreach ($collect as $k=>&$v){
-//
-//        }
-//    }
+    public function myCollect(){
+        $method = isset($this->data['status'])?$this->data['status']:0;
+        $collect = StudentCollect::where(['student_id'=>$this->userid,'status'=>0])->get()->toArray();
+        if(!empty($collect)){
+            foreach ($collect as $k=>&$v){
+                if($v['nature'] == 1){
+                    $course = CourseSchool::where(['id'=>$v['id'],'is_del'=>0,'status'=>1])->get()->toArray();
+                    $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id'], 'is_del' => 0])
+                        ->where(function ($query) use ($method) {
+                            if($method != ''){
+                                $query->where('method_id', $method);
+                            }
+                        })->get()->toArray();
+                    $course['method'] = array_column($method, 'method_id');
+
+                    if (!empty($course['method'])) {
+                        foreach ($course['method'] as $key => &$val) {
+                            if ($val['method_id'] == 1) {
+                                $val['method_name'] = '直播';
+                            }
+                            if ($val['method_id'] == 2) {
+                                $val['method_name'] = '录播';
+                            }
+                            if ($val['method_id'] == 3) {
+                                $val['method_name'] = '其他';
+                            }
+                        }
+                        $v['method'] = $method;
+                    } else {
+                        unset($course[$k]);
+                    }
+                }else{
+                    $course = Coures::where(['id'=>$v['id'],'is_del'=>0,'status'=>1])->get()->toArray();
+                    $method = Couresmethod::select('method_id')->where(['course_id' =>$v['id'], 'is_del' => 0])
+                        ->where(function ($query) use ($method) {
+                            if($method != ''){
+                                $query->where('method_id', $method);
+                            }
+                        })->get()->toArray();
+                    $course['method'] = array_column($method, 'method_id');
+
+                    if (!empty($course['method'])) {
+                        foreach ($course['method'] as $key => &$val) {
+                            if ($val['method_id'] == 1) {
+                                $val['method_name'] = '直播';
+                            }
+                            if ($val['method_id'] == 2) {
+                                $val['method_name'] = '录播';
+                            }
+                            if ($val['method_id'] == 3) {
+                                $val['method_name'] = '其他';
+                            }
+                        }
+                        $v['method'] = $method;
+                    } else {
+                        unset($course[$k]);
+                    }
+                }
+                $v['course'] = $course;
+            }
+        }
+        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$collect]);
+    }
     //我的题库
     //我的课程
     //我的订单  status 1已完成2未完成3已失效

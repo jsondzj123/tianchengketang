@@ -142,14 +142,10 @@ class CouresSubject extends Model {
     //课程模块 条件显示
     public static function couresWhere(){
         //获取用户学校
-        $school_status = AdminLog::getAdminInfo()->admin_user->school_status;
         $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
-        $where['is_del'] = 0;
-        $where['is_open'] = 0;
-        if($school_status != 1){
-            $where['school_id'] = $school_id;
-        }
-        $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where($where)->get()->toArray();
+        $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')
+            ->where(['is_del'=>0,'is_open'=>0,'school_id'=>$school_id])
+            ->orderBydesc('id')->get()->toArray();
         $list = self::demo($one,0,0);
         return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
     }
@@ -162,7 +158,7 @@ class CouresSubject extends Model {
         if($school_status != 1){
             $where['school_id'] = $school_id;
         }
-        $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where($where)->get()->toArray();
+        $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->orderBydesc('id')->where($where)->get()->toArray();
         $list = self::demo($one,0,0);
         return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
     }

@@ -55,12 +55,21 @@ class RoleController extends Controller {
      */
     public function doRoleDel(){
         $data = self::$accept_data;
+        $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : -1;
+        $user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         if( !isset($data['id']) || empty($data['id'])  || $data['id']<=0 ){
             return response()->json(['code'=>201,'msg'=>'角色标识为空或缺少或类型不合法']);
         }
         if(AdminUser::where(['role_id'=>$data['id'],'is_del'=>1])->count()  >0){  //  角色使用中无法删除    5.14  
             return response()->json(['code'=>205,'msg'=>'角色使用中,不能删除']);
         }
+
+        $zongxiaoRoleArr = Roleauth::where('id',$data['id'])->first();
+        if($zongxiaoRoleArr['is_super'] == 1){
+            return response()->json(['code'=>203,'msg'=>'超管角色，不能删除']);
+        }       
+
         $role = Roleauth::findOrfail($data['id']);
         $role->is_del = 0;
         if($role->save()){

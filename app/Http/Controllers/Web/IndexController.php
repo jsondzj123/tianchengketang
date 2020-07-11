@@ -30,7 +30,7 @@ class IndexController extends Controller {
 
     	$count = count($recomendTeacherArr);
     	if($count<$limit){
-    		$teacherData = Teacher::where(['school_id'=>$this->school['id'],'is_del'=>0,'type'=>2])->orderBy('number','desc')->select('id','head_icon','real_name','describe','number')->limit($limit-$count)->get()->toArray();
+    		$teacherData = Teacher::where(['school_id'=>$this->school['id'],'is_del'=>0,'type'=>2])->orderBy('number','desc')->select('id','head_icon','real_name','describe','number','teacher_icon')->limit($limit-$count)->get()->toArray();
     		$recomendTeacherArr=array_merge($recomendTeacherArr,$teacherData);
     	}
    		
