@@ -465,7 +465,12 @@ class CourseController extends Controller {
                     }
                 }
             }
-
+            $page=[
+                'pageSize'=>$pagesize,
+                'page' =>$page,
+                'total'=>$count
+            ];
+            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde,'page'=>$page]);
         }else{
             //只展示试听章节
             //章总数
