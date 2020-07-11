@@ -11,6 +11,8 @@ use App\Models\CourseLiveResource;
 class CourseController extends Controller {
     //获取学科列表
     public function subject(){
+        $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
+        echo $school_id;die;
         $list = CouresSubject::couresWhere();
         return response()->json($list);
     }
