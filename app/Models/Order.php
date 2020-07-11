@@ -433,11 +433,11 @@ class Order extends Model {
                 }
                 if($v['status'] == 3){
                     $v['learning'] = "审核失败";
-                    $v['bgcolor'] = '#26A4FD';
+                    $v['bgcolor'] = '#67C23A';
                 }
                 if($v['status'] == 4){
                     $v['learning'] = "已退款";
-                    $v['bgcolor'] = '#FDA426';
+                    $v['bgcolor'] = '#f2f6fc';
                 }
                 if($v['status'] == 5){
                     $v['learning'] = "以失效";
