@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
+use App\Models\Collection;
 use App\Models\Coures;
 use App\Models\Coureschapters;
 use App\Models\Couresmaterial;
@@ -277,10 +278,10 @@ class CourseController extends Controller {
                 $course['is_pay'] = 1;
             }
             //收藏数量
-            $collect = StudentCollect::where(['course_id'=>$course['course_id']])->count();
+            $collect = Collection::where(['lesson_id'=>$course['course_id']])->count();
             $course['collect'] = $collect;
             //判断用户是否收藏
-            $collect = StudentCollect::where(['course_id'=>$course['course_id'],'student_id'=>$this->userid,'status'=>0])->count();
+            $collect = Collection::where(['lesson_id'=>$course['course_id'],'student_id'=>$this->userid,'is_del'=>0])->count();
             if($collect != 0){
                 $course['is_collect'] = 1;
             }else{
@@ -318,10 +319,10 @@ class CourseController extends Controller {
                 $course['is_pay'] = 1;
             }
             //收藏数量
-            $collect = StudentCollect::where(['course_id'=>$this->data['id']])->count();
+            $collect = Collection::where(['course_id'=>$this->data['id']])->count();
             $course['collect'] = $collect;
             //判断用户是否收藏
-            $collect = StudentCollect::where(['course_id'=>$this->data['id'],'student_id'=>$this->userid,'status'=>0])->count();
+            $collect = Collection::where(['course_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0])->count();
             if($collect != 0){
                 $course['is_collect'] = 1;
             }else{
@@ -344,13 +345,13 @@ class CourseController extends Controller {
         if(!isset($this->data['id'])||empty($this->data['id'])){
             return response()->json(['code' => 201, 'msg' => '课程id为空']);
         }
-        $list = StudentCollect::where(['course_id'=>$this->data['id'],'student_id'=>$this->userid])->first();
+        $list = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid])->first();
         if($list){
-            $status = $list['status'] == 1?0:1;
-            $add = StudentCollect::where('id',$list['id'])->update(['status'=>$status,'update_at'=>date('Y-m-d H:i:s')]);
+            $status = $list['is_del'] == 1?0:1;
+            $add = Collection::where('id',$list['id'])->update(['is_del'=>$status,'update_at'=>date('Y-m-d H:i:s')]);
         }else{
-            $add = StudentCollect::insert([
-                'course_id' => $this->data['id'],
+            $add = Collection::insert([
+                'lesson_id' => $this->data['id'],
                 'student_id' => $this->userid
             ]);
         }
