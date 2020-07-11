@@ -44,7 +44,7 @@ class CourseController extends Controller {
         $parent = self::$accept_data;
         $list = Coures::where(['is_del'=>0,'status'=>1])
              ->where(function ($query) use ($parent) {
-                 $newparent = json_decode($parent,true);
+                 $newparent = json_decode($parent['parent'],true);
                 if (!empty($newparent[0]) && $newparent[0] != '') {
                     $query->where('parent_id', $newparent[0]);
                 }
