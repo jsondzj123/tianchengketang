@@ -289,6 +289,10 @@ class Article extends Model {
         $id = $data['id'];
         unset($data['id']);
         unset($data['/admin/article/exitForId']);
+        $data['key_word'] = isset($data['key_word'])?$data['key_word']:'';
+        $data['accessory_name'] = isset($data['accessory_name'])?$data['accessory_name']:'';
+        $data['accessory'] = isset($data['accessory'])?$data['accessory']:'';
+        $data['text'] = isset($data['text'])?$data['text']:'';
         $res = self::where(['id'=>$id])->update($data);
         if($res){
             //获取后端的操作员id
