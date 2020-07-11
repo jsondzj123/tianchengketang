@@ -29,7 +29,7 @@ class ArticleController extends Controller {
         }else{
             $where['school_id'] = $school_id;
         }
-        $typelist = self::select('id as value','typename as label')
+        $typelist = Articletype::select('id as value','typename as label')
             ->where($where)
             ->get()->toArray();
         //获取分校列表
