@@ -309,18 +309,18 @@ class Article extends Model {
         }
     }
     public static function schoolANDtype($role_id,$school_id=0){
-//        if($role_id == 1){
+        if($role_id == 1){
             if($school_id != 0){
                 $type = Articletype::select('id as value','typename as label')->where(['status'=>1,'is_del'=>1,'school_id'=>$school_id])->get()->toArray();
             }else{
                 $type = Articletype::select('id as value','typename as label')->where(['status'=>1,'is_del'=>1])->get()->toArray();
             }
             $school = School::select('id as value','name as label')->where(['is_forbid'=>1,'is_del'=>1])->get()->toArray();
-//        }else{
-//            $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
-//            $school = School::select('id as value','name as label')->where(['id'=>$school_id,'is_forbid'=>1,'is_del'=>1])->get()->toArray();
-//            $type = Articletype::select('id as value','typename as label')->where(['school_id'=>$school_id,'status'=>1,'is_del'=>1])->get()->toArray();
-//        }
+        }else{
+            $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+            $school = School::select('id as value','name as label')->where(['id'=>$school_id,'is_forbid'=>1,'is_del'=>1])->get()->toArray();
+            $type = Articletype::select('id as value','typename as label')->where(['school_id'=>$school_id,'status'=>1,'is_del'=>1])->get()->toArray();
+        }
         $data=[
             0 => $school,
             1 => $type
