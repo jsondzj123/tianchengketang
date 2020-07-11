@@ -1212,7 +1212,7 @@ class BankController extends Controller {
                 $papers_id = $type == 3 ? $v['papers_id'] : $v['id'];
                 
                 //判断是否有答过题的数量了
-                $is_right_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , '>' , 0)->count();
+                $is_right_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->count();
                 if($is_right_count && $is_right_count > 0){
                    //判断是否是章节
                     if($type == 1){
@@ -1241,10 +1241,17 @@ class BankController extends Controller {
 
                         $make_date   =   date('Y-m-d' ,strtotime($v['update_at']));
                         $make_time   =   date('H:i:s' ,strtotime($v['update_at']));
+                        $is_over     =   1;
                     } else {
                         $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->orderBy('update_at' , 'DESC')->first();
-                        $make_date   =   date('Y-m-d' ,strtotime($info['update_at']));
-                        $make_time   =   date('H:i:s' ,strtotime($info['update_at']));
+                        if($info && !empty($info)){
+                            $make_date   =   date('Y-m-d' ,strtotime($info['update_at']));
+                            $make_time   =   date('H:i:s' ,strtotime($info['update_at']));
+                        } else {
+                            $make_date   =   "";
+                            $make_time   =   "";
+                        }
+                        $is_over       = 0;
                         $collect_count = 0;
                         $error_count   = 0;
                     }
@@ -1258,7 +1265,8 @@ class BankController extends Controller {
                         'make_date'     =>  $make_date ,
                         'make_time'     =>  $make_time ,
                         'collect_count' =>  $collect_count ,
-                        'error_count'   =>  $error_count
+                        'error_count'   =>  $error_count ,
+                        'is_over'       =>  $is_over
                     ];
                 }
             }
