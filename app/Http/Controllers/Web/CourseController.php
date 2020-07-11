@@ -318,7 +318,7 @@ class CourseController extends Controller {
                 $course['is_pay'] = 1;
 //            }
             //收藏数量
-            $collect = Collection::where(['lession_id'=>$this->data['id']])->count();
+            $collect = Collection::where(['lesson_id'=>$this->data['id']])->count();
             $course['collect'] = $collect;
             //判断用户是否收藏
 //            $collect = Collection::where(['course_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0])->count();
