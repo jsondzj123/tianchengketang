@@ -23,9 +23,10 @@ class ArticleController extends Controller {
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
         $where['is_del'] = 1;
         if($role_id == 1){
-            if(!empty($data['school_id']) && $data['school_id'] != ''){
-                $where['school_id'] = $data['school_id'];
-            }
+            $data = self::$accept_data;
+//            if(!empty($data['school_id']) && $data['school_id'] != ''){
+                $where['school_id'] = isset($data['school_id'])?$data['school_id']:1;
+//            }
         }else{
             $where['school_id'] = $school_id;
         }
