@@ -235,22 +235,7 @@ class AdminUserController extends Controller {
         if($adminUserArr['code'] != 200){
             return response()->json(['code'=>204,'msg'=>'用户不存在']);
         }
-         if($school_status  == 1){//总校
-            $zongxiaoAdminArr = Adminuser::where(['id'=>$data['id']])->first(); 
-            $zongxiaoRoleArr = Roleauth::where('id',$zongxiaoAdminArr['role_id'])->first();
-            $zongxiaoSchoolArr = School::where('id',$zongxiaoAdminArr['school_id'])->first();
-            if($zongxiaoRoleArr['is_super'] == 1 && $zongxiaoSchoolArr['super_id'] == $zongxiaoAdminArr['id']){
-                return response()->json(['code'=>203,'msg'=>'超级管理员信息，不能编辑']);
-            }            
-        }
-        if($school_status == 0){//分校
-            $zongxiaoAdminArr = Adminuser::where(['id'=>$data['id']])->first(); 
-            $zongxiaoRoleArr = Roleauth::where('id',$zongxiaoAdminArr['role_id'])->first();
-            $zongxiaoSchoolArr = School::where('id',$zongxiaoAdminArr['school_id'])->first();
-            if($zongxiaoRoleArr['is_super'] == 1 && $zongxiaoSchoolArr['super_id'] == $zongxiaoAdminArr['id'] && $zongxiaoSchoolArr['super_id'] != $user_id   ){
-                return response()->json(['code'=>203,'msg'=>'超级管理员信息，不能编辑!!!']);
-            }            
-        }
+         
 
 
 
@@ -310,7 +295,7 @@ class AdminUserController extends Controller {
         }
         $data['teacher_id']= !isset($data['teacher_id']) || empty($data['teacher_id']) || $data['teacher_id']<=0 ?0 :$data['teacher_id'];
         //7.11  begin
-        if($school_status  == 1){//总校
+       if($school_status  == 1){//总校
             $zongxiaoAdminArr = Adminuser::where(['id'=>$data['id']])->first(); 
             $zongxiaoRoleArr = Roleauth::where('id',$zongxiaoAdminArr['role_id'])->first();
             $zongxiaoSchoolArr = School::where('id',$zongxiaoAdminArr['school_id'])->first();
@@ -323,10 +308,9 @@ class AdminUserController extends Controller {
             $zongxiaoRoleArr = Roleauth::where('id',$zongxiaoAdminArr['role_id'])->first();
             $zongxiaoSchoolArr = School::where('id',$zongxiaoAdminArr['school_id'])->first();
             if($zongxiaoRoleArr['is_super'] == 1 && $zongxiaoSchoolArr['super_id'] == $zongxiaoAdminArr['id'] && $zongxiaoSchoolArr['super_id'] != $user_id   ){
-                return response()->json(['code'=>203,'msg'=>'超级管理员信息，不能编辑']);
+                return response()->json(['code'=>203,'msg'=>'超级管理员信息，不能编辑!!!']);
             }            
         }
-       
          //7.11  end  
         if(isset($data['password']) && isset($data['pwd'])){
          
