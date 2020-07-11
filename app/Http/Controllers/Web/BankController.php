@@ -413,7 +413,8 @@ class BankController extends Controller {
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  '' ,
                         'is_right'            =>  0 ,
-                        'is_collect'          =>  0
+                        'is_collect'          =>  0 ,
+                        'type'                =>  1
                     ];
                 }
             } else {
@@ -457,7 +458,8 @@ class BankController extends Controller {
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                         'is_right'            =>  $v['is_right'] ,
-                        'is_collect'          =>  $is_collect ? 1 : 0
+                        'is_collect'          =>  $is_collect ? 1 : 0 ,
+                        'type'                =>  1
                     ];
                 }
                 //模式返回
@@ -527,7 +529,8 @@ class BankController extends Controller {
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  '' ,
                         'is_right'            =>  0  ,
-                        'is_collect'          =>  0
+                        'is_collect'          =>  0  ,
+                        'type'                =>  2
                     ];
                 }
             } else {
@@ -571,7 +574,8 @@ class BankController extends Controller {
                         'option_list'         =>  $option_content ,
                         'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                         'is_right'            =>  $v['is_right'] ,
-                        'is_collect'          =>  $is_collect ? 1 : 0
+                        'is_collect'          =>  $is_collect ? 1 : 0 ,
+                        'type'                =>  2
                     ];
                 }
             }
@@ -632,7 +636,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
                     'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
-                    'is_collect'          =>  $is_collect ? 1 : 0
+                    'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'type'                =>  3
                 ];
             }
         }
@@ -1089,7 +1094,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
                     'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
-                    'is_collect'          =>  1
+                    'is_collect'          =>  1 ,
+                    'type'                =>  $v['type']
                 ];
             }
             return response()->json(['code' => 200 , 'msg' => '获取收藏列表成功' , 'data' => $exam_array]);
@@ -1164,7 +1170,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
                     'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
-                    'is_collect'          =>  $is_collect ? 1 : 0
+                    'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'type'                =>  $v['type']
                 ];
             }
             return response()->json(['code' => 200 , 'msg' => '获取错题本列表成功' , 'data' => $exam_array]);
@@ -1354,7 +1361,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                     'is_right'            =>  $v['is_right'] ,
-                    'is_collect'          =>  $is_collect ? 1 : 0
+                    'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'type'                =>  1
                 ];
             }
         } else if($type == 2){  //快速做题
@@ -1395,7 +1403,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                     'is_right'            =>  $v['is_right'] ,
-                    'is_collect'          =>  $is_collect ? 1 : 0
+                    'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'type'                =>  2
                 ];
             }
         } else if($type == 3){  //模拟真题
@@ -1445,7 +1454,8 @@ class BankController extends Controller {
                     'option_list'         =>  $option_content ,
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
                     'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
-                    'is_collect'          =>  $is_collect ? 1 : 0
+                    'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'type'                =>  3
                 ];
             }
         }
