@@ -222,6 +222,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('orderUpinvalid', 'OrderController@orderUpinvalid');//订单无效修改
     $router->post('listType', 'ArticleController@listType');//分类列表
     $router->post('schoolLists', 'ArticleController@schoolLists');//学校列表
+    $router->post('courseType', 'CourseController@courseType');//根据分类查课程
 
 });
 //后端登录权限认证相关接口
@@ -462,7 +463,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     //课程模块（重构）（szw）
     $router->group(['prefix' => 'course'], function () use ($router) {
        // $router->post('subject', 'CourseController@subject');//学科列表   7 11 lys
-        $router->post('courseType', 'CourseController@courseType');//根据分类查课程
         $router->post('courseList', 'CourseController@courseList');//课程列表
         $router->post('courseAdd', 'CourseController@courseAdd');//课程添加
         $router->post('courseDel', 'CourseController@courseDel');//课程删除
