@@ -405,7 +405,7 @@ class Order extends Model {
         if(empty($data['student_id'])){
             return ['code' => 201 , 'msg' => '学员id为空'];
         }
-        $order = self::where(['status'=>2,'oa_status'=>1,'student_id'=>$data['student_id']])->get()->toArray();
+        $order = self::where(['student_id'=>$data['student_id']])->get()->toArray();
         if(!empty($order)){
             foreach ($order as $k=>&$v){
                 if($v['nature'] == 1){
@@ -415,6 +415,15 @@ class Order extends Model {
                 }
                 $v['course_cover'] = $course['cover'];
                 $v['course_title'] = $course['title'];
+                if($v['status'] == 0){
+                    $v['learning'] = "未支付";
+                }
+                if($v['status'] == 2){
+                    if($v['pay_status'] != 4){
+                        $v['learning'] = "尾款未付清";
+                    }
+                    $v['learning'] = "已开课";
+                }
             }
         }
         return ['code' => 200 , 'msg' => '完成' , 'data'=>$order];
