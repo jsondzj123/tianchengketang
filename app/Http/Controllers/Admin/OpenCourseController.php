@@ -73,6 +73,9 @@ class OpenCourseController extends Controller {
 	     	$eduTeacherArr = !isset($openCourseArr['edu_teacher_id']) && empty($openCourseArr['edu_teacher_id'])?[]:json_decode($openCourseArr['edu_teacher_id'],1);
 	        $lectTeacherId  = $openCourseArr['lect_teacher_id'];
 	        $time = json_decode($openCourseArr['time'],1);
+	        if(date('Y-m-d',$time[0]) != date('Y-m-d',$time[1])){
+	        	return response()->json(['code'=>207,'msg'=>'开始时间和结束时间必须在同一天']);
+	        }
 	        $openCourseArr['start_at']  = substr($time[0],0,10);
 	        $openCourseArr['end_at']  = substr($time[1],0,10); 
 	        unset($openCourseArr['edu_teacher_id']);
@@ -85,6 +88,8 @@ class OpenCourseController extends Controller {
 	        if($openCourseArr['start_at'] >  $openCourseArr['end_at'] ){
 	        	return response()->json(['code'=>207,'msg'=>'开始时间不能大于结束时间']); 
 	        }
+
+	        
 	        $openCourseArr['school_id']  = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0 ;
 	        $openCourseArr['admin_id']  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
 	        $openCourseArr['describe']  = isset($openCourseArr['describe']) ?$openCourseArr['describe']:'';

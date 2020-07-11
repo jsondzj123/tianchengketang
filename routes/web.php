@@ -221,7 +221,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('orderUpinvalid', 'OrderController@orderUpinvalid');//订单无效修改
 });
 //后端登录权限认证相关接口
-$router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors']], function () use ($router) {
+$router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors','api']], function () use ($router) {
     /*
      * 授课方式(sxl)
     */
@@ -457,7 +457,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     });
     //课程模块（重构）（szw）
     $router->group(['prefix' => 'course'], function () use ($router) {
-//        $router->post('subject', 'CourseController@subject');//学科列表
+       // $router->post('subject', 'CourseController@subject');//学科列表   7 11 lys
 
         $router->post('courseList', 'CourseController@courseList');//课程列表
         $router->post('courseAdd', 'CourseController@courseAdd');//课程添加
@@ -583,6 +583,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getLessonList', 'SchoolController@getLessonLists');      //获取分校课程列表
         $router->post('getOpenLessonList', 'SchoolController@getOpenLessonList');      //获取分校公开课列表
         $router->post('getSubjectList', 'SchoolController@getSubjectList');      //获取课程/公开课学科大类小类
+        $router->post('details','SchoolController@details'); //获取网校详情
+
     });
 
     $router->group(['prefix' => 'courschool'], function () use ($router) {
@@ -592,14 +594,11 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseStore', 'CourseSchoolController@store');  //批量添加
         $router->post('getNatureSubjectList', 'CourseSchoolController@getNatureSubjectOneByid');  //授权课程列表大类
         $router->post('getNatureSubjectByid', 'CourseSchoolController@getNatureSubjectTwoByid');  //授权课程列表小类
-
-
     });
     $router->group(['prefix' => 'courstocks'], function () use ($router) {
         $router->post('getList', 'CourseStocksController@getList');  //库存列表
         $router->post('doInsertStocks', 'CourseStocksController@doInsertStocks');  //添加库存
     });
-
     //end 网校系统     lys
 
     //课程模块（重构）【公开课】（lys）
