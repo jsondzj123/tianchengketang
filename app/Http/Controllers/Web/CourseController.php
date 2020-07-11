@@ -239,10 +239,10 @@ class CourseController extends Controller {
             return response()->json(['code' => 201 , 'msg' => '课程id不能为空']);
         }
         $this->data['nature'] = isset($this->data['nature'])?$this->data['nature']:0;
-        $keys = json_encode($this->data).$this->userid;
-        if(Redis::get($keys)){
-            return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>json_decode(Redis::get($keys),true)]);
-        }else {
+//        $keys = json_encode($this->data).$this->userid;
+//        if(Redis::get($keys)){
+//            return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>json_decode(Redis::get($keys),true)]);
+//        }else {
         //课程基本信息
         //授权
         if($this->data['nature'] == 1){
@@ -335,9 +335,9 @@ class CourseController extends Controller {
         $course['child_name'] = $child['subject_name'];
         unset($course['parent_id']);
         unset($course['child_id']);
-        Redis::set($keys,json_encode($course),60);
+//        Redis::set($keys,json_encode($course),60);
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
-        }
+//        }
     }
     //课程收藏
     public function collect(){
