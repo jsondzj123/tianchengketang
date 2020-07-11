@@ -82,7 +82,7 @@ class AdminUserController extends Controller {
      *     id           用户id
      * ]
      * @param author    lys
-     * @param ctime     2020-04-29
+     * @param ctime     2020-04-29   7.11
      */
     public function upUserDelStatus(){
         $data =  self::$accept_data;
@@ -91,6 +91,18 @@ class AdminUserController extends Controller {
         if( !isset($data['id']) || empty($data['id']) || is_int($data['id']) ){
             return response()->json(['code'=>201,'msg'=>'账号id为空或缺少或类型不合法']);
         }
+        $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : -1;
+        $user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+        
+        //7.11  begin
+        $zongxiaoAdminArr = Adminuser::where(['id'=>$data['id']])->first(); 
+        $zongxiaoRoleArr = Roleauth::where('id',$zongxiaoAdminArr['role_id'])->first();
+        $zongxiaoSchoolArr = School::where('id',$zongxiaoAdminArr['school_id'])->first();
+        if($zongxiaoRoleArr['is_super'] == 1 && $zongxiaoSchoolArr['super_id'] == $zongxiaoAdminArr['id']){
+            return response()->json(['code'=>203,'msg'=>'超级管理员信息，不能删除']);
+        }       
+         //7.11  end
         $userInfo = Adminuser::findOrFail($data['id']);
         $userInfo->is_del = 0;
         if($userInfo->save()){
@@ -213,6 +225,9 @@ class AdminUserController extends Controller {
 
     public function getAdminUserUpdate(){
         $data = self::$accept_data;
+        $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : -1;
+        $user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         if( !isset($data['id']) || empty($data['id']) ){
             return response()->json(['code'=>201,'msg'=>'用户表示缺少或为空']);
         }
@@ -220,6 +235,7 @@ class AdminUserController extends Controller {
         if($adminUserArr['code'] != 200){
             return response()->json(['code'=>204,'msg'=>'用户不存在']);
         }
+
         $adminUserArr['data']['school_name']  = School::getSchoolOne(['id'=>$adminUserArr['data']['school_id'],'is_forbid'=>1,'is_del'=>1],['name'])['data']['name'];
         $roleAuthArr = Roleauth::getRoleAuthAlls(['school_id'=>$adminUserArr['data']['school_id'],'is_del'=>1],['id','role_name']);
         $teacherArr = [];
@@ -256,6 +272,9 @@ class AdminUserController extends Controller {
 
     public function doAdminUserUpdate(){
         $data = self::$accept_data;
+        $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : -1;
+        $user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $validator = Validator::make($data,
                 [
                 'id' => 'required|integer',
@@ -272,7 +291,14 @@ class AdminUserController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
         $data['teacher_id']= !isset($data['teacher_id']) || empty($data['teacher_id']) || $data['teacher_id']<=0 ?0 :$data['teacher_id'];
-          
+        //7.11  begin
+        $zongxiaoAdminArr = Adminuser::where(['id'=>$data['id']])->first(); 
+        $zongxiaoRoleArr = Roleauth::where('id',$zongxiaoAdminArr['role_id'])->first();
+        $zongxiaoSchoolArr = School::where('id',$zongxiaoAdminArr['school_id'])->first();
+        if($zongxiaoRoleArr['is_super'] == 1 && $zongxiaoSchoolArr['super_id'] == $zongxiaoAdminArr['id']){
+            return response()->json(['code'=>203,'msg'=>'超级管理员信息，不能编辑']);
+        }       
+         //7.11  end  
         if(isset($data['password']) && isset($data['pwd'])){
          
             if(strlen($data['password']) <8){
