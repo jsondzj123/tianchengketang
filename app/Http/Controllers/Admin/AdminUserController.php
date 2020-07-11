@@ -272,8 +272,9 @@ class AdminUserController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
         $data['teacher_id']= !isset($data['teacher_id']) || empty($data['teacher_id']) || $data['teacher_id']<=0 ?0 :$data['teacher_id'];
-        
+          
         if(isset($data['password']) && isset($data['pwd'])){
+         
             if(strlen($data['password']) <8){
                 return response()->json(['code'=>207,'msg'=>'密码长度不能小于8位']);
             }
@@ -289,7 +290,7 @@ class AdminUserController extends Controller {
             }
             unset($data['pwd']);
         }
-
+     
         
         if(isset($data['/admin/adminuser/doAdminUserUpdate'])){
             unset($data['/admin/adminuser/doAdminUserUpdate']);
@@ -301,7 +302,7 @@ class AdminUserController extends Controller {
         if($count >=1 ){
              return response()->json(['code'=>205,'msg'=>'用户名已存在']);
         }  
-        $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+      
         // unset($data['pwd']);
         $admin_id  = CurrentAdmin::user()['id'];
       
