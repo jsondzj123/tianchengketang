@@ -137,6 +137,8 @@ class Video extends Model {
                     foreach($list as $k =>&$v){
                         $v['nature']  = 1;
                     }
+                }else{
+                    $list = [];
                 }
             }
             }else{
