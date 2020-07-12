@@ -21,8 +21,8 @@ class TeacherController extends Controller {
     protected $data;
     public function __construct(){
         $this->data = $_REQUEST;
-        // $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
-        $this->school = School::where(['dns'=>$_SERVER['SERVER_NAME']])->first();
+        $this->school = School::where(['dns'=>$this->data['dns']])->first();
+      
     }
     //列表
 	public function getList(){
