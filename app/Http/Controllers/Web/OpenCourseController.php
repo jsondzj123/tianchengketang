@@ -75,7 +75,7 @@ class OpenCourseController extends Controller {
             ->leftJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_open.id')
             ->leftJoin('ld_lecturer_educationa','ld_course_open_teacher.teacher_id','=','ld_lecturer_educationa.id')
             ->where(function($query) use ($school) {//自增
-                // $query->where('ld_course_open_live_childs.status',1);//预开始
+                $query->where('ld_course_open_live_childs.status',1);//预开始
                 $query->where('ld_course_open.school_id',$school['id']);
                 $query->where('ld_course_open.is_del',0);
                 $query->where('ld_course_open.status',1);
@@ -154,7 +154,7 @@ class OpenCourseController extends Controller {
         $school = $this->school;
         //自增的公开课
         $page = !isset($this->data['page']) || $this->data['page'] <=1 ? 1:$this->data['page'];
-        $pagesize = !isset($this->data['pagesize']) || $this->data['pagesize'] <=1 ? 15:$this->data['pagesize'];
+        $pagesize = !isset($this->data['pagesize']) || $this->data['pagesize'] <=1 ? 20:$this->data['pagesize'];
         $openCourse = OpenCourse::leftJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_open.id')
             ->leftJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_open.id')
             ->leftJoin('ld_lecturer_educationa','ld_course_open_teacher.teacher_id','=','ld_lecturer_educationa.id')
