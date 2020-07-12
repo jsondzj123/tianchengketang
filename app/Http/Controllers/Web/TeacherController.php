@@ -27,7 +27,8 @@ class TeacherController extends Controller {
     //列表
 	public function getList(){
 		$type = !isset($this->data['type']) || $this->data['type']<=0 ?0:$this->data['type'];
-		
+		$pagesize = (int)isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 20;
+        $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
 		$teacherArr = Teacher::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_forbid'=>0,'type'=>2])->select('id','head_icon','real_name','describe','number','is_recommend','teacher_icon')->orderBy('number','desc')->get()->toArray(); //自增讲师
 
 		$natureTeacherArr = CourseRefTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_ref_teacher.teacher_id')
@@ -79,7 +80,15 @@ class TeacherController extends Controller {
 		}else{
 			$teacherData=[];
 		}
-		return response()->json(['code'=>200,'msg'=>'Succes','data'=>$teacherData]);
+		$start=($page-1)*$pagesize;
+        $limit_s=$start+$pagesize;
+        $info=[];
+        for($i=$start;$i<$limit_s;$i++){
+            if(!empty($teacherData[$i])){
+                array_push($info,$teacherData[$i]);
+            }
+        }
+		return response()->json(['code'=>200,'msg'=>'Succes','data'=>$info,'total'=>count($teacherData)]);
 
 
 	}
