@@ -84,7 +84,7 @@ class Video extends Model {
                 }
                 //判断资源名称是否为空
                 if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
-                    $query->where('resource_name','like','%'.$data['resource_name'].'%');
+                    $query->where('resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
                 }
             })->get()->count();
             //获取所有列表
@@ -130,7 +130,7 @@ class Video extends Model {
                         }
                         //判断资源名称是否为空
                         if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
-                            $query->where('resource_name','like','%'.$data['resource_name'].'%');
+                            $query->where('resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
                         }
 
                     })->offset($offset)->limit($pagesize)->orderBy('ld_course_video_resource.id','desc')->get();
@@ -188,7 +188,7 @@ class Video extends Model {
                         }
                         //判断资源名称是否为空
                         if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
-                            $query->where('ld_course_video_resource.resource_name','like','%'.$data['resource_name'].'%');
+                            $query->where('ld_course_video_resource.resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
                         }
                     })->get()->count();
                     //获取所有列表
@@ -230,7 +230,7 @@ class Video extends Model {
                                 }
                                 //判断资源名称是否为空
                                 if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
-                                    $query->where('resource_name','like','%'.$data['resource_name'].'%');
+                                    $query->where('resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
                                 }
 
                             })->orderBy('ld_course_video_resource.id','desc')->get()->toArray();
@@ -278,7 +278,7 @@ class Video extends Model {
                         }
                         //判断资源名称是否为空
                         if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
-                            $query->where('ld_course_video_resource.resource_name','like','%'.$data['resource_name'].'%');
+                            $query->where('ld_course_video_resource.resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
                         }
                     })->get()->count();
                     if($count2 > 0){
@@ -321,7 +321,7 @@ class Video extends Model {
                             }
                             //判断资源名称是否为空
                             if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
-                                $query->where('ld_course_video_resource.resource_name','like','%'.$data['resource_name'].'%');
+                                $query->where('ld_course_video_resource.resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
                             }
                         })->get()->toArray();
                         foreach($list2 as $k =>&$v){
