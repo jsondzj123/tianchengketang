@@ -126,7 +126,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     });
     //教师
     $router->group(['prefix' => 'teacher'], function () use ($router) {
-        $router->post('details','TeacherController@details');//查看详情
+        $router->post('List','TeacherController@getList');//查看详情
+        $router->post('dateils','TeacherController@dateils');//查看详情
     });
      //end (lys)
 
