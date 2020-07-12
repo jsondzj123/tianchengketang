@@ -73,10 +73,14 @@ class OpenCourseController extends Controller {
 	        $openCourseArr['parent_id'] = $openCourseArr['subject'][0]<0 ? 0: $openCourseArr['subject'][0];
 	        $openCourseArr['child_id'] = !isset($openCourseArr['subject'][1]) && empty($openCourseArr['subject'][1]) ? 0 : $openCourseArr['subject'][1];
 	     	$eduTeacherArr = !isset($openCourseArr['edu_teacher_id']) && empty($openCourseArr['edu_teacher_id'])?[]:json_decode($openCourseArr['edu_teacher_id'],1);
+
 	        $lectTeacherId  = json_decode($openCourseArr['lect_teacher_id'],1);
 	        $time = json_decode($openCourseArr['time'],1); //时间段
 	      	$start_at = $openCourseArr['date'].$time[0];
 	      	$end_at = $openCourseArr['date'].$time[1];
+
+	        
+
 	        unset($openCourseArr['edu_teacher_id']);
 	        unset($openCourseArr['lect_teacher_id']);
 	        unset($openCourseArr['subject']);
