@@ -35,9 +35,9 @@ class CourseLiveResource extends Model {
         }
         $livecast = Live::where($where)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
         foreach ($livecast as $k=>&$v){
-            $ones = CouresSubject::where('id',$v['parent_id'])->first();
+            $ones = CouresSubject::where('id',$v['parent_id'])->first()->toArray();
             $v['parent_name'] = $ones['subject_name'];
-            $twos = CouresSubject::where('id',$v['child_id'])->first();
+            $twos = CouresSubject::where('id',$v['child_id'])->first()->toArray();
             $v['chind_name'] = $twos['subject_name'];
         }
         //已经加入的直播资源
