@@ -285,7 +285,6 @@ class Coureschapters extends Model {
 
 
 
-
     //递归
     public static function demo($arr,$id,$level){
         $list =array();
