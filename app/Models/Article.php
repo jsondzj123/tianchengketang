@@ -199,6 +199,7 @@ class Article extends Model {
         unset($data['/admin/article/addArticle']);
         $data['user_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $data['update_at'] = date('Y-m-d H:i:s');
+//        $accessory_name =
         $add = self::insert($data);
         if($add){
             //添加日志操作
