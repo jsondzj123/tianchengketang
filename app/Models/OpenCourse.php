@@ -127,7 +127,7 @@ class OpenCourse extends Model {
                 }
                 $query->where('school_id',$school_id);
                 $query->where('is_del',0);
-            })->select('id','title','cover','start_at','end_at','is_recommend','status')->offset($offset)->limit($pagesize)->get();
+            })->select('id','title','cover','start_at','end_at','is_recommend','status')->orderBy('create_at','desc')->offset($offset)->limit($pagesize)->get();
             foreach ($open_less_arr as $k => $v) {
                 $v['time'] = [date('Y-m-d H:i:s',$v['start_at']),date('Y-m-d H:i:s',$v['end_at'])];
                 $teacherIdArr = OpenCourseTeacher::where('course_id',$v['id'])->where('is_del',0)->get(['teacher_id']);

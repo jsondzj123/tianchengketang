@@ -318,9 +318,7 @@ class OpenCourseController extends Controller {
 	    if($data['code']!= 200 ){
 	    	return response()->json($data);
 	    }
-	    if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
-	    	return response()->json(['code'=>207,'msg'=>'直播中，无法修改']);
-	    }
+	    
 
 	    $data['data']['subject'] = [];
 
@@ -392,13 +390,14 @@ class OpenCourseController extends Controller {
 	    if($data['code']!= 200 ){
 	    	return response()->json($data);
 	    }
+
 	    $time = json_decode($openCourseArr['time'],1); //时间段
      	$start_at = $openCourseArr['date'].$time[0];
 	    $end_at = $openCourseArr['date'].$time[1];
-	    if(strtotime($start_at) <time() && strtotime($end_at) >time()){
+	    if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
 	    	return response()->json(['code'=>207,'msg'=>'直播中，无法修改']);
 	    }
-	    if(strtotime($end_at) <time()){
+	    if($data['data']['end_at'] <time()){
 	    	return response()->json(['code'=>207,'msg'=>'课程已结束，无法修改！！！']);
 	    }
 
