@@ -35,11 +35,11 @@ class CourseLiveResource extends Model {
         }
         $livecast = Live::where($where)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
         foreach ($livecast as $k=>&$v){
-            $ones = CouresSubject::where('id',$v['parent_id'])->first()->toArray();
+            $ones = CouresSubject::where('id',$v['parent_id'])->first();
             if(!empty($ones)){
                 $v['parent_name'] = $ones['subject_name'];
             }
-            $twos = CouresSubject::where('id',$v['child_id'])->first()->toArray();
+            $twos = CouresSubject::where('id',$v['child_id'])->first();
             if(!empty($twos)){
                 $v['chind_name'] = $twos['subject_name'];
             }
