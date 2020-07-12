@@ -44,7 +44,6 @@ class CourseLiveResource extends Model {
                 $v['chind_name'] = $twos['subject_name'];
             }
         }
-        print_r($livecast);die;
         //已经加入的直播资源
         $existLive = self::select('ld_course_livecast_resource.*')
             ->leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
@@ -61,6 +60,7 @@ class CourseLiveResource extends Model {
                 }
             }
         }
+        print_r($livecast);die;
         return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$livecast,'existlive'=>$existLive,'count'=>$count];
     }
     //删除直播资源  szw
