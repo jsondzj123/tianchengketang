@@ -108,7 +108,9 @@ class Live extends Model {
                 })->offset($offset)->limit($pagesize)
                     ->orderBy("ld_course_livecast_resource.id","desc")
                     ->get();
-                    }
+                }else{
+                    $list=[];
+                }
                 }
             }else{
                 //分校数据
