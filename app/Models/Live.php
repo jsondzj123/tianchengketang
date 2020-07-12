@@ -6,6 +6,7 @@ use App\Models\Subject;
 use App\Models\LiveClass;
 use App\Models\Admin;
 use App\Models\Coures;
+use App\Models\CourseRefResource;
 use App\Models\CourseLiveResource;
 class Live extends Model {
 
@@ -28,12 +29,21 @@ class Live extends Model {
             $pagesize = isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 15;
             $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
             $offset   = ($page - 1) * $pagesize;
-            //获取总条数
+            //判断登录状态
+            //获取用户网校id
+            $data['school_status'] = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+            $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+            //总校资源
+            if($data['school_status'] == 1){
+                if(!empty($data['school_id']) && $data['school_id'] != ''){
+                    //获取总条数
             $total = self::join('ld_course_subject','ld_course_subject.id','=','ld_course_livecast_resource.parent_id')->select('*','ld_course_livecast_resource.parent_id','ld_course_livecast_resource.child_id')->where(function($query) use ($data){
                 // //获取后端的操作员id
                 // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                 // //操作员id
                 // $query->where('ld_course_livecast_resource.admin_id' , '=' , $admin_id);
+                //学校id
+                $query->where('ld_course_livecast_resource.school_id' , '=' , $data['school_id']);
                 //删除状态
                 $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
                 //判断学科id是否为空
@@ -51,10 +61,6 @@ class Live extends Model {
                 if(isset($data['child_id']) && !empty(isset($data['child_id']))){
                     $query->where('ld_course_livecast_resource.child_id' , '=' , $data['child_id']);
                 }
-                //判断资源属性是否为空
-                if(isset($data['nature']) && !empty(isset($data['nature'])) && $data['nature'] !=3){
-                    $query->where('ld_course_livecast_resource.nature' , '=' , $data['nature']);
-                }
                 //判断资源状态是否为空
                 if(isset($data['is_forbid']) && $data['is_forbid'] != 3){
                     $query->where('ld_course_livecast_resource.is_forbid' , '=' , $data['is_forbid']);
@@ -71,6 +77,8 @@ class Live extends Model {
                     // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                     // //操作员id
                     // $query->where('ld_course_livecast_resource.admin_id' , '=' , $admin_id);
+                    //学校id
+                $query->where('ld_course_livecast_resource.school_id' , '=' , $data['school_id']);
                     //删除状态
                     $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
                     //判断学科id是否为空
@@ -88,13 +96,8 @@ class Live extends Model {
                     if(isset($data['child_id']) && !empty(isset($data['child_id']))){
                         $query->where('ld_course_livecast_resource.child_id' , '=' , $data['child_id']);
                     }
-                    //判断资源属性是否为空
-                    if(isset($data['nature']) && !empty(isset($data['nature']))  && $data['nature'] !=3){
-                        $query->where('ld_course_livecast_resource.nature' , '=' , $data['nature']);
-                    }
                     //判断资源状态是否为空
                     if(isset($data['is_forbid'])  && $data['is_forbid'] != 3){
-
                         $query->where('ld_course_livecast_resource.is_forbid' , '=' , $data['is_forbid']);
                     }
                     //判断课程单元名称是否为空
@@ -103,8 +106,216 @@ class Live extends Model {
                     }
 
                 })->offset($offset)->limit($pagesize)
-                ->orderBy("ld_course_livecast_resource.id","desc")
-                ->get();
+                    ->orderBy("ld_course_livecast_resource.id","desc")
+                    ->get();
+                    }
+                }
+            }else{
+                //分校数据
+                //自增
+                //获取总条数
+                    $count1 = self::join('ld_course_subject','ld_course_subject.id','=','ld_course_livecast_resource.parent_id')->select('*','ld_course_livecast_resource.parent_id','ld_course_livecast_resource.child_id')->where(function($query) use ($data){
+                        // //获取后端的操作员id
+                        // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                        // //操作员id
+                        // $query->where('ld_course_livecast_resource.admin_id' , '=' , $admin_id);
+                        //学校id
+                        $query->where('ld_course_livecast_resource.school_id' , '=' , $data['school_id']);
+                        //删除状态
+                        $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
+                        //判断学科id是否为空
+                        if(isset($data['parent_id'])){
+                            $s_id = json_decode($data['parent_id']);
+                            if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                                $data['parent_id'] = $s_id[0];
+                                if(!empty($s_id[1])){
+                                    $data['child_id'] = $s_id[1];
+                                }
+                                $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
+                            }
+                        }
+                        //判断学科小类
+                        if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                            $query->where('ld_course_livecast_resource.child_id' , '=' , $data['child_id']);
+                        }
+                        //判断资源状态是否为空
+                        if(isset($data['is_forbid']) && $data['is_forbid'] != 3){
+                            $query->where('ld_course_livecast_resource.is_forbid' , '=' , $data['is_forbid']);
+                        }
+                        //判断课程单元名称是否为空
+                        if(isset($data['name']) && !empty(isset($data['name']))){
+                            $query->where('name','like',$data['name'].'%');
+                        }
+                    })->get()->count();
+                    //获取所有列表
+                    if($count1 > 0){
+                        $list1 = self::join('ld_course_subject','ld_course_subject.id','=','ld_course_livecast_resource.parent_id')->select('*','ld_course_livecast_resource.parent_id','ld_course_livecast_resource.child_id','ld_course_livecast_resource.id','ld_course_livecast_resource.create_at','ld_course_livecast_resource.admin_id')->where(function($query) use ($data){
+                            // //获取后端的操作员id
+                            // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                            // //操作员id
+                            // $query->where('ld_course_livecast_resource.admin_id' , '=' , $admin_id);
+                            //学校id
+                        $query->where('ld_course_livecast_resource.school_id' , '=' , $data['school_id']);
+                            //删除状态
+                            $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
+                            //判断学科id是否为空
+                            if(isset($data['parent_id'])){
+                                $s_id = json_decode($data['parent_id']);
+                                if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                                    $data['parent_id'] = $s_id[0];
+                                    if(!empty($s_id[1])){
+                                        $data['child_id'] = $s_id[1];
+                                    }
+                                    $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
+                                }
+                            }
+                            //判断学科小类
+                            if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                                $query->where('ld_course_livecast_resource.child_id' , '=' , $data['child_id']);
+                            }
+                            //判断资源状态是否为空
+                            if(isset($data['is_forbid'])  && $data['is_forbid'] != 3){
+                                $query->where('ld_course_livecast_resource.is_forbid' , '=' , $data['is_forbid']);
+                            }
+                            //判断课程单元名称是否为空
+                            if(isset($data['name']) && !empty(isset($data['name']))){
+                                $query->where('name','like',$data['name'].'%');
+                            }
+
+                        })->orderBy("ld_course_livecast_resource.id","desc")
+                          ->get()->toArray();
+                        }
+                //授权
+
+                $count2 = CourseRefResource::join("ld_course_livecast_resource","ld_course_ref_resource.resource_id","=","ld_course_livecast_resource.id")
+                ->join('ld_course_subject','ld_course_subject.id','=','ld_course_livecast_resource.parent_id')->select('*','ld_course_livecast_resource.parent_id','ld_course_livecast_resource.child_id')->where(function($query) use ($data){
+                    // //获取后端的操作员id
+                    // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                    // //操作员id
+                    // $query->where('ld_course_livecast_resource.admin_id' , '=' , $admin_id);
+                    //关联数据条件
+                    $query->where(["to_school_id"=>$data['school_id'],"ld_course_ref_resource.type"=>1,"ld_course_ref_resource.is_del"=>0]);
+                    //删除状态
+                    $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
+                    //判断学科id是否为空
+                    if(isset($data['parent_id'])){
+                        $s_id = json_decode($data['parent_id']);
+                        if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                            $data['parent_id'] = $s_id[0];
+                            if(!empty($s_id[1])){
+                                $data['child_id'] = $s_id[1];
+                            }
+                            $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
+                        }
+                    }
+                    //判断学科小类
+                    if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                        $query->where('ld_course_livecast_resource.child_id' , '=' , $data['child_id']);
+                    }
+                    //判断资源状态是否为空
+                    if(isset($data['is_forbid']) && $data['is_forbid'] != 3){
+                        $query->where('ld_course_livecast_resource.is_forbid' , '=' , $data['is_forbid']);
+                    }
+                    //判断课程单元名称是否为空
+                    if(isset($data['name']) && !empty(isset($data['name']))){
+                        $query->where('name','like',$data['name'].'%');
+                    }
+                })->get()->count();
+                //获取所有列表
+                if($count2 > 0){
+                    $list2 = CourseRefResource::join("ld_course_livecast_resource","ld_course_ref_resource.resource_id","=","ld_course_livecast_resource.id")
+                    ->join('ld_course_subject','ld_course_subject.id','=','ld_course_livecast_resource.parent_id')->select('*','ld_course_livecast_resource.parent_id','ld_course_livecast_resource.child_id','ld_course_livecast_resource.id','ld_course_livecast_resource.create_at','ld_course_livecast_resource.admin_id')->where(function($query) use ($data){
+                        // //获取后端的操作员id
+                        // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                        // //操作员id
+                        // $query->where('ld_course_livecast_resource.admin_id' , '=' , $admin_id);
+                        //关联数据条件
+                    $query->where(["to_school_id"=>$data['school_id'],"ld_course_ref_resource.type"=>1,"ld_course_ref_resource.is_del"=>0]);
+                        //删除状态
+                        $query->where('ld_course_livecast_resource.is_del' , '=' , 0);
+                        //判断学科id是否为空
+                        if(isset($data['parent_id'])){
+                            $s_id = json_decode($data['parent_id']);
+                            if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                                $data['parent_id'] = $s_id[0];
+                                if(!empty($s_id[1])){
+                                    $data['child_id'] = $s_id[1];
+                                }
+                                $query->where('ld_course_livecast_resource.parent_id' , '=' , $data['parent_id']);
+                            }
+                        }
+                        //判断学科小类
+                        if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                            $query->where('ld_course_livecast_resource.child_id' , '=' , $data['child_id']);
+                        }
+                        //判断资源状态是否为空
+                        if(isset($data['is_forbid'])  && $data['is_forbid'] != 3){
+                            $query->where('ld_course_livecast_resource.is_forbid' , '=' , $data['is_forbid']);
+                        }
+                        //判断课程单元名称是否为空
+                        if(isset($data['name']) && !empty(isset($data['name']))){
+                            $query->where('name','like',$data['name'].'%');
+                        }
+
+                    })->orderBy("ld_course_livecast_resource.id","desc")
+                      ->get()->toArray();
+                    }
+                    if(!isset($list1)){
+                        $list1 = [];
+                    }
+                    if(!isset($list2)){
+                        $list2 = [];
+                    }
+                    //数据总数  等于  自增数据加授权数据
+                    //判断搜索条件  自增资源和授权资源  1为自增  2为授权 0为全部
+                    if(isset($data['nature']) && $data['nature']== 1){
+                        $total = $count1;
+                        if($total > 0){
+                            $arr = array_merge($list1);
+                            $start=($page-1)*$pagesize;
+                            $limit_s=$start+$pagesize;
+                            $list=[];
+                            for($i=$start;$i<$limit_s;$i++){
+                                if(!empty($arr[$i])){
+                                    array_push($list,$arr[$i]);
+                                }
+                            }
+                        }else{
+                            $list=[];
+                        }
+                    }else if(isset($data['nature']) &&  $data['nature'] == 2){
+                        $total = $count2;
+                        if($total > 0){
+                            $arr = array_merge($list2);
+                            $start=($page-1)*$pagesize;
+                            $limit_s=$start+$pagesize;
+                            $list=[];
+                            for($i=$start;$i<$limit_s;$i++){
+                                if(!empty($arr[$i])){
+                                    array_push($list,$arr[$i]);
+                                }
+                            }
+                        }else{
+                            $list=[];
+                        }
+                    }else{
+                        $total = $count1 + $count2;
+                        $arr = array_merge($list1,$list2);
+                        if($total > 0){
+                            $start=($page-1)*$pagesize;
+                            $limit_s=$start+$pagesize;
+                            $list=[];
+                            for($i=$start;$i<$limit_s;$i++){
+                                if(!empty($arr[$i])){
+                                    array_push($list,$arr[$i]);
+                                }
+                            }
+                        }else{
+                            $list=[];
+                        }
+                    }
+
+            }
                 foreach($list as $k => $live){
                     //获取班号数量
                     $live['class_num'] = LiveClass::where("is_del",0)->where("resource_id",$live['id'])->count();
@@ -112,10 +323,7 @@ class Live extends Model {
                     $live['subject_child_name'] = Subject::where("is_del",0)->where("id",$live['child_id'])->select("subject_name")->first()['subject_name'];
                 }
                 return ['code' => 200 , 'msg' => '获取直播资源列表成功' , 'data' => ['Live_list' => $list, 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
-            }else{
-                return ['code' => 200 , 'msg' => '获取直播资源列表成功' , 'data' => ['Live_list' => [], 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
             }
-        }
 
         /*
          * @param  获取直播资源详情
@@ -163,9 +371,8 @@ class Live extends Model {
             }
             //查询是否和课程关联
             if($LiveOne['is_forbid'] == 1){
-                return ['code' => 200 , 'msg' => '该资源已关联课程，无法修改状态'];
+                return ['code' => 204 , 'msg' => '该资源已关联课程，无法修改状态'];
             }
-            //等学科写完继续
             $is_forbid = ($LiveOne['is_forbid']==2)?0:2;
             $update = self::where(['id'=>$data['id']])->update(['is_forbid'=>$is_forbid,'update_at'=>date('Y-m-d H:i:s')]);
             if($update){
@@ -202,13 +409,25 @@ class Live extends Model {
             if(!$LiveOne){
                 return ['code' => 204 , 'msg' => '参数不正确'];
             }
-            //查询是否关联课程
-            //等学科写完继续
-
-            //查询是否是授权资源
-            $LiveOnes = self::where(['id'=>$data['id'],'nature'=>0])->first();
-            if(!$LiveOnes){
-                return ['code' => 204 , 'msg' => '该资源为授权资源，无法删除'];
+            //查询是否授权
+            //分校才进行查询
+            //获取用户网校id
+            $data['school_status'] = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+            $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+            //分校资源
+            if($data['school_status'] != 1){
+                if(!empty($data['school_id']) && $data['school_id'] != ''){
+                    //去授权表查询直播id
+                    $res = CourseRefResource::where(['resource_id'=>$data['id'],'type'=>1,'to_school_id'=>$data['school_id']])->first();
+                    if($res){
+                        return ['code' => 204 , 'msg' => '该资源是授权资源，无法删除'];
+                    }
+                }
+            }
+            //查询是否是关联课程
+            $LiveOnes = self::where(['id'=>$data['id'],'is_forbid'=>1])->first();
+            if($LiveOnes){
+                return ['code' => 204 , 'msg' => '该资源已关联课程，无法删除'];
             }
             $update = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
             if($update){
@@ -321,8 +540,25 @@ class Live extends Model {
             }else{
                 $data['child_id'] = 0;
             }
+            //查询是否授权
+            //分校才进行查询
+            //获取用户网校id
+            $data['school_status'] = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+            $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+            //分校资源
+            if($data['school_status'] != 1){
+                if(!empty($data['school_id']) && $data['school_id'] != ''){
+                    //去授权表查询直播id
+                    $res = CourseRefResource::where(['resource_id'=>$data['id'],'type'=>1,'to_school_id'=>$data['school_id']])->first();
+                    if($res){
+                        return ['code' => 204 , 'msg' => '该资源是授权资源，无法删除'];
+                    }
+                }
+            }
             $id = $data['id'];
             unset($data['id']);
+            unset($data['school_id']);
+            unset($data['school_status']);
             //获取后端的操作员id
             $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
             $data['admin_id'] = $admin_id;
