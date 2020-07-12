@@ -69,6 +69,16 @@ class CouresSubject extends Model {
 
     //删除
     public static function subjectDel($user_id,$data){
+        //判断此学科是否有在售课程
+        $find = self::where(['id'=>$data['id']])->first();
+        if($find['parent_id'] != 0){
+            $course = Coures::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+        }else{
+            $course = Coures::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+        }
+        if($course != 0){
+            return ['code' => 202 , 'msg' => '关联的课程在售无法删除，请确认'];
+        }
         $del = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
         if($del){
             //添加日志操作
@@ -122,6 +132,17 @@ class CouresSubject extends Model {
             return ['code' => 202 , 'msg' => '无此信息'];
         }
         $status = $find['is_open'] == 1?0:1;
+        if($status == 1){
+            //判断此学科是否有在售课程
+            if($find['parent_id'] != 0){
+                $course = Coures::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            }else{
+                $course = Coures::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            }
+            if($course != 0){
+                return ['code' => 202 , 'msg' => '关联的课程在售无法关闭，请确认'];
+            }
+        }
         $up = self::where(['id'=>$data['id']])->update(['is_open'=>$status,'update_at'=>date('Y-m-d H:i:s')]);
         if($up){
             //添加日志操作
