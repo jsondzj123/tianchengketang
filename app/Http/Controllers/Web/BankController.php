@@ -14,6 +14,7 @@ use App\Models\StudentCollectQuestion;
 use App\Models\StudentPapers;
 use App\Models\Coures;
 use App\Models\Order;
+use App\Models\School;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
@@ -28,29 +29,47 @@ class BankController extends Controller {
     public function getBankList() {
         //获取提交的参数
         try{
+            //分校域名
+            $school_dns        = isset(self::$accept_data['school_dns']) && !empty(self::$accept_data['school_dns']) ? self::$accept_data['school_dns'] : '';           //获取学校域名
+           
+            //判断学校域名是否传递
+            if(!$school_dns || empty($school_dns)){
+                return response()->json(['code' => 201 , 'msg' => '分校域名为空']);
+            }
+            
+            //根据学校域名获取学校的id
+            $school_info = School::where('dns' , $school_dns)->where('is_del' , 1)->where('is_forbid' , 1)->first();
+            if(!$school_info || empty($school_info)){
+                return response()->json(['code' => 203 , 'msg' => '此域名不合法']);
+            }
+            
+            //获取分校id
+            $school_id = $school_info['id'];
+            
             //题库数组赋值
             $bank_array = [];
-                
+            
             //获取全部题库的列表
-            $bank_list = Bank::where("is_del" , 0)->where("is_open" , 0)->orderByDesc('id')->get();
+            $bank_list = DB::table('ld_question_bank')->leftJoin("ld_admin" , function($join){
+                $join->on('ld_admin.id', '=', 'ld_question_bank.admin_id');
+            })->select('ld_question_bank.id' , 'ld_question_bank.subject_id' , 'ld_question_bank.topic_name')->where("ld_admin.school_id" , $school_id)->where('ld_question_bank.is_del' , '=' , 0)->where("ld_question_bank.is_open" , 0)->orderByDesc('ld_question_bank.id')->get()->toArray();
             if($bank_list && !empty($bank_list)){
-                $bank_list = $bank_list->toArray();
                 foreach($bank_list as $k=>$v){
                     //判断科目的id是否为空
-                    if($v['subject_id'] && !empty($v['subject_id'])){
+                    if($v->subject_id && !empty($v->subject_id)){
                         //科目id数据格式转化
-                        $subject_id   = explode(',' , $v['subject_id']);
+                        $subject_id   = explode(',' , $v->subject_id);
                         
                         //根据科目的id获取列表数据
-                        $subject_list = QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v['id'])->whereIn('id' , $subject_id)->where('is_del' , 0)->get();
+                        $subject_list = QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->id)->whereIn('id' , $subject_id)->where('is_del' , 0)->get();
                     } else {
                         $subject_list = [];
                     }
                     
                     //新数组赋值
                     $bank_array[] = [
-                        'bank_id'     =>   $v['id'] ,
-                        'bank_name'   =>   $v['topic_name'] ,
+                        'bank_id'     =>   $v->id ,
+                        'bank_name'   =>   $v->topic_name ,
                         'subject_list'=>   $subject_list
                     ];
                 }
