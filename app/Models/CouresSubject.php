@@ -169,6 +169,7 @@ class CouresSubject extends Model {
             ->orderBydesc('id')->get()->toArray();
         //根据授权课程 获取分类
         $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->get()->groupBy('parent_id');
+        print_r($course);die;
         $lists=[];
         if(!empty($course)){
             foreach ($course as $k=>$v){
