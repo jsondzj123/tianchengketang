@@ -38,7 +38,7 @@ class Articletype extends Model {
         $total = self::leftJoin('ld_school','ld_school.id','=','ld_article_type.school_id')
             ->leftJoin('ld_admin','ld_admin.id','=','ld_article_type.user_id')
             ->where($where)->count();
-        $typelist = self::select('ld_article_type.id','ld_article_type.typename','ld_article_type.status','ld_school.name','ld_admin.username')
+        $typelist = self::select('ld_article_type.id','ld_article_type.typename','ld_article_type.status','ld_article_type.description','ld_school.name','ld_admin.username')
             ->leftJoin('ld_school','ld_school.id','=','ld_article_type.school_id')
             ->leftJoin('ld_admin','ld_admin.id','=','ld_article_type.user_id')
             ->where($where)
