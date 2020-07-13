@@ -168,7 +168,7 @@ class Articletype extends Model {
         if($ones){
             return ['code' => 202 , 'msg' => '数据已存在'];
         }else {
-            $data['description'] = isset($data['typename'])?$data['typename']:'';
+            $data['description'] = isset($data['description'])?$data['description']:'';
             $add = self::insert($data);
             if($add){
                 //添加日志操作
