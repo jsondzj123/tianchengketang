@@ -170,7 +170,6 @@ class CouresSubject extends Model {
         print_r($one);die;
         //根据授权课程 获取分类
         $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->groupBy('parent_id')->get()->toArray();
-
         $two=[];
         if(!empty($course)){
             foreach ($course as $k=>$v){
@@ -179,7 +178,6 @@ class CouresSubject extends Model {
                 $two['childs'] = $twss;
             }
         }
-
         $list = self::demo($one,0,0);
         if(!empty($list) && !empty($two)){
             $listss = array_merge($list,$two);
