@@ -210,10 +210,10 @@ class Article extends Model {
             $accessory = json_decode($data['accessory'],true);
             foreach ($accessory as $k=>$v){
                 Articleaccessory::insert([
-                                        'article_id' => $add,
-                                        'accessory_name' => $v['name'],
-                                        'accessory' => $v['url'],
-                                     ]);
+                                    'article_id' => $add,
+                                    'accessory_name' => $v['name'],
+                                    'accessory' => $v['url'],
+                                 ]);
             }
         }
         if($add){
