@@ -223,6 +223,8 @@ class LiveChild extends Model {
             unset($data['id']);
             $res = self::where(['id'=>$id])->update($data);
             if($res){
+                //更新数据  更新发布状态
+                self::where(['id'=>$id])->update(['status'=>0]);
                 //添加日志操作
                 AdminLog::insertAdminLog([
                     'admin_id'       =>   $data['admin_id']  ,
@@ -292,6 +294,7 @@ class LiveChild extends Model {
             if(empty($data['class_id'])|| !isset($data['class_id'])){
                 return ['code' => 201 , 'msg' => '课次id不能为空'];
             }
+            $id = $data['class_id'];
             //讲师id
             if(empty($data['teacher_id'])|| !isset($data['teacher_id'])){
                 return ['code' => 201 , 'msg' => '讲师id不能为空'];
@@ -322,9 +325,9 @@ class LiveChild extends Model {
             }
             //获取后端的操作员id
             $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-
             $add = LiveClassChildTeacher::insert($data);
             if($add){
+                self::where(['id'=>$id])->update(['status'=>0]);
                 //添加日志操作
                 AdminLog::insertAdminLog([
                     'admin_id'       =>   $admin_id,
@@ -420,7 +423,7 @@ class LiveChild extends Model {
                 }
 
             }else{
-                return ['code' => 204 , 'msg' => '欢拓参数不正确'];
+                return ['code' => 204 , 'msg' => $res['msg']];
             }
         }
 
