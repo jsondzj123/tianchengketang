@@ -309,6 +309,7 @@ class Article extends Model {
         $data['text'] = isset($data['text'])?$data['text']:'';
         $res = self::where(['id'=>$id])->update($data);
         if(isset($access) || empty($access)){
+            Articleaccessory::where('article_id',$id)->update(['status'=>1]);
             $accessory = json_decode($access,true);
             foreach ($accessory as $k=>$v){
                 $one = Articleaccessory::where(['article_id'=>$id,'accessory_name'=>$v['name'],'accessory_url'=>$v['url']])->first();
