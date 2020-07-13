@@ -208,6 +208,7 @@ class Article extends Model {
         $add = self::insertGetId($data);
         if(isset($data['accessory']) || !empty($data['accessory'])){
             $accessory = json_decode($data['accessory']);
+            file_put_contents('accessory.txt', '时间:'.date('Y-m-d H:i:s').print_r($accessory,true),FILE_APPEND);
             foreach ($accessory as $k=>$v){
                 Articleaccessory::insert([
                                         'article_id' => $add,
