@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\Subject;
 use App\Models\CourseSchool;
 use App\Models\CourseRefOpen;
+use App\Models\CourseRefSubject;
 use App\Models\LessonTeacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -679,10 +680,23 @@ class IndexController extends Controller {
                     //解析json获取用户详情信息
                     $json_info = Redis::hGetAll($token_key);
                     //登录显示属于分校的课程
-                    $subject = Subject::select('id', 'subject_name as name')
-                        ->where(['is_del' => 0,'parent_id' => 0])
-                        ->limit(4)
+                    if($json_info['school_id'] == 1){
+                        $subject = Subject::select('id', 'subject_name as name')
+                        ->where(['is_del' => 0,'parent_id' => 0,"school_id" => $json_info['school_id']])
                         ->get()->toArray();
+                    }else{
+                        //自增科目
+                        $subject2 = Subject::select('id', 'subject_name as name')
+                        ->where(['is_del' => 0,'parent_id' => 0,"school_id" => $json_info['school_id']])
+                        ->get()->toArray();
+                        //授权科目
+                        $subject1 = CourseRefSubject::join("ld_course_subject","ld_course_ref_subject.parent_id","=","ld_course_subject.id")
+                        ->select('ld_course_subject.id', 'subject_name as name')
+                        ->where(['ld_course_subject.is_del' => 0,'ld_course_subject.parent_id' => 0,'to_school_id'=>$json_info['school_id']])
+                        ->get()->toArray();
+                        $subject = array_merge($subject1,$subject2);
+                    }
+                        $subject = array_slice($subject,0,5);
                         $lessons = [];
                         foreach($subject as $k =>$v){
 
@@ -735,8 +749,8 @@ class IndexController extends Controller {
                 } else {
                         //未登录显示主校自己的课程
                         $subject = Subject::select('id', 'subject_name as name')
-                        ->where(['is_del' => 0,'parent_id' => 0])
-                        ->limit(4)
+                        ->where(['is_del' => 0,'parent_id' => 0,"school_id" => 1])
+                        ->limit(5)
                         ->get()->toArray();
                         $lessons = [];
                         foreach($subject as $k =>$v){
@@ -774,7 +788,6 @@ class IndexController extends Controller {
                             }
                         }
                 }
-
             return $this->response($lessons);
         } catch (Exception $ex) {
             return $this->response($ex->getMessage());
