@@ -437,21 +437,32 @@ class CourseController extends Controller {
             if(!$course){
                 return response()->json(['code' => 201 , 'msg' => '无查看权限']);
             }
+            //判断此课程是否免费
+            //免费课程  将此课程的所有录播内容查询出来
+            //用户是否购买，如果购买，显示全部
+            //是否购买
+            if($course['sale_price'] > 0){
+                $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2,'nature'=>0])->count();
+                $is_pay = $order > 0?1:0;
+            }else{
+                $is_pay = 1;
+            }
+            $this->data['id'] = $course['course_id'];
         }else{
             $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first();
             if(!$course){
                 return response()->json(['code' => 201 , 'msg' => '无查看权限']);
             }
-        }
-        //判断此课程是否免费
+            //判断此课程是否免费
             //免费课程  将此课程的所有录播内容查询出来
             //用户是否购买，如果购买，显示全部
             //是否购买
-        if($course['sale_price'] > 0){
+             if($course['sale_price'] > 0){
                 $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2,'nature'=>0])->count();
                 $is_pay = $order > 0?1:0;
-         }else{
+            }else{
                 $is_pay = 1;
+            }
         }
         //免费或者已经购买，展示全部
         if($course['sale_price'] == 0 || $is_pay == 0){
@@ -545,18 +556,18 @@ class CourseController extends Controller {
             return response()->json(['code' => 201 , 'msg' => '课程id为空']);
         }
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
-//        if($nature == 1){
-//            $course = CourseSchool ::where(['to_school_id'=>$this->school['id'],'id'=>$this->data['id'],'is_del'=>0])->first();
-//            $courseid = $course['course_id'];
-//        }else{
-            $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first();
-//            $courseid = $this->data['id'];
-//        }
+        if($nature == 1){
+            $course = CourseSchool ::where(['to_school_id'=>$this->school['id'],'id'=>$this->data['id'],'is_del'=>0])->first();
+            //课程是否免费或者用户是否购买，如果购买，显示全部班号课次
+            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+            $this->data['id'] = $course['course_id'];
+        }else{
+            //课程是否免费或者用户是否购买，如果购买，显示全部班号课次
+            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+        }
         if(!$course){
             return response()->json(['code' => 201 , 'msg' => '无查看权限']);
         }
-        //课程是否免费或者用户是否购买，如果购买，显示全部班号课次
-        $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
         $courseArr=[];
         if($order == 0 || $course['sale_price'] == 0){
             //获取所有的班号
