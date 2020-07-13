@@ -177,6 +177,7 @@ class CouresSubject extends Model {
                 $two['childs'] = $twss;
             }
         }
+        print_r($two);die;
         $list = self::demo($one,0,0);
         if(!empty($list) && !empty($two)){
             $listss = array_merge($list,$two);
