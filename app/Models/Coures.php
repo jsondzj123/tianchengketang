@@ -133,7 +133,7 @@ class Coures extends Model {
                         }
                     }else{
                         //分校查询当前学校
-                        $query->where('school_id',$data['school_id']);
+                        $query->where('school_id',$school_id);
                     }
                     //学科大类
                     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
@@ -183,7 +183,7 @@ class Coures extends Model {
                         }
                     }else{
                         //分校查询当前学校
-                        $query->where('to_school_id',$data['school_id']);
+                        $query->where('to_school_id',$school_id);
                     }
                     //学科大类
                     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
@@ -237,7 +237,7 @@ class Coures extends Model {
                         }
                     }else{
                         //分校查询当前学校
-                        $query->where('to_school_id',$data['school_id']);
+                        $query->where('to_school_id',$school_id);
                     }
                     //学科大类
                     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
@@ -290,7 +290,7 @@ class Coures extends Model {
                         }
                     }else{
                         //分校查询当前学校
-                        $query->where('school_id',$data['school_id']);
+                        $query->where('school_id',$school_id);
                     }
                     //学科大类
                     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
