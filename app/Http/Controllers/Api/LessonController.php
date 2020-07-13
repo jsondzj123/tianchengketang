@@ -130,6 +130,7 @@ class LessonController extends Controller {
                         ->orWhere(function ($query) use ($keyWord){
                             $query->where('ld_course_school.title', 'like', '%'.$keyWord.'%')->orWhere('ld_course_school.keywords', 'like', '%'.$keyWord.'%');
                         })
+                        ->groupBy("ld_course_school.id")
                         ->get()->toArray();
                 foreach($data_list_accredit as $k => &$v){
                     //二级分类
@@ -144,6 +145,7 @@ class LessonController extends Controller {
                     //获取授课模式
                     $v['methods'] = DB::table('ld_course_school')->select('method_id as id')->join("ld_course_method","ld_course_school.course_id","=","ld_course_method.course_id")->where(['ld_course_school.id'=>$v['id'],"ld_course_method.is_del"=>0])->get();
                 }
+
                 $data_list = array_merge($data_list,$data_list_accredit);
                 //数据分页
                 $start =($page - 1) * $pagesize;
