@@ -178,7 +178,6 @@ class CouresSubject extends Model {
             }
         }
         $list = self::demo($one,0,0);
-//        print_r($list);die;
         if(!empty($list) && !empty($two)){
             $listss = array_merge($list,$two);
         }else{
