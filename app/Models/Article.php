@@ -179,6 +179,8 @@ class Article extends Model {
          * return  array
          */
     public static function addArticle($data){
+        $accessory = json_decode($data['accessory']);
+        file_put_contents('accessory.txt', '时间:'.date('Y-m-d H:i:s').print_r($accessory,true),FILE_APPEND);die;
         //判断分类id
         if(empty($data['article_type_id']) || !isset($data['article_type_id'])){
             return ['code' => 201 , 'msg' => '请正确选择分类'];
@@ -206,8 +208,7 @@ class Article extends Model {
         $data['update_at'] = date('Y-m-d H:i:s');
         $add = self::insertGetId($data);
         if(isset($data['accessory']) || !empty($data['accessory'])){
-            $accessory = json_decode($data['accessory']);
-            file_put_contents('accessory.txt', '时间:'.date('Y-m-d H:i:s').print_r($accessory,true),FILE_APPEND);
+
             foreach ($accessory as $k=>$v){
                 Articleaccessory::insert([
                                         'article_id' => $add,
