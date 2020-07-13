@@ -170,6 +170,7 @@ class CouresSubject extends Model {
         //根据授权课程 获取分类
         $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->groupBy('parent_id')->get()->toArray();
         $lists=[];
+        print_r($course);die;
         if(!empty($course)){
             foreach ($course as $k=>$v){
                 $two = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['id'=>$v,'is_del'=>0])->first();
