@@ -368,6 +368,7 @@ class CourseController extends Controller {
          * @param  ctime   2020/7/13 15:29
          * return  array
          */
+
     public function courseTeacher(){
         if(!isset($this->data['id'])||empty($this->data['id'])){
             return response()->json(['code' => 201, 'msg' => '课程id为空']);
