@@ -292,6 +292,11 @@ class Student extends Model {
         if(!isset($body['student_id']) || empty($body['student_id']) || $body['student_id'] <= 0){
             return ['code' => 202 , 'msg' => '学员id不合法'];
         }
+        
+        //判断学员的学校id是否为空
+        if(!isset($body['school_id']) || $body['school_id'] <= 0){
+            return ['code' => 201 , 'msg' => '请选择学校id'];
+        }
 
         //判断手机号是否为空
         if(!isset($body['phone']) || empty($body['phone'])){
@@ -344,6 +349,10 @@ class Student extends Model {
             }
         }
         
+        //获取分校的状态和id
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+        $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        
         //组装学员数组信息
         $student_array = [
             'phone'         =>   $body['phone'] ,
@@ -364,6 +373,7 @@ class Student extends Model {
             'wechat'        =>   isset($body['wechat']) && !empty($body['wechat']) ? $body['wechat'] : '' ,
             'address'       =>   isset($body['address']) && !empty($body['address']) ? $body['address'] : '' ,
             'remark'        =>   isset($body['remark']) && !empty($body['remark']) ? $body['remark'] : '' ,
+            'school_id'     =>   $school_status > 0 && $school_status == 1 ? $school_id : $body['school_id'] ,
             'update_at'     =>   date('Y-m-d H:i:s')
         ];
         
@@ -438,6 +448,11 @@ class Student extends Model {
         if(!$body || !is_array($body)){
             return ['code' => 202 , 'msg' => '传递数据不合法'];
         }
+        
+        //判断学员的学校id是否为空
+        if(!isset($body['school_id']) || $body['school_id'] <= 0){
+            return ['code' => 201 , 'msg' => '请选择学校id'];
+        }
 
         //判断手机号是否为空
         if(!isset($body['phone']) || empty($body['phone'])){
@@ -474,6 +489,7 @@ class Student extends Model {
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $school_id= isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
         
         //组装学员数组信息
         $student_array = [
@@ -497,7 +513,7 @@ class Student extends Model {
             'address'       =>   isset($body['address']) && !empty($body['address']) ? $body['address'] : '' ,
             'remark'        =>   isset($body['remark']) && !empty($body['remark']) ? $body['remark'] : '' ,
             'admin_id'      =>   $admin_id ,
-            'school_id'     =>   $school_id ,
+            'school_id'     =>   $school_status > 0 && $school_status == 1 ? $school_id : $body['school_id'] ,
             'reg_source'    =>   2 ,
             'create_at'     =>   date('Y-m-d H:i:s')
         ];
