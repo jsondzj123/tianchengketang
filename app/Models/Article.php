@@ -314,9 +314,7 @@ class Article extends Model {
             foreach ($accessory as $k=>$v){
                 $one = Articleaccessory::where(['article_id'=>$id,'accessory_name'=>$v['name'],'accessory_url'=>$v['url']])->first();
                 if(!empty($one)){
-                    if($one['status'] == 1){
-                        Articleaccessory::where('id',$one['id'])->update(['status'=>0]);
-                    }
+                    Articleaccessory::where('id',$one['id'])->update(['status'=>0]);
                 }else{
                     Articleaccessory::insert([
                         'article_id' => $id,
