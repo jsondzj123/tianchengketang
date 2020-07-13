@@ -205,7 +205,7 @@ class Article extends Model {
         $data['update_at'] = date('Y-m-d H:i:s');
         $add = self::insertGetId($data);
         if(isset($data['accessory']) || !empty($data['accessory'])){
-            $accessory = json_decode($data['accessory']);
+            $accessory = json_decode($data['accessory'],true);
             foreach ($accessory as $k=>$v){
                 Articleaccessory::insert([
                                         'article_id' => $add,
@@ -306,7 +306,7 @@ class Article extends Model {
         $data['text'] = isset($data['text'])?$data['text']:'';
         $res = self::where(['id'=>$id])->update($data);
         if(isset($data['accessory']) || empty($data['accessory'])){
-            $accessory = json_decode($data['accessory']);
+            $accessory = json_decode($data['accessory'],true);
             foreach ($accessory as $k=>$v){
                 $one = Articleaccessory::where(['article_id'=>$id,'accessory_name'=>$v['name'],'accessory_url'=>$v['url']])->first();
                 if($one){

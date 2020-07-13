@@ -158,7 +158,7 @@ class AdminUserController extends Controller {
         $validator = Validator::make($data,
                 [
                     'school_id' => 'required|integer',
-                    'username' => 'required|unique:ld_admin',
+                    'username' => 'required',
                     'realname' => 'required',
                     'mobile' => 'required|regex:/^1[3456789][0-9]{9}$/',
                     'sex' => 'required|integer',
@@ -184,7 +184,7 @@ class AdminUserController extends Controller {
         if(isset($data['pwd'])){
             unset($data['pwd']);
         }
-        $count  = Adminuser::where('username',$data['username'])->where('school_id',$data['school_id'])->where('is_del',1)->count();
+        $count  = Adminuser::where('username',$data['username'])->where('is_del',1)->count();
         if($count>0){
             return response()->json(['code'=>205,'msg'=>'用户名已存在']);
         }

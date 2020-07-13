@@ -206,11 +206,11 @@ class SchoolController extends Controller {
         $data = self::$accept_data;
         $validator = Validator::make(
                 $data, 
-                ['name' => 'required|unique:ld_school',
+                ['name' => 'required',
                  'dns' => 'required',
                  'logo_url'=>'required',
                  'introduce'=>'required',
-                 'username'=>'required|unique:ld_admin',
+                 'username'=>'required',
                  'password'=>'required',
                  'pwd' =>'required',
                  'realname'=>'required',
@@ -223,6 +223,15 @@ class SchoolController extends Controller {
         }
         if($data['password'] != $data['pwd']){
             return response()->json(['code'=>206,'msg'=>'两次密码不一致']);
+        }
+        $count  = School::where('name',$data['name'])->where('is_del',1)->count();
+        if($count>0){
+            return response()->json(['code'=>205,'msg'=>'网校名称已存在']);
+        }
+
+        $count  = Adminuser::where('username',$data['username'])->where('is_del',1)->count();
+        if($count>0){
+            return response()->json(['code'=>205,'msg'=>'用户名已存在']);
         }
         try{
             DB::beginTransaction();

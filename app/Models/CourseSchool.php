@@ -60,9 +60,18 @@ class CourseSchool extends Model {
      */
     public static function courseList($body){
     	$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登陆学校id
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0; //当前登陆学校id
         $OpenCourseArr =   $natureOpenCourse = $courseArr = $natureCourseArr = [];
         $zizengSubjectArr = CouresSubject::where('school_id',$school_id)->where(['is_open'=>0,'is_del'=>0])->select('id','subject_name')->get()->toArray();//自增大类小类（总校）
         $subjectArr = array_column($zizengSubjectArr,'subject_name','id');
+        $schoolArr =Admin::where(['school_id'=>$body['school_id'],'is_del'=>1])->first();
+        if($schoolArr['school_status'] > $school_status){
+            return ['code'=>205,'msg'=>'分校不能给总校授权'];
+        }
+        if($body['school_id'] == $school_id){
+            return ['code'=>205,'msg'=>'自己不能给自己授权'];
+        }
+
         if($body['is_public'] == 1){//公开课
 
             $zizengOpenCourse = OpenCourse::where(function($query) use ($body,$school_id) {
