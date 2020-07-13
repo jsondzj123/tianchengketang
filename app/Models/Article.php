@@ -179,9 +179,6 @@ class Article extends Model {
          * return  array
          */
     public static function addArticle($data){
-        echo 11111;
-        $accessory = json_decode($data['accessory'],true);
-        file_put_contents('accessory.txt', '时间:'.date('Y-m-d H:i:s').print_r($accessory,true),FILE_APPEND);die;
         //判断分类id
         if(empty($data['article_type_id']) || !isset($data['article_type_id'])){
             return ['code' => 201 , 'msg' => '请正确选择分类'];
@@ -198,7 +195,6 @@ class Article extends Model {
         if(empty($data['description']) || !isset($data['description'])){
             return ['code' => 201 , 'msg' => '摘要不能为空'];
         }
-        file_put_contents('addarticle.txt', '时间:'.date('Y-m-d H:i:s').print_r($data,true),FILE_APPEND);
         //缓存查出用户id和分校id
         $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
         if($role_id != 1){
@@ -209,7 +205,7 @@ class Article extends Model {
         $data['update_at'] = date('Y-m-d H:i:s');
         $add = self::insertGetId($data);
         if(isset($data['accessory']) || !empty($data['accessory'])){
-
+            $accessory = json_decode($data['accessory'],true);
             foreach ($accessory as $k=>$v){
                 Articleaccessory::insert([
                                         'article_id' => $add,
@@ -310,7 +306,7 @@ class Article extends Model {
         $data['text'] = isset($data['text'])?$data['text']:'';
         $res = self::where(['id'=>$id])->update($data);
         if(isset($data['accessory']) || empty($data['accessory'])){
-            $accessory = json_decode($data['accessory']);
+            $accessory = json_decode($data['accessory'],true);
             foreach ($accessory as $k=>$v){
                 $one = Articleaccessory::where(['article_id'=>$id,'accessory_name'=>$v['name'],'accessory_url'=>$v['url']])->first();
                 if($one){
