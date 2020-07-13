@@ -210,7 +210,7 @@ class SchoolController extends Controller {
                  'dns' => 'required',
                  'logo_url'=>'required',
                  'introduce'=>'required',
-                 'username'=>'required',
+                 'username'=>'required|unique:ld_admin',
                  'password'=>'required',
                  'pwd' =>'required',
                  'realname'=>'required',

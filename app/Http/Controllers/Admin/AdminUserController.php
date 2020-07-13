@@ -158,7 +158,7 @@ class AdminUserController extends Controller {
         $validator = Validator::make($data,
                 [
                     'school_id' => 'required|integer',
-                    'username' => 'required',
+                    'username' => 'required|unique:ld_admin',
                     'realname' => 'required',
                     'mobile' => 'required|regex:/^1[3456789][0-9]{9}$/',
                     'sex' => 'required|integer',
@@ -180,7 +180,7 @@ class AdminUserController extends Controller {
         }
         if($data['password'] != $data['pwd']){
             return response()->json(['code'=>206,'msg'=>'登录密码不一致']);
-        }
+        }  
         if(isset($data['pwd'])){
             unset($data['pwd']);
         }
@@ -334,7 +334,6 @@ class AdminUserController extends Controller {
         if(isset($data['/admin/adminuser/doAdminUserUpdate'])){
             unset($data['/admin/adminuser/doAdminUserUpdate']);
         }
-        $where['school_id'] = $data['school_id'];
         $where['username']   = $data['username'];
         $where['is_del'] = 1;
         $count = Adminuser::where($where)->where('id','!=',$data['id'])->count();
@@ -342,7 +341,6 @@ class AdminUserController extends Controller {
              return response()->json(['code'=>205,'msg'=>'用户名已存在']);
         }  
       
-        // unset($data['pwd']);
         $admin_id  = CurrentAdmin::user()['id'];
       
             DB::beginTransaction();
