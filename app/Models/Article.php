@@ -73,6 +73,14 @@ class Article extends Model {
                 ->where(['ld_article.is_del'=>1,'ld_article_type.is_del'=>1,'ld_article_type.status'=>1,'ld_admin.is_del'=>1,'ld_admin.is_forbid'=>1,'ld_school.is_del'=>1,'ld_school.is_forbid'=>1])
                 ->orderBy('ld_article.id','desc')
                 ->offset($offset)->limit($pagesize)->get();
+            foreach ($list as $k=>&$v){
+                $acc = Articleaccessory::where(['article_id'=>$v['id'],'status'=>0])->get()->toArray();
+                if(!empty($acc)){
+                    foreach ($acc as $ks=>$vs){
+                        $v['accessory'][$vs['accessory_name']] = $vs['accessory_url'];
+                    }
+                }
+            }
         }else{
             $list=[];
         }
@@ -199,8 +207,17 @@ class Article extends Model {
         unset($data['/admin/article/addArticle']);
         $data['user_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $data['update_at'] = date('Y-m-d H:i:s');
-//        $accessory_name =
-        $add = self::insert($data);
+        $add = self::insertGetId($data);
+        if(isset($data['accessory']) || !empty($data['accessory'])){
+            $accessory = json_decode($data['accessory']);
+            foreach ($accessory as $k=>$v){
+                Articleaccessory::insert([
+                                        'article_id' => $add,
+                                        'accessory_name' => $k,
+                                        'accessory' => $v,
+                                     ]);
+            }
+        }
         if($add){
             //添加日志操作
             AdminLog::insertAdminLog([
@@ -235,6 +252,13 @@ class Article extends Model {
             ->leftJoin('ld_article_type','ld_article_type.id','=','ld_article.article_type_id')
             ->where(['ld_article.id'=>$data['id'],'ld_article.is_del'=>1,'ld_school.is_del'=>1])
             ->first();
+        $find['accessory'] = [];
+        $acc = Articleaccessory::where(['article_id'=>$find['id'],'status'=>0])->get()->toArray();
+        if(!empty($acc)){
+            foreach ($acc as $k=>$v){
+                $find['accessory'][$v['accessory_name']] = $v['accessory_url'];
+            }
+        }
         if($find){
             unset($find['user_id'],$find['share'],$find['status'],$find['is_del'],$find['create_at'],$find['update_at']);
             return ['code' => 200 , 'msg' => '获取成功','data'=>$find,'school'=>$schooltype[0],'type'=>$schooltype[1]];
@@ -287,10 +311,27 @@ class Article extends Model {
         unset($data['id']);
         unset($data['/admin/article/exitForId']);
         $data['key_word'] = isset($data['key_word'])?$data['key_word']:'';
-        $data['accessory_name'] = isset($data['accessory_name'])?$data['accessory_name']:'';
-        $data['accessory'] = isset($data['accessory'])?$data['accessory']:'';
+//        $data['accessory_name'] = isset($data['accessory_name'])?$data['accessory_name']:'';
+//        $data['accessory'] = isset($data['accessory'])?$data['accessory']:'';
         $data['text'] = isset($data['text'])?$data['text']:'';
         $res = self::where(['id'=>$id])->update($data);
+        if(isset($data['accessory']) || empty($data['accessory'])){
+            $accessory = json_decode($data['accessory']);
+            foreach ($accessory as $k=>$v){
+                $one = Articleaccessory::where(['article_id'=>$id,'accessory_name'=>$k,'accessory_url'=>$v])->first();
+                if($one){
+                    if($one['status'] == 1){
+                        Articleaccessory::where('id',$one['id'])->update(['status'=>0]);
+                    }
+                }else{
+                    Articleaccessory::insert([
+                        'article_id' => $id,
+                        'accessory_name' => $k,
+                        'accessory' => $v,
+                    ]);
+                }
+            }
+        }
         if($res){
             //获取后端的操作员id
             $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
