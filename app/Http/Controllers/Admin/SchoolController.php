@@ -252,11 +252,16 @@ class SchoolController extends Controller {
                 'school_id' =>$school_id,
                 'school_status' => 0,
             ];
-
-            if(Adminuser::insertGetId($admin)<0){
+            $admin_id = Adminuser::insertGetId($admin);
+            if($admin_id < 0){
                 DB::rollBack();
-                return response()->json(['code' => 203 , 'msg' => '创建账号未成功']);
+                return response()->json(['code' => 203 , 'msg' => '创建账号未成功!']);
             } 
+            $schoolRes = School::where('id',$school_id)->update(['super_id'=>$admin_id,'update_time'=>date('Y-m-d H:i:s')]); 
+            if(!$schoolRes){
+                DB::rollBack();
+                return response()->json(['code' => 203 , 'msg' => '创建账号未成功!!']);
+            }
             $payconfig = [
                 'admin_id' => CurrentAdmin::user()['id'],
                 'school_id'=> $school_id,
@@ -267,7 +272,7 @@ class SchoolController extends Controller {
                 return response()->json(['code' => 200 , 'msg' => '创建账号成功']);
             }else{
                  DB::rollBack();
-                return response()->json(['code' => 203 , 'msg' => '创建账号未成功']);
+                return response()->json(['code' => 203 , 'msg' => '创建账号未成功!!!']);
             }
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);

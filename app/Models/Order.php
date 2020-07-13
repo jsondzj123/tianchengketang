@@ -396,4 +396,56 @@ class Order extends Model {
             return ['code' => 202 , 'msg' => '修改失败'];
         }
     }
+
+    //根据用户查询订单
+    public static function orderForStudent($data){
+        if(!$data || empty($data)){
+            return ['code' => 201 , 'msg' => '参数为空或格式错误'];
+        }
+        if(empty($data['student_id'])){
+            return ['code' => 201 , 'msg' => '学员id为空'];
+        }
+        $order = self::where(['student_id'=>$data['student_id']])->get()->toArray();
+        if(!empty($order)){
+            foreach ($order as $k=>&$v){
+                if($v['nature'] == 1){
+                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                }else{
+                    $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                }
+                $v['course_cover'] = $course['cover'];
+                $v['course_title'] = $course['title'];
+                if($v['status'] == 0){
+                    $v['learning'] = "未支付";
+                    $v['bgcolor'] = '#26A4FD';
+                }
+                if($v['status'] == 1){
+                    $v['learning'] = "待审核";
+                    $v['bgcolor'] = '#FDA426';
+                }
+                if($v['status'] == 2){
+                    if($v['pay_status'] < 4){
+                        $v['learning'] = "尾款未付清";
+                        $v['bgcolor'] = '#FF4545';
+                    }else{
+                        $v['learning'] = "已开课";
+                        $v['bgcolor'] = '#909399';
+                    }
+                }
+                if($v['status'] == 3){
+                    $v['learning'] = "审核失败";
+                    $v['bgcolor'] = '#67C23A';
+                }
+                if($v['status'] == 4){
+                    $v['learning'] = "已退款";
+                    $v['bgcolor'] = '#f2f6fc';
+                }
+                if($v['status'] == 5){
+                    $v['learning'] = "以失效";
+                    $v['bgcolor'] = '#FF4545';
+                }
+            }
+        }
+        return ['code' => 200 , 'msg' => '完成' , 'data'=>$order];
+    }
 }

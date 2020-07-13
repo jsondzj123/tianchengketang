@@ -31,6 +31,7 @@ class OpenCourse extends Model {
             'keywords.required' => json_encode(['code'=>'201','msg'=>'课程关键字不能为空']),
             'cover.required' => json_encode(['code'=>'201','msg'=>'课程封面不能为空']),
             'time.required' => json_encode(['code'=>'201','msg'=>'开课时间段不能为空']),
+            'date.required' => json_encode(['code'=>'201','msg'=>'开课日期不能为空']),
             'is_barrage.required' => json_encode(['code'=>'201','msg'=>'弹幕ID不能为空']),
             'is_barrage.integer' => json_encode(['code'=>'202','msg'=>'弹幕ID不合法']),
             'live_type.required' => json_encode(['code'=>'201','msg'=>'直播类型不能为空']),
@@ -39,6 +40,7 @@ class OpenCourse extends Model {
             'lect_teacher_id.required'  => json_encode(['code'=>'201','msg'=>'讲师标识不能为空']),
             'subject.required'  => json_encode(['code'=>'201','msg'=>'学科不能为空']),
             'introduce.required'  => json_encode(['code'=>'201','msg'=>'课程简介不能为空']),
+
         ];
     }
 
@@ -125,7 +127,7 @@ class OpenCourse extends Model {
                 }
                 $query->where('school_id',$school_id);
                 $query->where('is_del',0);
-            })->select('id','title','cover','start_at','end_at','is_recommend','status')->offset($offset)->limit($pagesize)->get();
+            })->select('id','title','cover','start_at','end_at','is_recommend','status')->orderBy('create_at','desc')->offset($offset)->limit($pagesize)->get();
             foreach ($open_less_arr as $k => $v) {
                 $v['time'] = [date('Y-m-d H:i:s',$v['start_at']),date('Y-m-d H:i:s',$v['end_at'])];
                 $teacherIdArr = OpenCourseTeacher::where('course_id',$v['id'])->where('is_del',0)->get(['teacher_id']);

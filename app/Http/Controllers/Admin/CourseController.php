@@ -44,13 +44,15 @@ class CourseController extends Controller {
         $parent = self::$accept_data;
         $list = Coures::where(['is_del'=>0,'status'=>1])
              ->where(function ($query) use ($parent) {
-                 $newparent = json_decode($parent,true);
-                if (!empty($newparent[0]) && $newparent[0] != '') {
-                    $query->where('parent_id', $newparent[0]);
-                }
-                if (!empty($newparent[1]) && $newparent[1] != '') {
-                    $query->where('child_id', $newparent[1]);
-                }
+                 if(!empty($parent['parent'])){
+                     $newparent = json_decode($parent['parent'],true);
+                     if (!empty($newparent[0]) && $newparent[0] != '') {
+                         $query->where('parent_id', $newparent[0]);
+                     }
+                     if (!empty($newparent[1]) && $newparent[1] != '') {
+                         $query->where('child_id', $newparent[1]);
+                     }
+                 }
             })->get()->toArray();
           return response()->json(['code' => 200 , 'msg' => '成功','data'=>$list]);
       }

@@ -151,9 +151,9 @@ class Coureschapters extends Model {
         if(!isset($data['name']) || empty($data['name'])){
             return ['code' => 201 , 'msg' => '请填写节名称'];
         }
-        if(!isset($data['resource_id']) || empty($data['resource_id'])){
-            return ['code' => 201 , 'msg' => '请选择资源'];
-        }
+//        if(!isset($data['resource_id']) || empty($data['resource_id'])){
+//            return ['code' => 201 , 'msg' => '请选择资源'];
+//        }
         try{
             DB::beginTransaction();
             $insert = self::insertGetId([
@@ -280,7 +280,6 @@ class Coureschapters extends Model {
             return ['code' => 202 , 'msg' => '删除失败'];
         }
     }
-
 
 
 

@@ -343,7 +343,7 @@ class CourseSchool extends Model {
 
             }
             //直播资源
-            $zhiboVideoIds = CourseLivesResource::whereIn('course_id',$courseIds)->where(['is_del'=>1])->pluck('id')->toArray();   
+            $zhiboVideoIds = CourseLivesResource::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('id')->toArray();   
             $narturezhiboVideoIds = CourseRefResource::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'type'=>1,'is_del'=>0])->pluck('resource_id as id ')->toArray();
             $zhiboVideoIds = array_diff($zhiboVideoIds,$narturezhiboVideoIds);
 

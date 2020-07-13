@@ -33,13 +33,7 @@ class CourseLiveResource extends Model {
                 $where['child_id'] = $parent[1];
             }
         }
-        $livecast = Live::where($where)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
-        foreach ($livecast as $k=>&$v){
-            $ones = CouresSubject::where('id',$v['parent_id'])->first();
-            $v['parent_name'] = $ones['subject_name'];
-            $twos = CouresSubject::where('id',$v['child_id'])->first();
-            $v['chind_name'] = $twos['subject_name'];
-        }
+
         //已经加入的直播资源
         $existLive = self::select('ld_course_livecast_resource.*')
             ->leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
@@ -48,12 +42,19 @@ class CourseLiveResource extends Model {
         //加入课程总数
         $count = self::leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
             ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0])->count();
+        $existLiveid=[];
         if(!empty($existLive)){
             $existLiveid = array_column($existLive, 'id');
-            foreach ($livecast as $ks=>$vs){
-                if(in_array($vs['id'],$existLiveid)){
-                    unset($livecast[$ks]);
-                }
+        }
+        $livecast = Live::where($where)->whereNotIn('id',$existLiveid)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
+        foreach ($livecast as $k=>&$v){
+            $ones = CouresSubject::where('id',$v['parent_id'])->first();
+            if(!empty($ones)){
+                $v['parent_name'] = $ones['subject_name'];
+            }
+            $twos = CouresSubject::where('id',$v['child_id'])->first();
+            if(!empty($twos)){
+                $v['chind_name'] = $twos['subject_name'];
             }
         }
         return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$livecast,'existlive'=>$existLive,'count'=>$count];

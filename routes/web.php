@@ -126,7 +126,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     });
     //教师
     $router->group(['prefix' => 'teacher'], function () use ($router) {
-        $router->post('details','TeacherController@details');//查看详情
+        $router->post('List','TeacherController@getList');//查看详情
+        $router->post('dateils','TeacherController@dateils');//查看详情
     });
      //end (lys)
 
@@ -221,6 +222,10 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('orderUpOaForId', 'OrderController@orderUpOaForId');//订单修改oa状态
     $router->post('orderUpinvalid', 'OrderController@orderUpinvalid');//订单无效修改
     $router->post('listType', 'ArticleController@listType');//分类列表
+    $router->post('schoolLists', 'ArticleController@schoolLists');//学校列表
+    $router->post('courseType', 'CourseController@courseType');//根据分类查课程
+    $router->post('subjects', 'CourseController@subjects');//学科列表(szw改)
+    $router->post('orderForStudent', 'OrderController@orderForStudent');//订单通过学员查询
 
 });
 //后端登录权限认证相关接口
@@ -279,7 +284,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
      * 科目模块(sxl)
     */
     $router->post('subject', 'CourseController@subject');//课程学科列表(szw改)
-    $router->post('subjects', 'CourseController@subjects');//学科列表(szw改)
+
 //    $router->post('subject', 'SubjectController@searchList');
     $router->post('subjectList', 'SubjectController@index');
     $router->post('subject/add', 'SubjectController@store');
@@ -461,7 +466,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     //课程模块（重构）（szw）
     $router->group(['prefix' => 'course'], function () use ($router) {
        // $router->post('subject', 'CourseController@subject');//学科列表   7 11 lys
-        $router->post('courseType', 'CourseController@courseType');//根据分类查课程
         $router->post('courseList', 'CourseController@courseList');//课程列表
         $router->post('courseAdd', 'CourseController@courseAdd');//课程添加
         $router->post('courseDel', 'CourseController@courseDel');//课程删除
@@ -512,7 +516,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('orderList', 'OrderController@orderList');//订单列表
         $router->post('findOrderForId', 'OrderController@findOrderForId');//订单详情
         $router->post('auditToId', 'OrderController@auditToId');//订单审核通过/不通过
-
         $router->post('ExcelExport', 'OrderController@ExcelExport');//订单导出
         $router->post('buttOa', 'OrderController@buttOa');//对接oa
         $router->post('orderBack', 'OrderController@orderBack');//退回
