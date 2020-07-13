@@ -64,7 +64,7 @@ class Bank extends Model {
 
             foreach($bank_list as $k=>$v){
                 //科目数量
-                $bank_list[$k]->subject_count  =  Subject::where('bank_id' , $v->bank_id)->where('is_del' , 0)->count();
+                $bank_list[$k]->subject_count  =  Subject::where('bank_id' , $v->bank_id)->where('is_del' , 0)->where('subject_name' , '!=' , "")->count();
                 
                 //试卷数量
                 $bank_list[$k]->papers_count   =  Papers::where('bank_id' , $v->bank_id)->where('is_del' , 0)->count();
@@ -124,7 +124,7 @@ class Bank extends Model {
         $bank_info = self::where('id',$body['bank_id'])->select('topic_name','parent_id','child_id','describe','subject_id')->first()->toArray();
 
         //根据科目id获取科目信息
-        $subject_list = Subject::findMany(explode(',' , $bank_info['subject_id']) , ['id','subject_name']);
+        $subject_list = Subject::select('id','subject_name')->whereIn('id' , explode(',' , $bank_info['subject_id']))->where('subject_name' , '!=' , "")->where('is_del' , 0)->get()->toArray();
         if($subject_list && !empty($subject_list)){
             foreach($subject_list as $k=>$v){
                 $subject_list[$k]['disabled'] = true;
