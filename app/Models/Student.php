@@ -113,43 +113,14 @@ class Student extends Model {
         $page     = isset($body['page']) && $body['page'] > 0 ? $body['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
         
-        //获取学员的总数量
-        $student_count = self::where(function($query) use ($body){
-            //判断报名状态是否选择
-            if(isset($body['enroll_status']) && strlen($body['enroll_status']) > 0 && in_array($body['enroll_status'] , [1,2])){
-                //已报名
-                if($body['enroll_status'] > 0 && $body['enroll_status'] == 1){
-                    $query->where('enroll_status' , '=' , 1);
-                } else if($body['enroll_status'] > 0 && $body['enroll_status'] == 2){
-                    $query->where('enroll_status' , '=' , 0);
-                }
-            }
-
-            //判断开课状态是否选择
-            if(isset($body['state_status']) && strlen($body['state_status']) > 0 && in_array($body['state_status'] , [0,1,2])){
-                $state_status = $body['state_status'] > 0 ? $body['state_status'] : 0;
-                $query->where('state_status' , '=' , $state_status);
-            }
-
-            //判断账号状态是否选择
-            if(isset($body['is_forbid']) && !empty($body['is_forbid']) && in_array($body['is_forbid'] , [1,2])){
-                $query->where('is_forbid' , '=' , $body['is_forbid']);
-            }
-
-            //判断搜索内容是否为空
-            if(isset($body['search']) && !empty($body['search'])){
-                $query->where('real_name','like','%'.$body['search'].'%')->orWhere('phone','like','%'.$body['search'].'%');
-            }
-        })->count();
+        //获取分校的状态和id
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+        $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
         
-        //判断学员数量是否为空
-        if($student_count > 0){
-            //学员列表
-            $student_list = self::where(function($query) use ($body){
-                //判断学科id是否选择
-                /*if(isset($body['subject_id']) && !empty($body['subject_id']) && $body['subject_id'] > 0){
-                    $query->where('subject_id' , '=' , $body['subject_id']);
-                }*/
+        //判断是否是总校的状态
+        if($school_status > 0 && $school_status == 1){
+            //获取学员的总数量
+            $student_count = self::where(function($query) use ($body){
                 //判断报名状态是否选择
                 if(isset($body['enroll_status']) && strlen($body['enroll_status']) > 0 && in_array($body['enroll_status'] , [1,2])){
                     //已报名
@@ -159,7 +130,7 @@ class Student extends Model {
                         $query->where('enroll_status' , '=' , 0);
                     }
                 }
-                
+
                 //判断开课状态是否选择
                 if(isset($body['state_status']) && strlen($body['state_status']) > 0 && in_array($body['state_status'] , [0,1,2])){
                     $state_status = $body['state_status'] > 0 ? $body['state_status'] : 0;
@@ -170,15 +141,118 @@ class Student extends Model {
                 if(isset($body['is_forbid']) && !empty($body['is_forbid']) && in_array($body['is_forbid'] , [1,2])){
                     $query->where('is_forbid' , '=' , $body['is_forbid']);
                 }
-                
+
                 //判断搜索内容是否为空
                 if(isset($body['search']) && !empty($body['search'])){
                     $query->where('real_name','like','%'.$body['search'].'%')->orWhere('phone','like','%'.$body['search'].'%');
                 }
-            })->select('id as student_id','real_name','phone','create_at','enroll_status','state_status','is_forbid','papers_type','papers_num')->orderByDesc('create_at')->offset($offset)->limit($pagesize)->get();
-            return ['code' => 200 , 'msg' => '获取学员列表成功' , 'data' => ['student_list' => $student_list , 'total' => $student_count , 'pagesize' => $pagesize , 'page' => $page]];
+            })->count();
+
+            //判断学员数量是否为空
+            if($student_count > 0){
+                //学员列表
+                $student_list = self::where(function($query) use ($body){
+                    //判断学科id是否选择
+                    /*if(isset($body['subject_id']) && !empty($body['subject_id']) && $body['subject_id'] > 0){
+                        $query->where('subject_id' , '=' , $body['subject_id']);
+                    }*/
+                    //判断报名状态是否选择
+                    if(isset($body['enroll_status']) && strlen($body['enroll_status']) > 0 && in_array($body['enroll_status'] , [1,2])){
+                        //已报名
+                        if($body['enroll_status'] > 0 && $body['enroll_status'] == 1){
+                            $query->where('enroll_status' , '=' , 1);
+                        } else if($body['enroll_status'] > 0 && $body['enroll_status'] == 2){
+                            $query->where('enroll_status' , '=' , 0);
+                        }
+                    }
+
+                    //判断开课状态是否选择
+                    if(isset($body['state_status']) && strlen($body['state_status']) > 0 && in_array($body['state_status'] , [0,1,2])){
+                        $state_status = $body['state_status'] > 0 ? $body['state_status'] : 0;
+                        $query->where('state_status' , '=' , $state_status);
+                    }
+
+                    //判断账号状态是否选择
+                    if(isset($body['is_forbid']) && !empty($body['is_forbid']) && in_array($body['is_forbid'] , [1,2])){
+                        $query->where('is_forbid' , '=' , $body['is_forbid']);
+                    }
+
+                    //判断搜索内容是否为空
+                    if(isset($body['search']) && !empty($body['search'])){
+                        $query->where('real_name','like','%'.$body['search'].'%')->orWhere('phone','like','%'.$body['search'].'%');
+                    }
+                })->select('id as student_id','real_name','phone','create_at','enroll_status','state_status','is_forbid','papers_type','papers_num')->orderByDesc('create_at')->offset($offset)->limit($pagesize)->get();
+                return ['code' => 200 , 'msg' => '获取学员列表成功' , 'data' => ['student_list' => $student_list , 'total' => $student_count , 'pagesize' => $pagesize , 'page' => $page]];
+            }
+            return ['code' => 200 , 'msg' => '获取学员列表成功' , 'data' => ['student_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
+        } else {
+            //获取学员的总数量
+            $student_count = self::where(function($query) use ($body){
+                //判断报名状态是否选择
+                if(isset($body['enroll_status']) && strlen($body['enroll_status']) > 0 && in_array($body['enroll_status'] , [1,2])){
+                    //已报名
+                    if($body['enroll_status'] > 0 && $body['enroll_status'] == 1){
+                        $query->where('enroll_status' , '=' , 1);
+                    } else if($body['enroll_status'] > 0 && $body['enroll_status'] == 2){
+                        $query->where('enroll_status' , '=' , 0);
+                    }
+                }
+
+                //判断开课状态是否选择
+                if(isset($body['state_status']) && strlen($body['state_status']) > 0 && in_array($body['state_status'] , [0,1,2])){
+                    $state_status = $body['state_status'] > 0 ? $body['state_status'] : 0;
+                    $query->where('state_status' , '=' , $state_status);
+                }
+
+                //判断账号状态是否选择
+                if(isset($body['is_forbid']) && !empty($body['is_forbid']) && in_array($body['is_forbid'] , [1,2])){
+                    $query->where('is_forbid' , '=' , $body['is_forbid']);
+                }
+
+                //判断搜索内容是否为空
+                if(isset($body['search']) && !empty($body['search'])){
+                    $query->where('real_name','like','%'.$body['search'].'%')->orWhere('phone','like','%'.$body['search'].'%');
+                }
+            })->where('school_id' , $school_id)->count();
+
+            //判断学员数量是否为空
+            if($student_count > 0){
+                //学员列表
+                $student_list = self::where(function($query) use ($body){
+                    //判断学科id是否选择
+                    /*if(isset($body['subject_id']) && !empty($body['subject_id']) && $body['subject_id'] > 0){
+                        $query->where('subject_id' , '=' , $body['subject_id']);
+                    }*/
+                    //判断报名状态是否选择
+                    if(isset($body['enroll_status']) && strlen($body['enroll_status']) > 0 && in_array($body['enroll_status'] , [1,2])){
+                        //已报名
+                        if($body['enroll_status'] > 0 && $body['enroll_status'] == 1){
+                            $query->where('enroll_status' , '=' , 1);
+                        } else if($body['enroll_status'] > 0 && $body['enroll_status'] == 2){
+                            $query->where('enroll_status' , '=' , 0);
+                        }
+                    }
+
+                    //判断开课状态是否选择
+                    if(isset($body['state_status']) && strlen($body['state_status']) > 0 && in_array($body['state_status'] , [0,1,2])){
+                        $state_status = $body['state_status'] > 0 ? $body['state_status'] : 0;
+                        $query->where('state_status' , '=' , $state_status);
+                    }
+
+                    //判断账号状态是否选择
+                    if(isset($body['is_forbid']) && !empty($body['is_forbid']) && in_array($body['is_forbid'] , [1,2])){
+                        $query->where('is_forbid' , '=' , $body['is_forbid']);
+                    }
+
+                    //判断搜索内容是否为空
+                    if(isset($body['search']) && !empty($body['search'])){
+                        $query->where('real_name','like','%'.$body['search'].'%')->orWhere('phone','like','%'.$body['search'].'%');
+                    }
+                })->select('id as student_id','real_name','phone','create_at','enroll_status','state_status','is_forbid','papers_type','papers_num')->where('school_id' , $school_id)->orderByDesc('create_at')->offset($offset)->limit($pagesize)->get();
+                return ['code' => 200 , 'msg' => '获取学员列表成功' , 'data' => ['student_list' => $student_list , 'total' => $student_count , 'pagesize' => $pagesize , 'page' => $page]];
+            }
+            return ['code' => 200 , 'msg' => '获取学员列表成功' , 'data' => ['student_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
         }
-        return ['code' => 200 , 'msg' => '获取学员列表成功' , 'data' => ['student_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
     }
 
     /*
