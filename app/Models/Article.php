@@ -208,7 +208,7 @@ class Article extends Model {
         unset($data['accessory']);
         $add = self::insertGetId($data);
         if(isset($access) || !empty($access)){
-            $accessory = json_decode($data['accessory'],true);
+            $accessory = json_decode($access,true);
             foreach ($accessory as $k=>$v){
                 Articleaccessory::insert([
                                     'article_id' => $add,
