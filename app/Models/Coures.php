@@ -199,10 +199,10 @@ class Coures extends Model {
                     }
                 })
                     ->orderBy('id','desc')->get()->toArray();
-                foreach($list2  as $k=>&$v){
-                    $v['nature'] = 1;
+                foreach($list2  as $ks=>&$vs){
+                    $vs['nature'] = 1;
                     $where=[
-                        'course_id'=>$v['course_id'],
+                        'course_id'=>$vs['course_id'],
                         'is_del'=>0
                     ];
                     if(!empty($data['method'])) {
@@ -223,7 +223,7 @@ class Coures extends Model {
                                 $val['method_name'] = '其他';
                             }
                         }
-                        $v['method'] = $method;
+                        $vs['method'] = $method;
                     }
                 }
                 $list =array_slice(array_merge($list1,$list2),($page - 1) * $pagesize, $pagesize);
