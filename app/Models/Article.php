@@ -213,7 +213,7 @@ class Article extends Model {
                 Articleaccessory::insert([
                                     'article_id' => $add,
                                     'accessory_name' => $v['name'],
-                                    'accessory' => $v['url'],
+                                    'accessory_url' => $v['url'],
                                  ]);
             }
         }
@@ -320,7 +320,7 @@ class Article extends Model {
                     Articleaccessory::insert([
                         'article_id' => $id,
                         'accessory_name' => $v['name'],
-                        'accessory' => $v['url'],
+                        'accessory_url' => $v['url'],
                     ]);
                 }
             }
