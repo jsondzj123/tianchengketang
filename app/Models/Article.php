@@ -196,6 +196,7 @@ class Article extends Model {
             return ['code' => 201 , 'msg' => '摘要不能为空'];
         }
         file_put_contents('addarticle.txt', '时间:'.date('Y-m-d H:i:s').print_r($data,true),FILE_APPEND);
+
         //缓存查出用户id和分校id
         $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
         if($role_id != 1){
