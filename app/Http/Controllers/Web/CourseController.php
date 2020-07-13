@@ -13,6 +13,7 @@ use App\Models\CouresSubject;
 use App\Models\Couresteacher;
 use App\Models\CourseLiveResource;
 use App\Models\CourseSchool;
+use App\Models\Lecturer;
 use App\Models\LiveChild;
 use App\Models\LiveClass;
 use App\Models\LiveClassChildTeacher;
@@ -360,6 +361,30 @@ class CourseController extends Controller {
         }else{
             return response()->json(['code' => 203, 'msg' => '操作失败']);
         }
+    }
+    /*
+         * @param  课程讲师
+         * @param  author  苏振文
+         * @param  ctime   2020/7/13 15:29
+         * return  array
+         */
+    public function courseTeacher(){
+        if(!isset($this->data['id'])||empty($this->data['id'])){
+            return response()->json(['code' => 201, 'msg' => '课程id为空']);
+        }
+        $nature = isset($this->data['nature'])?$this->data['nature']:0;
+        if($nature == 1){
+            $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
+            $this->data['id'] =  $course['course_id'];
+        }
+        $teacher = Couresteacher::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
+        $teacherlist=[];
+        if(!empty($teacher)){
+            foreach ($teacher as $k=>$v){
+                $teacherlist[] = Lecturer::where(['id'=>$v['teacher_id'],'is_del'=>0])->first();
+            }
+        }
+        return response()->json(['code' => 200, 'msg' => '获取成功','data'=>$teacherlist]);
     }
     /*
          * @param  课程介绍
