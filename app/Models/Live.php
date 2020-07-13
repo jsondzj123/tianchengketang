@@ -112,7 +112,7 @@ class Live extends Model {
                     }else{
                         $list=[];
                     }
-                    if($data['nature'] == 2){
+                    if(isset($data['nature']) && $data['nature'] == 2){
                         $list=[];
                         $total = 0;
                     }
