@@ -168,7 +168,7 @@ class CouresSubject extends Model {
             ->where(['is_del'=>0,'is_open'=>0,'school_id'=>$school_id])
             ->orderBydesc('id')->get()->toArray();
         //根据授权课程 获取分类
-        $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->groupBy('parent_id');
+        $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->get()->groupBy('parent_id');
         print_r($course);
         $list = self::demo($one,0,0);
         return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
