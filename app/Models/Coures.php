@@ -22,14 +22,14 @@ class Coures extends Model {
             //自增
             $count1 = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                 //判断总校 查询所有或一个分校
-                if($data['school_status'] == 1){
-                    if(!empty($data['school_id']) && $data['school_id'] != ''){
-                        $query->where('school_id',$data['school_id']);
-                    }
-                }else{
+//                if($data['school_status'] == 1){
+//                    if(!empty($data['school_id']) && $data['school_id'] != ''){
+//                        $query->where('school_id',$data['school_id']);
+//                    }
+//                }else{
                     //分校查询当前学校
                     $query->where('school_id',$school_id);
-                }
+//                }
                 //学科大类
                 if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
                     $query->where('parent_id',$data['coursesubjectOne']);
@@ -47,14 +47,14 @@ class Coures extends Model {
             //授权
             $count2 = CourseSchool::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                 //判断总校 查询所有或一个分校
-                if($data['school_status'] == 1){
-                    if(!empty($data['school_id']) && $data['school_id'] != ''){
-                        $query->where('to_school_id',$data['school_id']);
-                    }
-                }else{
+//                if($data['school_status'] == 1){
+//                    if(!empty($data['school_id']) && $data['school_id'] != ''){
+//                        $query->where('to_school_id',$data['school_id']);
+//                    }
+//                }else{
                     //分校查询当前学校
                     $query->where('to_school_id',$school_id);
-                }
+//                }
                 //学科大类
                 if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
                     $query->where('parent_id',$data['coursesubjectOne']);
@@ -73,14 +73,14 @@ class Coures extends Model {
             //授权
             $count = CourseSchool::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                 //判断总校 查询所有或一个分校
-                if($data['school_status'] == 1){
-                    if(!empty($data['school_id']) && $data['school_id'] != ''){
-                        $query->where('to_school_id',$data['school_id']);
-                    }
-                }else{
+//                if($data['school_status'] == 1){
+//                    if(!empty($data['school_id']) && $data['school_id'] != ''){
+//                        $query->where('to_school_id',$data['school_id']);
+//                    }
+//                }else{
                     //分校查询当前学校
                     $query->where('to_school_id',$school_id);
-                }
+//                }
                 //学科大类
                 if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
                     $query->where('parent_id',$data['coursesubjectOne']);
@@ -98,14 +98,14 @@ class Coures extends Model {
             //自增
             $count = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                 //判断总校 查询所有或一个分校
-                if($data['school_status'] == 1){
-                    if(!empty($data['school_id']) && $data['school_id'] != ''){
-                        $query->where('school_id',$data['school_id']);
-                    }
-                }else{
+//                if($data['school_status'] == 1){
+//                    if(!empty($data['school_id']) && $data['school_id'] != ''){
+//                        $query->where('school_id',$data['school_id']);
+//                    }
+//                }else{
                     //分校查询当前学校
                     $query->where('school_id',$school_id);
-                }
+//                }
                 //学科大类
                 if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
                     $query->where('parent_id',$data['coursesubjectOne']);
@@ -127,14 +127,14 @@ class Coures extends Model {
                 //全部
                 $list1 = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
-                    if($data['school_status'] == 1){
-                        if(!empty($data['school_id']) && $data['school_id'] != ''){
-                            $query->where('school_id',$data['school_id']);
-                        }
-                    }else{
+//                    if($data['school_status'] == 1){
+//                        if(!empty($data['school_id']) && $data['school_id'] != ''){
+//                            $query->where('school_id',$data['school_id']);
+//                        }
+//                    }else{
                         //分校查询当前学校
                         $query->where('school_id',$school_id);
-                    }
+//                    }
                     //学科大类
                     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
                         $query->where('parent_id',$data['coursesubjectOne']);
@@ -177,14 +177,14 @@ class Coures extends Model {
                 }
                 $list2 = CourseSchool::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
-                    if($data['school_status'] == 1){
-                        if(!empty($data['school_id']) && $data['school_id'] != ''){
-                            $query->where('to_school_id',$data['school_id']);
-                        }
-                    }else{
+//                    if($data['school_status'] == 1){
+//                        if(!empty($data['school_id']) && $data['school_id'] != ''){
+//                            $query->where('to_school_id',$data['school_id']);
+//                        }
+//                    }else{
                         //分校查询当前学校
                         $query->where('to_school_id',$school_id);
-                    }
+//                    }
                     //学科大类
                     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
                         $query->where('parent_id',$data['coursesubjectOne']);
@@ -231,14 +231,14 @@ class Coures extends Model {
                 //授权
                 $list = CourseSchool::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
-                    if($data['school_status'] == 1){
-                        if(!empty($data['school_id']) && $data['school_id'] != ''){
-                            $query->where('to_school_id',$data['school_id']);
-                        }
-                    }else{
+//                    if($data['school_status'] == 1){
+//                        if(!empty($data['school_id']) && $data['school_id'] != ''){
+//                            $query->where('to_school_id',$data['school_id']);
+//                        }
+//                    }else{
                         //分校查询当前学校
                         $query->where('to_school_id',$school_id);
-                    }
+//                    }
                     //学科大类
                     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
                         $query->where('parent_id',$data['coursesubjectOne']);
@@ -284,14 +284,14 @@ class Coures extends Model {
                 //自增
                 $list = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
-                    if($data['school_status'] == 1){
-                        if(!empty($data['school_id']) && $data['school_id'] != ''){
-                            $query->where('school_id',$data['school_id']);
-                        }
-                    }else{
+//                    if($data['school_status'] == 1){
+//                        if(!empty($data['school_id']) && $data['school_id'] != ''){
+//                            $query->where('school_id',$data['school_id']);
+//                        }
+//                    }else{
                         //分校查询当前学校
                         $query->where('school_id',$school_id);
-                    }
+//                    }
                     //学科大类
                     if(!empty($data['coursesubjectOne']) && $data['coursesubjectOne'] != ''){
                         $query->where('parent_id',$data['coursesubjectOne']);
