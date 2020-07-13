@@ -554,15 +554,15 @@ class Exam extends Model {
         //判断科目id是否为空和合法
         if(!isset($body['subject_id']) || empty($body['subject_id']) || $body['subject_id'] <= 0){
             //根据题库的Id获取最新科目信息
-            $subject_info = QuestionSubject::select("id")->where("admin_id" , $admin_id)->where("bank_id" , $body['bank_id'])->where("is_del" , 0)->orderByDesc('create_at')->first();
-            $body['subject_id']  = $subject_info->id ? $subject_info->id : 0;
+            $subject_info = QuestionSubject::select("id")->where("admin_id" , $admin_id)->where("bank_id" , $body['bank_id'])->where('subject_name' , '!=' , "")->where("is_del" , 0)->orderByDesc('create_at')->first();
+            $body['subject_id']  = $subject_info['id'] ? $subject_info['id'] : 0;
         }
 
         //获取试题的总数量
         $exam_count = self::where(function($query) use ($body){
             //获取后端的操作员id
             $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-            $query->where('bank_id' , '=' , $body['bank_id'])->where("subject_id" , "=" , $body['subject_id'])->where("type" , $body['type'])->where("parent_id" , 0)->where('is_del' , '=' , 0)->where('admin_id' , '=' , $admin_id);
+            $query->where('bank_id' , '=' , $body['bank_id'])->where("subject_id" , "=" , $body['subject_id'])->where("type" , $body['type'])->where("parent_id" , 0)->where('is_del' , '=' , 0);
             
             //判断审核状态是否为空和合法
             if(isset($body['is_publish']) && in_array($body['is_publish'] , [1,0])){
@@ -606,9 +606,6 @@ class Exam extends Model {
 
                 //获取后端的操作员id
                 $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-
-                //操作员id
-                $query->where('admin_id' , '=' , $admin_id);
                 
                 //判断审核状态是否为空和合法
                 if(isset($body['is_publish']) && in_array($body['is_publish'] , [1,0])){

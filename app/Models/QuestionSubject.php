@@ -50,6 +50,9 @@ class QuestionSubject extends Model {
             //删除状态
             $query->where('is_del' , '=' , 0);
             
+            //去掉空的科目
+            $query->where('subject_name' , '!=' , "");
+            
             //题库id
             $query->where('bank_id' , '=' , $body['bank_id']);
         })->select('id as subject_id','subject_name')->orderByDesc('create_at')->get();

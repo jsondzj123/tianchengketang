@@ -167,8 +167,23 @@ class CouresSubject extends Model {
         $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')
             ->where(['is_del'=>0,'is_open'=>0,'school_id'=>$school_id])
             ->orderBydesc('id')->get()->toArray();
+        //根据授权课程 获取分类
+        $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->groupBy('parent_id')->get()->toArray();
+        $two=[];
+        if(!empty($course)){
+            foreach ($course as $k=>$v){
+                $two = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['id'=>$v['parent_id'],'is_del'=>0,'is_open'=>0])->first();
+                $twss = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['parent_id'=>$two['id'],'is_del'=>0,'is_open'=>0])->select();
+                $two['childs'] = $twss;
+            }
+        }
         $list = self::demo($one,0,0);
-        return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
+        if(!empty($list) && !empty($two)){
+            $listss = array_merge($list,$two);
+        }else{
+            $listss = !empty($list)?$list:$two;
+        }
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$listss];
     }
     //资源模块 条件显示
     public static function couresWheres(){
