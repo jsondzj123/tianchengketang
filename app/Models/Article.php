@@ -312,7 +312,7 @@ class Article extends Model {
             $accessory = json_decode($access,true);
             foreach ($accessory as $k=>$v){
                 $one = Articleaccessory::where(['article_id'=>$id,'accessory_name'=>$v['name'],'accessory_url'=>$v['url']])->first();
-                if($one){
+                if(!empty($one)){
                     if($one['status'] == 1){
                         Articleaccessory::where('id',$one['id'])->update(['status'=>0]);
                     }
