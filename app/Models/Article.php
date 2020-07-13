@@ -179,7 +179,8 @@ class Article extends Model {
          * return  array
          */
     public static function addArticle($data){
-        $accessory = json_decode($data['accessory']);
+        echo 11111;
+        $accessory = json_decode($data['accessory'],true);
         file_put_contents('accessory.txt', '时间:'.date('Y-m-d H:i:s').print_r($accessory,true),FILE_APPEND);die;
         //判断分类id
         if(empty($data['article_type_id']) || !isset($data['article_type_id'])){
