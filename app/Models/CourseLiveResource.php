@@ -52,6 +52,7 @@ class CourseLiveResource extends Model {
         //加入课程总数
         $count = self::leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
             ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0])->count();
+        print_r($livecast);
         if(!empty($existLive)){
             $existLiveid = array_column($existLive, 'id');
             print_r($existLiveid);
