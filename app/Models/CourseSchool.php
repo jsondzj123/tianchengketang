@@ -201,9 +201,9 @@ class CourseSchool extends Model {
     public static function store($body){
 
         $arr = $subjectArr = $bankids = $questionIds = $InsertTeacherRef = $InsertSubjectRef = $InsertRecordVideoArr = $InsertZhiboVideoArr = $InsertQuestionArr = $teacherIdArr = [];
-        $courseIds=$body['course_id'];
+     //    $courseIds=$body['course_id'];
     	// $courseIds = explode(',',$body['course_id']);
-        // $courseIds = json_decode($body['course_id'],1); //前端传值
+        $courseIds = json_decode($body['course_id'],1); //前端传值
     	$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
     	$user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0; //当前登录的用户id
         if($body['is_public'] == 1){ //公开课
@@ -285,14 +285,13 @@ class CourseSchool extends Model {
             }
         }
         if($body['is_public'] == 0){  //课程
-            $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->first();
-            if(!empty($nature)){
-                return ['code'=>207,'msg'=>'课程已经授权'];
-            }
+            $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->limit(1)->get();
+            // if(!empty($nature)){
+            //     return ['code'=>207,'msg'=>'课程已经授权'];
+            // }
             $course = Coures::whereIn('id',$courseIds)->where(['is_del'=>0])->select('parent_id','child_id','title','keywords','cover','pricing','sale_price','buy_num','expiry','describe','introduce','status','watch_num','is_recommend','id as course_id','school_id as from_school_id')->get()->toArray();//要授权课程 所有信息
            
             if(!empty($course)){
-
                 foreach($course as $key=>&$vv){
                     $vv['from_school_id'] = $school_id;
                     $vv['to_school_id'] = $body['school_id'];
@@ -301,9 +300,7 @@ class CourseSchool extends Model {
                     $courseSubjectArr[$key]['parent_id'] = $vv['parent_id'];
                     $courseSubjectArr[$key]['child_id'] = $vv['child_id'];
                 }//授权课程信息
-                
                 $ids = Couresteacher::whereIn('course_id',$courseIds)->where('is_del',0)->pluck('teacher_id')->toArray(); //要授权的教师信息
-
                 if(!empty($ids)){
                     $ids = array_unique($ids);
                     $teacherIds = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>1])->pluck('teacher_id')->toArray();//已经授权过的讲师信息
@@ -321,17 +318,19 @@ class CourseSchool extends Model {
                         }   
                     }
                 }
+
                 //学科
                 $subjectArr = CourseRefSubject::where(['to_school_id'=>$body['school_id'],'from_school_id'=>$school_id,'is_del'=>0])->select('parent_id','child_id')->get()->toArray();  //已经授权过的学科
                 if(!empty($subjectArr)){
                     foreach($courseSubjectArr as $k=>$v){
-                        foreach($subjectArr as $kk=>$vv){
-                            if($v == $vv){
+                        foreach($subjectArr as $kk=>$bv){
+                            if($v == $bv){
                                 unset($courseSubjectArr[$k]);
                             }
                         }
                     }         
                 }
+                
                 foreach($courseSubjectArr as $key=>$v){
                         $InsertSubjectRef[$key]['parent_id'] = $v['parent_id'];
                         $InsertSubjectRef[$key]['child_id'] = $v['child_id'];
@@ -340,6 +339,7 @@ class CourseSchool extends Model {
                         $InsertSubjectRef[$key]['admin_id'] = $user_id;
                         $InsertSubjectRef[$key]['create_at'] = date('Y-m-d H:i:s');    
                 }
+                
                 //录播资源
                 $recordVideoIds = CourseLivesResource::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('id')->toArray(); //要授权的录播资源 
                 if(!empty($recordVideoIds)){
@@ -354,6 +354,7 @@ class CourseSchool extends Model {
                         $InsertRecordVideoArr[$key]['create_at'] = date('Y-m-d H:i:s');    
                     }
                 } 
+                
                 //直播资源
                 $zhiboVideoIds = CourseLivesResource::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('id')->toArray();//要授权的直播资源
                 if(!empty($zhiboVideoIds)){
@@ -379,6 +380,7 @@ class CourseSchool extends Model {
                         }
                     }
                 }
+                
                 if(!empty($bankids)){
                     $natureQuestionBank = CourseRefBank::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->pluck('bank_id')->toArray();
                     $bankids = array_diff($bankids,$natureQuestionBank);
@@ -390,7 +392,7 @@ class CourseSchool extends Model {
                         $InsertQuestionArr[$key]['create_at'] = date('Y-m-d H:i:s');    
                     }
                 }
-              
+
                 DB::beginTransaction();
                 try{
                     $teacherRes = CourseRefTeacher::insert($InsertTeacherRef);//教师
