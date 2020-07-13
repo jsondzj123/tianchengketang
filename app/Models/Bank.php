@@ -6,6 +6,8 @@ use App\Models\AdminLog;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use App\Models\QuestionSubject as Subject;
+use App\Models\Papers;
+use App\Models\Exam;
 use Illuminate\Support\Facades\Redis;
 
 class Bank extends Model {
@@ -38,28 +40,39 @@ class Bank extends Model {
         $offset   = ($page - 1) * $pagesize;
         
         //获取后端的操作员id
-        $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+        $admin_id  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
 
         //获取题库的总数量
-        $bank_count = self::where('is_del' , '=' , 0)->where('admin_id' , '=' , $admin_id)->count();
+        $bank_count = DB::table('ld_question_bank')->leftJoin("ld_admin" , function($join){
+            $join->on('ld_admin.id', '=', 'ld_question_bank.admin_id');
+        })->where("ld_admin.school_id" , $school_id)->where('ld_question_bank.is_del' , '=' , 0)->count();
         if($bank_count > 0){
             //获取题库列表
-            $bank_list = self::select('id as bank_id','topic_name','describe','is_open')->withCount(['subjectToBank as subject_count' => function($query) {
-                $query->where('is_del' , '=' , 0);
-            } , 'papersToBank as papers_count' => function($query) {
-                $query->where('is_del' , '=' , 0);
-            } , 'examToBank as exam_count' => function($query) {
-                $query->where('is_del' , '=' , 0);
-            }])->where(function($query) use ($body){
+            $bank_list = DB::table('ld_question_bank')->leftJoin("ld_admin" , function($join){
+                $join->on('ld_admin.id', '=', 'ld_question_bank.admin_id');
+            })->where(function($query) use ($body){
                 //删除状态
-                $query->where('is_del' , '=' , 0);
+                $query->where('ld_question_bank.is_del' , '=' , 0);
+                
+                //分校id
+                $schoolId = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+                
+                //分校id
+                $query->where('ld_admin.school_id' , '=' , $schoolId);
+            })->select('ld_question_bank.id as bank_id','ld_question_bank.topic_name','ld_question_bank.describe','ld_question_bank.is_open')->orderByDesc('ld_question_bank.create_at')->offset($offset)->limit($pagesize)->get()->toArray();
 
-                //获取后端的操作员id
-                $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-
-                //操作员id
-                $query->where('admin_id' , '=' , $admin_id);
-            })->orderByDesc('create_at')->offset($offset)->limit($pagesize)->get();
+            foreach($bank_list as $k=>$v){
+                //科目数量
+                $bank_list[$k]->subject_count  =  Subject::where('bank_id' , $v->bank_id)->where('is_del' , 0)->count();
+                
+                //试卷数量
+                $bank_list[$k]->papers_count   =  Papers::where('bank_id' , $v->bank_id)->where('is_del' , 0)->count();
+                
+                //科目数量
+                $bank_list[$k]->exam_count     =  Exam::where('bank_id' , $v->bank_id)->where('is_del' , 0)->count();
+            }
+            
             return ['code' => 200 , 'msg' => '获取题库列表成功' , 'data' => ['bank_list' => $bank_list , 'total' => $bank_count , 'pagesize' => $pagesize , 'page' => $page]];
         }
         return ['code' => 200 , 'msg' => '获取题库列表成功' , 'data' => ['bank_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
