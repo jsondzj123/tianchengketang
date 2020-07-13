@@ -18,6 +18,7 @@ class CreateLdStudentEnrolmentTable extends Migration
             //字段设置部分
             $table->increments('id')->comment('自增id');
             $table->integer('admin_id')->default(0)->comment('操作员id');
+            $table->integer('school_id')->default(0)->comment('分校id');
             $table->integer('student_id')->default(0)->comment('学员id');
             $table->integer('parent_id')->default(0)->comment('学科分类id');
             $table->integer('child_id')->default(0)->comment('学科二级分类得id');
