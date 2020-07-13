@@ -156,6 +156,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('getMyMakeExamList','BankController@getMyMakeExamList');        //做题记录列表接口
         $router->post('getMakeExamInfo','BankController@getMakeExamInfo');            //做题记录详情接口
         $router->post('doHandInPapers','BankController@doHandInPapers');              //做题交卷接口
+        $router->post('getMyBankList','BankController@getMyBankList');                //我的题库
     });
 });
 
