@@ -183,7 +183,6 @@ class CouresSubject extends Model {
         }else{
             $listss = !empty($list)?$list:$two;
         }
-        print_r($listss);die;
         return ['code' => 200 , 'msg' => '获取成功','data'=>$listss];
     }
     //资源模块 条件显示
