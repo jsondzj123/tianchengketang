@@ -13,6 +13,7 @@ use App\Models\LiveChild;
 use App\Models\Collection;
 use Illuminate\Http\Request;
 use App\Tools\MTCloud;
+use Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Validator;
@@ -221,6 +222,8 @@ class LessonController extends Controller {
             'page_data' => $lessons,
             'total' => $total,
         ];
+
+        Log::info(date("Y-m-d H:i:s",time()).'数据:'.$lessons);
         return $this->response($data);
     }
 

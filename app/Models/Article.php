@@ -203,15 +203,18 @@ class Article extends Model {
         unset($data['/admin/article/addArticle']);
         $data['user_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $data['update_at'] = date('Y-m-d H:i:s');
+        $data['text'] = isset($data['text'])?$data['text']:'';
+        $access = $data['accessory'];
+        unset($data['accessory']);
         $add = self::insertGetId($data);
-        if(isset($data['accessory']) || !empty($data['accessory'])){
-            $accessory = json_decode($data['accessory'],true);
+        if(isset($access) || !empty($access)){
+            $accessory = json_decode($access,true);
             foreach ($accessory as $k=>$v){
                 Articleaccessory::insert([
-                                        'article_id' => $add,
-                                        'accessory_name' => $v['name'],
-                                        'accessory' => $v['url'],
-                                     ]);
+                                    'article_id' => $add,
+                                    'accessory_name' => $v['name'],
+                                    'accessory_url' => $v['url'],
+                                 ]);
             }
         }
         if($add){
@@ -301,23 +304,22 @@ class Article extends Model {
         unset($data['id']);
         unset($data['/admin/article/exitForId']);
         $data['key_word'] = isset($data['key_word'])?$data['key_word']:'';
-//        $data['accessory_name'] = isset($data['accessory_name'])?$data['accessory_name']:'';
-//        $data['accessory'] = isset($data['accessory'])?$data['accessory']:'';
+        $access = isset($data['accessory'])?$data['accessory']:'';
+        unset($data['accessory']);
         $data['text'] = isset($data['text'])?$data['text']:'';
         $res = self::where(['id'=>$id])->update($data);
-        if(isset($data['accessory']) || empty($data['accessory'])){
-            $accessory = json_decode($data['accessory'],true);
+        if(isset($access) || empty($access)){
+            Articleaccessory::where('article_id',$id)->update(['status'=>1]);
+            $accessory = json_decode($access,true);
             foreach ($accessory as $k=>$v){
                 $one = Articleaccessory::where(['article_id'=>$id,'accessory_name'=>$v['name'],'accessory_url'=>$v['url']])->first();
-                if($one){
-                    if($one['status'] == 1){
-                        Articleaccessory::where('id',$one['id'])->update(['status'=>0]);
-                    }
+                if(!empty($one)){
+                    Articleaccessory::where('id',$one['id'])->update(['status'=>0]);
                 }else{
                     Articleaccessory::insert([
                         'article_id' => $id,
                         'accessory_name' => $v['name'],
-                        'accessory' => $v['url'],
+                        'accessory_url' => $v['url'],
                     ]);
                 }
             }
