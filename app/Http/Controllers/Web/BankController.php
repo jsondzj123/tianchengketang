@@ -613,21 +613,6 @@ class BankController extends Controller {
             $is_over = StudentPapers::where('student_id' , self::$accept_data['user_info']['user_id'])->where('bank_id' , $bank_id)->where("subject_id" , $subject_id)->where("papers_id" , $papers_id)->where('type' , 3)->where('is_over' , 1)->count();
             if($is_over && $is_over > 0){
                 return response()->json(['code' => 209 , 'msg' => '此试卷你已经做过了']);
-            } else {
-                //判断学员试卷表中是否存在此试卷
-                $student_paperts_count = StudentPapers::where('student_id' , self::$accept_data['user_info']['user_id'])->where('bank_id' , $bank_id)->where("subject_id" , $subject_id)->where("papers_id" , $papers_id)->where('type' , 3)->count();
-                if($student_paperts_count <= 0){
-                    //插入试卷
-                    StudentPapers::insertGetId([
-                        'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
-                        'bank_id'      =>   $bank_id ,
-                        'subject_id'   =>   $subject_id ,
-                        'papers_id'    =>   $papers_id ,
-                        'type'         =>   3 ,
-                        'create_at'    =>   date('Y-m-d H:i:s') ,
-                        'update_at'    =>   date('Y-m-d H:i:s')
-                    ]);
-                }
             }
             
             //通过试卷的id获取下面的试题列表
@@ -1021,6 +1006,21 @@ class BankController extends Controller {
                     $answer_score = count($sum_score) > 0 ? array_sum($sum_score) : 0;
                     //更新试卷的信息
                     StudentPapers::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'papers_id' => $papers_id , 'type' => 3])->update(['answer_time' => $answer_time , 'answer_score' => $answer_score , 'is_over' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
+                } else {
+                    //判断学员试卷表中是否存在此试卷
+                    $student_paperts_count = StudentPapers::where('student_id' , self::$accept_data['user_info']['user_id'])->where('bank_id' , $bank_id)->where("subject_id" , $subject_id)->where("papers_id" , $papers_id)->where('type' , 3)->count();
+                    if($student_paperts_count <= 0){
+                        //插入试卷
+                        StudentPapers::insertGetId([
+                            'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                            'bank_id'      =>   $bank_id ,
+                            'subject_id'   =>   $subject_id ,
+                            'papers_id'    =>   $papers_id ,
+                            'type'         =>   3 ,
+                            'create_at'    =>   date('Y-m-d H:i:s') ,
+                            'update_at'    =>   date('Y-m-d H:i:s')
+                        ]);
+                    }
                 }
             }
             
@@ -1652,9 +1652,29 @@ class BankController extends Controller {
                         'create_at'    =>   date('Y-m-d H:i:s') ,
                         'update_at'    =>   date('Y-m-d H:i:s')
                     ]);*/
-                    //更新试卷的信息
-                    $id = StudentPapers::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'papers_id' => $papers_id , 'type' => 3])->update(['answer_time' => $answer_time , 'answer_score' => $sum_scores , 'is_over' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
-
+                    
+                    //判断学员试卷表中是否存在此试卷
+                    $student_paperts_count = StudentPapers::where('student_id' , self::$accept_data['user_info']['user_id'])->where('bank_id' , $bank_id)->where("subject_id" , $subject_id)->where("papers_id" , $papers_id)->where('type' , 3)->count();
+                    if($student_paperts_count <= 0){
+                        //插入试卷
+                        $id = StudentPapers::insertGetId([
+                            'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                            'bank_id'      =>   $bank_id ,
+                            'subject_id'   =>   $subject_id ,
+                            'papers_id'    =>   $papers_id ,
+                            'answer_time'  =>   $answer_time ,
+                            'answer_score' =>   $sum_scores,
+                            'type'         =>   3 ,
+                            'is_over'      =>   1 ,
+                            'create_at'    =>   date('Y-m-d H:i:s') ,
+                            'update_at'    =>   date('Y-m-d H:i:s')
+                        ]);
+                    } else {
+                        //更新试卷的信息
+                        $id = StudentPapers::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'papers_id' => $papers_id , 'type' => 3])->update(['answer_time' => $answer_time , 'answer_score' => $sum_scores , 'is_over' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
+                    }
+                    
+                    //判断是否提交试卷成功
                     if($id && !empty($id)){
                         //事务回滚
                         DB::commit();
