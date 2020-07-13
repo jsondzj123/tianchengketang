@@ -46,7 +46,7 @@ class CourseLiveResource extends Model {
         if(!empty($existLive)){
             $existLiveid = array_column($existLive, 'id');
         }
-        $livecast = Live::where($where)->whereNotIn($existLiveid)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
+        $livecast = Live::where($where)->whereNotIn('id',$existLiveid)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
         foreach ($livecast as $k=>&$v){
             $ones = CouresSubject::where('id',$v['parent_id'])->first();
             if(!empty($ones)){
