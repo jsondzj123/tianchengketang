@@ -178,7 +178,7 @@ class CouresSubject extends Model {
             }
         }
         $list = self::demo($one,0,0);
-        return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$two];
         if(!empty($list) && !empty($two)){
             $listss = array_merge($list,$two);
         }else{
