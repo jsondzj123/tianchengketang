@@ -606,9 +606,6 @@ class Exam extends Model {
 
                 //获取后端的操作员id
                 $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-
-                //操作员id
-                $query->where('admin_id' , '=' , $admin_id);
                 
                 //判断审核状态是否为空和合法
                 if(isset($body['is_publish']) && in_array($body['is_publish'] , [1,0])){
