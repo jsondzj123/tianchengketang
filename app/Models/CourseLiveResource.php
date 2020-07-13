@@ -60,7 +60,7 @@ class CourseLiveResource extends Model {
 //                }
 //            }
 //        }
-//        print_r($livecast);
+        print_r($livecast);
         echo json_encode($livecast);die;
         return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$livecast,'existlive'=>$existLive,'count'=>$count];
     }
