@@ -125,12 +125,11 @@ class LessonController extends Controller {
                 $sort_type = $request->input('sort_type') ?: 'asc';
                 $data_list_accredit =  CourseSchool::join("ld_course_subject","ld_course_subject.id","=","ld_course_school.parent_id")
                         ->join("ld_course_method","ld_course_school.course_id","=","ld_course_method.course_id")
-                        ->select('ld_course_school.course_id as id','ld_course_school.id', 'ld_course_school.admin_id','ld_course_school.child_id','ld_course_school.parent_id', 'ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.pricing as price', 'ld_course_school.sale_price as favorable_price','ld_course_school.buy_num','ld_course_school.is_del','ld_course_school.status','ld_course_school.watch_num','ld_course_school.keywords','ld_course_subject.subject_name')
+                        ->select('ld_course_school.course_id as id', 'ld_course_school.admin_id','ld_course_school.child_id','ld_course_school.parent_id', 'ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.pricing as price', 'ld_course_school.sale_price as favorable_price','ld_course_school.buy_num','ld_course_school.is_del','ld_course_school.status','ld_course_school.watch_num','ld_course_school.keywords','ld_course_subject.subject_name')
                         ->where($where_two)
                         ->orWhere(function ($query) use ($keyWord){
                             $query->where('ld_course_school.title', 'like', '%'.$keyWord.'%')->orWhere('ld_course_school.keywords', 'like', '%'.$keyWord.'%');
                         })
-                        ->groupBy("ld_course_school.id")
                         ->get()->toArray();
                 foreach($data_list_accredit as $k => &$v){
                     //二级分类
@@ -222,7 +221,6 @@ class LessonController extends Controller {
             'page_data' => $lessons,
             'total' => $total,
         ];
-
         return $this->response($data);
     }
 
