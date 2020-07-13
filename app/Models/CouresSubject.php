@@ -169,15 +169,16 @@ class CouresSubject extends Model {
             ->orderBydesc('id')->get()->toArray();
         //根据授权课程 获取分类
         $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->groupBy('parent_id')->get()->toArray();
-        $lists=[];
+        $two=[];
         if(!empty($course)){
             foreach ($course as $k=>$v){
                 $two = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['id'=>$v['parent_id'],'is_del'=>0])->first();
-                $lists = self::demo($two,0,0);
+                $twss = self::where(['parent_id'=>$two['id'],'is_del'=>0])->select();
+                $two['childs'] = $twss;
             }
         }
         $list = self::demo($one,0,0);
-        $listss = array_merge($list,$lists);
+        $listss = array_merge($list,$two);
         return ['code' => 200 , 'msg' => '获取成功','data'=>$listss];
     }
     //资源模块 条件显示
