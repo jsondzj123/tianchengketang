@@ -385,7 +385,8 @@ class BankController extends Controller {
                     'joint_id'     =>   $joint_id ,
                     'model'        =>   $model ,
                     'type'         =>   1 ,
-                    'create_at'    =>   date('Y-m-d H:i:s')
+                    'create_at'    =>   date('Y-m-d H:i:s') ,
+                    'update_at'    =>   date('Y-m-d H:i:s')
                 ]);
                 
                 //保存随机生成的试题
@@ -503,7 +504,8 @@ class BankController extends Controller {
                     'bank_id'      =>   $bank_id ,
                     'subject_id'   =>   $subject_id ,
                     'type'         =>   2 ,
-                    'create_at'    =>   date('Y-m-d H:i:s')
+                    'create_at'    =>   date('Y-m-d H:i:s') ,
+                    'update_at'    =>   date('Y-m-d H:i:s')
                 ]);
                 
                 //保存随机生成的试题
@@ -1044,7 +1046,9 @@ class BankController extends Controller {
         $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_right' , 2)->count();
         
         //做题记录
-        $exam_count    = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_right' , '>' , 0)->count();
+        //$exam_count    = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_right' , '>' , 0)->count();
+        //章节练习和快速做题数量
+        $exam_count  = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->whereIn('type' , [1,2,3])->count();
         
         //返回数据信息
         return response()->json(['code' => 200 , 'msg' => '返回数据成功' , 'data' => ['collect_count' => $collect_count , 'error_count' => $error_count , 'exam_count' => $exam_count]]);
@@ -1229,7 +1233,7 @@ class BankController extends Controller {
         $new_array = [];
 
         //获取学员的做题记录列表
-        $make_exam_list = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , $type)->get()->toArray();
+        $make_exam_list = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , $type)->orderBy('update_at' , 'DESC')->get()->toArray();
         
         //判断信息是否为空
         if($make_exam_list && !empty($make_exam_list)){
