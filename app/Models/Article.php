@@ -203,8 +203,10 @@ class Article extends Model {
         unset($data['/admin/article/addArticle']);
         $data['user_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $data['update_at'] = date('Y-m-d H:i:s');
+        $access = $data['accessory'];
+        unset($data['accessory']);
         $add = self::insertGetId($data);
-        if(isset($data['accessory']) || !empty($data['accessory'])){
+        if(isset($access) || !empty($access)){
             $accessory = json_decode($data['accessory'],true);
             foreach ($accessory as $k=>$v){
                 Articleaccessory::insert([
