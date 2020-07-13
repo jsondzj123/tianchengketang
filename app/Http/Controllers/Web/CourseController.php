@@ -382,7 +382,7 @@ class CourseController extends Controller {
         $teacherlist=[];
         if(!empty($teacher)){
             foreach ($teacher as $k=>$v){
-                $teacherlist[] = Lecturer::where(['id'=>$v['teacher_id'],'is_del'=>0])->first();
+                $teacherlist[] = Lecturer::where(['id'=>$v['teacher_id'],'is_del'=>0,'is_forbid'=>0,'type'=>2])->first();
             }
         }
         return response()->json(['code' => 200, 'msg' => '获取成功','data'=>$teacherlist]);
