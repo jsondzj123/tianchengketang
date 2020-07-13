@@ -14,6 +14,7 @@ class Coures extends Model {
         //获取用户网校id
         $data['school_status'] = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        echo $school_id;die;
         //每页显示的条数
         $pagesize = (int)isset($data['pageSize']) && $data['pageSize'] > 0 ? $data['pageSize'] : 20;
         $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
