@@ -30,11 +30,10 @@ class LiveChildController extends Controller {
         ->join("ld_course_shift_no","ld_course_livecast_resource.id","=","ld_course_shift_no.resource_id")
         ->select(['ld_course_livecast_resource.id as resource_id','ld_course_shift_no.id as shift_no_id'])
         ->where(["ld_course.status"=>1,"ld_course.is_del"=>0,'ld_course.id'=>$request->input('lesson_id')])->get();
-
         //获取班号
-        //获取班号下所有课次
+        //获取班号下所有课次'
         $childs = [];
-        if(!empty($lives)){
+        if(!empty($lives) && count($lives) > 0){
             foreach ($lives as $key => $value) {
                 //直播中
                 $live = LiveChild::join("ld_course_live_childs","ld_course_class_number.id","=","ld_course_live_childs.class_id")
