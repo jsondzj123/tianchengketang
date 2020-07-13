@@ -22,6 +22,7 @@ class ArticleController extends Controller {
         $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
         $where['is_del'] = 1;
+        $where['status'] = 1;
         if($role_id == 1){
             $data = self::$accept_data;
 //            if(!empty($data['school_id']) && $data['school_id'] != ''){
