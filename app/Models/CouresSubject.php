@@ -178,7 +178,11 @@ class CouresSubject extends Model {
             }
         }
         $list = self::demo($one,0,0);
-        $listss = array_merge($list,$two);
+        if(!empty($list) && !empty($two)){
+            $listss = array_merge($list,$two);
+        }else{
+            $listss = !empty($list)?$list:$two;
+        }
         return ['code' => 200 , 'msg' => '获取成功','data'=>$listss];
     }
     //资源模块 条件显示
