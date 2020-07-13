@@ -176,7 +176,6 @@ class CouresSubject extends Model {
                 $twss = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['parent_id'=>$two['id'],'is_del'=>0,'is_open'=>0])->get()->toArray();
                 $two['childs'] = $twss;
             }
-
         }
         $list = self::demo($one,0,0);
         if(!empty($list) && !empty($two)){
@@ -184,6 +183,7 @@ class CouresSubject extends Model {
         }else{
             $listss = !empty($list)?$list:$two;
         }
+        print_r($listss);die;
         return ['code' => 200 , 'msg' => '获取成功','data'=>$listss];
     }
     //资源模块 条件显示
