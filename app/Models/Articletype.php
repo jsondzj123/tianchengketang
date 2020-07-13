@@ -242,15 +242,16 @@ class Articletype extends Model {
         }
         //缓存
         $key = 'articletype_oneFind_'.$data['id'];
-        if(Redis::get($key)) {
-            return ['code' => 200 , 'msg' => '获取成功','data'=>json_decode(Redis::get($key),true)];
-        }else{
-            $find = self::select('ld_article_type.id','ld_article_type.typename','ld_article_type.description','ld_school.name')
+//        if(Redis::get($key)) {
+//            return ['code' => 200 , 'msg' => '获取成功','data'=>json_decode(Redis::get($key),true)];
+//        }else{
+            $find = self::select('ld_article_type.id','ld_article_type.typename','ld_article_type.description','ld_school.id as school_id')
                 ->leftJoin('ld_school','ld_school.id','=','ld_article_type.school_id')
                 ->where(['ld_article_type.id'=>$data['id'],'ld_article_type.is_del'=>1])
                 ->first();
-            Redis::setex($key,60,json_encode($find));
+
+//            Redis::setex($key,60,json_encode($find));
             return ['code' => 200 , 'msg' => '获取成功','data'=>$find];
-        }
+//        }
     }
 }
