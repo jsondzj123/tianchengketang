@@ -33,7 +33,20 @@ class CourseLiveResource extends Model {
                 $where['child_id'] = $parent[1];
             }
         }
-        $livecast = Live::where($where)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
+
+        //已经加入的直播资源
+        $existLive = self::select('ld_course_livecast_resource.*')
+            ->leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
+            ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0,'ld_course_live_resource.course_id'=>$data['course_id']])
+            ->orderByDesc('ld_course_live_resource.id')->get()->toArray();
+        //加入课程总数
+        $count = self::leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
+            ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0])->count();
+        $existLiveid=[];
+        if(!empty($existLive)){
+            $existLiveid = array_column($existLive, 'id');
+        }
+        $livecast = Live::where($where)->whereNotIn($existLiveid)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
         foreach ($livecast as $k=>&$v){
             $ones = CouresSubject::where('id',$v['parent_id'])->first();
             if(!empty($ones)){
@@ -44,26 +57,6 @@ class CourseLiveResource extends Model {
                 $v['chind_name'] = $twos['subject_name'];
             }
         }
-        //已经加入的直播资源
-        $existLive = self::select('ld_course_livecast_resource.*')
-            ->leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
-            ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0,'ld_course_live_resource.course_id'=>$data['course_id']])
-            ->orderByDesc('ld_course_live_resource.id')->get()->toArray();
-        //加入课程总数
-        $count = self::leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
-            ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0])->count();
-        print_r($livecast);
-        if(!empty($existLive)){
-            $existLiveid = array_column($existLive, 'id');
-            print_r($existLiveid);
-            foreach ($livecast as $ks=>$vs){
-                if(in_array($vs['id'],$existLiveid)){
-                    unset($livecast[$ks]);
-                }
-            }
-        }
-        print_r($livecast);
-        echo json_encode($livecast);die;
         return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$livecast,'existlive'=>$existLive,'count'=>$count];
     }
     //删除直播资源  szw
