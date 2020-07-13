@@ -168,6 +168,7 @@ class Articletype extends Model {
         if($ones){
             return ['code' => 202 , 'msg' => '数据已存在'];
         }else {
+            unset($data['id']);
             $data['description'] = isset($data['description'])?$data['description']:'';
             $add = self::insert($data);
             if($add){
