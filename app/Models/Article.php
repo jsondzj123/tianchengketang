@@ -304,12 +304,12 @@ class Article extends Model {
         unset($data['id']);
         unset($data['/admin/article/exitForId']);
         $data['key_word'] = isset($data['key_word'])?$data['key_word']:'';
-//        $data['accessory_name'] = isset($data['accessory_name'])?$data['accessory_name']:'';
-//        $data['accessory'] = isset($data['accessory'])?$data['accessory']:'';
+        $access = isset($data['accessory'])?$data['accessory']:'';
+        unset($data['accessory']);
         $data['text'] = isset($data['text'])?$data['text']:'';
         $res = self::where(['id'=>$id])->update($data);
-        if(isset($data['accessory']) || empty($data['accessory'])){
-            $accessory = json_decode($data['accessory'],true);
+        if(isset($access) || empty($access)){
+            $accessory = json_decode($access,true);
             foreach ($accessory as $k=>$v){
                 $one = Articleaccessory::where(['article_id'=>$id,'accessory_name'=>$v['name'],'accessory_url'=>$v['url']])->first();
                 if($one){
