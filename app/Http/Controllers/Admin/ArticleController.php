@@ -25,9 +25,7 @@ class ArticleController extends Controller {
         $where['status'] = 1;
         if($role_id == 1){
             $data = self::$accept_data;
-//            if(!empty($data['school_id']) && $data['school_id'] != ''){
                 $where['school_id'] = isset($data['school_id'])?$data['school_id']:1;
-//            }
         }else{
             $where['school_id'] = $school_id;
         }
