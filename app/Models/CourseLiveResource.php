@@ -52,14 +52,15 @@ class CourseLiveResource extends Model {
         //加入课程总数
         $count = self::leftJoin('ld_course_livecast_resource','ld_course_livecast_resource.id','=','ld_course_live_resource.resource_id')
             ->where(['ld_course_live_resource.is_del'=>0,'ld_course_livecast_resource.is_del'=>0])->count();
-        if(!empty($existLive)){
-            $existLiveid = array_column($existLive, 'id');
-            foreach ($livecast as $ks=>$vs){
-                if(in_array($vs['id'],$existLiveid)){
-                    unset($livecast[$ks]);
-                }
-            }
-        }
+//        if(!empty($existLive)){
+//            $existLiveid = array_column($existLive, 'id');
+//            foreach ($livecast as $ks=>$vs){
+//                if(in_array($vs['id'],$existLiveid)){
+//                    unset($livecast[$ks]);
+//                }
+//            }
+//        }
+//        print_r($livecast);
         echo json_encode($livecast);die;
         return ['code' => 200 , 'msg' => '获取成功','course'=>$course,'where'=>$data,'livecast'=>$livecast,'existlive'=>$existLive,'count'=>$count];
     }
