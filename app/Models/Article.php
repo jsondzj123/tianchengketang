@@ -74,12 +74,8 @@ class Article extends Model {
                 ->orderBy('ld_article.id','desc')
                 ->offset($offset)->limit($pagesize)->get();
             foreach ($list as $k=>&$v){
-                $acc = Articleaccessory::where(['article_id'=>$v['id'],'status'=>0])->get()->toArray();
-                if(!empty($acc)){
-                    foreach ($acc as $ks=>$vs){
-                        $v['accessory'][$vs['accessory_name']] = $vs['accessory_url'];
-                    }
-                }
+                $acc = Articleaccessory::select('id','accessory_name as name','accessory_url as url')->where(['article_id'=>$v['id'],'status'=>0])->get();
+                $v['accessory'] = $acc;
             }
         }else{
             $list=[];
@@ -213,8 +209,8 @@ class Article extends Model {
             foreach ($accessory as $k=>$v){
                 Articleaccessory::insert([
                                         'article_id' => $add,
-                                        'accessory_name' => $k,
-                                        'accessory' => $v,
+                                        'accessory_name' => $v['name'],
+                                        'accessory' => $v['url'],
                                      ]);
             }
         }
@@ -252,13 +248,7 @@ class Article extends Model {
             ->leftJoin('ld_article_type','ld_article_type.id','=','ld_article.article_type_id')
             ->where(['ld_article.id'=>$data['id'],'ld_article.is_del'=>1,'ld_school.is_del'=>1])
             ->first();
-        $find['accessory'] = [];
-        $acc = Articleaccessory::where(['article_id'=>$find['id'],'status'=>0])->get()->toArray();
-        if(!empty($acc)){
-            foreach ($acc as $k=>$v){
-                $find['accessory'][$v['accessory_name']] = $v['accessory_url'];
-            }
-        }
+        $find['accessory'] = Articleaccessory::select('id','accessory_name as name','accessory_url as url')->where(['article_id'=>$find['id'],'status'=>0])->get()->toArray();
         if($find){
             unset($find['user_id'],$find['share'],$find['status'],$find['is_del'],$find['create_at'],$find['update_at']);
             return ['code' => 200 , 'msg' => '获取成功','data'=>$find,'school'=>$schooltype[0],'type'=>$schooltype[1]];
@@ -318,7 +308,7 @@ class Article extends Model {
         if(isset($data['accessory']) || empty($data['accessory'])){
             $accessory = json_decode($data['accessory']);
             foreach ($accessory as $k=>$v){
-                $one = Articleaccessory::where(['article_id'=>$id,'accessory_name'=>$k,'accessory_url'=>$v])->first();
+                $one = Articleaccessory::where(['article_id'=>$id,'accessory_name'=>$v['name'],'accessory_url'=>$v['url']])->first();
                 if($one){
                     if($one['status'] == 1){
                         Articleaccessory::where('id',$one['id'])->update(['status'=>0]);
@@ -326,8 +316,8 @@ class Article extends Model {
                 }else{
                     Articleaccessory::insert([
                         'article_id' => $id,
-                        'accessory_name' => $k,
-                        'accessory' => $v,
+                        'accessory_name' => $v['name'],
+                        'accessory' => $v['url'],
                     ]);
                 }
             }
