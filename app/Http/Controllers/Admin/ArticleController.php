@@ -123,7 +123,6 @@ class ArticleController extends Controller {
          * return  array
          */
     public function findToId(){
-        echo 11111;
         try{
             $list = Article::findOne(self::$accept_data);
             return response()->json($list);
