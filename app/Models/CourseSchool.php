@@ -154,14 +154,17 @@ class CourseSchool extends Model {
                     $query->where('ld_course_school.from_school_id',$school_id); //授权学校
                     $query->where('ld_course_school.is_del',0);
             })->select('ld_course_school.course_id as id','ld_course.parent_id','ld_course.child_id','ld_course.title')->get()->toArray(); //授权课程
+           
             if(!empty($zizengCourse)){
                 if(!empty($natureCourse)){
                     $natureCourseIds = array_column($natureCourse,'id');
-                    foreach($zizengCourse as $key=>&$v){
+
+                    foreach($zizengCourse as $key=>$v){
                         if(in_array($v['id'], $natureCourseIds)){
                             unset($zizengCourse[$key]);
                         }
                     }
+
                 } 
                 $CourseArr = array_merge($zizengCourse,$natureCourse);
                 foreach ($CourseArr as $key => $v) {
@@ -190,6 +193,9 @@ class CourseSchool extends Model {
             }  
             return ['code'=>200,'msg'=>'message','data'=>$CourseArr];   
         }
+
+
+
     }
      /**
      * @param  批量授权
@@ -217,7 +223,7 @@ class CourseSchool extends Model {
 
 
         if($body['is_public'] == 1){ //公开课
-            $nature = CourseRefOpen::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->first();
+            $nature = CourseRefOpen::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->first()->toArray();
 
             if(!empty($nature)){
                 return ['code'=>207,'msg'=>'公开课已经授权'];
@@ -295,7 +301,7 @@ class CourseSchool extends Model {
             }
         }
         if($body['is_public'] == 0){  //课程
-            $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->limit(1)->get();
+            $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->limit(1)->get()->toArray();
             if(!empty($nature)){
                 return ['code'=>207,'msg'=>'课程已经授权'];
             }
