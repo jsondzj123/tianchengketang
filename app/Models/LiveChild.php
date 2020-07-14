@@ -135,6 +135,11 @@ class LiveChild extends Model {
             if(empty($data['class_hour']) || !isset($data['class_hour'])){
                 return ['code' => 201 , 'msg' => '课时不能为空'];
             }
+            $ktime = floor(($data['end_at']-$data['start_at'])%86400/3600);
+            //课时必须等于开始时间和结束时间
+            if($data['class_hour'] != $ktime){
+                return ['code' => 201 , 'msg' => '课时数不正确'];
+            }
             //选择模式
             if(empty($data['live_type']) || !isset($data['live_type'])){
                 return ['code' => 201 , 'msg' => '选择模式不能为空'];
@@ -208,6 +213,11 @@ class LiveChild extends Model {
             //课时
             if(empty($data['class_hour']) || !isset($data['class_hour'])){
                 return ['code' => 201 , 'msg' => '课时不能为空'];
+            }
+            $ktime = floor(($data['end_at']-$data['start_at'])%86400/3600);
+            //课时必须等于开始时间和结束时间
+            if($data['class_hour'] != $ktime){
+                return ['code' => 201 , 'msg' => '课时数不正确'];
             }
             //选择模式
             if(empty($data['live_type']) || !isset($data['live_type'])){
@@ -358,72 +368,141 @@ class LiveChild extends Model {
             if(!$one){
                 return ['code' => 204 , 'msg' => '课次已发布成功'];
             }
-            $MTCloud = new MTCloud();
-            $res = $MTCloud->courseAdd(
-                $course_name = $one['name'],
-                $account   = $one['teacher_id'],
-                $start_time = date("Y-m-d H:i:s",$one['start_at']),
-                $end_time   = date("Y-m-d H:i:s",$one['end_at']),
-                $nickname   = $one['real_name']
-            );
-            if($res['code'] == 0){
-                //更新发布状态
-                $update = self::where(['id'=>$data['class_id'],'status'=>0])->update(['status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
-                if($update){
-                    //获取后端的操作员id
-                    $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-                    //添加日志操作
-                    AdminLog::insertAdminLog([
-                        'admin_id'       =>   $admin_id  ,
-                        'module_name'    =>  'LiveClassChild' ,
-                        'route_url'      =>  'admin/updateStatusLiveChild' ,
-                        'operate_method' =>  'update' ,
-                        'content'        =>  '更新id为'.$data['class_id'],
-                        'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
-                        'create_at'      =>  date('Y-m-d H:i:s')
-                    ]);
-                    //课次关联表添加数据
-                    $insert['class_id'] = $data['class_id'];
-                    $insert['admin_id'] = $admin_id;
-                    $insert['course_name'] = $res['data']['course_name'];
-                    $insert['account'] = $res['data']['partner_id'];
-                    $insert['start_time'] = $res['data']['start_time'];
-                    $insert['end_time'] = $res['data']['end_time'];
-                    $insert['nickname'] = $one['real_name'];
-                    $insert['accountIntro'] = $one['describe'];
-                    $insert['partner_id'] = $res['data']['partner_id'];
-                    $insert['bid'] = $res['data']['bid'];
-                    $insert['course_id'] = $res['data']['course_id'];
-                    $insert['zhubo_key'] = $res['data']['zhubo_key'];
-                    $insert['admin_key'] = $res['data']['admin_key'];
-                    $insert['user_key'] = $res['data']['user_key'];
-                    $insert['add_time'] = $res['data']['add_time'];
-                    $insert['status'] = 1;
-                    $insert['create_at'] = date('Y-m-d H:i:s');
-                    $insert['update_at'] = date('Y-m-d H:i:s');
-                    $add = CourseLiveClassChild::insert($insert);
-                    if($add){
+            //查询该课次是已发布 修改信息
+            $CourseLiveClassChild = CourseLiveClassChild::where(["class_id"=>$data['class_id']])->first()->toArray();
+            if($CourseLiveClassChild){
+                //更新课次
+                $MTCloud = new MTCloud();
+                $res = $MTCloud->courseUpdate(
+                    $course_id = $CourseLiveClassChild['course_id'],
+                    $account   = $one['teacher_id'],
+                    $course_name = $one['name'],
+                    $start_time = date("Y-m-d H:i:s",$one['start_at']),
+                    $end_time   = date("Y-m-d H:i:s",$one['end_at']),
+                    $nickname   = $one['real_name']
+                );
+                    if($res['code'] == 0){
+                        //更新发布状态
+                        $update = self::where(['id'=>$data['class_id'],'status'=>0])->update(['status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+                        if($update){
+                            //获取后端的操作员id
+                            $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                            //添加日志操作
+                            AdminLog::insertAdminLog([
+                                'admin_id'       =>   $admin_id  ,
+                                'module_name'    =>  'LiveClassChild' ,
+                                'route_url'      =>  'admin/updateStatusLiveChild' ,
+                                'operate_method' =>  'update' ,
+                                'content'        =>  '更新id为'.$data['class_id'],
+                                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                                'create_at'      =>  date('Y-m-d H:i:s')
+                            ]);
+                            //课次关联表更新数据
+                            //获取后端的操作员id
+                            $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                            $data['course_name'] = $one['name'];
+                            $data['accountIntro'] = $one['describe'];
+                            $data['nickname'] = $one['real_name'];
+                            $data['account'] = $one['teacher_id'];
+                            $data['start_time'] = $res['data']['start_time'];
+                            $data['end_time'] = $res['data']['end_time'];
+                            $data['bid'] = $res['data']['bid'];
+                            $data['admin_id'] = $admin_id;
+                            $data['update_at'] = date('Y-m-d H:i:s');
+                            $id = $CourseLiveClassChild['id'];
+                            $update = CourseLiveClassChild::where(['id'=>$id])->update($data);
+                            if($update){
+                                //添加日志操作
+                                AdminLog::insertAdminLog([
+                                    'admin_id'       =>   $admin_id  ,
+                                    'module_name'    =>  'LiveClassChild' ,
+                                    'route_url'      =>  'admin/liveChild/add' ,
+                                    'operate_method' =>  'update' ,
+                                    'content'        =>  '更新数据'.json_encode($data) ,
+                                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                                    'create_at'      =>  date('Y-m-d H:i:s')
+                                ]);
+                                return ['code' => 200 , 'msg' => '更新发布成功'];
+                            }else{
+                                return ['code' => 202 , 'msg' => '更新发布失败'];
+                            }
+
+                        }else{
+                            return ['code' => 202 , 'msg' => '更新发布状态失败'];
+                        }
+
+                    }else{
+                        return ['code' => 204 , 'msg' => $res['msg']];
+                    }
+            }else{
+                //发布课次
+                $MTCloud = new MTCloud();
+                $res = $MTCloud->courseAdd(
+                    $course_name = $one['name'],
+                    $account   = $one['teacher_id'],
+                    $start_time = date("Y-m-d H:i:s",$one['start_at']),
+                    $end_time   = date("Y-m-d H:i:s",$one['end_at']),
+                    $nickname   = $one['real_name']
+                );
+                if($res['code'] == 0){
+                    //更新发布状态
+                    $update = self::where(['id'=>$data['class_id'],'status'=>0])->update(['status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+                    if($update){
+                        //获取后端的操作员id
+                        $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                         //添加日志操作
                         AdminLog::insertAdminLog([
-                            'admin_id'       =>   $insert['admin_id']  ,
+                            'admin_id'       =>   $admin_id  ,
                             'module_name'    =>  'LiveClassChild' ,
-                            'route_url'      =>  'admin/liveChild/add' ,
-                            'operate_method' =>  'insert' ,
-                            'content'        =>  '新增数据'.json_encode($data) ,
+                            'route_url'      =>  'admin/updateStatusLiveChild' ,
+                            'operate_method' =>  'update' ,
+                            'content'        =>  '更新id为'.$data['class_id'],
                             'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                             'create_at'      =>  date('Y-m-d H:i:s')
                         ]);
-                        return ['code' => 200 , 'msg' => '发布成功'];
+                        //课次关联表添加数据
+                        $insert['class_id'] = $data['class_id'];
+                        $insert['admin_id'] = $admin_id;
+                        $insert['course_name'] = $res['data']['course_name'];
+                        $insert['account'] = $res['data']['partner_id'];
+                        $insert['start_time'] = $res['data']['start_time'];
+                        $insert['end_time'] = $res['data']['end_time'];
+                        $insert['nickname'] = $one['real_name'];
+                        $insert['accountIntro'] = $one['describe'];
+                        $insert['partner_id'] = $res['data']['partner_id'];
+                        $insert['bid'] = $res['data']['bid'];
+                        $insert['course_id'] = $res['data']['course_id'];
+                        $insert['zhubo_key'] = $res['data']['zhubo_key'];
+                        $insert['admin_key'] = $res['data']['admin_key'];
+                        $insert['user_key'] = $res['data']['user_key'];
+                        $insert['add_time'] = $res['data']['add_time'];
+                        $insert['status'] = 1;
+                        $insert['create_at'] = date('Y-m-d H:i:s');
+                        $insert['update_at'] = date('Y-m-d H:i:s');
+                        $add = CourseLiveClassChild::insert($insert);
+                        if($add){
+                            //添加日志操作
+                            AdminLog::insertAdminLog([
+                                'admin_id'       =>   $insert['admin_id']  ,
+                                'module_name'    =>  'LiveClassChild' ,
+                                'route_url'      =>  'admin/liveChild/add' ,
+                                'operate_method' =>  'insert' ,
+                                'content'        =>  '新增数据'.json_encode($data) ,
+                                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                                'create_at'      =>  date('Y-m-d H:i:s')
+                            ]);
+                            return ['code' => 200 , 'msg' => '发布成功'];
+                        }else{
+                            return ['code' => 202 , 'msg' => '发布失败'];
+                        }
+
                     }else{
-                        return ['code' => 202 , 'msg' => '发布失败'];
+                        return ['code' => 202 , 'msg' => '更新发布状态失败'];
                     }
 
                 }else{
-                    return ['code' => 202 , 'msg' => '更新发布状态失败'];
+                    return ['code' => 204 , 'msg' => $res['msg']];
                 }
-
-            }else{
-                return ['code' => 204 , 'msg' => $res['msg']];
             }
         }
 
