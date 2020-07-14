@@ -227,13 +227,13 @@ class Teacher extends Model {
                     if(isset($body['search']) && !empty($body['search'])){
                         $query->where('real_name','like','%'.$body['search'].'%');
                     }
-                })->select('id as teacher_id','real_name','phone','create_at','number','is_recommend','is_forbid')->orderByDesc('id')->offset($offset)->limit($pagesize)->get()->toArray();
+                })->select('id as teacher_id','real_name','phone','create_at','number','is_recommend','is_forbid','school_id')->orderByDesc('id')->offset($offset)->limit($pagesize)->get()->toArray();
                 //判断如果是讲师则查询开课数量
                 if($body['type'] == 2){
                     foreach($teacher_list as $k=>$v){
                         $teacher_list[$k]['number'] = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
                         //判断此讲师教务是否授权
-                        $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['id'])->where('is_del' , 0)->count();
+                        $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['teacher_id'])->where('is_del' , 0)->count();
                         if($is_auth <= 0){
                             $teacher_list[$k]['is_auth'] = 0;
                         } else {
@@ -244,7 +244,7 @@ class Teacher extends Model {
                     foreach($teacher_list as $k=>$v){
                         $teacher_list[$k]['number'] = 0;
                         //判断此讲师教务是否授权
-                        $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['id'])->where('is_del' , 0)->count();
+                        $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['teacher_id'])->where('is_del' , 0)->count();
                         if($is_auth <= 0){
                             $teacher_list[$k]['is_auth'] = 0;
                         } else {
@@ -269,13 +269,13 @@ class Teacher extends Model {
                 if(isset($body['search']) && !empty($body['search'])){
                     $query->where('real_name','like','%'.$body['search'].'%');
                 }
-            })->select('id as teacher_id','real_name','phone','create_at','number','is_recommend','is_forbid')->orderByDesc('id')->get()->toArray();
+            })->select('id as teacher_id','real_name','phone','create_at','number','is_recommend','is_forbid','school_id')->orderByDesc('id')->get()->toArray();
             //判断如果是讲师则查询开课数量
             if($body['type'] == 2){
                 foreach($teacher_list as $k=>$v){
                     $teacher_list[$k]['number'] = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
                     //判断此讲师教务是否授权
-                    $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['id'])->where('is_del' , 0)->count();
+                    $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['teacher_id'])->where('is_del' , 0)->count();
                     if($is_auth <= 0){
                         $teacher_list[$k]['is_auth'] = 0;
                     } else {
@@ -286,7 +286,7 @@ class Teacher extends Model {
                 foreach($teacher_list as $k=>$v){
                     $teacher_list[$k]['number'] = 0;
                     //判断此讲师教务是否授权
-                    $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['id'])->where('is_del' , 0)->count();
+                    $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['teacher_id'])->where('is_del' , 0)->count();
                     if($is_auth <= 0){
                         $teacher_list[$k]['is_auth'] = 0;
                     } else {
