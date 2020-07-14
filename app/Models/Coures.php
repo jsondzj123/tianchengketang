@@ -493,6 +493,7 @@ class Coures extends Model {
             if($find['parent_id'] > 0 && $find['child_id'] > 0){
                 $where[1] = $find['child_id'];
             }
+
             $find['parent'] = $where;
             unset($find['parent_id'],$find['child_id']);
             //查询讲师
