@@ -7,6 +7,7 @@ use App\Models\Coures;
 use App\Models\Coureschapters;
 use App\Models\CouresSubject;
 use App\Models\CourseLiveResource;
+use App\Models\CourseSchool;
 
 class CourseController extends Controller {
     //获取学科列表
@@ -42,7 +43,9 @@ class CourseController extends Controller {
        */
       public function courseType(){
         $parent = self::$accept_data;
-        $list = Coures::where(['is_del'=>0,'status'=>1])
+        $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
+        //自增
+        $list1 = Coures::where(['is_del'=>0,'status'=>1,'school_id'=>$school_id])
              ->where(function ($query) use ($parent) {
                  if(!empty($parent['parent_id'])){
                      $newparent = json_decode($parent['parent_id'],true);
@@ -54,6 +57,24 @@ class CourseController extends Controller {
                      }
                  }
             })->get()->toArray();
+         //授权课程
+          $list2 = CourseSchool::where(['is_del'=>0,'status'=>1,'to_school_id'=>$school_id])
+              ->where(function ($query) use ($parent) {
+                  if(!empty($parent['parent_id'])){
+                      $newparent = json_decode($parent['parent_id'],true);
+                      if (!empty($newparent[0]) && $newparent[0] != '') {
+                          $query->where('parent_id', $newparent[0]);
+                      }
+                      if (!empty($newparent[1]) && $newparent[1] != '') {
+                          $query->where('child_id', $newparent[1]);
+                      }
+                  }
+              })->get()->toArray();
+          if(!empty($list1) && !empty($list2)){
+              $list = array_merge($list1,$list2);
+          }else{
+              $list = !empty($list1)?$list1:$list2;
+          }
           return response()->json(['code' => 200 , 'msg' => '成功','data'=>$list]);
       }
   /*
