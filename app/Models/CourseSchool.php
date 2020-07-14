@@ -144,8 +144,10 @@ class CourseSchool extends Model {
             })->select('ld_course_school.course_id as id','ld_course.parent_id','ld_course.child_id','ld_course.title')->get()->toArray(); 
             //授权课程
             $CourseArr = array_merge($zizengCourse,$natureCourse);
+
             if(!empty($CourseArr)){
                 $CourseArr = array_unique($CourseArr, SORT_REGULAR);
+                
                 foreach ($CourseArr as $key => $v) {
                     $CourseArr[$key]['subjectNameOne'] = !isset($subjectArr[$v['parent_id']])?'':$subjectArr[$v['parent_id']];
                     $CourseArr[$key]['subjectNameTwo'] = !isset($subjectArr[$v['child_id']])?'':$subjectArr[$v['child_id']];
@@ -170,6 +172,7 @@ class CourseSchool extends Model {
                     }
                 }       
             }
+           
             return ['code'=>200,'msg'=>'message','data'=>$CourseArr];   
         }
     }
