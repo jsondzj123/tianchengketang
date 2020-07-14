@@ -201,8 +201,8 @@ class Teacher extends Model {
         if($school_status > 0 && $school_status == 1){
             //获取讲师或教务是否有数据
             $teacher_count = self::where(function($query) use ($body){
-                $admin_id      = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-                $query->where('admin_id' , '=' , $admin_id);
+                $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+                $query->where('school_id' , '=' , $school_id);
                 $query->where('is_del' , '=' , 0);
                 //获取老师类型(讲师还是教务)
                 $query->where('type' , '=' , $body['type']);
@@ -217,8 +217,8 @@ class Teacher extends Model {
             if($teacher_count && $teacher_count > 0){
                 //获取讲师或教务列表
                 $teacher_list = self::where(function($query) use ($body){
-                    $admin_id      = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-                    $query->where('admin_id' , '=' , $admin_id);
+                    $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+                    $query->where('school_id' , '=' , $school_id);
                     $query->where('is_del' , '=' , 0);
                     //获取老师类型(讲师还是教务)
                     $query->where('type' , '=' , $body['type']);
@@ -232,6 +232,24 @@ class Teacher extends Model {
                 if($body['type'] == 2){
                     foreach($teacher_list as $k=>$v){
                         $teacher_list[$k]['number'] = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
+                        //判断此讲师教务是否授权
+                        $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['id'])->where('is_del' , 0)->count();
+                        if($is_auth <= 0){
+                            $teacher_list[$k]['is_auth'] = 0;
+                        } else {
+                            $teacher_list[$k]['is_auth'] = 1;
+                        }
+                    }
+                } else {
+                    foreach($teacher_list as $k=>$v){
+                        $teacher_list[$k]['number'] = 0;
+                        //判断此讲师教务是否授权
+                        $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['id'])->where('is_del' , 0)->count();
+                        if($is_auth <= 0){
+                            $teacher_list[$k]['is_auth'] = 0;
+                        } else {
+                            $teacher_list[$k]['is_auth'] = 1;
+                        }
                     }
                 }
                 return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => $teacher_list , 'total' => $teacher_count , 'pagesize' => $pagesize , 'page' => $page]];
@@ -241,8 +259,8 @@ class Teacher extends Model {
         } else {
             //获取讲师或教务列表
             $teacher_list = self::where(function($query) use ($body){
-                $admin_id      = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-                $query->where('admin_id' , '=' , $admin_id);
+                $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+                $query->where('school_id' , '=' , $school_id);
                 $query->where('is_del' , '=' , 0);
                 //获取老师类型(讲师还是教务)
                 $query->where('type' , '=' , $body['type']);
@@ -256,6 +274,24 @@ class Teacher extends Model {
             if($body['type'] == 2){
                 foreach($teacher_list as $k=>$v){
                     $teacher_list[$k]['number'] = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
+                    //判断此讲师教务是否授权
+                    $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['id'])->where('is_del' , 0)->count();
+                    if($is_auth <= 0){
+                        $teacher_list[$k]['is_auth'] = 0;
+                    } else {
+                        $teacher_list[$k]['is_auth'] = 1;
+                    }
+                }
+            } else {
+                foreach($teacher_list as $k=>$v){
+                    $teacher_list[$k]['number'] = 0;
+                    //判断此讲师教务是否授权
+                    $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['id'])->where('is_del' , 0)->count();
+                    if($is_auth <= 0){
+                        $teacher_list[$k]['is_auth'] = 0;
+                    } else {
+                        $teacher_list[$k]['is_auth'] = 1;
+                    }
                 }
             }
             
@@ -287,7 +323,8 @@ class Teacher extends Model {
                     'is_forbid'        =>    $teacher_info['is_forbid'] ,
                     'checked'          =>    true ,
                     'student_number'   =>    0 ,
-                    'star_num'         =>    5
+                    'star_num'         =>    5 ,
+                    'is_auth'          =>    1
                 ];
             }
             
@@ -318,6 +355,8 @@ class Teacher extends Model {
         if($school_status > 0 && $school_status == 1){
             //获取讲师或教务列表
             $teacher_list = self::where(function($query) use ($body){
+                $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+                $query->where('school_id' , '=' , $school_id);
                 $query->where('is_forbid' , '=' , 0);
                 $query->where('is_del' , '=' , 0);
                 //判断学科分类是否选择
@@ -360,6 +399,8 @@ class Teacher extends Model {
         } else {
             //获取讲师或教务列表
             $teacher_list = self::where(function($query) use ($body){
+                $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+                $query->where('school_id' , '=' , $school_id);
                 $query->where('is_forbid' , '=' , 0);
                 $query->where('is_del' , '=' , 0);
                 //判断学科分类是否选择

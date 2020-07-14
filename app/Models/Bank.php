@@ -41,14 +41,13 @@ class Bank extends Model {
         $offset   = ($page - 1) * $pagesize;
         
         //获取后端的操作员id
-        $admin_id  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
         $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
 
         //判断登录的后台用户是否是总校状态
         if($school_status > 0 && $school_status == 1){
             //获取题库的总数量
-            $bank_count = self::where('is_del' , '=' , 0)->where('admin_id' , '=' , $admin_id)->count();
+            $bank_count = self::where('is_del' , '=' , 0)->where('school_id' , '=' , $school_id)->count();
             if($bank_count > 0){
                 //获取题库列表
                 $bank_list = self::select('id as bank_id','topic_name','describe','is_open')->withCount(['subjectToBank as subject_count' => function($query) {
@@ -62,10 +61,10 @@ class Bank extends Model {
                     $query->where('is_del' , '=' , 0);
 
                     //获取后端的操作员id
-                    $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                    $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
 
                     //操作员id
-                    $query->where('admin_id' , '=' , $admin_id);
+                    $query->where('school_id' , '=' , $school_id);
                 })->orderByDesc('create_at')->offset($offset)->limit($pagesize)->get();
                 return ['code' => 200 , 'msg' => '获取题库列表成功' , 'data' => ['bank_list' => $bank_list , 'total' => $bank_count , 'pagesize' => $pagesize , 'page' => $page]];
             }
@@ -83,10 +82,10 @@ class Bank extends Model {
                 $query->where('is_del' , '=' , 0);
 
                 //获取后端的操作员id
-                $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
 
                 //操作员id
-                $query->where('admin_id' , '=' , $admin_id);
+                $query->where('school_id' , '=' , $school_id);
             })->orderByDesc('create_at')->get()->toArray();
             
             $arr = [];
@@ -522,6 +521,7 @@ class Bank extends Model {
         
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+        $school_id= isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
         
         //数据数组组装
         $array_bank = [
@@ -530,6 +530,7 @@ class Bank extends Model {
             'child_id'     =>  isset($body['child_id']) && $body['child_id'] > 0 ? $body['child_id'] : 0 ,
             'describe'     =>  $body['describe'] ,
             'admin_id'     =>  $admin_id ,
+            'school_id'    =>  $school_id , 
             'create_at'    =>  date('Y-m-d H:i:s')
         ]; 
         

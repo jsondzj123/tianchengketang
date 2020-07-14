@@ -125,6 +125,7 @@ class Enrolment extends Model {
         //将数据插入到表中
         if(false !== self::insertEnrolment($enroll_array)){
             //订单表插入逻辑
+            $enroll_array['nature']  =  $body['nature'];
             Order::offlineStudentSignup($enroll_array);
             
             //添加日志操作
