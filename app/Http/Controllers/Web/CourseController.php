@@ -13,6 +13,7 @@ use App\Models\CouresSubject;
 use App\Models\Couresteacher;
 use App\Models\CourseLiveResource;
 use App\Models\CourseSchool;
+use App\Models\CourseStocks;
 use App\Models\Lecturer;
 use App\Models\LiveChild;
 use App\Models\LiveClass;
@@ -174,31 +175,51 @@ class CourseController extends Controller {
                     ->where('title', 'like', '%' . $name . '%')
                     ->get()->toArray();
                 foreach ($ref_course as $ks => &$vs) {
-                    $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])
-                        ->where(function ($query) use ($methodwhere) {
-                            if($methodwhere != ''){
-                                $query->where('method_id', $methodwhere);
-                            }
-                        })->get()->toArray();
-                    if (!empty($method)) {
-                        foreach ($method as $key => &$val) {
-                            if ($val['method_id'] == 1) {
-                                $val['method_name'] = '直播';
-                            }
-                            if ($val['method_id'] == 2) {
-                                $val['method_name'] = '录播';
-                            }
-                            if ($val['method_id'] == 3) {
-                                $val['method_name'] = '其他';
-                            }
+                    //获取库存计算总数  订单总数
+                    $add_number = CourseStocks::where(['course_id' => $vs['course_id'], 'school_id' => $school_id, 'is_del' => 0])->get()->toArray();
+                    if (!empty($add_number)) {
+                        //库存总数
+                        $stocknum = 0;
+                        foreach ($add_number as $kstock=>$vstock){
+                            $stocknum = $stocknum + $vstock['add_number'];
                         }
-                        $vs['method'] = $method;
-                        $vs['nature'] = 1;
+                        if($stocknum != 0){
+                            //查订单表
+                            $ordercount = Order::where(['status'=>2,'oa_status'=>1,'student_id'=>$school_id,'class_id'=>$vs['id'],'nature'=>1])->count();
+                            if($ordercount < $stocknum){
+                                $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])
+                                    ->where(function ($query) use ($methodwhere) {
+                                        if ($methodwhere != '') {
+                                            $query->where('method_id', $methodwhere);
+                                        }
+                                    })->get()->toArray();
+                                if (!empty($method)) {
+                                    foreach ($method as $key => &$val) {
+                                        if ($val['method_id'] == 1) {
+                                            $val['method_name'] = '直播';
+                                        }
+                                        if ($val['method_id'] == 2) {
+                                            $val['method_name'] = '录播';
+                                        }
+                                        if ($val['method_id'] == 3) {
+                                            $val['method_name'] = '其他';
+                                        }
+                                    }
+                                    $vs['method'] = $method;
+                                    $vs['nature'] = 1;
+                                } else {
+                                    unset($ref_course[$ks]);
+                                }
+                            }else{
+                                unset($ref_course[$ks]);
+                            }
+                        }else{
+                            unset($ref_course[$ks]);
+                        }
                     } else {
                         unset($ref_course[$ks]);
                     }
                 }
-            }
             //两数组合并 排序
             if (!empty($course) && !empty($ref_course)) {
                 $all = array_merge($course, $ref_course);//合并两个二维数组
@@ -227,7 +248,7 @@ class CourseController extends Controller {
             ];
 //            Redis::set($keys,json_encode($datas),300);
             return response()->json(['code' => 200, 'msg' => '获取成功', 'data' => $res, 'page' => $page, 'where' => $this->data]);
-//        }
+        }
     }
     /*
          * @param  课程详情
