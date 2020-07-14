@@ -356,6 +356,7 @@ class LiveChild extends Model {
         //发布课次到欢拓
         public static function creationLiveClassChild($data){
             //课次id
+            unset($data['/admin/creationLive']);
             if(empty($data['class_id']) || !isset($data['class_id'])){
                 return ['code' => 201 , 'msg' => '课次id不能为空'];
             }
