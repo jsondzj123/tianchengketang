@@ -436,8 +436,8 @@ class SchoolController extends Controller {
         }
         $arr = [];
         if(!empty($data['auth_id'])){
-            
-            $auths_id = Authrules::where(['is_del'=>1,'is_show'=>1,'is_forbid'=>1])->pluck('id')->toArray();
+
+            $auths_id = AuthMap::where(['is_del'=>1,'is_show'=>1,'is_forbid'=>1])->pluck('id')->toArray();
             $auth_id = explode(',', $data['auth_id']);
             foreach ($auth_id as $v) {
                 if(in_array($v,$auths_id)){
@@ -446,7 +446,6 @@ class SchoolController extends Controller {
             }
         }
         $roleAuthArr = Roleauth::where(['school_id'=>$data['id'],'is_super'=>1,'is_del'=>1])->first(); //判断该网校有无超级管理员
- 
         if(isset($data['admin/school/doSchoolAdminById'])) unset($data['admin/school/doSchoolAdminById']);
         DB::beginTransaction();
         if(is_null($roleAuthArr)){
