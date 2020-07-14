@@ -130,36 +130,14 @@ class Bank extends Model {
      * return  array
      */
     public static function getBankIsAuth($body=[]){
-        //规则结构
-        $rule = [
-            'bank_id'   =>   'bail|required|min:1'
-        ];
-        
-        //信息提示
-        $message = [
-            'bank_id.required'    =>  json_encode(['code'=>201,'msg'=>'题库id为空']) ,
-            'bank_id.min'         =>  json_encode(['code'=>202,'msg'=>'题库id不合法']) ,
-        ];
-        
-        $validator = Validator::make($body , $rule , $message);
-        if ($validator->fails()) {
-            return json_decode($validator->errors()->first() , true);
+        //判断传过来的数组数据是否为空
+        if(!$body || !is_array($body)){
+            return ['code' => 202 , 'msg' => '传递数据不合法'];
         }
-        
-        //key赋值
-        $key = 'bank:bankinfo:'.$body['bank_id'];
 
-        //判断此题库是否被请求过一次(防止重复请求,且数据信息不存在)
-        if(Redis::get($key)){
-            return ['code' => 204 , 'msg' => '此题库不存在'];
-        } else {
-            //判断此题库在题库表中是否存在
-            $bank_count = self::where('id',$body['bank_id'])->count();
-            if($bank_count <= 0){
-                //存储题库的id值并且保存60s
-                Redis::setex($key , 60 , $body['bank_id']);
-                return ['code' => 204 , 'msg' => '此题库不存在'];
-            }
+        //判断题库id是否合法
+        if(!isset($body['bank_id']) || empty($body['bank_id']) || $body['bank_id'] <= 0){
+            return ['code' => 202 , 'msg' => '题库id不合法'];
         }
         
         //学校id
