@@ -154,14 +154,17 @@ class CourseSchool extends Model {
                     $query->where('ld_course_school.from_school_id',$school_id); //授权学校
                     $query->where('ld_course_school.is_del',0);
             })->select('ld_course_school.course_id as id','ld_course.parent_id','ld_course.child_id','ld_course.title')->get()->toArray(); //授权课程
+           
             if(!empty($zizengCourse)){
                 if(!empty($natureCourse)){
                     $natureCourseIds = array_column($natureCourse,'id');
-                    foreach($zizengCourse as $key=>&$v){
+
+                    foreach($zizengCourse as $key=>$v){
                         if(in_array($v['id'], $natureCourseIds)){
                             unset($zizengCourse[$key]);
                         }
                     }
+
                 } 
                 $CourseArr = array_merge($zizengCourse,$natureCourse);
                 foreach ($CourseArr as $key => $v) {
@@ -190,6 +193,9 @@ class CourseSchool extends Model {
             }  
             return ['code'=>200,'msg'=>'message','data'=>$CourseArr];   
         }
+
+
+
     }
      /**
      * @param  批量授权
