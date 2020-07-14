@@ -140,6 +140,10 @@ class Video extends Model {
                 }else{
                     $list = [];
                 }
+                //自增数据
+                foreach($list as $k => &$v){
+                    $v['nature'] = 1;
+                }
             }
             }else{
                     //分校查询当前学校自增  和授权数据
@@ -234,9 +238,6 @@ class Video extends Model {
                                 }
 
                             })->orderBy('ld_course_video_resource.id','desc')->get()->toArray();
-                            foreach($list1 as $k =>&$v){
-                                $v['nature']  = 1;
-                            }
                         }
                     //授权数据
                     $count2 =CourseRefResource::join("ld_course_video_resource","ld_course_ref_resource.resource_id","=","ld_course_video_resource.id")
@@ -324,9 +325,20 @@ class Video extends Model {
                                 $query->where('ld_course_video_resource.resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
                             }
                         })->get()->toArray();
-                        foreach($list2 as $k =>&$v){
-                            $v['nature']  = 2;
-                        }
+                    }
+                    if(!isset($list1)){
+                        $list1 = [];
+                    }
+                    if(!isset($list2)){
+                        $list2 = [];
+                    }
+                    //自增数据
+                    foreach($list1 as $k => &$v){
+                        $v['nature'] = 1;
+                    }
+                    //授权数据
+                    foreach($list2 as $k => &$v){
+                            $v['nature'] = 2;
                     }
                     //数据总数  等于  自增数据加授权数据
                     //判断搜索条件  自增资源和授权资源  1为自增  2为授权 3为全部
