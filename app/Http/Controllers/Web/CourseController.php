@@ -175,7 +175,7 @@ class CourseController extends Controller {
                     ->where('title', 'like', '%' . $name . '%')
                     ->get()->toArray();
                 foreach ($ref_course as $ks => &$vs) {
-                    //获取库存计算总数  订单总数
+                    //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
                     $add_number = CourseStocks::where(['course_id' => $vs['course_id'], 'school_id' => $school_id, 'is_del' => 0])->get()->toArray();
                     if (!empty($add_number)) {
                         //库存总数
