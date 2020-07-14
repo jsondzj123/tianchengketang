@@ -151,6 +151,10 @@ class CourseLiveResource extends Model {
         if(!isset($data['course_id']) || empty($data['course_id'])){
             return ['code' => 201 , 'msg' => '课程id不能为空'];
         }
+        $nature = isset($data['nature'])?$data['nature']:0;
+        if($nature == 1){
+            return ['code' => 201 , 'msg' => '授权课程无法修改'];
+        }
         $resource = json_decode($data['id'],true);
         if(!empty($resource)){
             $glarr = self::where(['course_id'=>$data['course_id'],'is_del'=>0])->get();
