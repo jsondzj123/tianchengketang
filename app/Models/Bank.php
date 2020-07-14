@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\QuestionSubject as Subject;
 use App\Models\Papers;
 use App\Models\Exam;
+use App\Models\CourseRefBank;
 use Illuminate\Support\Facades\Redis;
 
 class Bank extends Model {
@@ -42,40 +43,135 @@ class Bank extends Model {
         //获取后端的操作员id
         $admin_id  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
 
-        //获取题库的总数量
-        $bank_count = DB::table('ld_question_bank')->leftJoin("ld_admin" , function($join){
-            $join->on('ld_admin.id', '=', 'ld_question_bank.admin_id');
-        })->where("ld_admin.school_id" , $school_id)->where('ld_question_bank.is_del' , '=' , 0)->count();
-        if($bank_count > 0){
-            //获取题库列表
-            $bank_list = DB::table('ld_question_bank')->leftJoin("ld_admin" , function($join){
-                $join->on('ld_admin.id', '=', 'ld_question_bank.admin_id');
-            })->where(function($query) use ($body){
+        //判断登录的后台用户是否是总校状态
+        if($school_status > 0 && $school_status == 1){
+            //获取题库的总数量
+            $bank_count = self::where('is_del' , '=' , 0)->where('admin_id' , '=' , $admin_id)->count();
+            if($bank_count > 0){
+                //获取题库列表
+                $bank_list = self::select('id as bank_id','topic_name','describe','is_open')->withCount(['subjectToBank as subject_count' => function($query) {
+                    $query->where('is_del' , '=' , 0);
+                } , 'papersToBank as papers_count' => function($query) {
+                    $query->where('is_del' , '=' , 0);
+                } , 'examToBank as exam_count' => function($query) {
+                    $query->where('is_del' , '=' , 0);
+                }])->where(function($query) use ($body){
+                    //删除状态
+                    $query->where('is_del' , '=' , 0);
+
+                    //获取后端的操作员id
+                    $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+
+                    //操作员id
+                    $query->where('admin_id' , '=' , $admin_id);
+                })->orderByDesc('create_at')->offset($offset)->limit($pagesize)->get();
+                return ['code' => 200 , 'msg' => '获取题库列表成功' , 'data' => ['bank_list' => $bank_list , 'total' => $bank_count , 'pagesize' => $pagesize , 'page' => $page]];
+            }
+            return ['code' => 200 , 'msg' => '获取题库列表成功' , 'data' => ['bank_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
+        } else {
+            //自增的题库列表
+            $bank_list = self::select('id as bank_id','topic_name','describe','is_open')->withCount(['subjectToBank as subject_count' => function($query) {
+                $query->where('is_del' , '=' , 0);
+            } , 'papersToBank as papers_count' => function($query) {
+                $query->where('is_del' , '=' , 0);
+            } , 'examToBank as exam_count' => function($query) {
+                $query->where('is_del' , '=' , 0);
+            }])->where(function($query) use ($body){
                 //删除状态
-                $query->where('ld_question_bank.is_del' , '=' , 0);
-                
-                //分校id
-                $schoolId = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
-                
-                //分校id
-                $query->where('ld_admin.school_id' , '=' , $schoolId);
-            })->select('ld_question_bank.id as bank_id','ld_question_bank.topic_name','ld_question_bank.describe','ld_question_bank.is_open')->orderByDesc('ld_question_bank.create_at')->offset($offset)->limit($pagesize)->get()->toArray();
+                $query->where('is_del' , '=' , 0);
 
-            foreach($bank_list as $k=>$v){
-                //科目数量
-                $bank_list[$k]->subject_count  =  Subject::where('bank_id' , $v->bank_id)->where('is_del' , 0)->where('subject_name' , '!=' , "")->count();
+                //获取后端的操作员id
+                $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+
+                //操作员id
+                $query->where('admin_id' , '=' , $admin_id);
+            })->orderByDesc('create_at')->get()->toArray();
+            
+            $arr = [];
+            
+            //授权的题库列表
+            $bank_list2 = DB::table('ld_course_ref_bank')->where('to_school_id' , $school_id)->where('is_del' , 0)->orderByDesc('create_at')->get()->toArray();
+            foreach($bank_list2 as $k=>$v){
+                //通过题库的id获取题库详情
+                $bank_info = Bank::where('id' , $v->bank_id)->first();
                 
+                //科目数量
+                $subject_count  =  Subject::where('bank_id' , $v->bank_id)->where('is_del' , 0)->where('subject_name' , '!=' , "")->count();
                 //试卷数量
-                $bank_list[$k]->papers_count   =  Papers::where('bank_id' , $v->bank_id)->where('is_del' , 0)->count();
-                
+                $papers_count   =  Papers::where('bank_id' , $v->bank_id)->where('is_del' , 0)->count();
                 //科目数量
-                $bank_list[$k]->exam_count     =  Exam::where('bank_id' , $v->bank_id)->where('is_del' , 0)->count();
+                $exam_count     =  Exam::where('bank_id' , $v->bank_id)->where('is_del' , 0)->count();
+                
+                $arr[] = [
+                    'bank_id'       =>    $v->bank_id ,
+                    'topic_name'    =>    $bank_info['topic_name'] ,
+                    'describe'      =>    $bank_info['describe'] ,
+                    'is_open'       =>    $bank_info['is_open'] ,
+                    'subject_count' =>    $subject_count ,
+                    'papers_count'  =>    $papers_count ,
+                    'exam_count'    =>    $exam_count 
+                ];
             }
             
-            return ['code' => 200 , 'msg' => '获取题库列表成功' , 'data' => ['bank_list' => $bank_list , 'total' => $bank_count , 'pagesize' => $pagesize , 'page' => $page]];
+            //获取总条数
+            $bank_sum_array = array_merge((array)$bank_list , (array)$arr);
+
+            $count = count($bank_sum_array);//总条数
+            $array = array_slice($bank_sum_array,$offset,$pagesize);
+            return ['code' => 200 , 'msg' => '获取题库列表成功' , 'data' => ['bank_list' => $array , 'total' => $count , 'pagesize' => (int)$pagesize , 'page' => (int)$page]];
         }
-        return ['code' => 200 , 'msg' => '获取题库列表成功' , 'data' => ['bank_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
+    }
+    
+    /*
+     * @param  descriptsion    判断是否授权题库
+     * @param  author          dzj
+     * @param  ctime           2020-07-14
+     * return  array
+     */
+    public static function getBankIsAuth($body=[]){
+        //规则结构
+        $rule = [
+            'bank_id'   =>   'bail|required|min:1'
+        ];
+        
+        //信息提示
+        $message = [
+            'bank_id.required'    =>  json_encode(['code'=>201,'msg'=>'题库id为空']) ,
+            'bank_id.min'         =>  json_encode(['code'=>202,'msg'=>'题库id不合法']) ,
+        ];
+        
+        $validator = Validator::make($body , $rule , $message);
+        if ($validator->fails()) {
+            return json_decode($validator->errors()->first() , true);
+        }
+        
+        //key赋值
+        $key = 'bank:bankinfo:'.$body['bank_id'];
+
+        //判断此题库是否被请求过一次(防止重复请求,且数据信息不存在)
+        if(Redis::get($key)){
+            return ['code' => 204 , 'msg' => '此题库不存在'];
+        } else {
+            //判断此题库在题库表中是否存在
+            $bank_count = self::where('id',$body['bank_id'])->count();
+            if($bank_count <= 0){
+                //存储题库的id值并且保存60s
+                Redis::setex($key , 60 , $body['bank_id']);
+                return ['code' => 204 , 'msg' => '此题库不存在'];
+            }
+        }
+        
+        //学校id
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        
+        //判断此题库是否授权
+        $is_auth = CourseRefBank::where('to_school_id' , $school_id)->where('bank_id' , $body['bank_id'])->where('is_del' , 0)->count();
+        if($is_auth && $is_auth > 0){
+            return ['code' => 203 , 'msg' => '此题库已授权'];
+        }
+        return ['code' => 200 , 'msg' => '此题库未授权'];
     }
     
     /*

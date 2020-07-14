@@ -82,6 +82,26 @@ class BankController extends Controller {
     }
     
     /*
+     * @param  descriptsion    判断是否授权题库
+     * @param  author          dzj
+     * @param  ctime           2020-07-14
+     * return  array
+     */
+    public function getBankIsAuth(){
+        //获取提交的参数
+        try{
+            $data = Bank::getBankIsAuth(self::$accept_data);
+            if($data['code'] == 200){
+                return response()->json(['code' => 200 , 'msg' => '此题库未授权']);
+            } else {
+                return response()->json(['code' => $data['code'] , 'msg' => $data['msg']]);
+            }
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    
+    /*
      * @param  descriptsion    题库开启/关闭的方法
      * @param  参数说明         body包含以下参数[
      *      bank_id   题库id

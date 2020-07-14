@@ -227,7 +227,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('listType', 'ArticleController@listType');//分类列表
     $router->post('schoolLists', 'ArticleController@schoolLists');//学校列表
     $router->post('courseType', 'CourseController@courseType');//根据分类查课程
-    $router->post('subjects', 'CourseController@subjects');//学科列表(szw改)
+
     $router->post('orderForStudent', 'OrderController@orderForStudent');//订单通过学员查询
 
 });
@@ -416,6 +416,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getBankInfoById', 'BankController@getBankInfoById');              //获取题库详情信息
         $router->post('getBankList', 'BankController@getBankList');                      //获取题库列表
         $router->post('getBankCommonList', 'BankController@getBankCommonList');          //题库公共参数列表
+        $router->post('getBankIsAuth', 'BankController@getBankIsAuth');                  //是否授权题库
         /****************题库部分  end****************/
 
 
@@ -457,6 +458,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
         $router->get('export', 'CommonController@doExportExamLog'); //导入导出demo
     });
+
+     $router->post('subjects', 'CourseController@subjects');//学科列表(szw改)
     //学科模块（重构）（szw）
     $router->group(['prefix' => 'coursesubject'], function () use ($router) {
         $router->post('subjectList', 'CoursesubjectController@subjectList');//学科列表
