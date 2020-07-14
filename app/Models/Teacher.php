@@ -395,9 +395,10 @@ class Teacher extends Model {
                 }
             })->select('id as teacher_id','real_name','type')->orderByDesc('create_at')->get()->toArray();
 
+            $arr = ["jiangshi" => [] , "jiaowu" => []];
+            
             //判断获取列表是否为空
             if($teacher_list && !empty($teacher_list)){
-                $arr = [];
                 foreach($teacher_list as $k => $v){
                     //教务
                     if($v['type'] == 1){
@@ -479,9 +480,10 @@ class Teacher extends Model {
             //获取总条数
             $teacher_sum_array = array_merge((array)$teacher_list , (array)$arr);
             
+            $arr = ["jiangshi" => [] , "jiaowu" => []];
+            
             //判断获取列表是否为空
             if($teacher_sum_array && !empty($teacher_sum_array)){
-                $arr = [];
                 foreach($teacher_sum_array as $k => $v){
                     //教务
                     if($v['type'] == 1){
