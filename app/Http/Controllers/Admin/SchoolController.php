@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
 use App\Tools\CurrentAdmin;
 use App\Models\AdminLog;
+use App\Models\AuthMap;
 use Illuminate\Support\Facades\DB;
 use App\Models\CouresSubject;
 class SchoolController extends Controller {
@@ -381,7 +382,7 @@ class SchoolController extends Controller {
         if(!$schoolData){
              return response()->json(['code'=>422,'msg'=>'无学校信息']);
         }
-        $roleAuthId = Roleauth::where(['school_id'=>$data['id'],'is_super'=>1])->select('id','auth_id')->first(); //查询学校是否有超管人员角色
+        $roleAuthId = Roleauth::where(['school_id'=>$data['id'],'is_super'=>1])->select('id','auth_id','map_auth_id')->first(); //查询学校是否有超管人员角色
         if(is_null($roleAuthId)){
             //无
             $adminUser = Adminuser::where(['school_id'=>$data['id'],'is_del'=>1])->select('id','username','realname','mobile')->first();  
@@ -391,9 +392,9 @@ class SchoolController extends Controller {
         }
 
         $adminUser['role_id'] = $roleAuthId['id'] > 0 ? $roleAuthId['id']  : 0;
-        $adminUser['auth_id'] = $roleAuthId['auth_id'] ? $roleAuthId['auth_id']  : '';
+        $adminUser['map_auth_id'] = $roleAuthId['map_auth_id'] ? $roleAuthId['map_auth_id']:'';
         $adminUser['school_name'] =  !empty($schoolData['name']) ? $schoolData['name']  : '';
-        $authRules = Authrules::getAuthAlls([],['id','name','title','parent_id']);
+        $authRules = AuthMap::getAuthAlls(['is_del'=>0,'is_forbid'=>0],['id','title','parent_id']);
         $authRules = getAuthArr($authRules);
         $arr = [
             'admin' =>$adminUser,
