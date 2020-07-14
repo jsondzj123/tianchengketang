@@ -495,10 +495,13 @@ class SchoolController extends Controller {
             if(!empty($fen_role_auth_arr)){
                 foreach ($fen_role_auth_arr as $k => $v) {
                     $fen_roles_id = explode(",", $v['map_auth_id']); 
-                    $new_arr = array_diff($fen_roles_id,$auth);
-                    $new_qita_role_ids = array_diff($fen_roles_id,$new_arr);
+                    $new_arr = array_diff($fen_roles_id,$arr);//取差集
+                    $new_qita_role_ids = array_diff($fen_roles_id,$new_arr);//取共同的差集
+                    $fen_roles_id = Roleauth::whereIn('id',$new_qita_role_ids)->where(['is_del'=>1])->pluck('id')->toArray(); //取数据
+                    $publicAuthArr =  Authrules::where(['is_del'=>1,'is_forbid'=>1,'is_show'=>1,'parent_id'=>-1])->pluck('id')->toArray();//公共的部分
+                    $updateAuthids = array_merge($fen_roles_id,$publicAuthArr);
                     if(!empty($new_qita_role_ids)){
-                        $res = Roleauth::where(['id'=>$v['id']])->update(['map_auth_id'=>implode(",", $new_qita_role_ids),'update_time'=>date('Y-m-d H:i:s')]);
+                        $res = Roleauth::where(['id'=>$v['id']])->update(['map_auth_id'=>implode(",", $new_qita_role_ids),'auth_id'=>implode(",", $updateAuthids),'update_time'=>date('Y-m-d H:i:s')]);
                         if(!$res){
                             DB::rollBack();
                             return response()->json(['code'=>203,'msg'=>'赋权成功']);
@@ -506,7 +509,6 @@ class SchoolController extends Controller {
                     }
                 }
             }
-            
             AdminLog::insertAdminLog([
                 'admin_id'       =>   CurrentAdmin::user()['id'] ,
                 'module_name'    =>  'School' ,
