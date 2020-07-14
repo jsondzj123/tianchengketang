@@ -501,7 +501,11 @@ class Coures extends Model {
             if(!empty($teachers)){
                 foreach ($teachers as $k=>&$v){
                     $name = Lecturer::select('real_name')->where(['id'=>$v['teacher_id'],'is_del'=>0,'type'=>2])->first();
-                    $v['real_name'] = $name['real_name'];
+                    if(!empty($name)){
+                        $v['real_name'] = $name['real_name'];
+                    }else{
+                        unset($teachers[$k]);
+                    }
                 }
             }
             $find['teacher'] = array_column($teacher, 'teacher_id');
