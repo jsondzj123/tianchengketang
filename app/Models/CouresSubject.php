@@ -208,6 +208,7 @@ class CouresSubject extends Model {
         if(!empty($course)){
             foreach ($course as $k=>$v){
                 $twos = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['id'=>$v['parent_id'],'is_del'=>0])->first();
+                $twos['nature'] = 1;
                 $twsss = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['parent_id'=>$twos['id'],'is_del'=>0])->get()->toArray();
                 $twos['childs'] = $twsss;
                 $two[] =$twos;
