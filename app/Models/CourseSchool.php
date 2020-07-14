@@ -154,17 +154,14 @@ class CourseSchool extends Model {
                     $query->where('ld_course_school.from_school_id',$school_id); //授权学校
                     $query->where('ld_course_school.is_del',0);
             })->select('ld_course_school.course_id as id','ld_course.parent_id','ld_course.child_id','ld_course.title')->get()->toArray(); //授权课程
-           
             if(!empty($zizengCourse)){
                 if(!empty($natureCourse)){
                     $natureCourseIds = array_column($natureCourse,'id');
-
-                    foreach($zizengCourse as $key=>$v){
+                    foreach($zizengCourse as $key=>&$v){
                         if(in_array($v['id'], $natureCourseIds)){
                             unset($zizengCourse[$key]);
                         }
                     }
-
                 } 
                 $CourseArr = array_merge($zizengCourse,$natureCourse);
                 foreach ($CourseArr as $key => $v) {
@@ -193,9 +190,6 @@ class CourseSchool extends Model {
             }  
             return ['code'=>200,'msg'=>'message','data'=>$CourseArr];   
         }
-
-
-
     }
      /**
      * @param  批量授权
@@ -210,10 +204,8 @@ class CourseSchool extends Model {
      //    $courseIds=$body['course_id'];
     	// $courseIds = explode(',',$body['course_id']);
         $courseIds = json_decode($body['course_id'],1); //前端传值
-        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0; //当前学校id
     	$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
     	$user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0; //当前登录的用户id
-        $schoolArr =Admin::where(['school_id'=>$body['school_id'],'is_del'=>1])->first();
         if($body['school_id'] == $school_id){
             return ['code'=>205,'msg'=>'自己不能给自己授权'];
         }
@@ -223,7 +215,7 @@ class CourseSchool extends Model {
 
 
         if($body['is_public'] == 1){ //公开课
-            $nature = CourseRefOpen::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->first()->toArray();
+            $nature = CourseRefOpen::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->first();
 
             if(!empty($nature)){
                 return ['code'=>207,'msg'=>'公开课已经授权'];
@@ -301,7 +293,7 @@ class CourseSchool extends Model {
             }
         }
         if($body['is_public'] == 0){  //课程
-            $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->limit(1)->get()->toArray();
+            $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->limit(1)->get();
             if(!empty($nature)){
                 return ['code'=>207,'msg'=>'课程已经授权'];
             }
@@ -322,9 +314,11 @@ class CourseSchool extends Model {
                     $teacherIds = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>1])->pluck('teacher_id')->toArray();//已经授权过的讲师信息
                     if(!empty($teacherIds)){
                         $teacherIdArr = array_diff($ids,$teacherIds);//不在授权讲师表里的数据   
+                    }else{
+                        $teacherIdArr = $ids;
                     }
                     if(!empty($teacherIdArr)){
-                        foreach($teacherIds as $key => $id){
+                        foreach($teacherIdArr as $key => $id){
                             $InsertTeacherRef[$key]['from_school_id'] =$school_id;
                             $InsertTeacherRef[$key]['to_school_id'] =$body['school_id'];
                             $InsertTeacherRef[$key]['teacher_id'] =$body['id'];
