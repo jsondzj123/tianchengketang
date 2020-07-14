@@ -563,6 +563,7 @@ class Coures extends Model {
                 $nature = isset($data['nature'])?$data['nature']:0;
                 if($nature == 1){
                     //只修改基本信息
+                    unset($data['nature']);
                     $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id)?AdminLog::getAdminInfo()->admin_user->school_id:0;
                     $data['update_at'] = date('Y-m-d H:i:s');
                     $id = $data['id'];
