@@ -401,7 +401,6 @@ class LiveChild extends Model {
                             //获取后端的操作员id
                             $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                             $data['course_name'] = $one['name'];
-                            $data['accountIntro'] = $one['describe'];
                             $data['nickname'] = $one['real_name'];
                             $data['account'] = $one['teacher_id'];
                             $data['start_time'] = $res['data']['start_time'];
@@ -468,7 +467,6 @@ class LiveChild extends Model {
                         $insert['start_time'] = $res['data']['start_time'];
                         $insert['end_time'] = $res['data']['end_time'];
                         $insert['nickname'] = $one['real_name'];
-                        $insert['accountIntro'] = $one['describe'];
                         $insert['partner_id'] = $res['data']['partner_id'];
                         $insert['bid'] = $res['data']['bid'];
                         $insert['course_id'] = $res['data']['course_id'];
