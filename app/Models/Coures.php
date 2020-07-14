@@ -357,12 +357,14 @@ class Coures extends Model {
         if(!isset($data['cover']) || empty($data['cover'])){
             return ['code' => 201 , 'msg' => '学科封面不能为空'];
         }
-        if(!isset($data['pricing']) || empty($data['pricing'])){
-            return ['code' => 201 , 'msg' => '请填写课程原价'];
-        }
-        if(!isset($data['sale_price']) || empty($data['sale_price'])){
-            return ['code' => 201 , 'msg' => '请填写课程优惠价'];
-        }
+//        if(!isset($data['pricing']) || empty($data['pricing'])){
+//            return ['code' => 201 , 'msg' => '请填写课程原价'];
+//        }
+//        if(!isset($data['sale_price']) || empty($data['sale_price'])){
+//            return ['code' => 201 , 'msg' => '请填写课程优惠价'];
+//        }
+        $data['pricing'] = isset($data['pricing'])?$data['pricing']:0;
+        $data['sale_price'] = isset($data['sale_price'])?$data['sale_price']:0;
         if(!isset($data['method']) || empty($data['method'])){
             return ['code' => 201 , 'msg' => '请选择授课方式'];
         }
