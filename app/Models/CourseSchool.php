@@ -218,7 +218,7 @@ class CourseSchool extends Model {
 
 
         if($body['is_public'] == 1){ //公开课
-            $nature = CourseRefOpen::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->first()->toArray();
+            $nature = CourseRefOpen::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->first();
 
             if(!empty($nature)){
                 return ['code'=>207,'msg'=>'公开课已经授权'];
