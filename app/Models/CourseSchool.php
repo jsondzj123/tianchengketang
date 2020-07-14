@@ -58,144 +58,121 @@ class CourseSchool extends Model {
      * @param  ctime   2020/6/30
      * @return  array 7.4 调整
      */
-    // public static function courseList($body){
-    // 	$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登陆学校id
-    //     $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0; //当前登陆学校id
-    //     $OpenCourseArr =   $natureOpenCourse = $courseArr = $natureCourseArr = [];
-    //     $zizengSubjectArr = CouresSubject::where('school_id',$school_id)->where(['is_open'=>0,'is_del'=>0])->select('id','subject_name')->get()->toArray();//自增大类小类（总校）
-    //     $subjectArr = array_column($zizengSubjectArr,'subject_name','id');
-    //     $schoolArr =Admin::where(['school_id'=>$body['school_id'],'is_del'=>1])->first();
-    //     if($schoolArr['school_status'] > $school_status){
-    //         return ['code'=>205,'msg'=>'分校不能给总校授权'];
-    //     }
-    //     if($body['school_id'] == $school_id){
-    //         return ['code'=>205,'msg'=>'自己不能给自己授权'];
-    //     }
-    //     if($body['is_public'] == 1){//公开课
-    //     //     echo 1;die;
-    //         $zizengOpenCourse = OpenCourse::where(function($query) use ($body,$school_id) {
-    //                         if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
-    //                             $query->where('parent_id',$body['subjectOne']);
-    //                         }
-    //                         if(!empty($body['subjectTwo']) && $body['subjectTwo'] != ''){
-    //                             $query->where('child_id',$body['subjectTwo']);
-    //                         }
-    //                         if(!empty($body['search']) && $body['search'] != ''){
-    //                             $query->where('title','like',"%".$body['search']."%");
-    //                         }
-    //                         $query->where('is_del',0);
-    //                         $query->where('school_id',$school_id);
-    //                     })->select('id','parent_id','child_id','title')->get()->toArray();//自增公开课信息（总校）
-         
-    //         $natureOpenCourse = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
-    //                         ->where(function($query) use ($body,$school_id) {
-    //                             if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
-    //                                 $query->where('ld_course_open.parent_id',$body['subjectOne']);
-    //                             }
-    //                             if(!empty($body['subjectTwo']) && $body['subjectTwo'] != ''){
-    //                                 $query->where('ld_course_open.child_id',$body['subjectTwo']);
-    //                             }
-    //                             if(!empty($body['search']) && $body['search'] != ''){
-    //                                 $query->where('ld_course_open.title','like',"%".$body['search']."%");
-    //                             }
-    //                             $query->where('ld_course_ref_open.to_school_id',$body['school_id']);
-    //                             $query->where('ld_course_ref_open.from_school_id',$school_id);
-    //                             $query->where('ld_course_ref_open.is_del',0);
-    //                     })->select('ld_course_ref_open.course_id as id','ld_course_open.parent_id','ld_course_open.child_id','ld_course_open.title')->get()->toArray(); //授权公开课信息（分校）
-                
-
-
-
-    //             if(!empty($zizengOpenCourse) ){
-    //                 if(!empty($natureOpenCourse)){
-    //                     $natureOpenCourseIds = array_column($natureOpenCourse,'id');
-    //                       print_r($natureOpenCourseIds);die;
-    //                     foreach($zizengOpenCourse as $key=>&$v){
-    //                         if(in_array($v['id'], $natureOpenCourseIds)){
-    //                             unset($zizengOpenCourse[$key]);
-    //                         }
-    //                     }
-    //                 }
-
-    //                 $OpenCourseArr = array_merge($zizengOpenCourse,$natureOpenCourse);
-
-    //                 foreach ($OpenCourseArr as $key => $v) {
-    //                     $OpenCourseArr[$key]['subjectNameOne'] = !isset($subjectArr[$v['parent_id']])?'':$subjectArr[$v['parent_id']];
-    //                     $OpenCourseArr[$key]['subjectNameTwo'] = !isset($subjectArr[$v['child_id']])?'':$subjectArr[$v['child_id']];
-    //                     $OpenCourseArr[$key]['method'] = ['直播'];
-    //                 }
-    //             }
-    //             return ['code'=>200,'msg'=>'message','data'=>$OpenCourseArr];
-    //         }
-    //     // if($body['is_public'] == 0){//课程
-    //     //     $CourseArr = [];
-    //     //     $zizengCourse = Coures::where(['school_id'=>$school_id,'nature'=>0])  //自增课程(总校)
-    //     //         ->where(function($query) use ($body) {
-    //     //             if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
-    //     //                 $query->where('parent_id',$body['subjectOne']);
-    //     //             }
-    //     //             if(!empty($body['subjectTwo']) && $body['subjectTwo'] != ''){
-    //     //                 $query->where('child_id',$body['subjectTwo']);
-    //     //             }
-    //     //             if(!empty($body['search']) && $body['search'] != ''){
-    //     //                 $query->where('title','like',"%".$body['search']."%");
-    //     //             }
-    //     //             $query->where('is_del',0);
-    //     //             $query->where('status',1);
-    //     //         })->select('id','parent_id','child_id','title')->get()->toArray(); 
-    //     //     $natureCourse = self::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
-    //     //         ->where(function($query) use ($body,$school_id) {
-    //     //             if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
-    //     //                 $query->where('ld_course.parent_id',$body['subjectOne']);
-    //     //             }
-    //     //             if(!empty($body['subjectTwo']) && $body['subjectTwo'] != ''){
-    //     //                 $query->where('ld_course.child_id',$body['subjectTwo']);
-    //     //             }
-    //     //             if(!empty($body['search']) && $body['search'] != ''){
-    //     //                 $query->where('ld_course.title','like',"%".$body['search']."%");
-    //     //             }
-    //     //             $query->where('ld_course_school.to_school_id',$body['school_id']); //被授权学校
-    //     //             $query->where('ld_course_school.from_school_id',$school_id); //授权学校
-    //     //             $query->where('ld_course_school.is_del',0);
-    //         // })->select('ld_course_school.course_id as id','ld_course.parent_id','ld_course.child_id','ld_course.title')->get()->toArray(); 
-    //         //授权课程
-    //     //     if(!empty($zizengCourse)){
-    //     //         if(!empty($natureCourse)){
-    //     //             $natureCourseIds = array_column($natureCourse,'id');
-    //     //             foreach($zizengCourse as $key=>&$v){
-    //     //                 if(in_array($v['id'], $natureCourseIds)){
-    //     //                     unset($zizengCourse[$key]);
-    //     //                 }
-    //     //             }
-    //     //         } 
-    //     //         $CourseArr = array_merge($zizengCourse,$natureCourse);
-    //     //         foreach ($CourseArr as $key => $v) {
-    //     //             $CourseArr[$key]['subjectNameOne'] = !isset($subjectArr[$v['parent_id']])?'':$subjectArr[$v['parent_id']];
-    //     //             $CourseArr[$key]['subjectNameTwo'] = !isset($subjectArr[$v['child_id']])?'':$subjectArr[$v['child_id']];
-    //     //             $method = Couresmethod::select('method_id')->where(['course_id'=>$v['id'],'is_del'=>0])->get()->toArray();
-    //     //             if(!$method){
-    //     //                 unset($CourseArr[$key]);
-    //     //             }else{
-    //     //                 $methodArr = [];
-    //     //                 foreach ($method as $k=>&$val){
-    //     //                     if($val['method_id'] == 1){
-    //     //                         $val['method_name'] = '直播';
-    //     //                     }
-    //     //                     if($val['method_id'] == 2){
-    //     //                         $val['method_name'] = '录播';
-    //     //                     }
-    //     //                     if($val['method_id'] == 3){
-    //     //                         $val['method_name'] = '其他';
-    //     //                     }
-    //     //                     array_push($methodArr,$val['method_name']);
-    //     //                 }
-    //     //               $CourseArr[$key]['method'] = $methodArr;
-    //     //             }
-    //     //         }
-    //     //     }  
-    //     //     return ['code'=>200,'msg'=>'message','data'=>$CourseArr];   
-    //     // }
-    // }
+    public static function courseList($body){
+    	$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登陆学校id
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0; //当前登陆学校id
+        $OpenCourseArr =   $natureOpenCourse = $courseArr = $natureCourseArr = [];
+        $zizengSubjectArr = CouresSubject::where('school_id',$school_id)->where(['is_open'=>0,'is_del'=>0])->select('id','subject_name')->get()->toArray();//自增大类小类（总校）
+        $subjectArr = array_column($zizengSubjectArr,'subject_name','id');
+        $schoolArr =Admin::where(['school_id'=>$body['school_id'],'is_del'=>1])->first();
+        if($schoolArr['school_status'] > $school_status){
+            return ['code'=>205,'msg'=>'分校不能给总校授权'];
+        }
+        if($body['school_id'] == $school_id){
+            return ['code'=>205,'msg'=>'自己不能给自己授权'];
+        }
+        if($body['is_public'] == 1){//公开课
+            $zizengOpenCourse = OpenCourse::where(function($query) use ($body,$school_id) {
+                            if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
+                                $query->where('parent_id',$body['subjectOne']);
+                            }
+                            if(!empty($body['subjectTwo']) && $body['subjectTwo'] != ''){
+                                $query->where('child_id',$body['subjectTwo']);
+                            }
+                            if(!empty($body['search']) && $body['search'] != ''){
+                                $query->where('title','like',"%".$body['search']."%");
+                            }
+                            $query->where('is_del',0);
+                            $query->where('school_id',$school_id);
+                        })->select('id','parent_id','child_id','title')->get()->toArray();//自增公开课信息（总校）
+            $natureOpenCourse = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
+                            ->where(function($query) use ($body,$school_id) {
+                                if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
+                                    $query->where('ld_course_open.parent_id',$body['subjectOne']);
+                                }
+                                if(!empty($body['subjectTwo']) && $body['subjectTwo'] != ''){
+                                    $query->where('ld_course_open.child_id',$body['subjectTwo']);
+                                }
+                                if(!empty($body['search']) && $body['search'] != ''){
+                                    $query->where('ld_course_open.title','like',"%".$body['search']."%");
+                                }
+                                $query->where('ld_course_ref_open.to_school_id',$body['school_id']);
+                                $query->where('ld_course_ref_open.from_school_id',$school_id);
+                                $query->where('ld_course_ref_open.is_del',0);
+                        })->select('ld_course_ref_open.course_id as id','ld_course_open.parent_id','ld_course_open.child_id','ld_course_open.title')->get()->toArray(); //授权公开课信息（分校）
+            $OpenCourseArr = array_merge($zizengOpenCourse,$natureOpenCourse);
+            if(!empty($OpenCourseArr)){
+                $OpenCourseArr = array_unique($OpenCourseArr, SORT_REGULAR);
+                foreach ($OpenCourseArr as $key => $v) {
+                    $OpenCourseArr[$key]['subjectNameOne'] = !isset($subjectArr[$v['parent_id']])?'':$subjectArr[$v['parent_id']];
+                    $OpenCourseArr[$key]['subjectNameTwo'] = !isset($subjectArr[$v['child_id']])?'':$subjectArr[$v['child_id']];
+                    $OpenCourseArr[$key]['method'] = ['直播'];
+                }
+            }
+            return ['code'=>200,'msg'=>'message','data'=>$OpenCourseArr];
+        }
+        if($body['is_public'] == 0){//课程
+            $CourseArr = [];
+            $zizengCourse = Coures::where(['school_id'=>$school_id,'nature'=>0])  //自增课程(总校)
+                ->where(function($query) use ($body) {
+                    if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
+                        $query->where('parent_id',$body['subjectOne']);
+                    }
+                    if(!empty($body['subjectTwo']) && $body['subjectTwo'] != ''){
+                        $query->where('child_id',$body['subjectTwo']);
+                    }
+                    if(!empty($body['search']) && $body['search'] != ''){
+                        $query->where('title','like',"%".$body['search']."%");
+                    }
+                    $query->where('is_del',0);
+                    $query->where('status',1);
+                })->select('id','parent_id','child_id','title')->get()->toArray(); 
+            $natureCourse = self::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
+                ->where(function($query) use ($body,$school_id) {
+                    if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
+                        $query->where('ld_course.parent_id',$body['subjectOne']);
+                    }
+                    if(!empty($body['subjectTwo']) && $body['subjectTwo'] != ''){
+                        $query->where('ld_course.child_id',$body['subjectTwo']);
+                    }
+                    if(!empty($body['search']) && $body['search'] != ''){
+                        $query->where('ld_course.title','like',"%".$body['search']."%");
+                    }
+                    $query->where('ld_course_school.to_school_id',$body['school_id']); //被授权学校
+                    $query->where('ld_course_school.from_school_id',$school_id); //授权学校
+                    $query->where('ld_course_school.is_del',0);
+            })->select('ld_course_school.course_id as id','ld_course.parent_id','ld_course.child_id','ld_course.title')->get()->toArray(); 
+            //授权课程
+            $CourseArr = array_merge($zizengCourse,$natureCourse);
+            if(!empty($CourseArr)){
+                $CourseArr = array_unique($CourseArr, SORT_REGULAR);
+                foreach ($CourseArr as $key => $v) {
+                    $CourseArr[$key]['subjectNameOne'] = !isset($subjectArr[$v['parent_id']])?'':$subjectArr[$v['parent_id']];
+                    $CourseArr[$key]['subjectNameTwo'] = !isset($subjectArr[$v['child_id']])?'':$subjectArr[$v['child_id']];
+                    $method = Couresmethod::select('method_id')->where(['course_id'=>$v['id'],'is_del'=>0])->get()->toArray();
+                    if(!$method){
+                        unset($CourseArr[$key]);
+                    }else{
+                        $methodArr = [];
+                        foreach ($method as $k=>&$val){
+                            if($val['method_id'] == 1){
+                                $val['method_name'] = '直播';
+                            }
+                            if($val['method_id'] == 2){
+                                $val['method_name'] = '录播';
+                            }
+                            if($val['method_id'] == 3){
+                                $val['method_name'] = '其他';
+                            }
+                            array_push($methodArr,$val['method_name']);
+                        }
+                      $CourseArr[$key]['method'] = $methodArr;
+                    }
+                }       
+            }
+            return ['code'=>200,'msg'=>'message','data'=>$CourseArr];   
+        }
+    }
      /**
      * @param  批量授权
      * @param  school_id
