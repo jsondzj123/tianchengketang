@@ -6,6 +6,7 @@ use App\Models\AdminLog;
 use App\Models\Couresteacher;
 use App\Models\Coures;
 use App\Models\Order;
+use App\Models\CourseRefTeacher;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\DB;
 
@@ -120,6 +121,51 @@ class Teacher extends Model {
         }
         return ['code' => 200 , 'msg' => '获取老师信息成功' , 'data' => $teacher_info];
     }
+    
+    /*
+     * @param  descriptsion    判断是否授权讲师教务
+     * @param  author          dzj
+     * @param  ctime           2020-07-14
+     * return  array
+     */
+    public static function getTeacherIsAuth($body=[]){
+        //判断传过来的数组数据是否为空
+        if(!$body || !is_array($body)){
+            return ['code' => 202 , 'msg' => '传递数据不合法'];
+        }
+
+        //判断讲师或教务id是否合法
+        if(!isset($body['teacher_id']) || empty($body['teacher_id']) || $body['teacher_id'] <= 0){
+            return ['code' => 202 , 'msg' => '老师id不合法'];
+        }
+
+        //key赋值
+        $key = 'teacher:teacherinfo:'.$body['teacher_id'];
+
+        //判断此老师是否被请求过一次(防止重复请求,且数据信息不存在)
+        if(Redis::get($key)){
+            return ['code' => 204 , 'msg' => '此讲师教务不存在'];
+        } else {
+            //判断此讲师教务在讲师教务表中是否存在
+            $teacher_count = self::where('id',$body['teacher_id'])->count();
+            if($teacher_count <= 0){
+                //存储讲师教务的id值并且保存60s
+                Redis::setex($key , 60 , $body['teacher_id']);
+                return ['code' => 204 , 'msg' => '此讲师教务不存在'];
+            }
+        }
+        
+        //学校id
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+  
+        //判断此讲师教务是否授权
+        $is_auth = CourseRefTeacher::where('to_school_id' , $school_id)->where('teacher_id' , $body['teacher_id'])->where('is_del' , 0)->count();
+        if($is_auth <= 0){
+            return ['code' => 200 , 'msg' => '此老师未授权'];
+        } else {
+            return ['code' => 203 , 'msg' => '此老师已授权'];
+        }
+    }
 
     /*
      * @param  descriptsion    根据讲师或教务id获取详细信息
@@ -142,6 +188,7 @@ class Teacher extends Model {
         }
         
         //获取分校的状态和id
+        $admin_id      = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
         $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
 
@@ -154,6 +201,8 @@ class Teacher extends Model {
         if($school_status > 0 && $school_status == 1){
             //获取讲师或教务是否有数据
             $teacher_count = self::where(function($query) use ($body){
+                $admin_id      = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                $query->where('admin_id' , '=' , $admin_id);
                 $query->where('is_del' , '=' , 0);
                 //获取老师类型(讲师还是教务)
                 $query->where('type' , '=' , $body['type']);
@@ -168,6 +217,8 @@ class Teacher extends Model {
             if($teacher_count && $teacher_count > 0){
                 //获取讲师或教务列表
                 $teacher_list = self::where(function($query) use ($body){
+                    $admin_id      = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                    $query->where('admin_id' , '=' , $admin_id);
                     $query->where('is_del' , '=' , 0);
                     //获取老师类型(讲师还是教务)
                     $query->where('type' , '=' , $body['type']);
@@ -188,8 +239,10 @@ class Teacher extends Model {
                 return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
             }
         } else {
-            //获取讲师或教务是否有数据
-            $teacher_count = self::where(function($query) use ($body){
+            //获取讲师或教务列表
+            $teacher_list = self::where(function($query) use ($body){
+                $admin_id      = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                $query->where('admin_id' , '=' , $admin_id);
                 $query->where('is_del' , '=' , 0);
                 //获取老师类型(讲师还是教务)
                 $query->where('type' , '=' , $body['type']);
@@ -198,31 +251,52 @@ class Teacher extends Model {
                 if(isset($body['search']) && !empty($body['search'])){
                     $query->where('real_name','like','%'.$body['search'].'%');
                 }
-            })->where('school_id' , $school_id)->count();
-
-            //判断讲师或教务是否有数据
-            if($teacher_count && $teacher_count > 0){
-                //获取讲师或教务列表
-                $teacher_list = self::where(function($query) use ($body){
-                    $query->where('is_del' , '=' , 0);
-                    //获取老师类型(讲师还是教务)
-                    $query->where('type' , '=' , $body['type']);
-
-                    //判断搜索内容是否为空
-                    if(isset($body['search']) && !empty($body['search'])){
-                        $query->where('real_name','like','%'.$body['search'].'%');
-                    }
-                })->select('id as teacher_id','real_name','phone','create_at','number','is_recommend','is_forbid')->where('school_id' , $school_id)->orderByDesc('id')->offset($offset)->limit($pagesize)->get()->toArray();
-                //判断如果是讲师则查询开课数量
-                if($body['type'] == 2){
-                    foreach($teacher_list as $k=>$v){
-                        $teacher_list[$k]['number'] = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
-                    }
+            })->select('id as teacher_id','real_name','phone','create_at','number','is_recommend','is_forbid')->orderByDesc('id')->get()->toArray();
+            //判断如果是讲师则查询开课数量
+            if($body['type'] == 2){
+                foreach($teacher_list as $k=>$v){
+                    $teacher_list[$k]['number'] = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
                 }
-                return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => $teacher_list , 'total' => $teacher_count , 'pagesize' => $pagesize , 'page' => $page]];
-            } else {
-                return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
             }
+            
+            $arr = [];
+            
+            //授权讲师教务列表
+            $teacher_list2 = DB::table('ld_course_ref_teacher')->leftJoin("ld_lecturer_educationa" , function($join){
+                $join->on('ld_lecturer_educationa.id', '=', 'ld_course_ref_teacher.teacher_id');
+            })->select(DB::raw("any_value(ld_course_ref_teacher.teacher_id) as teacher_id"))->where(function($query) use ($body){
+                $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+                $query->where('ld_course_ref_teacher.to_school_id' , '=' , $school_id);
+                $query->where('ld_course_ref_teacher.is_del' , '=' , 0);
+                //判断搜索内容是否为空
+                if(isset($body['search']) && !empty($body['search'])){
+                    $query->where('ld_lecturer_educationa.real_name','like','%'.$body['search'].'%');
+                }
+            })->groupBy('ld_course_ref_teacher.teacher_id')->get()->toArray();
+            foreach($teacher_list2 as $k=>$v){
+                //通过老师的id获取老师详情
+                $teacher_info = self::where('id' , $v->teacher_id)->first();
+                
+                $arr[] = [
+                    'teacher_id'       =>    $v->teacher_id ,
+                    'real_name'        =>    $teacher_info['real_name'] ,
+                    'phone'            =>    $teacher_info['phone'] ,
+                    'create_at'        =>    $teacher_info['create_at'] ,
+                    'number'           =>    $teacher_info['number'] ,
+                    'is_recommend'     =>    $teacher_info['is_recommend'] ,
+                    'is_forbid'        =>    $teacher_info['is_forbid'] ,
+                    'checked'          =>    true ,
+                    'student_number'   =>    0 ,
+                    'star_num'         =>    5
+                ];
+            }
+            
+            //获取总条数
+            $teacher_sum_array = array_merge((array)$teacher_list , (array)$arr);
+
+            $count = count($teacher_sum_array);//总条数
+            $array = array_slice($teacher_sum_array,$offset,$pagesize);
+            return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => $array , 'total' => $count , 'pagesize' => $pagesize , 'page' => $page]];
         }
     }
 

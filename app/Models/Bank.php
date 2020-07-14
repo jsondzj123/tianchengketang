@@ -168,10 +168,11 @@ class Bank extends Model {
         
         //判断此题库是否授权
         $is_auth = CourseRefBank::where('to_school_id' , $school_id)->where('bank_id' , $body['bank_id'])->where('is_del' , 0)->count();
-        if($is_auth && $is_auth > 0){
+        if($is_auth <= 0){
+            return ['code' => 200 , 'msg' => '此题库未授权'];
+        } else {
             return ['code' => 203 , 'msg' => '此题库已授权'];
         }
-        return ['code' => 200 , 'msg' => '此题库未授权'];
     }
     
     /*

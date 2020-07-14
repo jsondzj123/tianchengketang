@@ -94,7 +94,7 @@ class BankController extends Controller {
             if($data['code'] == 200){
                 return response()->json(['code' => 200 , 'msg' => '此题库未授权']);
             } else {
-                return response()->json(['code' => $data['code'] , 'msg' => $data['msg']]);
+                return response()->json(['code' => 203 , 'msg' => '此题库已授权']);
             }
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);

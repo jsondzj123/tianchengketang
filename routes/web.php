@@ -389,6 +389,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getTeacherInfoById', 'TeacherController@getTeacherInfoById');  //获取老师信息
         $router->post('getTeacherList', 'TeacherController@getTeacherList');          //获取老师列表
         $router->post('getTeacherSearchList', 'TeacherController@getTeacherSearchList'); //讲师或教务搜索列表
+        $router->post('getTeacherIsAuth', 'TeacherController@getTeacherIsAuth');         //是否授权讲师教务
     });
 
     //题库相关模块(dzj)

@@ -369,7 +369,7 @@ class LiveChild extends Model {
                 return ['code' => 204 , 'msg' => '课次已发布成功'];
             }
             //查询该课次是已发布 修改信息
-            $CourseLiveClassChild = CourseLiveClassChild::where(["class_id"=>$data['class_id']])->first()->toArray();
+            $CourseLiveClassChild = CourseLiveClassChild::where(["class_id"=>$data['class_id']])->first();
             if($CourseLiveClassChild){
                 //更新课次
                 $MTCloud = new MTCloud();
