@@ -56,26 +56,26 @@ class CommonController extends BaseController {
             if($adminUserSchoolType >0){
                 //总校 Auth 
                 $roleAuthArr = \App\Models\AuthMap::getAuthAlls(['is_del'=>0,'is_forbid'=>0],['id','title','parent_id']);
-                print_r($roleAuthArr);die;
+         
             }else{
-                //分校  Auth
-                $schoolData = \App\Models\Roleauth::getRoleOne(['school_id'=>$adminUserSchoolId,'is_del'=>1,'is_super'=>1],['id','role_name','auth_desc','auth_id']);
+                // //分校  Auth
+                // $schoolData = \App\Models\Roleauth::getRoleOne(['school_id'=>$adminUserSchoolId,'is_del'=>1,'is_super'=>1],['id','role_name','auth_desc','auth_id']);
               
-                if( $schoolData['code'] != 200){    
-                     return response()->json(['code' => 403 , 'msg' => '请联系总校超级管理员' ]);
-                }
-                $auth_id_arr = explode(',',$schoolData['data']['auth_id']);
+                // if( $schoolData['code'] != 200){    
+                //      return response()->json(['code' => 403 , 'msg' => '请联系总校超级管理员' ]);
+                // }
+                // $auth_id_arr = explode(',',$schoolData['data']['auth_id']);
       
-                if(!$auth_id_arr){
-                     $auth_id_arr = [$auth_id];
-                }
-                $roleAuthArr = \App\Models\Authrules::getAuthAlls(['id'=>$auth_id_arr],['id','name','title','parent_id']);
+                // if(!$auth_id_arr){
+                //      $auth_id_arr = [$auth_id];
+                // }
+                $mapAuthIds = \App\Models\Roleauth::where(['school_id'=>$adminUserSchoolId,'is_super'=>1])->select('map_auth_id')->first();
+                $roleAuthArr = \App\Models\AuthMap::whereIn('id',$mapAuthIds['map_auth_id'])->get()->toArray();
             }
-
-            $roleAuthData = \App\Models\Roleauth::getRoleAuthAlls(['school_id'=>$adminUserSchoolId,'is_del'=>1],['id','role_name','auth_desc','auth_id']);
+            // $roleAuthData = \App\Models\Roleauth::getRoleAuthAlls(['school_id'=>$adminUserSchoolId,'is_del'=>1],['id','role_name','auth_desc','auth_id']);
             $roleAuthArr  = getAuthArr($roleAuthArr);
             $arr = [
-                'role_auth'=>$roleAuthData,
+                // 'role_auth'=>$roleAuthData,
                 'auth'=>$roleAuthArr,
                 'school_id'=>$adminUserSchoolId,
                 'admin_id' =>$adminId,

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Redis;
 use Validator;
 use App\Tools\CurrentAdmin;
 use App\Models\AdminLog;
+use App\Models\AuthMap;
 use Illuminate\Support\Facades\DB;
 class RoleController extends Controller {
   
@@ -122,22 +123,42 @@ class RoleController extends Controller {
         $data['create_time'] = date('Y-m-d H:i:s');
         if($role){  $data['is_super'] = 0; }
         else{       $data['is_super'] = 1; }
-        if(Roleauth::insert($data)){
-             AdminLog::insertAdminLog([
+        DB::beginTransaction();
+        try{
+            $auth_map_id = $data['auth_id'];
+            $map_auth_ids = explode(',',$data['auth_id']);
 
-                'admin_id'       =>   CurrentAdmin::user()['id'] ,
-                'module_name'    =>  'Role' ,
-                'route_url'      =>  'admin/role/doRoleInsert' , 
-                'operate_method' =>  'insert' ,
-                'content'        =>  json_encode($data),
-                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
-                'create_at'      =>  date('Y-m-d H:i:s')
-            ]);
-            return response()->json(['code'=>200,'msg'=>'添加成功']);
-        }else{
-            return response()->json(['code'=>201,'msg'=>'添加失败']);
-        }
-        
+            $roleAuthData  = AuthMap::whereIn('id',$map_auth_ids)->where(['is_del'=>0,'is_forbid'=>0,'is_show'=>0])->select('auth_id')->get()->toArray();
+            $arr = [];
+            foreach($roleAuthData as $key=>$v){
+                foreach($v as $vv){
+                     array_push($arr,$vv);
+                }
+            }
+            $arr =implode(',',$arr);
+            $data['auth_id'] = unique($arr);
+            $data['map_auth_id'] = $auth_map_id;
+            print_r($data);die;
+            if(Roleauth::insert($data)){
+                AdminLog::insertAdminLog([
+
+                    'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                    'module_name'    =>  'Role' ,
+                    'route_url'      =>  'admin/role/doRoleInsert' , 
+                    'operate_method' =>  'insert' ,
+                    'content'        =>  json_encode($data),
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                DB::commit();  
+                return response()->json(['code'=>200,'msg'=>'添加成功']);
+            }else{
+                 DB::rollback();
+                return response()->json(['code'=>201,'msg'=>'添加失败']);
+            }    
+        } catch (Exception $e) {
+            return ['code' => 500 , 'msg' => $ex->getMessage()];
+        }    
     } 
     /*
      * @param  descriptsion   获取角色信息（编辑）
