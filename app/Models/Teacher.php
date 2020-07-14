@@ -826,6 +826,12 @@ class Teacher extends Model {
                 return ['code' => 204 , 'msg' => '此讲师教务不存在'];
             }
         }
+        
+        //判断此讲师是否被授权过
+        $is_del_teacher = CourseRefTeacher::where("teacher_id" , $body['teacher_id'])->where('is_del' , 0)->count();
+        if($is_del_teacher && $is_del_teacher > 0){
+            return ['code' => 204 , 'msg' => '此讲师教务被授权,不能删除'];
+        }
 
         //追加更新时间
         $data = [
