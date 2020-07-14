@@ -55,7 +55,8 @@ class CommonController extends BaseController {
             
             if($adminUserSchoolType >0){
                 //总校 Auth 
-                $roleAuthArr = \App\Models\Authrules::getAuthAlls([],['id','name','title','parent_id']);
+                $roleAuthArr = \App\Models\AuthMap::getAuthAlls(['is_del'=>0,'is_forbid'=>0],['id','title','parent_id']);
+                print_r($roleAuthArr);die;
             }else{
                 //分校  Auth
                 $schoolData = \App\Models\Roleauth::getRoleOne(['school_id'=>$adminUserSchoolId,'is_del'=>1,'is_super'=>1],['id','role_name','auth_desc','auth_id']);
