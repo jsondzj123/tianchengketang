@@ -135,6 +135,7 @@ class CouresSubject extends Model {
         if(!$find){
             return ['code' => 202 , 'msg' => '无此信息'];
         }
+
         $status = $find['is_open'] == 1?0:1;
         if($status == 1){
             //判断此学科是否有在售课程
