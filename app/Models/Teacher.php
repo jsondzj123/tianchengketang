@@ -439,10 +439,50 @@ class Teacher extends Model {
                 }
             })->select('id as teacher_id','real_name','type')->where('school_id' , $school_id)->orderByDesc('create_at')->get()->toArray();
 
+            $arr = [];
+            
+            //授权讲师教务列表
+            $teacher_list2 = DB::table('ld_course_ref_teacher')->leftJoin("ld_lecturer_educationa" , function($join){
+                $join->on('ld_lecturer_educationa.id', '=', 'ld_course_ref_teacher.teacher_id');
+            })->select(DB::raw("any_value(ld_course_ref_teacher.teacher_id) as teacher_id"))->where(function($query) use ($body){
+                $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+                $query->where('ld_course_ref_teacher.to_school_id' , '=' , $school_id);
+                $query->where('ld_course_ref_teacher.is_del' , '=' , 0);
+                //判断学科分类是否选择
+                if(isset($body['parent_id']) && !empty($body['parent_id'])){
+                    $parent_id = json_decode($body['parent_id'] , true);
+                    if($parent_id && !empty($parent_id)){
+                        $query->where('ld_lecturer_educationa.parent_id','=',$parent_id[0]);
+                        //判断二级分类的id是否为空
+                        if(isset($parent_id[1]) && $parent_id[1] > 0){
+                            $query->where('ld_lecturer_educationa.child_id','=',$parent_id[1]);
+                        }
+                    }
+                }
+
+                //判断姓名是否为空
+                if(isset($body['real_name']) && !empty($body['real_name'])){
+                    $query->where('ld_lecturer_educationa.real_name','like','%'.$body['real_name'].'%');
+                }
+            })->groupBy('ld_course_ref_teacher.teacher_id')->get()->toArray();
+            foreach($teacher_list2 as $k=>$v){
+                //通过老师的id获取老师详情
+                $teacher_info = self::where('id' , $v->teacher_id)->first();
+                
+                $arr[] = [
+                    'teacher_id'       =>    $v->teacher_id ,
+                    'real_name'        =>    $teacher_info['real_name'] ,
+                    'type'             =>    $teacher_info['type'] 
+                ];
+            }
+            
+            //获取总条数
+            $teacher_sum_array = array_merge((array)$teacher_list , (array)$arr);
+            
             //判断获取列表是否为空
-            if($teacher_list && !empty($teacher_list)){
+            if($teacher_sum_array && !empty($teacher_sum_array)){
                 $arr = [];
-                foreach($teacher_list as $k => $v){
+                foreach($teacher_sum_array as $k => $v){
                     //教务
                     if($v['type'] == 1){
                         $arr['jiaowu'][] = [
