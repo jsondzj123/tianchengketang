@@ -135,11 +135,6 @@ class LiveChild extends Model {
             if(empty($data['class_hour']) || !isset($data['class_hour'])){
                 return ['code' => 201 , 'msg' => '课时不能为空'];
             }
-            $ktime = floor(($data['end_at']-$data['start_at'])%86400/3600);
-            //课时必须等于开始时间和结束时间
-            if($data['class_hour'] != $ktime){
-                return ['code' => 201 , 'msg' => '课时数不正确'];
-            }
             //选择模式
             if(empty($data['live_type']) || !isset($data['live_type'])){
                 return ['code' => 201 , 'msg' => '选择模式不能为空'];
@@ -213,11 +208,6 @@ class LiveChild extends Model {
             //课时
             if(empty($data['class_hour']) || !isset($data['class_hour'])){
                 return ['code' => 201 , 'msg' => '课时不能为空'];
-            }
-            $ktime = floor(($data['end_at']-$data['start_at'])%86400/3600);
-            //课时必须等于开始时间和结束时间
-            if($data['class_hour'] != $ktime){
-                return ['code' => 201 , 'msg' => '课时数不正确'];
             }
             //选择模式
             if(empty($data['live_type']) || !isset($data['live_type'])){
