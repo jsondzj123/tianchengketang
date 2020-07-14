@@ -568,6 +568,8 @@ class Coures extends Model {
                     $data['update_at'] = date('Y-m-d H:i:s');
                     $id = $data['id'];
                     unset($data['id']);
+                    unset($data['parent_id']);
+                    unset($data['child_id']);
                     CourseSchool::where(['id'=>$id])->update($data);
                 }else {
                     $data['update_at'] = date('Y-m-d H:i:s');
