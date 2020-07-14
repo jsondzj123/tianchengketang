@@ -206,7 +206,11 @@ class Bank extends Model {
         }
         //科目列表赋值
         $bank_info['subject_list']    = $subject_list && !empty($subject_list) ? $subject_list : [];
-        $bank_info['lession_subject'] = [$bank_info['parent_id'],$bank_info['child_id']];
+        if($bank_info['child_id'] && $bank_info['child_id'] > 0){
+            $bank_info['lession_subject'] = [$bank_info['parent_id'],$bank_info['child_id']];
+        } else {
+            $bank_info['lession_subject'] = [$bank_info['parent_id']];
+        }
         return ['code' => 200 , 'msg' => '获取题库信息成功' , 'data' => $bank_info];
     }
 
