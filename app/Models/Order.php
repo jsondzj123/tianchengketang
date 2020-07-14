@@ -138,6 +138,7 @@ class Order extends Model {
         $data['oa_status'] = 0;              //OA状态
         $data['class_id'] = $arr['lession_id'];
         $data['school_id'] = $school['school_id'];
+        $data['nature'] = $arr['nature'];
         $add = self::insert($data);
         if($add){
             //添加日志操作
