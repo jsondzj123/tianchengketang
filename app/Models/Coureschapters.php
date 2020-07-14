@@ -10,6 +10,7 @@ class Coureschapters extends Model {
     //时间戳设置
     public $timestamps = false;
     /*=============章================*/
+
     //章节列表
     public static function chapterList($data){
         $nature = isset($data['nature'])?$data['nature']:0;
