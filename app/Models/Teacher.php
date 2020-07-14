@@ -441,7 +441,7 @@ class Teacher extends Model {
                 }
             })->select('id as teacher_id','real_name','type')->where('school_id' , $school_id)->orderByDesc('create_at')->get()->toArray();
 
-            $arr = [];
+            /*$arr = [];
             
             //授权讲师教务列表
             $teacher_list2 = DB::table('ld_course_ref_teacher')->leftJoin("ld_lecturer_educationa" , function($join){
@@ -479,13 +479,13 @@ class Teacher extends Model {
             }
             
             //获取总条数
-            $teacher_sum_array = array_merge((array)$teacher_list , (array)$arr);
+            $teacher_sum_array = array_merge((array)$teacher_list , (array)$arr);*/
             
             $arr = ["jiangshi" => [] , "jiaowu" => []];
             
             //判断获取列表是否为空
-            if($teacher_sum_array && !empty($teacher_sum_array)){
-                foreach($teacher_sum_array as $k => $v){
+            if($teacher_list && !empty($teacher_list)){
+                foreach($teacher_list as $k => $v){
                     //教务
                     if($v['type'] == 1){
                         $arr['jiaowu'][] = [
