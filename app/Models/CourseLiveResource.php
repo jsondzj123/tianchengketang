@@ -17,11 +17,22 @@ class CourseLiveResource extends Model {
         if(!isset($data['course_id']) || empty($data['course_id'])){
             return ['code' => 201 , 'msg' => '课程id不能为空'];
         }
-        //课程信息
-        $course = Coures::select('id','title','sale_price','status')->where(['id'=>$data['course_id'],'is_del'=>0])->first();
-        if(!$course){
-            return ['code' => 201 , 'msg' => '课程无效'];
+        $nature = isset($data['nature'])?$data['nature']:0;
+        if($nature == 1){
+            //课程信息
+            $course = CourseSchool::select('id','title','sale_price','status')->where(['id'=>$data['id'],'is_del'=>0])->first();
+            $data['course_id'] = $course['course_id'];
+            if(!$course){
+                return ['code' => 201 , 'msg' => '课程无效'];
+            }
+        }else{
+            //课程信息
+            $course = Coures::select('id','title','sale_price','status')->where(['id'=>$data['course_id'],'is_del'=>0])->first();
+            if(!$course){
+                return ['code' => 201 , 'msg' => '课程无效'];
+            }
         }
+
         //取直播资源列表
         $where['is_del'] = 0;
         if(isset($data['parent']) && !empty($data['parent'])){
@@ -67,6 +78,10 @@ class CourseLiveResource extends Model {
         if(!isset($data['id']) || empty($data['id'])){
             return ['code' => 201 , 'msg' => '资源id不能为空'];
         }
+        $nature = isset($data['nature'])?$data['nature']:0;
+        if($nature == 1){
+            return ['code' => 201 , 'msg' => '授权课程，无法删除'];
+        }
         $livecourse = Live::where(['id'=>$data['id']])->first();
         if($livecourse['nature'] == 1){
             return ['code' => 202 , 'msg' => '此课程单元为授权课程资源，如需删除请联系系统管理员'];
@@ -100,6 +115,10 @@ class CourseLiveResource extends Model {
         }
         if(!isset($data['id']) || empty($data['id'])){
             return ['code' => 201 , 'msg' => '资源id不能为空'];
+        }
+        $nature = isset($data['nature'])?$data['nature']:0;
+        if($nature == 1){
+            return ['code' => 201 , 'msg' => '授权课程，无法删除'];
         }
         unset($data['/admin/course/liveCoursesUp']);
         $data['update_at'] = date('Y-m-d H:i:s');
