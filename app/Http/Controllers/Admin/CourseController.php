@@ -77,6 +77,7 @@ class CourseController extends Controller {
           }
           return response()->json(['code' => 200 , 'msg' => '成功','data'=>$list]);
       }
+
   /*
        * @param  课程添加
        * @param  author  苏振文
