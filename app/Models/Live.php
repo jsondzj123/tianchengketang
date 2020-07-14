@@ -112,6 +112,10 @@ class Live extends Model {
                     }else{
                         $list=[];
                     }
+                    //自增数据
+                    foreach($list as $k => &$v){
+                        $v['nature'] = 1;
+                    }
                     if(isset($data['nature']) && $data['nature'] == 2){
                         $list=[];
                         $total = 0;
@@ -272,6 +276,15 @@ class Live extends Model {
                     if(!isset($list2)){
                         $list2 = [];
                     }
+                    //自增数据
+                    foreach($list1 as $k => &$v){
+                        $v['nature'] = 1;
+                    }
+                    //授权数据
+                    foreach($list2 as $k => &$v){
+                            $v['nature'] = 2;
+                    }
+
                     //数据总数  等于  自增数据加授权数据
                     //判断搜索条件  自增资源和授权资源  1为自增  2为授权 3为全部
                     if(isset($data['nature']) && $data['nature']== 1){
