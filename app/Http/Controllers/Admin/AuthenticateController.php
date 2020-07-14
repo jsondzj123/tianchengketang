@@ -68,6 +68,9 @@ class AuthenticateController extends Controller {
         $user['school_name'] = School::where('id',$user['school_id'])->select('name')->first()['name'];
         $user['token'] = $token;
         $this->setTokenToRedis($user->id, $token);
+        if($user['is_forbid'] != 1 ||$user['is_del'] != 1 ){
+              return response()->json(['code'=>403,'msg'=>'此用户已被禁用或删除，请联系管理员']);   
+        }
         $AdminUser = new AdminUser();
         $user['auth'] = [];     //5.14 该账户没有权限返回空  begin
         if($user['role_id']>0){

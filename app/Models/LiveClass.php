@@ -67,7 +67,7 @@ class LiveClass extends Model {
             if($total > 0){
                 return ['code' => 200 , 'msg' => '获取班号列表成功' , 'data' => ['LiveClass_list' => $list, 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
             }else{
-                return ['code' => 200 , 'msg' => '获取班号列表成功' , 'data' => ['LiveClass_list' => [], 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
+                return ['code' => 200 , 'msg' => '获取班号列表成功' , 'data' => ['LiveClass_list' => 0, 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
             }
         }
 

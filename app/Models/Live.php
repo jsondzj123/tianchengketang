@@ -274,7 +274,7 @@ class Live extends Model {
                         $list2 = [];
                     }
                     //数据总数  等于  自增数据加授权数据
-                    //判断搜索条件  自增资源和授权资源  1为自增  2为授权 0为全部
+                    //判断搜索条件  自增资源和授权资源  1为自增  2为授权 3为全部
                     if(isset($data['nature']) && $data['nature']== 1){
                         $total = $count1;
                         if($total > 0){
