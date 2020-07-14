@@ -58,6 +58,27 @@ class Teacher extends Model {
         }
         return $student_number;
     }
+    
+    //获取学员数量
+    public static function getStudentNumberInfo($value) {
+        //获取课程的id列表
+        $lesson_list     = Couresteacher::where('teacher_id' , $value)->get();
+        if($lesson_list && !empty($lesson_list)){
+            //获取课程id列表
+            $lesson_ids = array_column($lesson_list->toArray() , 'course_id');
+            //通过课程id获取对应的购买基数
+            $buy_num    = Coures::whereIn('id' , $lesson_ids)->sum('buy_num');
+
+            //查询订单所属的学员购买记录数量
+            $order_count= Order::whereIn('class_id' , $lesson_ids)->where('status' , 2)->count();
+
+            //获取学员总数量
+            $student_number  = (int)bcadd($buy_num , $order_count);
+        } else {
+            $student_number  = 0;
+        }
+        return $student_number;
+    }
 
     //好评数量
     public function getStarNumAttribute($value) {
@@ -313,6 +334,9 @@ class Teacher extends Model {
                 //通过老师的id获取老师详情
                 $teacher_info = self::where('id' , $v->teacher_id)->first();
                 
+                //获取学员数量
+                $student_number = self::getStudentNumberInfo($v->teacher_id);
+                
                 $arr[] = [
                     'teacher_id'       =>    $v->teacher_id ,
                     'real_name'        =>    $teacher_info['real_name'] ,
@@ -322,7 +346,7 @@ class Teacher extends Model {
                     'is_recommend'     =>    $teacher_info['is_recommend'] ,
                     'is_forbid'        =>    $teacher_info['is_forbid'] ,
                     'checked'          =>    true ,
-                    'student_number'   =>    0 ,
+                    'student_number'   =>    $student_number ,
                     'star_num'         =>    5 ,
                     'is_auth'          =>    1
                 ];
