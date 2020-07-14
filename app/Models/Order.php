@@ -277,6 +277,14 @@ class Order extends Model {
             if($data['status'] == 2){
                 $update = self::where(['id'=>$data['order_id']])->update(['status'=>2]);
                 if($update){
+                    //修改学员报名  订单状态 课程有效期
+                    $lessons = Coures::where(['id'=>$order['class_id']])->first();
+                    //计算用户购买课程到期时间
+                    $validity = date('Y-m-d H:i:s',strtotime('+'.$lessons['ttl'].' day'));
+                    //修改订单状态 课程有效期 oa状态
+                    $update = self::where(['id'=>$order['id']])->update(['status'=>2,'validity_time'=>$validity,'oa_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+                    //修改用户报名状态
+                    Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1]);
                     //添加日志操作
                     AdminLog::insertAdminLog([
                         'admin_id'       =>   $admin_id  ,
