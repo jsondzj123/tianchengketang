@@ -252,25 +252,19 @@ class Teacher extends Model {
                 //判断如果是讲师则查询开课数量
                 if($body['type'] == 2){
                     foreach($teacher_list as $k=>$v){
-                        $teacher_list[$k]['number'] = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
-                        //判断此讲师教务是否授权
-                        $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['teacher_id'])->where('is_del' , 0)->count();
-                        if($is_auth <= 0){
-                            $teacher_list[$k]['is_auth'] = 0;
-                        } else {
-                            $teacher_list[$k]['is_auth'] = 1;
-                        }
+                        $teacher_list[$k]['number']  = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
+                        $teacher_list[$k]['is_auth'] = 0;
+                        //获取学员数量
+                        $student_number = self::getStudentNumberInfo($v['teacher_id']);
+                        $teacher_list[$k]['student_number'] = $student_number;
                     }
                 } else {
                     foreach($teacher_list as $k=>$v){
                         $teacher_list[$k]['number'] = 0;
-                        //判断此讲师教务是否授权
-                        $is_auth = CourseRefTeacher::where('to_school_id' , $v['school_id'])->where('teacher_id' , $v['teacher_id'])->where('is_del' , 0)->count();
-                        if($is_auth <= 0){
-                            $teacher_list[$k]['is_auth'] = 0;
-                        } else {
-                            $teacher_list[$k]['is_auth'] = 1;
-                        }
+                        $teacher_list[$k]['is_auth']= 0;
+                        //获取学员数量
+                        $student_number = self::getStudentNumberInfo($v['teacher_id']);
+                        $teacher_list[$k]['student_number'] = $student_number;
                     }
                 }
                 return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => $teacher_list , 'total' => $teacher_count , 'pagesize' => $pagesize , 'page' => $page]];
