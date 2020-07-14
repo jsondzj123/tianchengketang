@@ -25,8 +25,8 @@ class OpenCourseController extends Controller {
     protected $data;
     public function __construct(){
         $this->data = $_REQUEST;
-        // $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
-        $this->school = School::where(['dns'=>$_SERVER['SERVER_NAME']])->first();
+        $this->school = School::where(['dns'=>$this->data['dns']])->first();
+        // $this->school = School::where(['dns'=>$_SERVER['SERVER_NAME']])->first();
     }
 
     //大家都在看
@@ -64,7 +64,7 @@ class OpenCourseController extends Controller {
 
             $openCourse = array_merge($natureOpenCourse,$openCourse);
         }
-
+ 
         return response()->json(['code'=>200,'msg'=>'Success','data'=>$openCourse]);
     }
     //预开始
@@ -84,7 +84,7 @@ class OpenCourseController extends Controller {
         ->select('ld_course_open.id','ld_course_open.title','ld_course_open.cover','ld_lecturer_educationa.real_name','ld_course_open.start_at','ld_course_open.end_at','ld_course_open_live_childs.status')
         ->orderBy('ld_course_open.id','desc')
         ->get()->toArray();
-      
+        
         //授权的公开课
         $natureOpenCourse = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
                 ->leftJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_ref_open.course_id')
@@ -154,7 +154,7 @@ class OpenCourseController extends Controller {
         $school = $this->school;
         //自增的公开课
         $page = !isset($this->data['page']) || $this->data['page'] <=1 ? 1:$this->data['page'];
-        $pagesize = !isset($this->data['pagesize']) || $this->data['pagesize'] <=1 ? 15:$this->data['pagesize'];
+        $pagesize = !isset($this->data['pagesize']) || $this->data['pagesize'] <=1 ? 20:$this->data['pagesize'];
         $openCourse = OpenCourse::leftJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_open.id')
             ->leftJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_open.id')
             ->leftJoin('ld_lecturer_educationa','ld_course_open_teacher.teacher_id','=','ld_lecturer_educationa.id')

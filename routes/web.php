@@ -126,7 +126,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     });
     //教师
     $router->group(['prefix' => 'teacher'], function () use ($router) {
-        $router->post('details','TeacherController@details');//查看详情
+        $router->post('List','TeacherController@getList');//查看详情
+        $router->post('dateils','TeacherController@dateils');//查看详情
     });
      //end (lys)
 
@@ -153,7 +154,9 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('getMyCollectExamList','BankController@getMyCollectExamList');  //我的收藏列表接口
         $router->post('getMyErrorExamList','BankController@getMyErrorExamList');      //错题本列表接口
         $router->post('getMyMakeExamList','BankController@getMyMakeExamList');        //做题记录列表接口
+        $router->post('getMakeExamInfo','BankController@getMakeExamInfo');            //做题记录详情接口
         $router->post('doHandInPapers','BankController@doHandInPapers');              //做题交卷接口
+        $router->post('getMyBankList','BankController@getMyBankList');                //我的题库
     });
 });
 
@@ -182,6 +185,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('recordedarr','CourseController@recordedarr');//课程录播列表
         $router->post('material','CourseController@material');//课程资料列表
         $router->post('collect','CourseController@collect');//课程收藏
+        $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
     });
     //对公购买模块（szw）
     $router->group(['prefix' => 'publicpay'], function () use ($router) {
@@ -223,7 +227,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('listType', 'ArticleController@listType');//分类列表
     $router->post('schoolLists', 'ArticleController@schoolLists');//学校列表
     $router->post('courseType', 'CourseController@courseType');//根据分类查课程
-    $router->post('subjects', 'CourseController@subjects');//学科列表(szw改)
+
     $router->post('orderForStudent', 'OrderController@orderForStudent');//订单通过学员查询
 
 });
@@ -453,6 +457,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
         $router->get('export', 'CommonController@doExportExamLog'); //导入导出demo
     });
+
+     $router->post('subjects', 'CourseController@subjects');//学科列表(szw改)
     //学科模块（重构）（szw）
     $router->group(['prefix' => 'coursesubject'], function () use ($router) {
         $router->post('subjectList', 'CoursesubjectController@subjectList');//学科列表

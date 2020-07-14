@@ -2,7 +2,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\CourseRefResource;
+use App\Models\Coureschapters;
+use Illuminate\Support\Facades\DB;
 class Video extends Model {
 
 
@@ -31,12 +33,22 @@ class Video extends Model {
             $pagesize = isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 15;
             $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
             $offset   = ($page - 1) * $pagesize;
-            //获取总条数
-            $total = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->where(function($query) use ($data){
+            //判断登录状态
+            //获取用户网校id
+            $data['school_status'] = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+            $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+            //总校资源
+            if($data['school_status'] == 1){
+                if(!empty($data['school_id']) && $data['school_id'] != ''){
+                    //总校
+                    //获取总条数
+                $total = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->where(function($query) use ($data){
                 // //获取后端的操作员id
                 // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                 // //操作员id
                 // $query->where('ld_course_video_resource.admin_id' , '=' , $admin_id);
+                //学校id
+                $query->where('ld_course_video_resource.school_id' , '=' , $data['school_id']);
                 //删除状态
                 $query->where('ld_course_video_resource.is_del' , '=' , 0);
                 //判断学科id是否为空
@@ -58,7 +70,7 @@ class Video extends Model {
                 if(isset($data['resource_type']) && !empty(isset($data['resource_type'])) && $data['resource_type'] != 0){
                     $query->where('ld_course_video_resource.resource_type' , '=' , $data['resource_type']);
                 }
-                //判断资源属性是否为空
+                //判断资源属性是否为空 （没有授权  只有自增）
                 if(isset($data['nature']) && !empty(isset($data['nature']))){
                     $query->where('ld_course_video_resource.nature' , '=' , $data['nature']);
                 }
@@ -72,58 +84,302 @@ class Video extends Model {
                 }
                 //判断资源名称是否为空
                 if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
-                    $query->where('resource_name','like',$data['resource_name'].'%');
+                    $query->where('resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
                 }
             })->get()->count();
             //获取所有列表
             if($total > 0){
-                $list = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->select('*','ld_course_video_resource.parent_id','ld_course_video_resource.id')->where(function($query) use ($data){
-                    // //获取后端的操作员id
-                    // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-                    // //操作员id
-                    // $query->where('ld_course_video_resource.admin_id' , '=' , $admin_id);
-                    //删除状态
-                    $query->where('ld_course_video_resource.is_del' , '=' , 0);
-                    //判断学科id是否为空
-                    if(isset($data['parent_id'])){
-                        $s_id = json_decode($data['parent_id']);
-                        if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
-                            $data['parent_id'] = $s_id[0];
-                            if(!empty($s_id[1])){
-                                $data['child_id'] = $s_id[1];
+                    $list = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->select('*','ld_course_video_resource.parent_id','ld_course_video_resource.id')->where(function($query) use ($data){
+                        // //获取后端的操作员id
+                        // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                        // //操作员id
+                        // $query->where('ld_course_video_resource.admin_id' , '=' , $admin_id);
+                        //学校id
+                        $query->where('ld_course_video_resource.school_id' , '=' , $data['school_id']);
+                        //删除状态
+                        $query->where('ld_course_video_resource.is_del' , '=' , 0);
+                        //判断学科id是否为空
+                        if(isset($data['parent_id'])){
+                            $s_id = json_decode($data['parent_id']);
+                            if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                                $data['parent_id'] = $s_id[0];
+                                if(!empty($s_id[1])){
+                                    $data['child_id'] = $s_id[1];
+                                }
+                                $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
                             }
-                            $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
+                        }
+                        if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                            $query->where('ld_course_video_resource.child_id','=' , $data['child_id']);
+                        }
+                        //判断资源类型是否为空
+                        if(isset($data['resource_type']) && !empty(isset($data['resource_type'])) && $data['resource_type'] != 0){
+                            $query->where('ld_course_video_resource.resource_type' , '=' , $data['resource_type']);
+                        }
+                        //判断资源属性是否为空（没有授权  只有自增）
+                        if(isset($data['nature']) && !empty(isset($data['nature']))){
+                            $query->where('ld_course_video_resource.nature' , '=' , $data['nature']);
+                        }
+                        //判断资源状态是否为空
+                        if(isset($data['status']) && !empty(isset($data['status']))  && $data['status'] != 3){
+                            $query->where('ld_course_video_resource.status' , '=' , $data['status']);
+                        }
+                        //判断资源id是否为空
+                        if(isset($data['id']) && !empty(isset($data['id']))){
+                            $query->where('ld_course_video_resource.id' , '=' , $data['id']);
+                        }
+                        //判断资源名称是否为空
+                        if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
+                            $query->where('resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
+                        }
+
+                    })->offset($offset)->limit($pagesize)->orderBy('ld_course_video_resource.id','desc')->get();
+                    foreach($list as $k =>&$v){
+                        $v['nature']  = 1;
+                    }
+                }else{
+                    $list = [];
+                }
+            }
+            }else{
+                    //分校查询当前学校自增  和授权数据
+                    //查询授权资源和自增资源
+                    //自增数据
+                    //获取总条数
+                    $count1 = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->where(function($query) use ($data){
+                        // //获取后端的操作员id
+                        // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                        // //操作员id
+                        // $query->where('ld_course_video_resource.admin_id' , '=' , $admin_id);
+                        //学校id
+                        $query->where('ld_course_video_resource.school_id' , '=' , $data['school_id']);
+                        //删除状态
+                        $query->where('ld_course_video_resource.is_del' , '=' , 0);
+                        //判断学科id是否为空
+                        if(isset($data['parent_id'])){
+                            $s_id = json_decode($data['parent_id']);
+                            if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                                $data['parent_id'] = $s_id[0];
+                                if(!empty($s_id[1])){
+                                    $data['child_id'] = $s_id[1];
+                                }
+                                $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
+                            }
+                        }
+                        //判断学科小类
+                        if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                            $query->where('ld_course_video_resource.child_id' , '=' , $data['child_id']);
+                        }
+                        //判断资源类型是否为空
+                        if(isset($data['resource_type']) && !empty(isset($data['resource_type'])) && $data['resource_type'] != 0){
+                            $query->where('ld_course_video_resource.resource_type' , '=' , $data['resource_type']);
+                        }
+                        //判断资源属性是否为空
+                        if(isset($data['nature']) && !empty(isset($data['nature']))){
+
+                        }
+                        //判断资源状态是否为空
+                        if(isset($data['status']) && !empty(isset($data['status'])) && $data['status'] != 3){
+                            $query->where('ld_course_video_resource.status' , '=' , $data['status']);
+                        }
+                        //判断资源id是否为空
+                        if(isset($data['id']) && !empty(isset($data['id']))){
+                            $query->where('ld_course_video_resource.id' , '=' , $data['id']);
+                        }
+                        //判断资源名称是否为空
+                        if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
+                            $query->where('ld_course_video_resource.resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
+                        }
+                    })->get()->count();
+                    //获取所有列表
+                    if($count1 > 0){
+                            $list1 = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->select('*','ld_course_video_resource.parent_id','ld_course_video_resource.id')->where(function($query) use ($data){
+                                // //获取后端的操作员id
+                                // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                                // //操作员id
+                                // $query->where('ld_course_video_resource.admin_id' , '=' , $admin_id);
+                                //学校id
+                                $query->where('ld_course_video_resource.school_id' , '=' , $data['school_id']);
+                                //删除状态
+                                $query->where('ld_course_video_resource.is_del' , '=' , 0);
+                                //判断学科id是否为空
+                                if(isset($data['parent_id'])){
+                                    $s_id = json_decode($data['parent_id']);
+                                    if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                                        $data['parent_id'] = $s_id[0];
+                                        if(!empty($s_id[1])){
+                                            $data['child_id'] = $s_id[1];
+                                        }
+                                        $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
+                                    }
+                                }
+                                if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                                    $query->where('ld_course_video_resource.child_id','=' , $data['child_id']);
+                                }
+                                //判断资源类型是否为空
+                                if(isset($data['resource_type']) && !empty(isset($data['resource_type'])) && $data['resource_type'] != 0){
+                                    $query->where('ld_course_video_resource.resource_type' , '=' , $data['resource_type']);
+                                }
+                                //判断资源状态是否为空
+                                if(isset($data['status']) && !empty(isset($data['status']))  && $data['status'] != 3){
+                                    $query->where('ld_course_video_resource.status' , '=' , $data['status']);
+                                }
+                                //判断资源id是否为空
+                                if(isset($data['id']) && !empty(isset($data['id']))){
+                                    $query->where('ld_course_video_resource.id' , '=' , $data['id']);
+                                }
+                                //判断资源名称是否为空
+                                if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
+                                    $query->where('resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
+                                }
+
+                            })->orderBy('ld_course_video_resource.id','desc')->get()->toArray();
+                            foreach($list1 as $k =>&$v){
+                                $v['nature']  = 1;
+                            }
+                        }
+                    //授权数据
+                    $count2 =CourseRefResource::join("ld_course_video_resource","ld_course_ref_resource.resource_id","=","ld_course_video_resource.id")
+                    ->join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->where(function($query) use ($data){
+                        // //获取后端的操作员id
+                        // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                        // //操作员id
+                        // $query->where('ld_course_video_resource.admin_id' , '=' , $admin_id);
+                        //关联数据条件
+                        $query->where(["to_school_id"=>$data['school_id'],"ld_course_ref_resource.type"=>0,"ld_course_ref_resource.is_del"=>0]);
+                        //删除状态
+                        $query->where('ld_course_video_resource.is_del' , '=' , 0);
+                        //判断学科id是否为空
+                        if(isset($data['parent_id'])){
+                            $s_id = json_decode($data['parent_id']);
+                            if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                                $data['parent_id'] = $s_id[0];
+                                if(!empty($s_id[1])){
+                                    $data['child_id'] = $s_id[1];
+                                }
+                                $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
+                            }
+                        }
+                        //判断学科小类
+                        if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                            $query->where('ld_course_video_resource.child_id' , '=' , $data['child_id']);
+                        }
+                        //判断资源类型是否为空
+                        if(isset($data['resource_type']) && !empty(isset($data['resource_type'])) && $data['resource_type'] != 0){
+                            $query->where('ld_course_video_resource.resource_type' , '=' , $data['resource_type']);
+                        }
+                        //判断资源状态是否为空
+                        if(isset($data['status']) && !empty(isset($data['status'])) && $data['status'] != 3){
+                            $query->where('ld_course_video_resource.status' , '=' , $data['status']);
+                        }
+                        //判断资源id是否为空
+                        if(isset($data['id']) && !empty(isset($data['id']))){
+                            $query->where('ld_course_video_resource.id' , '=' , $data['id']);
+                        }
+                        //判断资源名称是否为空
+                        if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
+                            $query->where('ld_course_video_resource.resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
+                        }
+                    })->get()->count();
+                    if($count2 > 0){
+                        $list2 = CourseRefResource::join("ld_course_video_resource","ld_course_ref_resource.resource_id","=","ld_course_video_resource.id")
+                        ->join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->where(function($query) use ($data){
+                            // //获取后端的操作员id
+                            // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+                            // //操作员id
+                            // $query->where('ld_course_video_resource.admin_id' , '=' , $admin_id);
+                            //关联数据条件
+                            $query->where(["to_school_id"=>$data['school_id'],"ld_course_ref_resource.type"=>0,"ld_course_ref_resource.is_del"=>0]);
+                            //删除状态
+                            $query->where('ld_course_video_resource.is_del' , '=' , 0);
+                            //判断学科id是否为空
+                            if(isset($data['parent_id'])){
+                                $s_id = json_decode($data['parent_id']);
+                                if(isset($data['parent_id']) && !empty(isset($data['parent_id']) && count($s_id) > 0)){
+                                    $data['parent_id'] = $s_id[0];
+                                    if(!empty($s_id[1])){
+                                        $data['child_id'] = $s_id[1];
+                                    }
+                                    $query->where('ld_course_video_resource.parent_id' , '=' , $data['parent_id']);
+                                }
+                            }
+                            //判断学科小类
+                            if(isset($data['child_id']) && !empty(isset($data['child_id']))){
+                                $query->where('ld_course_video_resource.child_id' , '=' , $data['child_id']);
+                            }
+                            //判断资源类型是否为空
+                            if(isset($data['resource_type']) && !empty(isset($data['resource_type'])) && $data['resource_type'] != 0){
+                                $query->where('ld_course_video_resource.resource_type' , '=' , $data['resource_type']);
+                            }
+                            //判断资源状态是否为空
+                            if(isset($data['status']) && !empty(isset($data['status'])) && $data['status'] != 3){
+                                $query->where('ld_course_video_resource.status' , '=' , $data['status']);
+                            }
+                            //判断资源id是否为空
+                            if(isset($data['id']) && !empty(isset($data['id']))){
+                                $query->where('ld_course_video_resource.id' , '=' , $data['id']);
+                            }
+                            //判断资源名称是否为空
+                            if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
+                                $query->where('ld_course_video_resource.resource_name','like','%'.$data['resource_name'].'%')->orWhere('ld_course_video_resource.id','like','%'.$data['resource_name'].'%');
+                            }
+                        })->get()->toArray();
+                        foreach($list2 as $k =>&$v){
+                            $v['nature']  = 2;
                         }
                     }
-                    if(isset($data['child_id']) && !empty(isset($data['child_id']))){
-                        $query->where('ld_course_video_resource.child_id','=' , $data['child_id']);
-                    }
-                    //判断资源类型是否为空
-                    if(isset($data['resource_type']) && !empty(isset($data['resource_type'])) && $data['resource_type'] != 0){
-                        $query->where('ld_course_video_resource.resource_type' , '=' , $data['resource_type']);
-                    }
-                    //判断资源属性是否为空
-                    if(isset($data['nature']) && !empty(isset($data['nature']))){
-                        $query->where('ld_course_video_resource.nature' , '=' , $data['nature']);
-                    }
-                    //判断资源状态是否为空
-                    if(isset($data['status']) && !empty(isset($data['status']))  && $data['status'] != 3){
-                        $query->where('ld_course_video_resource.status' , '=' , $data['status']);
-                    }
-                    //判断资源id是否为空
-                    if(isset($data['id']) && !empty(isset($data['id']))){
-                        $query->where('ld_course_video_resource.id' , '=' , $data['id']);
-                    }
-                    //判断资源名称是否为空
-                    if(isset($data['resource_name']) && !empty(isset($data['resource_name']))){
-                        $query->where('resource_name','like','%'.$data['resource_name'].'%');
+                    //数据总数  等于  自增数据加授权数据
+                    //判断搜索条件  自增资源和授权资源  1为自增  2为授权 0为全部
+                    if(isset($data['nature']) && $data['nature']== 1){
+                        $total = $count1;
+                        if($total > 0){
+                            $arr = array_merge($list1);
+                            $start=($page-1)*$pagesize;
+                            $limit_s=$start+$pagesize;
+                            $list=[];
+                            for($i=$start;$i<$limit_s;$i++){
+                                if(!empty($arr[$i])){
+                                    array_push($list,$arr[$i]);
+                                }
+                            }
+                        }else{
+                            $list=[];
+                        }
+                    }else if(isset($data['nature']) &&  $data['nature'] == 2){
+                        $total = $count2;
+                        if($total > 0){
+                            $arr = array_merge($list2);
+                            $start=($page-1)*$pagesize;
+                            $limit_s=$start+$pagesize;
+                            $list=[];
+                            for($i=$start;$i<$limit_s;$i++){
+                                if(!empty($arr[$i])){
+                                    array_push($list,$arr[$i]);
+                                }
+                            }
+                        }else{
+                            $list=[];
+                        }
+                    }else{
+                        $total = $count2 + $count1;
+                        if($total > 0){
+                            $arr = array_merge($list1,$list2);
+                            $start=($page-1)*$pagesize;
+                            $limit_s=$start+$pagesize;
+                            $list=[];
+                            for($i=$start;$i<$limit_s;$i++){
+                                if(!empty($arr[$i])){
+                                    array_push($list,$arr[$i]);
+                                }
+                            }
+                        }else{
+                            $list=[];
+                        }
                     }
 
-                })->offset($offset)->limit($pagesize)->orderBy('ld_course_video_resource.id','desc')->get();
-                return ['code' => 200 , 'msg' => '获取录播资源列表成功' , 'data' => ['video_list' => $list, 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
-            }else{
-                return ['code' => 200 , 'msg' => '获取录播资源列表成功' , 'data' => ['video_list' => [], 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
+
             }
+                return ['code' => 200 , 'msg' => '获取录播资源列表成功' , 'data' => ['video_list' => $list, 'total' => $total , 'pagesize' => $pagesize , 'page' => $page]];
         }
         /*
          * @param  获取录播资源详情
@@ -163,6 +419,10 @@ class Video extends Model {
                 return ['code' => 201 , 'msg' => '参数不对'];
             }
             //查询是否和课程关联
+            $res = Coureschapters::where(["resource_id"=>$data['id'],"is_del"=>0])->first();
+            if($res){
+                return ['code' => 204 , 'msg' => '该资源已关联课程，无法修改状态'];
+            }
             //等学科写完继续
             $status = ($videoOne['status']==1)?0:1;
             $update = self::where(['id'=>$data['id']])->update(['status'=>$status,'update_at'=>date('Y-m-d H:i:s')]);
@@ -202,11 +462,26 @@ class Video extends Model {
             }
             //查询是否关联课程
             //等学科写完继续
-
+            //查询是否和课程关联
+            $is_coures = Coureschapters::where(["resource_id"=>$data['id'],"is_del"=>0])->first();
+            if($is_coures){
+                return ['code' => 204 , 'msg' => '该资源已关联课程，无法删除'];
+            }
             //查询是否是授权资源
-            $videoOnes = self::where(['id'=>$data['id'],'nature'=>0])->first();
-            if(!$videoOnes){
-                return ['code' => 204 , 'msg' => '该资源为授权资源，无法删除'];
+            //查询是否授权
+            //分校才进行查询
+            //获取用户网校id
+            $data['school_status'] = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+            $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+            //分校资源
+            if($data['school_status'] != 1){
+                if(!empty($data['school_id']) && $data['school_id'] != ''){
+                    //去授权表查询直播id
+                    $res = CourseRefResource::where(['resource_id'=>$data['id'],'type'=>0,'to_school_id'=>$data['school_id']])->first();
+                    if($res){
+                        return ['code' => 204 , 'msg' => '该资源是授权资源，无法删除'];
+                    }
+                }
             }
             $update = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
             if($update){
@@ -360,8 +635,28 @@ class Video extends Model {
             }else{
                 $data['child_id'] = 0;
             }
+
+            //查询是否是授权资源
+            //查询是否授权
+            //分校才进行查询
+            //获取用户网校id
+            $data['school_status'] = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+            $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+            //分校资源
+            if($data['school_status'] != 1){
+                if(!empty($data['school_id']) && $data['school_id'] != ''){
+                    //去授权表查询直播id
+                    $res = CourseRefResource::where(['resource_id'=>$data['id'],'type'=>0,'to_school_id'=>$data['school_id']])->first();
+                    if($res){
+                        return ['code' => 204 , 'msg' => '该资源是授权资源，无法更新'];
+                    }
+                }
+            }
+
             $id = $data['id'];
             unset($data['id']);
+            unset($data['school_status']);
+            unset($data['school_id']);
             //获取后端的操作员id
             $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
             $data['admin_id'] = $admin_id;

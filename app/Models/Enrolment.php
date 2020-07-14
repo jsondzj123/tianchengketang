@@ -45,6 +45,11 @@ class Enrolment extends Model {
             return ['code' => 202 , 'msg' => '传递数据不合法'];
         }
 
+        //判断学校id是否合法
+        if(!isset($body['school_id']) || empty($body['school_id']) || $body['school_id'] <= 0){
+            return ['code' => 202 , 'msg' => '学校id不合法'];
+        }
+        
         //判断学员id是否合法
         if(!isset($body['student_id']) || empty($body['student_id']) || $body['student_id'] <= 0){
             return ['code' => 202 , 'msg' => '学员id不合法'];
@@ -98,6 +103,7 @@ class Enrolment extends Model {
 
         //报名数据信息追加
         $enroll_array = [
+            'school_id'      =>   $body['school_id'] ,
             'student_id'     =>   $body['student_id'] ,
             'parent_id'      =>   isset($parent_info[0]) && $parent_info[0] > 0 ? $parent_info[0] : 0 ,
             'child_id'       =>   isset($parent_info[1]) && $parent_info[1] > 0 ? $parent_info[1] : 0 ,

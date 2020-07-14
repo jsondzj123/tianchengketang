@@ -31,16 +31,16 @@ class Article extends Model {
             ->leftJoin('ld_admin','ld_admin.id','=','ld_article.user_id')
             ->where(function($query) use ($data,$school_id) {
                 if($data['role_id'] == 1){
-                    if(!empty($data['school_id']) && $data['school_id'] != ''){
+                    if(!empty($data['school_id']) && $data['school_id'] != 0){
                         $query->where('ld_article.school_id',$data['school_id']);
                     }
                 }else{
                     $query->where('ld_article.school_id',$school_id);
                 }
-                if(!empty($data['type_id']) && $data['type_id'] != '' ){
+                if(isset($data['type_id']) && !empty($data['type_id'] != '')){
                     $query->where('ld_article.article_type_id',$data['type_id']);
                 }
-                if(!empty($data['title']) && $data['title'] != ''){
+                if(isset($data['title']) && !empty($data['title'] != '')){
                     $query->where('ld_article.title','like','%'.$data['title'].'%')
                         ->orwhere('ld_article.id',$data['title']);
                 }
@@ -52,20 +52,20 @@ class Article extends Model {
                 ->leftJoin('ld_school','ld_school.id','=','ld_article.school_id')
                 ->leftJoin('ld_article_type','ld_article_type.id','=','ld_article.article_type_id')
                 ->leftJoin('ld_admin','ld_admin.id','=','ld_article.user_id')
-                ->where(function($query) use ($data) {
+                ->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
                     if($data['role_id'] == 1){
-                        if(!empty($data['school_id']) && $data['school_id'] != ''){
+                        if(!empty($data['school_id']) && $data['school_id'] != 0){
                             $query->where('ld_article.school_id',$data['school_id']);
                         }
                     }else{
                         //分校查询当前学校
-                        $query->where('ld_article.school_id',$data['school_id']);
+                        $query->where('ld_article.school_id',$school_id);
                     }
-                    if(!empty($data['type_id']) && $data['type_id'] != '' ){
+                    if(isset($data['type_id']) && !empty($data['type_id'] != '')){
                         $query->where('ld_article.article_type_id',$data['type_id']);
                     }
-                    if(!empty($data['title']) && $data['title'] != ''){
+                    if(isset($data['title']) && !empty($data['title'] != '')){
                         $query->where('ld_article.title','like','%'.$data['title'].'%')
                             ->orwhere('ld_article.id',$data['title']);
                     }
@@ -73,6 +73,10 @@ class Article extends Model {
                 ->where(['ld_article.is_del'=>1,'ld_article_type.is_del'=>1,'ld_article_type.status'=>1,'ld_admin.is_del'=>1,'ld_admin.is_forbid'=>1,'ld_school.is_del'=>1,'ld_school.is_forbid'=>1])
                 ->orderBy('ld_article.id','desc')
                 ->offset($offset)->limit($pagesize)->get();
+            foreach ($list as $k=>&$v){
+                $acc = Articleaccessory::select('id','accessory_name as name','accessory_url as url')->where(['article_id'=>$v['id'],'status'=>0])->get();
+                $v['accessory'] = $acc;
+            }
         }else{
             $list=[];
         }
@@ -199,7 +203,20 @@ class Article extends Model {
         unset($data['/admin/article/addArticle']);
         $data['user_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $data['update_at'] = date('Y-m-d H:i:s');
-        $add = self::insert($data);
+        $data['text'] = isset($data['text'])?$data['text']:'';
+        $access = $data['accessory'];
+        unset($data['accessory']);
+        $add = self::insertGetId($data);
+        if(isset($access) || !empty($access)){
+            $accessory = json_decode($access,true);
+            foreach ($accessory as $k=>$v){
+                Articleaccessory::insert([
+                                    'article_id' => $add,
+                                    'accessory_name' => $v['name'],
+                                    'accessory_url' => $v['url'],
+                                 ]);
+            }
+        }
         if($add){
             //添加日志操作
             AdminLog::insertAdminLog([
@@ -234,6 +251,7 @@ class Article extends Model {
             ->leftJoin('ld_article_type','ld_article_type.id','=','ld_article.article_type_id')
             ->where(['ld_article.id'=>$data['id'],'ld_article.is_del'=>1,'ld_school.is_del'=>1])
             ->first();
+        $find['accessory'] = Articleaccessory::select('id','accessory_name as name','accessory_url as url')->where(['article_id'=>$find['id'],'status'=>0])->get()->toArray();
         if($find){
             unset($find['user_id'],$find['share'],$find['status'],$find['is_del'],$find['create_at'],$find['update_at']);
             return ['code' => 200 , 'msg' => '获取成功','data'=>$find,'school'=>$schooltype[0],'type'=>$schooltype[1]];
@@ -286,10 +304,26 @@ class Article extends Model {
         unset($data['id']);
         unset($data['/admin/article/exitForId']);
         $data['key_word'] = isset($data['key_word'])?$data['key_word']:'';
-        $data['accessory_name'] = isset($data['accessory_name'])?$data['accessory_name']:'';
-        $data['accessory'] = isset($data['accessory'])?$data['accessory']:'';
+        $access = isset($data['accessory'])?$data['accessory']:'';
+        unset($data['accessory']);
         $data['text'] = isset($data['text'])?$data['text']:'';
         $res = self::where(['id'=>$id])->update($data);
+        if(isset($access) || empty($access)){
+            Articleaccessory::where('article_id',$id)->update(['status'=>1]);
+            $accessory = json_decode($access,true);
+            foreach ($accessory as $k=>$v){
+                $one = Articleaccessory::where(['article_id'=>$id,'accessory_name'=>$v['name'],'accessory_url'=>$v['url']])->first();
+                if(!empty($one)){
+                    Articleaccessory::where('id',$one['id'])->update(['status'=>0]);
+                }else{
+                    Articleaccessory::insert([
+                        'article_id' => $id,
+                        'accessory_name' => $v['name'],
+                        'accessory_url' => $v['url'],
+                    ]);
+                }
+            }
+        }
         if($res){
             //获取后端的操作员id
             $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;

@@ -254,7 +254,7 @@ class StudentController extends Controller {
             ],
             [
                 'id'  =>  5 ,
-                'name'=> '大本'
+                'name'=> '本科'
             ],
             [
                 'id'  =>  6 ,

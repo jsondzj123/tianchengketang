@@ -38,7 +38,7 @@ class Articletype extends Model {
         $total = self::leftJoin('ld_school','ld_school.id','=','ld_article_type.school_id')
             ->leftJoin('ld_admin','ld_admin.id','=','ld_article_type.user_id')
             ->where($where)->count();
-        $typelist = self::select('ld_article_type.id','ld_article_type.typename','ld_article_type.status','ld_school.name','ld_admin.username')
+        $typelist = self::select('ld_article_type.id','ld_article_type.typename','ld_article_type.status','ld_article_type.description','ld_school.name','ld_admin.username')
             ->leftJoin('ld_school','ld_school.id','=','ld_article_type.school_id')
             ->leftJoin('ld_admin','ld_admin.id','=','ld_article_type.user_id')
             ->where($where)
@@ -168,6 +168,8 @@ class Articletype extends Model {
         if($ones){
             return ['code' => 202 , 'msg' => '数据已存在'];
         }else {
+            unset($data['id']);
+            $data['description'] = isset($data['description'])?$data['description']:'';
             $add = self::insert($data);
             if($add){
                 //添加日志操作
@@ -242,15 +244,16 @@ class Articletype extends Model {
         }
         //缓存
         $key = 'articletype_oneFind_'.$data['id'];
-        if(Redis::get($key)) {
-            return ['code' => 200 , 'msg' => '获取成功','data'=>json_decode(Redis::get($key),true)];
-        }else{
-            $find = self::select('ld_article_type.id','ld_article_type.typename','ld_article_type.description','ld_school.name')
+//        if(Redis::get($key)) {
+//            return ['code' => 200 , 'msg' => '获取成功','data'=>json_decode(Redis::get($key),true)];
+//        }else{
+            $find = self::select('ld_article_type.id','ld_article_type.typename','ld_article_type.description','ld_school.id as school_id')
                 ->leftJoin('ld_school','ld_school.id','=','ld_article_type.school_id')
                 ->where(['ld_article_type.id'=>$data['id'],'ld_article_type.is_del'=>1])
                 ->first();
-            Redis::setex($key,60,json_encode($find));
+
+//            Redis::setex($key,60,json_encode($find));
             return ['code' => 200 , 'msg' => '获取成功','data'=>$find];
-        }
+//        }
     }
 }

@@ -13,6 +13,7 @@ use App\Tools\CurrentAdmin;
 class ApiAuthToken {
     public function handle($request, Closure $next){
         $user = CurrentAdmin::user();  
+
         if(!isset($user['id']) || $user['id'] <=0 ){
             return response()->json(['code'=>403,'msg'=>'无此用户，请联系管理员']);
         }
@@ -31,18 +32,20 @@ class ApiAuthToken {
             return response()->json(['code'=>403,'msg'=>'无此用户，请联系管理员']);
         }
         $authid = Authrules::getAuthOne($url);//获取权限id
-      
+
         if(isset($authid)&&$authid['id'] >0 ){
-            $role = Roleauth::getRoleOne($userlist['data']['role_id']);//获取角色权限
-            if(!strpos($role['data']['auth_id'],(string)$authid['id'])){
-                
-               return response()->json(['code'=>403,'msg'=>'此用户没有权限！']);
+            $role = Roleauth::getRoleOne(['id'=>$userlist['data']['role_id'],'school_id'=>$schoolData['data']['id']]);//获取角色权限
+            if($role['code']!=200){
+                return response()->json(['code'=>403,'msg'=>'此用户没有权限！！']);
             }else{
-               return $next($request);
+                if(!strpos($role['data']['auth_id'],(string)$authid['id'])){      
+                    return response()->json(['code'=>403,'msg'=>'此用户没有权限！']);
+                }else{
+                    return $next($request);
+                }
             }
         }else{
             return response()->json(['code'=>403,'msg'=>'此用户没有权限???']);
-
         }
 
     }

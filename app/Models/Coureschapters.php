@@ -12,6 +12,11 @@ class Coureschapters extends Model {
     /*=============章================*/
     //章节列表
     public static function chapterList($data){
+        $nature = isset($data['nature'])?$data['nature']:0;
+        if($nature == 1){
+            $course = CourseSchool::where(['id'=>$data['id']])->first();
+            $data['course_id'] = $course['course_id'];
+        }
         $lists = self::where(['course_id'=>$data['course_id'],'is_del'=>0,])->get()->toArray();
         $arr = self::demo($lists,0,0);
         return ['code' => 200 , 'msg' => '查询成功','data'=>$arr];
@@ -151,9 +156,9 @@ class Coureschapters extends Model {
         if(!isset($data['name']) || empty($data['name'])){
             return ['code' => 201 , 'msg' => '请填写节名称'];
         }
-        if(!isset($data['resource_id']) || empty($data['resource_id'])){
-            return ['code' => 201 , 'msg' => '请选择资源'];
-        }
+//        if(!isset($data['resource_id']) || empty($data['resource_id'])){
+//            return ['code' => 201 , 'msg' => '请选择资源'];
+//        }
         try{
             DB::beginTransaction();
             $insert = self::insertGetId([
@@ -280,7 +285,6 @@ class Coureschapters extends Model {
             return ['code' => 202 , 'msg' => '删除失败'];
         }
     }
-
 
 
 

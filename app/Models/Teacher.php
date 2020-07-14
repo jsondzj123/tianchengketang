@@ -140,28 +140,20 @@ class Teacher extends Model {
         if(!isset($body['type']) || empty($body['type']) || $body['type'] <= 0 || !in_array($body['type'] , [1,2])){
             return ['code' => 202 , 'msg' => '老师类型不合法'];
         }
+        
+        //获取分校的状态和id
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+        $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
 
         //每页显示的条数
         $pagesize = isset($body['pagesize']) && $body['pagesize'] > 0 ? $body['pagesize'] : 15;
         $page     = isset($body['page']) && $body['page'] > 0 ? $body['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
-
-        //获取讲师或教务是否有数据
-        $teacher_count = self::where(function($query) use ($body){
-            $query->where('is_del' , '=' , 0);
-            //获取老师类型(讲师还是教务)
-            $query->where('type' , '=' , $body['type']);
-
-            //判断搜索内容是否为空
-            if(isset($body['search']) && !empty($body['search'])){
-                $query->where('real_name','like','%'.$body['search'].'%');
-            }
-        })->count();
-
-        //判断讲师或教务是否有数据
-        if($teacher_count && $teacher_count > 0){
-            //获取讲师或教务列表
-            $teacher_list = self::where(function($query) use ($body){
+        
+        //判断是否是总校的状态
+        if($school_status > 0 && $school_status == 1){
+            //获取讲师或教务是否有数据
+            $teacher_count = self::where(function($query) use ($body){
                 $query->where('is_del' , '=' , 0);
                 //获取老师类型(讲师还是教务)
                 $query->where('type' , '=' , $body['type']);
@@ -170,16 +162,67 @@ class Teacher extends Model {
                 if(isset($body['search']) && !empty($body['search'])){
                     $query->where('real_name','like','%'.$body['search'].'%');
                 }
-            })->select('id as teacher_id','real_name','phone','create_at','number','is_recommend','is_forbid')->orderByDesc('id')->offset($offset)->limit($pagesize)->get()->toArray();
-            //判断如果是讲师则查询开课数量
-            if($body['type'] == 2){
-                foreach($teacher_list as $k=>$v){
-                    $teacher_list[$k]['number'] = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
+            })->count();
+
+            //判断讲师或教务是否有数据
+            if($teacher_count && $teacher_count > 0){
+                //获取讲师或教务列表
+                $teacher_list = self::where(function($query) use ($body){
+                    $query->where('is_del' , '=' , 0);
+                    //获取老师类型(讲师还是教务)
+                    $query->where('type' , '=' , $body['type']);
+
+                    //判断搜索内容是否为空
+                    if(isset($body['search']) && !empty($body['search'])){
+                        $query->where('real_name','like','%'.$body['search'].'%');
+                    }
+                })->select('id as teacher_id','real_name','phone','create_at','number','is_recommend','is_forbid')->orderByDesc('id')->offset($offset)->limit($pagesize)->get()->toArray();
+                //判断如果是讲师则查询开课数量
+                if($body['type'] == 2){
+                    foreach($teacher_list as $k=>$v){
+                        $teacher_list[$k]['number'] = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
+                    }
                 }
+                return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => $teacher_list , 'total' => $teacher_count , 'pagesize' => $pagesize , 'page' => $page]];
+            } else {
+                return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
             }
-            return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => $teacher_list , 'total' => $teacher_count , 'pagesize' => $pagesize , 'page' => $page]];
         } else {
-            return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
+            //获取讲师或教务是否有数据
+            $teacher_count = self::where(function($query) use ($body){
+                $query->where('is_del' , '=' , 0);
+                //获取老师类型(讲师还是教务)
+                $query->where('type' , '=' , $body['type']);
+
+                //判断搜索内容是否为空
+                if(isset($body['search']) && !empty($body['search'])){
+                    $query->where('real_name','like','%'.$body['search'].'%');
+                }
+            })->where('school_id' , $school_id)->count();
+
+            //判断讲师或教务是否有数据
+            if($teacher_count && $teacher_count > 0){
+                //获取讲师或教务列表
+                $teacher_list = self::where(function($query) use ($body){
+                    $query->where('is_del' , '=' , 0);
+                    //获取老师类型(讲师还是教务)
+                    $query->where('type' , '=' , $body['type']);
+
+                    //判断搜索内容是否为空
+                    if(isset($body['search']) && !empty($body['search'])){
+                        $query->where('real_name','like','%'.$body['search'].'%');
+                    }
+                })->select('id as teacher_id','real_name','phone','create_at','number','is_recommend','is_forbid')->where('school_id' , $school_id)->orderByDesc('id')->offset($offset)->limit($pagesize)->get()->toArray();
+                //判断如果是讲师则查询开课数量
+                if($body['type'] == 2){
+                    foreach($teacher_list as $k=>$v){
+                        $teacher_list[$k]['number'] = Couresteacher::where('teacher_id' , $v['teacher_id'])->count();
+                    }
+                }
+                return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => $teacher_list , 'total' => $teacher_count , 'pagesize' => $pagesize , 'page' => $page]];
+            } else {
+                return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => ['teacher_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
+            }
         }
     }
 
@@ -193,46 +236,95 @@ class Teacher extends Model {
      * @param ctime     2020-04-29
      */
     public static function getTeacherSearchList($body=[]) {
-        //获取讲师或教务列表
-        $teacher_list = self::where(function($query) use ($body){
-            $query->where('is_forbid' , '=' , 0);
-            $query->where('is_del' , '=' , 0);
-            //判断学科分类是否选择
-            if(isset($body['parent_id']) && !empty($body['parent_id'])){
-                $parent_id = json_decode($body['parent_id'] , true);
-                if($parent_id && !empty($parent_id)){
-                    $query->where('parent_id','=',$parent_id[0]);
-                    //判断二级分类的id是否为空
-                    if(isset($parent_id[1]) && $parent_id[1] > 0){
-                        $query->where('child_id','=',$parent_id[1]);
+        //获取分校的状态和id
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+        $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        
+        //判断是否是总校的状态
+        if($school_status > 0 && $school_status == 1){
+            //获取讲师或教务列表
+            $teacher_list = self::where(function($query) use ($body){
+                $query->where('is_forbid' , '=' , 0);
+                $query->where('is_del' , '=' , 0);
+                //判断学科分类是否选择
+                if(isset($body['parent_id']) && !empty($body['parent_id'])){
+                    $parent_id = json_decode($body['parent_id'] , true);
+                    if($parent_id && !empty($parent_id)){
+                        $query->where('parent_id','=',$parent_id[0]);
+                        //判断二级分类的id是否为空
+                        if(isset($parent_id[1]) && $parent_id[1] > 0){
+                            $query->where('child_id','=',$parent_id[1]);
+                        }
                     }
                 }
-            }
 
-            //判断姓名是否为空
-            if(isset($body['real_name']) && !empty($body['real_name'])){
-                $query->where('real_name','like','%'.$body['real_name'].'%');
-            }
-        })->select('id as teacher_id','real_name','type')->orderByDesc('create_at')->get()->toArray();
-
-        //判断获取列表是否为空
-        if($teacher_list && !empty($teacher_list)){
-            $arr = [];
-            foreach($teacher_list as $k => $v){
-                //教务
-                if($v['type'] == 1){
-                    $arr['jiaowu'][] = [
-                        'teacher_id' =>  $v['teacher_id'] ,
-                        'real_name'  =>  $v['real_name']
-                    ];
-                } else {
-                    $arr['jiangshi'][] = [
-                        'teacher_id' =>  $v['teacher_id'] ,
-                        'real_name'  =>  $v['real_name']
-                    ];
+                //判断姓名是否为空
+                if(isset($body['real_name']) && !empty($body['real_name'])){
+                    $query->where('real_name','like','%'.$body['real_name'].'%');
                 }
+            })->select('id as teacher_id','real_name','type')->orderByDesc('create_at')->get()->toArray();
+
+            //判断获取列表是否为空
+            if($teacher_list && !empty($teacher_list)){
+                $arr = [];
+                foreach($teacher_list as $k => $v){
+                    //教务
+                    if($v['type'] == 1){
+                        $arr['jiaowu'][] = [
+                            'teacher_id' =>  $v['teacher_id'] ,
+                            'real_name'  =>  $v['real_name']
+                        ];
+                    } else {
+                        $arr['jiangshi'][] = [
+                            'teacher_id' =>  $v['teacher_id'] ,
+                            'real_name'  =>  $v['real_name']
+                        ];
+                    }
+                }
+                $teacher_list = $arr;
             }
-            $teacher_list = $arr;
+        } else {
+            //获取讲师或教务列表
+            $teacher_list = self::where(function($query) use ($body){
+                $query->where('is_forbid' , '=' , 0);
+                $query->where('is_del' , '=' , 0);
+                //判断学科分类是否选择
+                if(isset($body['parent_id']) && !empty($body['parent_id'])){
+                    $parent_id = json_decode($body['parent_id'] , true);
+                    if($parent_id && !empty($parent_id)){
+                        $query->where('parent_id','=',$parent_id[0]);
+                        //判断二级分类的id是否为空
+                        if(isset($parent_id[1]) && $parent_id[1] > 0){
+                            $query->where('child_id','=',$parent_id[1]);
+                        }
+                    }
+                }
+
+                //判断姓名是否为空
+                if(isset($body['real_name']) && !empty($body['real_name'])){
+                    $query->where('real_name','like','%'.$body['real_name'].'%');
+                }
+            })->select('id as teacher_id','real_name','type')->where('school_id' , $school_id)->orderByDesc('create_at')->get()->toArray();
+
+            //判断获取列表是否为空
+            if($teacher_list && !empty($teacher_list)){
+                $arr = [];
+                foreach($teacher_list as $k => $v){
+                    //教务
+                    if($v['type'] == 1){
+                        $arr['jiaowu'][] = [
+                            'teacher_id' =>  $v['teacher_id'] ,
+                            'real_name'  =>  $v['real_name']
+                        ];
+                    } else {
+                        $arr['jiangshi'][] = [
+                            'teacher_id' =>  $v['teacher_id'] ,
+                            'real_name'  =>  $v['real_name']
+                        ];
+                    }
+                }
+                $teacher_list = $arr;
+            }
         }
         return ['code' => 200 , 'msg' => '获取老师列表成功' , 'data' => $teacher_list];
     }

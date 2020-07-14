@@ -554,15 +554,15 @@ class Exam extends Model {
         //判断科目id是否为空和合法
         if(!isset($body['subject_id']) || empty($body['subject_id']) || $body['subject_id'] <= 0){
             //根据题库的Id获取最新科目信息
-            $subject_info = QuestionSubject::select("id")->where("admin_id" , $admin_id)->where("bank_id" , $body['bank_id'])->where("is_del" , 0)->orderByDesc('create_at')->first();
-            $body['subject_id']  = $subject_info->id ? $subject_info->id : 0;
+            $subject_info = QuestionSubject::select("id")->where("admin_id" , $admin_id)->where("bank_id" , $body['bank_id'])->where('subject_name' , '!=' , "")->where("is_del" , 0)->orderByDesc('create_at')->first();
+            $body['subject_id']  = $subject_info['id'] ? $subject_info['id'] : 0;
         }
 
         //获取试题的总数量
         $exam_count = self::where(function($query) use ($body){
             //获取后端的操作员id
             $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-            $query->where('bank_id' , '=' , $body['bank_id'])->where("subject_id" , "=" , $body['subject_id'])->where("type" , $body['type'])->where("parent_id" , 0)->where('is_del' , '=' , 0)->where('admin_id' , '=' , $admin_id);
+            $query->where('bank_id' , '=' , $body['bank_id'])->where("subject_id" , "=" , $body['subject_id'])->where("type" , $body['type'])->where("parent_id" , 0)->where('is_del' , '=' , 0);
             
             //判断审核状态是否为空和合法
             if(isset($body['is_publish']) && in_array($body['is_publish'] , [1,0])){
@@ -606,9 +606,6 @@ class Exam extends Model {
 
                 //获取后端的操作员id
                 $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-
-                //操作员id
-                $query->where('admin_id' , '=' , $admin_id);
                 
                 //判断审核状态是否为空和合法
                 if(isset($body['is_publish']) && in_array($body['is_publish'] , [1,0])){
@@ -860,134 +857,138 @@ class Exam extends Model {
         //空数组赋值
         $arr = [];
         foreach($exam_list as $k=>$v){
-            //试题类型赋值
-            $exam_type = $v[0];
+            //判断此题库此科目下面此试题是否被添加过
+            $is_insert_exam = Exam::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where('exam_content' , $v[1])->where('is_del' , 0)->count();
+            if($is_insert_exam <= 0){
+                //试题类型赋值
+                $exam_type = $v[0];
 
-            //试题选项空数组赋值
-            $option_list = [];
+                //试题选项空数组赋值
+                $option_list = [];
 
-            //判断试题类型是单选题或多选题或不定项或填空题
-            if(in_array($exam_type , [1,2,4,5])){
-                //选项对应索引值
-                $option_index = [3=>'A',4=>'B',5=>'C',6=>'D',7=>'E',8=>'F',9=>'G',10=>'H'];
+                //判断试题类型是单选题或多选题或不定项或填空题
+                if(in_array($exam_type , [1,2,4,5])){
+                    //选项对应索引值
+                    $option_index = [3=>'A',4=>'B',5=>'C',6=>'D',7=>'E',8=>'F',9=>'G',10=>'H'];
 
-                //判断A选项的值是否为空
-                for($i=3;$i<11;$i++){
-                    //对应的选项列是否为空
-                    if($v[$i] && !empty($v[$i])){
-                        $option_list[] = [
-                            'option_no'    => $option_index[$i] ,
-                            'option_name'  => $v[$i]  ,
-                            'correct_flag' => $exam_type == 5 ? 1 : strpos($v[2] , $option_index[$i]) !== false ? 1 : 0
-                        ];
+                    //判断A选项的值是否为空
+                    for($i=3;$i<11;$i++){
+                        //对应的选项列是否为空
+                        if($v[$i] && !empty($v[$i])){
+                            $option_list[] = [
+                                'option_no'    => $option_index[$i] ,
+                                'option_name'  => $v[$i]  ,
+                                'correct_flag' => $exam_type == 5 ? 1 : strpos($v[2] , $option_index[$i]) !== false ? 1 : 0
+                            ];
+                        }
                     }
                 }
-            }
 
-            //判断excel表格中章的信息是否为空
-            if($v[13] && !empty($v[13])){
-                //根据章的名称获取章的信息
-                $chapter_info  = Chapters::where("name" , trim($v[13]))->where("type" , 0)->first();
-                
-                //如果章不存在则插入
-                if(!$chapter_info || empty($chapter_info)){
-                    $chapter_id = Chapters::insertGetId([
-                        'parent_id'      =>   0 ,
-                        'subject_id'     =>   $body['subject_id'] ,
-                        'admin_id'       =>   $admin_id ,
-                        'bank_id'        =>   $body['bank_id'] ,
-                        'name'           =>   trim($v[13]) ,
-                        'type'           =>   0 ,
-                        'create_at'      =>   date('Y-m-d H:i:s', time()+10)
-                    ]);
-                } else {
-                    $chapter_id = $chapter_info['id'];
-                }
-            }
-            
-            //判断excel表格中节的信息是否为空
-            if($v[14] && !empty($v[14])){
-                //根据节的名称获取节的信息
-                $joint_info    = Chapters::where("name" , trim($v[14]))->where("type" , 1)->first();
-                
-                //如果节不存在则插入
-                if(!$joint_info || empty($joint_info)){
-                    $joint_id = Chapters::insertGetId([
-                        'parent_id'      =>   $chapter_id ,
-                        'subject_id'     =>   $body['subject_id'] ,
-                        'admin_id'       =>   $admin_id ,
-                        'bank_id'        =>   $body['bank_id'] ,
-                        'name'           =>   trim($v[14]) ,
-                        'type'           =>   1 ,
-                        'create_at'      =>   date('Y-m-d H:i:s', time()+10)
-                    ]);
-                } else {
-                    $joint_id = $joint_info['id'];
-                }
-            }
-            
-            //判断excel表格中考点的信息是否为空
-            if($v[15] && !empty($v[15])){
-                //根据考点的名称获取考点的信息
-                $point_info    = Chapters::where("name" , trim($v[15]))->where("type" , 2)->first();
-                
-                //如果考点不存在则插入
-                if(!$point_info || empty($point_info)){
-                    $point_id = Chapters::insertGetId([
-                        'parent_id'      =>   $joint_id ,
-                        'subject_id'     =>   $body['subject_id'] ,
-                        'admin_id'       =>   $admin_id ,
-                        'bank_id'        =>   $body['bank_id'] ,
-                        'name'           =>   trim($v[15]) ,
-                        'type'           =>   2 ,
-                        'create_at'      =>   date('Y-m-d H:i:s', time()+10)
-                    ]);
-                } else {
-                    $point_id = $point_info['id'];
-                }
-            }
-            
-            //判断是否执行插入操作
-            if($is_insert > 0){
-                //试题插入操作
-                $exam_id = self::insertGetId([
-                    'bank_id'        =>  $body['bank_id'] ,                                        //题库的id
-                    'subject_id'     =>  $body['subject_id'] ,                                     //科目的id
-                    'admin_id'       =>  $admin_id ,                                               //后端的操作员id
-                    'exam_content'   =>  $v[1] ,                                                   //试题内容
-                    'answer'         =>  $exam_type == 3 ? $v[2] == '正确' ?  1  : 0  : $v[2]  ,   //试题答案
-                    'text_analysis'  =>  !empty($v[11]) ? $v[11] : '' ,                            //文字解析
-                    'item_diffculty' =>  !empty($v[12]) ? $diffculty_array[trim($v[12])] : 0 ,     //试题难度
-                    'chapter_id'     =>  $v[13] && !empty($v[13]) ? $chapter_id > 0 ? $chapter_id : 0 : 0,         //章id
-                    'joint_id'       =>  $v[14] && !empty($v[14]) ? $joint_id > 0 ? $joint_id : 0 : 0,             //节id
-                    'point_id'       =>  $v[15] && !empty($v[15]) ? $point_id > 0 ? $point_id : 0 : 0,             //考点id
-                    'type'           =>  $exam_type,                                               //试题类型
-                    'create_at'      =>  date('Y-m-d H:i:s')                                       //创建时间
-                ]);
+                //判断excel表格中章的信息是否为空
+                if($v[13] && !empty($v[13])){
+                    //根据章的名称获取章的信息
+                    $chapter_info  = Chapters::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[13]))->where("type" , 0)->first();
 
-                //判断是否插入成功试题
-                if($exam_id > 0 && in_array($exam_type , [1,2,4,5])){
-                    //试题选项插入
-                    ExamOption::insertGetId([
-                        'admin_id'       =>  $admin_id ,                                           //后端的操作员id
-                        'exam_id'        =>  $exam_id ,                                            //试题的id
-                        'option_content' =>  $option_list ? json_encode($option_list) : [],        //试题选项
-                        'create_at'      =>  date('Y-m-d H:i:s')                                   //创建时间
-                    ]);
+                    //如果章不存在则插入
+                    if(!$chapter_info || empty($chapter_info)){
+                        $chapter_id = Chapters::insertGetId([
+                            'parent_id'      =>   0 ,
+                            'subject_id'     =>   $body['subject_id'] ,
+                            'admin_id'       =>   $admin_id ,
+                            'bank_id'        =>   $body['bank_id'] ,
+                            'name'           =>   trim($v[13]) ,
+                            'type'           =>   0 ,
+                            'create_at'      =>   date('Y-m-d H:i:s', time()+10)
+                        ]);
+                    } else {
+                        $chapter_id = $chapter_info['id'];
+                    }
                 }
-            } else {
-                //数组信息赋值
-                $arr[$exam_type][] = [
-                    'exam_content'  =>  $v[1]  ,                                                  //试题内容
-                    'answer'        =>  $exam_type == 3 ? $v[2] == '正确' ?  1  : 0  : $v[2]  ,   //试题答案
-                    'text_analysis' =>  !empty($v[11]) ? $v[11] : '' ,                            //文字解析
-                    'item_diffculty'=>  !empty($v[12]) ? $diffculty_array[trim($v[12])] : 0 ,     //试题难度
-                    'chapter_id'     =>  $v[13] && !empty($v[13]) ? $chapter_id > 0 ? $chapter_id : 0 : 0,         //章id
-                    'joint_id'       =>  $v[14] && !empty($v[14]) ? $joint_id > 0 ? $joint_id : 0 : 0,             //节id
-                    'point_id'       =>  $v[15] && !empty($v[15]) ? $point_id > 0 ? $point_id : 0 : 0,             //考点id
-                    'option_list'   =>  $option_list ? $option_list : []                          //试题选项
-                ];
-                
+
+                //判断excel表格中节的信息是否为空
+                if($v[14] && !empty($v[14])){
+                    //根据节的名称获取节的信息
+                    $joint_info    = Chapters::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[14]))->where("type" , 1)->first();
+
+                    //如果节不存在则插入
+                    if(!$joint_info || empty($joint_info)){
+                        $joint_id = Chapters::insertGetId([
+                            'parent_id'      =>   $chapter_id ,
+                            'subject_id'     =>   $body['subject_id'] ,
+                            'admin_id'       =>   $admin_id ,
+                            'bank_id'        =>   $body['bank_id'] ,
+                            'name'           =>   trim($v[14]) ,
+                            'type'           =>   1 ,
+                            'create_at'      =>   date('Y-m-d H:i:s', time()+10)
+                        ]);
+                    } else {
+                        $joint_id = $joint_info['id'];
+                    }
+                }
+
+                //判断excel表格中考点的信息是否为空
+                if($v[15] && !empty($v[15])){
+                    //根据考点的名称获取考点的信息
+                    $point_info    = Chapters::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[15]))->where("type" , 2)->first();
+
+                    //如果考点不存在则插入
+                    if(!$point_info || empty($point_info)){
+                        $point_id = Chapters::insertGetId([
+                            'parent_id'      =>   $joint_id ,
+                            'subject_id'     =>   $body['subject_id'] ,
+                            'admin_id'       =>   $admin_id ,
+                            'bank_id'        =>   $body['bank_id'] ,
+                            'name'           =>   trim($v[15]) ,
+                            'type'           =>   2 ,
+                            'create_at'      =>   date('Y-m-d H:i:s', time()+10)
+                        ]);
+                    } else {
+                        $point_id = $point_info['id'];
+                    }
+                }
+
+                //判断是否执行插入操作
+                if($is_insert > 0){
+                    //试题插入操作
+                    $exam_id = self::insertGetId([
+                        'bank_id'        =>  $body['bank_id'] ,                                        //题库的id
+                        'subject_id'     =>  $body['subject_id'] ,                                     //科目的id
+                        'admin_id'       =>  $admin_id ,                                               //后端的操作员id
+                        'exam_content'   =>  $v[1] ,                                                   //试题内容
+                        'answer'         =>  $exam_type == 3 ? $v[2] == '正确' ?  1  : 0  : $v[2]  ,   //试题答案
+                        'text_analysis'  =>  !empty($v[11]) ? $v[11] : '' ,                            //文字解析
+                        'item_diffculty' =>  !empty($v[12]) ? $diffculty_array[trim($v[12])] : 0 ,     //试题难度
+                        'chapter_id'     =>  $v[13] && !empty($v[13]) ? $chapter_id > 0 ? $chapter_id : 0 : 0,         //章id
+                        'joint_id'       =>  $v[14] && !empty($v[14]) ? $joint_id > 0 ? $joint_id : 0 : 0,             //节id
+                        'point_id'       =>  $v[15] && !empty($v[15]) ? $point_id > 0 ? $point_id : 0 : 0,             //考点id
+                        'type'           =>  $exam_type,                                               //试题类型
+                        'create_at'      =>  date('Y-m-d H:i:s')                                       //创建时间
+                    ]);
+
+                    //判断是否插入成功试题
+                    if($exam_id > 0 && in_array($exam_type , [1,2,4,5])){
+                        //试题选项插入
+                        ExamOption::insertGetId([
+                            'admin_id'       =>  $admin_id ,                                           //后端的操作员id
+                            'exam_id'        =>  $exam_id ,                                            //试题的id
+                            'option_content' =>  $option_list ? json_encode($option_list) : [],        //试题选项
+                            'create_at'      =>  date('Y-m-d H:i:s')                                   //创建时间
+                        ]);
+                    }
+                } else {
+                    //数组信息赋值
+                    $arr[$exam_type][] = [
+                        'exam_content'  =>  $v[1]  ,                                                  //试题内容
+                        'answer'        =>  $exam_type == 3 ? $v[2] == '正确' ?  1  : 0  : $v[2]  ,   //试题答案
+                        'text_analysis' =>  !empty($v[11]) ? $v[11] : '' ,                            //文字解析
+                        'item_diffculty'=>  !empty($v[12]) ? $diffculty_array[trim($v[12])] : 0 ,     //试题难度
+                        'chapter_id'     =>  $v[13] && !empty($v[13]) ? $chapter_id > 0 ? $chapter_id : 0 : 0,         //章id
+                        'joint_id'       =>  $v[14] && !empty($v[14]) ? $joint_id > 0 ? $joint_id : 0 : 0,             //节id
+                        'point_id'       =>  $v[15] && !empty($v[15]) ? $point_id > 0 ? $point_id : 0 : 0,             //考点id
+                        'option_list'   =>  $option_list ? $option_list : []                          //试题选项
+                    ];
+
+                }
             }
         }
         //返回信息数据

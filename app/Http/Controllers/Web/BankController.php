@@ -14,6 +14,7 @@ use App\Models\StudentCollectQuestion;
 use App\Models\StudentPapers;
 use App\Models\Coures;
 use App\Models\Order;
+use App\Models\School;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
@@ -28,29 +29,47 @@ class BankController extends Controller {
     public function getBankList() {
         //获取提交的参数
         try{
+            //分校域名
+            $school_dns        = isset(self::$accept_data['school_dns']) && !empty(self::$accept_data['school_dns']) ? self::$accept_data['school_dns'] : '';           //获取学校域名
+           
+            //判断学校域名是否传递
+            if(!$school_dns || empty($school_dns)){
+                return response()->json(['code' => 201 , 'msg' => '分校域名为空']);
+            }
+            
+            //根据学校域名获取学校的id
+            $school_info = School::where('dns' , $school_dns)->where('is_del' , 1)->where('is_forbid' , 1)->first();
+            if(!$school_info || empty($school_info)){
+                return response()->json(['code' => 203 , 'msg' => '此域名不合法']);
+            }
+            
+            //获取分校id
+            $school_id = $school_info['id'];
+            
             //题库数组赋值
             $bank_array = [];
-                
+            
             //获取全部题库的列表
-            $bank_list = Bank::where("is_del" , 0)->where("is_open" , 0)->orderByDesc('id')->get();
+            $bank_list = DB::table('ld_question_bank')->leftJoin("ld_admin" , function($join){
+                $join->on('ld_admin.id', '=', 'ld_question_bank.admin_id');
+            })->select('ld_question_bank.id' , 'ld_question_bank.subject_id' , 'ld_question_bank.topic_name')->where("ld_admin.school_id" , $school_id)->where('ld_question_bank.is_del' , '=' , 0)->where("ld_question_bank.is_open" , 0)->orderByDesc('ld_question_bank.id')->get()->toArray();
             if($bank_list && !empty($bank_list)){
-                $bank_list = $bank_list->toArray();
                 foreach($bank_list as $k=>$v){
                     //判断科目的id是否为空
-                    if($v['subject_id'] && !empty($v['subject_id'])){
+                    if($v->subject_id && !empty($v->subject_id)){
                         //科目id数据格式转化
-                        $subject_id   = explode(',' , $v['subject_id']);
+                        $subject_id   = explode(',' , $v->subject_id);
                         
                         //根据科目的id获取列表数据
-                        $subject_list = QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v['id'])->whereIn('id' , $subject_id)->where('is_del' , 0)->get();
+                        $subject_list = QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->id)->whereIn('id' , $subject_id)->where('is_del' , 0)->get();
                     } else {
                         $subject_list = [];
                     }
                     
                     //新数组赋值
                     $bank_array[] = [
-                        'bank_id'     =>   $v['id'] ,
-                        'bank_name'   =>   $v['topic_name'] ,
+                        'bank_id'     =>   $v->id ,
+                        'bank_name'   =>   $v->topic_name ,
                         'subject_list'=>   $subject_list
                     ];
                 }
@@ -366,7 +385,8 @@ class BankController extends Controller {
                     'joint_id'     =>   $joint_id ,
                     'model'        =>   $model ,
                     'type'         =>   1 ,
-                    'create_at'    =>   date('Y-m-d H:i:s')
+                    'create_at'    =>   date('Y-m-d H:i:s') ,
+                    'update_at'    =>   date('Y-m-d H:i:s')
                 ]);
                 
                 //保存随机生成的试题
@@ -484,7 +504,8 @@ class BankController extends Controller {
                     'bank_id'      =>   $bank_id ,
                     'subject_id'   =>   $subject_id ,
                     'type'         =>   2 ,
-                    'create_at'    =>   date('Y-m-d H:i:s')
+                    'create_at'    =>   date('Y-m-d H:i:s') ,
+                    'update_at'    =>   date('Y-m-d H:i:s')
                 ]);
                 
                 //保存随机生成的试题
@@ -970,7 +991,7 @@ class BankController extends Controller {
                             $sum_score[] = $score;
                         }
                     }
-                    StudentPapers::insertGetId([
+                    /*StudentPapers::insertGetId([
                         'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
                         'bank_id'      =>   $bank_id ,
                         'subject_id'   =>   $subject_id ,
@@ -981,7 +1002,25 @@ class BankController extends Controller {
                         'is_over'      =>   1 ,
                         'create_at'    =>   date('Y-m-d H:i:s') ,
                         'update_at'    =>   date('Y-m-d H:i:s')
-                    ]);
+                    ]);*/
+                    $answer_score = count($sum_score) > 0 ? array_sum($sum_score) : 0;
+                    //更新试卷的信息
+                    StudentPapers::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'papers_id' => $papers_id , 'type' => 3])->update(['answer_time' => $answer_time , 'answer_score' => $answer_score , 'is_over' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
+                } else {
+                    //判断学员试卷表中是否存在此试卷
+                    $student_paperts_count = StudentPapers::where('student_id' , self::$accept_data['user_info']['user_id'])->where('bank_id' , $bank_id)->where("subject_id" , $subject_id)->where("papers_id" , $papers_id)->where('type' , 3)->count();
+                    if($student_paperts_count <= 0){
+                        //插入试卷
+                        StudentPapers::insertGetId([
+                            'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                            'bank_id'      =>   $bank_id ,
+                            'subject_id'   =>   $subject_id ,
+                            'papers_id'    =>   $papers_id ,
+                            'type'         =>   3 ,
+                            'create_at'    =>   date('Y-m-d H:i:s') ,
+                            'update_at'    =>   date('Y-m-d H:i:s')
+                        ]);
+                    }
                 }
             }
             
@@ -1025,7 +1064,7 @@ class BankController extends Controller {
         $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_right' , 2)->count();
         
         //做题记录
-        $exam_count    = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_right' , '>' , 0)->count();
+        $exam_count    = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->whereIn('type' , [1,2,3])->count();
         
         //返回数据信息
         return response()->json(['code' => 200 , 'msg' => '返回数据成功' , 'data' => ['collect_count' => $collect_count , 'error_count' => $error_count , 'exam_count' => $exam_count]]);
@@ -1210,7 +1249,7 @@ class BankController extends Controller {
         $new_array = [];
 
         //获取学员的做题记录列表
-        $make_exam_list = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , $type)->get()->toArray();
+        $make_exam_list = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , $type)->orderBy('update_at' , 'DESC')->get()->toArray();
         
         //判断信息是否为空
         if($make_exam_list && !empty($make_exam_list)){
@@ -1571,7 +1610,7 @@ class BankController extends Controller {
             $papers_info = Papers::where("id" , $papers_id)->first();
             
             //判断是否提交
-            $info = StudentPapers::where('papers_id' , $papers_id)->where('type' , 3)->first();
+            $info = StudentPapers::where('papers_id' , $papers_id)->where('type' , 3)->where('is_over' , 1)->first();
             if($info && !empty($info)){
                 return response()->json(['code' => 200 , 'msg' => '交卷成功' , 'data' => ['answer_time' => $info['answer_time'] , 'answer_score' => (double)$info['answer_score']]]);
             } else {
@@ -1601,7 +1640,7 @@ class BankController extends Controller {
                     $sum_scores = count($sum_score) > 0 ? array_sum($sum_score) : 0;
 
                     //判断是否插入成功
-                    $id = StudentPapers::insertGetId([
+                    /*$id = StudentPapers::insertGetId([
                         'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
                         'bank_id'      =>   $bank_id ,
                         'subject_id'   =>   $subject_id ,
@@ -1612,9 +1651,31 @@ class BankController extends Controller {
                         'is_over'      =>   1 ,
                         'create_at'    =>   date('Y-m-d H:i:s') ,
                         'update_at'    =>   date('Y-m-d H:i:s')
-                    ]);
-
-                    if($id && $id > 0){
+                    ]);*/
+                    
+                    //判断学员试卷表中是否存在此试卷
+                    $student_paperts_count = StudentPapers::where('student_id' , self::$accept_data['user_info']['user_id'])->where('bank_id' , $bank_id)->where("subject_id" , $subject_id)->where("papers_id" , $papers_id)->where('type' , 3)->count();
+                    if($student_paperts_count <= 0){
+                        //插入试卷
+                        $id = StudentPapers::insertGetId([
+                            'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                            'bank_id'      =>   $bank_id ,
+                            'subject_id'   =>   $subject_id ,
+                            'papers_id'    =>   $papers_id ,
+                            'answer_time'  =>   $answer_time ,
+                            'answer_score' =>   $sum_scores,
+                            'type'         =>   3 ,
+                            'is_over'      =>   1 ,
+                            'create_at'    =>   date('Y-m-d H:i:s') ,
+                            'update_at'    =>   date('Y-m-d H:i:s')
+                        ]);
+                    } else {
+                        //更新试卷的信息
+                        $id = StudentPapers::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'papers_id' => $papers_id , 'type' => 3])->update(['answer_time' => $answer_time , 'answer_score' => $sum_scores , 'is_over' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
+                    }
+                    
+                    //判断是否提交试卷成功
+                    if($id && !empty($id)){
                         //事务回滚
                         DB::commit();
                         return response()->json(['code' => 200 , 'msg' => '交卷成功' , 'data' => ['answer_time' => $answer_time , 'answer_score' => $sum_scores]]);
@@ -1625,6 +1686,88 @@ class BankController extends Controller {
                     }
                 }
             }
+        }
+    }
+    
+    /*
+     * @param  description   我的题库
+     * @param author    dzj
+     * @param ctime     2020-07-13
+     * return string
+     */
+    public function getMyBankList(){
+        $pagesize = isset(self::$accept_data['pagesize']) && self::$accept_data['pagesize'] > 0 ? self::$accept_data['pagesize'] : 15;
+        $page     = isset(self::$accept_data['page']) && self::$accept_data['page'] > 0 ? self::$accept_data['page'] : 1;
+        $type     = isset(self::$accept_data['type']) && self::$accept_data['type'] > 0 ? self::$accept_data['type'] : 1;                             //获取类型(1代表已做题库2代表可做题库)
+        
+        //起始位置
+        $offset   = ($page - 1) * $pagesize;
+        
+        //判断类型是否传递
+        if($type <= 0 || !in_array($type , [1,2])){
+            return response()->json(['code' => 202 , 'msg' => '类型不合法']);
+        }
+        
+        $arr = [];
+        
+        //已做题库数量
+        if($type == 1){
+            //已做题库数量
+            $bank_count = DB::table('ld_student_papers')->selectRaw("any_value(ld_student_papers.bank_id) as bank_id")->where('student_id' , self::$accept_data['user_info']['user_id'])->groupBy('bank_id')->get()->count();
+            if($bank_count && $bank_count > 0){
+               $bank_list = DB::table('ld_student_papers')->selectRaw("any_value(ld_student_papers.bank_id) as bank_id")->where('student_id' , self::$accept_data['user_info']['user_id'])->groupBy('bank_id')->offset($offset)->limit($pagesize)->get()->toArray();
+               foreach($bank_list as $k=>$v){
+                   //题库名称
+                   $bank_info = Bank::where('id' , $v->bank_id)->first();
+                   
+                   //获取科目id
+                   if($bank_info['subject_id'] && !empty($bank_info['subject_id'])){
+                       $subject_ids = explode(',' , $bank_info['subject_id']);
+                       $subject_list= QuestionSubject::select('id as subject_id' , 'subject_name')->whereIn('id' , $subject_ids)->where('subject_name' , '!=' , "")->where('is_del' , 0)->get();
+                   } else {
+                       $subject_list= [];
+                   }
+                   
+                   $arr[] =[
+                       'bank_id'     =>  $v->bank_id ,
+                       'bank_name'   =>  $bank_info['topic_name'] , 
+                       'subject_list'=>  $subject_list
+                   ];
+               }
+            }
+            return response()->json(['code' => 200 , 'msg' => '获取信息成功' , 'data' => ['bank_list' => $arr , 'bank_count' => $bank_count , 'page' => (int)$page , 'pagesize' => (int)$pagesize]]);
+        } else {  //可做题库数量
+            $bank_count = DB::table('ld_question_bank')->join("ld_course" , function($join){
+                $join->on('ld_course.parent_id', '=', 'ld_question_bank.parent_id');
+            })->join("ld_order" , function($join){
+                $join->on('ld_course.id', '=', 'ld_order.class_id');
+            })->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->get()->count();
+            if($bank_count && $bank_count > 0){
+                $bank_list = DB::table('ld_question_bank')->join("ld_course" , function($join){
+                    $join->on('ld_course.parent_id', '=', 'ld_question_bank.parent_id');
+                })->join("ld_order" , function($join){
+                    $join->on('ld_course.id', '=', 'ld_order.class_id');
+                })->select('ld_question_bank.id as bank_id')->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->offset($offset)->limit($pagesize)->get()->toArray();
+               foreach($bank_list as $k=>$v){
+                   //题库名称
+                   $bank_info = Bank::where('id' , $v->bank_id)->first();
+                   
+                   //获取科目id
+                   if($bank_info['subject_id'] && !empty($bank_info['subject_id'])){
+                       $subject_ids = explode(',' , $bank_info['subject_id']);
+                       $subject_list= QuestionSubject::select('id as subject_id' , 'subject_name')->whereIn('id' , $subject_ids)->where('subject_name' , '!=' , "")->where('is_del' , 0)->get();
+                   } else {
+                       $subject_list= [];
+                   }
+                   
+                   $arr[] =[
+                       'bank_id'     =>  $v->bank_id ,
+                       'bank_name'   =>  $bank_info['topic_name'] , 
+                       'subject_list'=>  $subject_list
+                   ];
+               }
+            }
+            return response()->json(['code' => 200 , 'msg' => '获取信息成功' , 'data' => ['bank_list' => $arr , 'bank_count' => $bank_count , 'page' => (int)$page , 'pagesize' => (int)$pagesize]]);
         }
     }
 }

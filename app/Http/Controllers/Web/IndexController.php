@@ -22,11 +22,12 @@ class IndexController extends Controller {
         $this->data = $_REQUEST;
         // $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
         $this->school = School::where(['dns'=>$this->data['dns']])->first();
+
     }
     //讲师列表
     public function teacherList(){
     	$limit = !isset($this->data['limit']) || empty($this->data['limit']) || $this->data['limit'] <= 0 ? 8 : $this->data['limit'];
-    	$recomendTeacherArr = Teacher::where(['school_id'=>$this->school['id'],'is_del'=>0,'type'=>2])->orderBy('number','desc')->select('id','head_icon','real_name','describe','number')->limit($limit)->get()->toArray();
+    	$recomendTeacherArr = Teacher::where(['school_id'=>$this->school['id'],'is_del'=>0,'type'=>2])->orderBy('number','desc')->select('id','head_icon','real_name','describe','number','teacher_icon')->limit($limit)->get()->toArray();
 
     	$count = count($recomendTeacherArr);
     	if($count<$limit){
