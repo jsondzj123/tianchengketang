@@ -21,10 +21,10 @@ class CourseLiveResource extends Model {
         if($nature == 1){
             //课程信息
             $course = CourseSchool::select('id','title','sale_price','status')->where(['id'=>$data['course_id'],'is_del'=>0])->first();
-            $data['course_id'] = $course['course_id'];
             if(!$course){
                 return ['code' => 201 , 'msg' => '课程无效'];
             }
+            $data['course_id'] = $course['course_id'];
         }else{
             //课程信息
             $course = Coures::select('id','title','sale_price','status')->where(['id'=>$data['course_id'],'is_del'=>0])->first();
@@ -57,7 +57,8 @@ class CourseLiveResource extends Model {
         if(!empty($existLive)){
             $existLiveid = array_column($existLive, 'id');
         }
-        $livecast = Live::where($where)->whereNotIn('id',$existLiveid)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
+        $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
+        $livecast = Live::where($where)->where(['school_id'=>$school_id])->whereNotIn('id',$existLiveid)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
         foreach ($livecast as $k=>&$v){
             $ones = CouresSubject::where('id',$v['parent_id'])->first();
             if(!empty($ones)){
