@@ -32,7 +32,7 @@ class CourseLiveResource extends Model {
                 return ['code' => 201 , 'msg' => '课程无效'];
             }
         }
-
+        print_r($course);die;
         //取直播资源列表
         $where['is_del'] = 0;
         if(isset($data['parent']) && !empty($data['parent'])){
