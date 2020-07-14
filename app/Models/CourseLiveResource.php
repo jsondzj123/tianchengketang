@@ -20,14 +20,14 @@ class CourseLiveResource extends Model {
         $nature = isset($data['nature'])?$data['nature']:0;
         if($nature == 1){
             //课程信息
-            $course = CourseSchool::select('id','title','sale_price','status')->where(['id'=>$data['course_id'],'is_del'=>0])->first();
+            $course = CourseSchool::select('id','title','sale_price','status')->where(['id'=>$data['course_id'],'is_del'=>0])->first()->toArray();
             if(!$course){
                 return ['code' => 201 , 'msg' => '课程无效'];
             }
             $data['course_id'] = $course['course_id'];
         }else{
             //课程信息
-            $course = Coures::select('id','title','sale_price','status')->where(['id'=>$data['course_id'],'is_del'=>0])->first();
+            $course = Coures::select('id','title','sale_price','status')->where(['id'=>$data['course_id'],'is_del'=>0])->first()->toArray();
             if(!$course){
                 return ['code' => 201 , 'msg' => '课程无效'];
             }
