@@ -319,6 +319,7 @@ class Teacher extends Model {
                 $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
                 $query->where('ld_course_ref_teacher.to_school_id' , '=' , $school_id);
                 $query->where('ld_course_ref_teacher.is_del' , '=' , 0);
+                $query->where('ld_lecturer_educationa.type' , '=' , $body['type']);
                 //判断搜索内容是否为空
                 if(isset($body['search']) && !empty($body['search'])){
                     $query->where('ld_lecturer_educationa.real_name','like','%'.$body['search'].'%');
