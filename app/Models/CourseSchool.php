@@ -345,7 +345,7 @@ class CourseSchool extends Model {
                 }
                 
                 //录播资源
-                $recordVideoIds = CourseLivesResource::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('id')->toArray(); //要授权的录播资源 
+                $recordVideoIds = Coureschapters::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('resource_id as id')->toArray(); //要授权的录播资源 
                 if(!empty($recordVideoIds)){
                     $narturecordVideoIds = CourseRefResource::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'type'=>0,'is_del'=>0])->pluck('resource_id as id ')->toArray(); //已经授权过的录播资源   
                     $recordVideoIds = array_diff($recordVideoIds,$narturecordVideoIds);
