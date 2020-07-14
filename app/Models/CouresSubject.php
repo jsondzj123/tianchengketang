@@ -72,9 +72,13 @@ class CouresSubject extends Model {
         //判断此学科是否有在售课程
         $find = self::where(['id'=>$data['id']])->first();
         if($find['parent_id'] != 0){
-            $course = Coures::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course1 = Coures::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course2 = CourseSchool::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course = $course1 + $course2;
         }else{
-            $course = Coures::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course1 = Coures::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course2 = CourseSchool::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course = $course1 + $course2;
         }
         if($course != 0){
             return ['code' => 202 , 'msg' => '关联的课程在售无法删除，请确认'];
@@ -135,9 +139,13 @@ class CouresSubject extends Model {
         if($status == 1){
             //判断此学科是否有在售课程
             if($find['parent_id'] != 0){
-                $course = Coures::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course1 = Coures::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course2 = CourseSchool::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course = $course1 + $course2;
             }else{
-                $course = Coures::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course1 = Coures::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course2 = CourseSchool::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course = $course1 + $course2;
             }
             if($course != 0){
                 return ['code' => 202 , 'msg' => '关联的课程在售无法关闭，请确认'];
