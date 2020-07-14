@@ -206,6 +206,7 @@ class CourseSchool extends Model {
         $courseIds = json_decode($body['course_id'],1); //前端传值
     	$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
     	$user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0; //当前登录的用户id
+        $schoolArr =Admin::where(['school_id'=>$body['school_id'],'is_del'=>1])->first();
         if($body['school_id'] == $school_id){
             return ['code'=>205,'msg'=>'自己不能给自己授权'];
         }
