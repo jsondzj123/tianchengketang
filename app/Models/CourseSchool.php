@@ -223,7 +223,7 @@ class CourseSchool extends Model {
 
 
         if($body['is_public'] == 1){ //公开课
-            $nature = CourseRefOpen::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->first();
+            $nature = CourseRefOpen::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->first()->toArray();
 
             if(!empty($nature)){
                 return ['code'=>207,'msg'=>'公开课已经授权'];
@@ -301,7 +301,7 @@ class CourseSchool extends Model {
             }
         }
         if($body['is_public'] == 0){  //课程
-            $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->limit(1)->get();
+            $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->limit(1)->get()->toArray();
             if(!empty($nature)){
                 return ['code'=>207,'msg'=>'课程已经授权'];
             }
