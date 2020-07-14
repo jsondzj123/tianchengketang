@@ -14,7 +14,8 @@ class Coureschapters extends Model {
     public static function chapterList($data){
         $nature = isset($data['nature'])?$data['nature']:0;
         if($nature == 1){
-            $course = CourseSchool::where(['id'=>$data['course_id']])->first();
+            $course = CourseSchool::where(['id'=>$data['course_id']])->first()->toArray();
+            print_r($course);die;
             $data['course_id'] = $course['course_id'];
         }
         $lists = self::where(['course_id'=>$data['course_id'],'is_del'=>0,])->get()->toArray();
