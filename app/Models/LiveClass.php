@@ -31,10 +31,13 @@ class LiveClass extends Model {
             $offset   = ($page - 1) * $pagesize;
             //直播单元id
             $resource_id = $data['resource_id'];
+            //获取用户网校id
+            $data['school_status'] = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+            $data['school_id'] = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
             //获取总条数
-            $total = self::where(['is_del'=>0,'resource_id'=>$resource_id])->get()->count();
+            $total = self::where(['is_del'=>0,'resource_id'=>$resource_id,'school_id'=>$data['school_id']])->get()->count();
             //获取数据
-            $list = self::where(['is_del'=>0,'resource_id'=>$resource_id])->offset($offset)->limit($pagesize)->get();
+            $list = self::where(['is_del'=>0,'resource_id'=>$resource_id,'school_id'=>$data['school_id']])->offset($offset)->limit($pagesize)->get();
             foreach($list as $k => $v){
                 //添加总课次
                 $list[$k]['class_num'] = self::join("ld_course_class_number","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")->where(['ld_course_class_number.shift_no_id'=>$v['id'],'ld_course_class_number.is_del'=>0])->count();
