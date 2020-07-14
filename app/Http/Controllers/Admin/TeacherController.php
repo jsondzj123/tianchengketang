@@ -93,6 +93,26 @@ class TeacherController extends Controller {
     }
     
     /*
+     * @param  descriptsion    判断是否授权讲师教务
+     * @param  author          dzj
+     * @param  ctime           2020-07-14
+     * return  array
+     */
+    public function getTeacherIsAuth(){
+        //获取提交的参数
+        try{
+            $data = Teacher::getTeacherIsAuth(self::$accept_data);
+            if($data['code'] == 200){
+                return response()->json(['code' => 200 , 'msg' => '此老师未授权']);
+            } else {
+                return response()->json(['code' => 203 , 'msg' => '此老师已授权']);
+            }
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    
+    /*
      * @param  descriptsion    推荐老师的方法
      * @param  参数说明         body包含以下参数[
      *      is_recommend   是否推荐(1代表推荐,2代表不推荐)
