@@ -416,6 +416,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getBankInfoById', 'BankController@getBankInfoById');              //获取题库详情信息
         $router->post('getBankList', 'BankController@getBankList');                      //获取题库列表
         $router->post('getBankCommonList', 'BankController@getBankCommonList');          //题库公共参数列表
+        $router->post('getBankIsAuth', 'BankController@getBankIsAuth');                  //是否授权题库
         /****************题库部分  end****************/
 
 
