@@ -86,7 +86,7 @@ class CourseLiveResource extends Model {
         if($livecourse['nature'] == 1){
             return ['code' => 202 , 'msg' => '此课程单元为授权课程资源，如需删除请联系系统管理员'];
         }
-        $care = Couresliveresource::where(['resource_id'=>$data['id'],'is_del'=>0])->get()->toArray();
+        $care = CourseLiveResource::where(['resource_id'=>$data['id'],'is_del'=>0])->get()->toArray();
         if(!empty($care)){
             return ['code' => 202 , 'msg' => '此课程单元已有被关联的课程,取消关联后删除班号'];
         }
