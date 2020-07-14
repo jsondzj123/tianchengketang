@@ -215,6 +215,9 @@ class Student extends Model {
                 //判断学校id是否传递
                 if(isset($body['school_id']) && $body['school_id'] > 0){
                     $query->where('school_id' , '=' , $body['school_id']);
+                } else {
+                    $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+                    $query->where('school_id' , '=' , $school_id);
                 }
 
                 //判断开课状态是否选择
@@ -255,6 +258,9 @@ class Student extends Model {
                     //判断学校id是否传递
                     if(isset($body['school_id']) && $body['school_id'] > 0){
                         $query->where('school_id' , '=' , $body['school_id']);
+                    } else {
+                        $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+                        $query->where('school_id' , '=' , $school_id);
                     }
 
                     //判断开课状态是否选择
