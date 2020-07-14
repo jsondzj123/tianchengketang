@@ -482,6 +482,7 @@ class Coures extends Model {
             if(!$find){
                 return ['code' => 201 , 'msg' => '此数据不存在'];
             }
+            $find['nature'] = 1;
             //查询授课方式
             $method= Couresmethod::select('method_id')->where(['course_id'=>$find['course_id'],'is_del'=>0])->get()->toArray();
             $find['method'] = array_column($method, 'method_id');
@@ -492,6 +493,7 @@ class Coures extends Model {
             if($find['parent_id'] > 0 && $find['child_id'] > 0){
                 $where[1] = $find['child_id'];
             }
+
             $find['parent'] = $where;
             unset($find['parent_id'],$find['child_id']);
             //查询讲师
@@ -561,11 +563,14 @@ class Coures extends Model {
                 $nature = isset($data['nature'])?$data['nature']:0;
                 if($nature == 1){
                     //只修改基本信息
+                    unset($data['nature']);
                     $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id)?AdminLog::getAdminInfo()->admin_user->school_id:0;
                     $data['update_at'] = date('Y-m-d H:i:s');
                     $id = $data['id'];
                     unset($data['id']);
-                    CourseSchool::where(['to_school_id'=>$school_id,'course_id'=>$id])->update($data);
+                    unset($data['parent_id']);
+                    unset($data['child_id']);
+                    CourseSchool::where(['id'=>$id])->update($data);
                 }else {
                     $data['update_at'] = date('Y-m-d H:i:s');
                     self::where(['id' => $data['id']])->update($data);

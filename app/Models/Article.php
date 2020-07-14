@@ -31,16 +31,16 @@ class Article extends Model {
             ->leftJoin('ld_admin','ld_admin.id','=','ld_article.user_id')
             ->where(function($query) use ($data,$school_id) {
                 if($data['role_id'] == 1){
-                    if(!empty($data['school_id']) && $data['school_id'] != ''){
+                    if(!empty($data['school_id']) && $data['school_id'] != 0){
                         $query->where('ld_article.school_id',$data['school_id']);
                     }
                 }else{
                     $query->where('ld_article.school_id',$school_id);
                 }
-                if(!empty($data['type_id']) && $data['type_id'] != '' ){
+                if(isset($data['type_id']) && !empty($data['type_id'] != '')){
                     $query->where('ld_article.article_type_id',$data['type_id']);
                 }
-                if(!empty($data['title']) && $data['title'] != ''){
+                if(isset($data['title']) && !empty($data['title'] != '')){
                     $query->where('ld_article.title','like','%'.$data['title'].'%')
                         ->orwhere('ld_article.id',$data['title']);
                 }
@@ -52,20 +52,20 @@ class Article extends Model {
                 ->leftJoin('ld_school','ld_school.id','=','ld_article.school_id')
                 ->leftJoin('ld_article_type','ld_article_type.id','=','ld_article.article_type_id')
                 ->leftJoin('ld_admin','ld_admin.id','=','ld_article.user_id')
-                ->where(function($query) use ($data) {
+                ->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
                     if($data['role_id'] == 1){
-                        if(!empty($data['school_id']) && $data['school_id'] != ''){
+                        if(!empty($data['school_id']) && $data['school_id'] != 0){
                             $query->where('ld_article.school_id',$data['school_id']);
                         }
                     }else{
                         //分校查询当前学校
-                        $query->where('ld_article.school_id',$data['school_id']);
+                        $query->where('ld_article.school_id',$school_id);
                     }
-                    if(!empty($data['type_id']) && $data['type_id'] != '' ){
+                    if(isset($data['type_id']) && !empty($data['type_id'] != '')){
                         $query->where('ld_article.article_type_id',$data['type_id']);
                     }
-                    if(!empty($data['title']) && $data['title'] != ''){
+                    if(isset($data['title']) && !empty($data['title'] != '')){
                         $query->where('ld_article.title','like','%'.$data['title'].'%')
                             ->orwhere('ld_article.id',$data['title']);
                     }

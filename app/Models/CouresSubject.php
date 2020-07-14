@@ -72,9 +72,13 @@ class CouresSubject extends Model {
         //判断此学科是否有在售课程
         $find = self::where(['id'=>$data['id']])->first();
         if($find['parent_id'] != 0){
-            $course = Coures::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course1 = Coures::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course2 = CourseSchool::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course = $course1 + $course2;
         }else{
-            $course = Coures::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course1 = Coures::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course2 = CourseSchool::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+            $course = $course1 + $course2;
         }
         if($course != 0){
             return ['code' => 202 , 'msg' => '关联的课程在售无法删除，请确认'];
@@ -131,13 +135,18 @@ class CouresSubject extends Model {
         if(!$find){
             return ['code' => 202 , 'msg' => '无此信息'];
         }
+
         $status = $find['is_open'] == 1?0:1;
         if($status == 1){
             //判断此学科是否有在售课程
             if($find['parent_id'] != 0){
-                $course = Coures::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course1 = Coures::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course2 = CourseSchool::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course = $course1 + $course2;
             }else{
-                $course = Coures::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course1 = Coures::where(['parent_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course2 = CourseSchool::where(['child_id'=>$data['id'],'is_del'=>0,'status'=>1])->count();
+                $course = $course1 + $course2;
             }
             if($course != 0){
                 return ['code' => 202 , 'msg' => '关联的课程在售无法关闭，请确认'];
@@ -189,15 +198,28 @@ class CouresSubject extends Model {
     //资源模块 条件显示
     public static function couresWheres(){
         //获取用户学校
-        $school_status = AdminLog::getAdminInfo()->admin_user->school_status;
         $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
-        $where['is_del'] = 0;
-        if($school_status != 1){
-            $where['school_id'] = $school_id;
+        $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')
+            ->where(['is_del'=>0,'school_id'=>$school_id])
+            ->orderBydesc('id')->get()->toArray();
+        //根据授权课程 获取分类
+        $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->groupBy('parent_id')->get()->toArray();
+        $two=[];
+        if(!empty($course)){
+            foreach ($course as $k=>$v){
+                $twos = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['id'=>$v['parent_id'],'is_del'=>0])->first();
+                $twsss = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['parent_id'=>$twos['id'],'is_del'=>0])->get()->toArray();
+                $twos['childs'] = $twsss;
+                $two[] =$twos;
+            }
         }
-        $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->orderBydesc('id')->where($where)->get()->toArray();
         $list = self::demo($one,0,0);
-        return ['code' => 200 , 'msg' => '获取成功','data'=>$list];
+        if(!empty($list) && !empty($two)){
+            $listss = array_merge($list,$two);
+        }else{
+            $listss = !empty($list)?$list:$two;
+        }
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$listss];
     }
 
     //递归

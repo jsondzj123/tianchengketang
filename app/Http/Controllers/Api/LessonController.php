@@ -125,7 +125,7 @@ class LessonController extends Controller {
                 $sort_type = $request->input('sort_type') ?: 'asc';
                 $data_list_accredit =  CourseSchool::join("ld_course_subject","ld_course_subject.id","=","ld_course_school.parent_id")
                         ->join("ld_course_method","ld_course_school.course_id","=","ld_course_method.course_id")
-                        ->select('ld_course_school.id', 'ld_course_school.admin_id','ld_course_school.child_id','ld_course_school.parent_id', 'ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.pricing as price', 'ld_course_school.sale_price as favorable_price','ld_course_school.buy_num','ld_course_school.is_del','ld_course_school.status','ld_course_school.watch_num','ld_course_school.keywords','ld_course_subject.subject_name')
+                        ->select('ld_course_school.course_id as id', 'ld_course_school.admin_id','ld_course_school.child_id','ld_course_school.parent_id', 'ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.pricing as price', 'ld_course_school.sale_price as favorable_price','ld_course_school.buy_num','ld_course_school.is_del','ld_course_school.status','ld_course_school.watch_num','ld_course_school.keywords','ld_course_subject.subject_name')
                         ->where($where_two)
                         ->orWhere(function ($query) use ($keyWord){
                             $query->where('ld_course_school.title', 'like', '%'.$keyWord.'%')->orWhere('ld_course_school.keywords', 'like', '%'.$keyWord.'%');
@@ -143,7 +143,7 @@ class LessonController extends Controller {
                     //购买数量
                     $v['sold_num'] =  Order::where(['oa_status'=>1,'class_id'=>$v['id']])->count() + $v['buy_num'];
                     //获取授课模式
-                    $v['methods'] = DB::table('ld_course_school')->select('method_id as id')->join("ld_course_method","ld_course_school.course_id","=","ld_course_method.course_id")->where(['ld_course_school.id'=>$v['id'],"ld_course_method.is_del"=>0])->get();
+                    $v['methods'] = DB::table('ld_course')->select('method_id as id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id'],"ld_course_method.is_del"=>0])->get();
                 }
                 $data_list = array_merge($data_list,$data_list_accredit);
                 //数据分页
@@ -222,8 +222,6 @@ class LessonController extends Controller {
             'page_data' => $lessons,
             'total' => $total,
         ];
-
-        Log::info(date("Y-m-d H:i:s",time()).'数据:'.$lessons);
         return $this->response($data);
     }
 
