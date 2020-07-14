@@ -37,8 +37,8 @@ class Coureschapters extends Model {
             $user_id = AdminLog::getAdminInfo()->admin_user->id;
             //添加日志操作
             AdminLog::insertAdminLog([
-                'admin_id'       =>   $user_id  ,
-                'module_name'    =>  'chapterAdd' ,
+                'admin_id'       =>   $user_id,
+                'module_name'    =>  'chapterAdd',
                 'route_url'      =>  'admin/Course/chapterAdd' ,
                 'operate_method' =>  'Add' ,
                 'content'        =>  '添加章或节操作'.json_encode($data) ,
