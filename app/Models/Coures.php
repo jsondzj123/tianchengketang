@@ -482,6 +482,7 @@ class Coures extends Model {
             if(!$find){
                 return ['code' => 201 , 'msg' => '此数据不存在'];
             }
+            $find['nature'] = 1;
             //查询授课方式
             $method= Couresmethod::select('method_id')->where(['course_id'=>$find['course_id'],'is_del'=>0])->get()->toArray();
             $find['method'] = array_column($method, 'method_id');
