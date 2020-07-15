@@ -25,27 +25,31 @@ class FootConfig extends Model {
     }
     public static function getList($body){
     	$schoolid = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登录的id
+
     	$school_id = isset($body['school_id']) && $body['school_id'] > 0 ? $body['school_id'] : $schoolid; //搜索条件
-    	$pageSet = self::where(['is_opne'=>0,'is_del'=>0])
+
+    	$pageSet = self::where(['is_open'=>0,'is_del'=>0])
     		->where(function($query) use ($body,$school_id){
-    			if($body['school_id'] == '' ){
+    			if(isset($body['school_id']) && $body['school_id'] != '' ){
     				$query->where('school_id',$school_id);
     			}
     	})->get()->toArray(); //
+    		
     	$headerArr = $footer = $icp=[];
     	if(!empty($pageSet)){
     		foreach($pageSet  as $key=>$v){
-    			if($type== 1){
-    				array_push($v,$headerArr);
+    			if($v['type']== 1){
+    				array_push($headerArr,$v);
     			}
-    			if($type== 2){
-    				array_push($v,$footer);
+    			if($v['type']== 2){
+    				array_push($footer,$v);
     			}
-    			if($type== 3){
-    				array_push($v,$icp);
+    			if($v['type']== 3){
+    				array_push($icp,$v);
     			}
     		}
     	}
+    	
     	return ['code'=>200,'msg'=>'Success','data'=>['header'=>$headerArr,'footer'=>$footer,'icp'=>$icp]];
     }
 
