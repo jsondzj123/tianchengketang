@@ -158,42 +158,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('doHandInPapers','BankController@doHandInPapers');              //做题交卷接口
         $router->post('getMyBankList','BankController@getMyBankList');                //我的题库
     });
-});
-
-//PC端路由接口  需要登录
-$router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
-    $router->group(['prefix' => 'order'], function () use ($router) {
-        $router->post('aliPcpay','OrderController@aliPcpay');          //支付宝pc
-        $router->post('wxPcpay','OrderController@wxPcpay');          //微信pc
-        $router->post('hjaliPcpay','OrderController@hjaliPcpay');          //汇聚支付宝pc
-        $router->post('hjwxPcpay','OrderController@hjwxPcpay');          //汇聚微信pc
-    });
-    //pc支付回调(szw)
-    $router->group(['prefix' => 'notify'], function () use ($router) {
-        $router->post('hjAlinotify','NotifyController@hjAlinotify');          //汇聚支付宝pc回调
-        $router->post('hjWxnotify','NotifyController@hjWxnotify');          //汇聚支付宝pc回调
-        $router->post('Alinotify','NotifyController@Alinotify');          //支付宝pc回调
-        $router->post('Wxnotify','NotifyController@Wxnotify');          //汇聚支付宝pc回调
-    });
-    //课程（szw）
-    $router->group(['prefix' => 'course'], function () use ($router) {
-        $router->post('subjectList','CourseController@subjectList');//学科列表
-        $router->post('courseList','CourseController@courseList');//课程列表
-        $router->post('courseDetail','CourseController@courseDetail');//课程详情
-        $router->post('courseIntroduce','CourseController@courseIntroduce');//课程简介
-        $router->post('livearr','CourseController@livearr');//课程直播列表
-        $router->post('recordedarr','CourseController@recordedarr');//课程录播列表
-        $router->post('material','CourseController@material');//课程资料列表
-        $router->post('collect','CourseController@collect');//课程收藏
-        $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
-    });
-    //对公购买模块（szw）
-    $router->group(['prefix' => 'publicpay'], function () use ($router) {
-        $router->post('Transfer','PublicpayController@Transfer');//对公转账
-        $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');//OA流转订单
-    });
-    //我的模块（szw）
-    $router->group(['prefix' => 'user'], function () use ($router) {
+    //szw    我的
+    $router->group(['prefix' => 'user' , 'middleware'=> 'user'], function () use ($router) {
         //个人设置模块
         $router->post('userDetail','UserController@userDetail');//个人信息
         $router->post('userUpPhone','UserController@userUpPhone');//修改手机号
@@ -208,6 +174,23 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('orderFind','UserController@orderFind');//我的订单单条记录
         $router->post('myCollect','UserController@myCollect');//我的收藏
         $router->post('myCourse','UserController@myCourse');//我的课程
+    });
+    //课程（szw）
+    $router->group(['prefix' => 'course', 'middleware'=> 'user'], function () use ($router) {
+        $router->post('subjectList','CourseController@subjectList');//学科列表
+        $router->post('courseList','CourseController@courseList');//课程列表
+        $router->post('courseDetail','CourseController@courseDetail');//课程详情
+        $router->post('courseIntroduce','CourseController@courseIntroduce');//课程简介
+        $router->post('livearr','CourseController@livearr');//课程直播列表
+        $router->post('recordedarr','CourseController@recordedarr');//课程录播列表
+        $router->post('material','CourseController@material');//课程资料列表
+        $router->post('collect','CourseController@collect');//课程收藏
+        $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
+    });
+    //对公购买模块（szw）
+    $router->group(['prefix' => 'publicpay', 'middleware'=> 'user'], function () use ($router) {
+        $router->post('Transfer','PublicpayController@Transfer');//对公转账
+        $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');//OA流转订单
     });
 });
 //后台端路由接口
