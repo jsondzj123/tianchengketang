@@ -25,7 +25,7 @@ class FootConfig extends Model {
     }
     public static function getList($body){
     	$schoolid = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登录的id
-    	$school_id = isset($body['school_id']) && $body['school_id'] > 0 ? $body['school_id'] : $school_id; //搜索条件
+    	$school_id = isset($body['school_id']) && $body['school_id'] > 0 ? $body['school_id'] : $schoolid; //搜索条件
     	$pageSet = self::where(['is_opne'=>0,'is_del'=>0])
     		->where(function($query) use ($body,$school_id){
     			if($body['school_id'] == '' ){
