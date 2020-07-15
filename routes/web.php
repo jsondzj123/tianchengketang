@@ -597,7 +597,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     });
     $router->group(['prefix' => 'pageset'], function () use ($router) {
         $router->post('getList', 'PageSetController@getList');  //库存列表
-    }
+        $router->post('details', 'PageSetController@details');  //库存列表
+    });
 
 
     //end 网校系统     lys
