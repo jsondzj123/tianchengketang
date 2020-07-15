@@ -76,7 +76,7 @@ class CommonController extends BaseController {
             $roleAuthArr  = getAuthArr($roleAuthArr);
             $arr = [
                 // 'role_auth'=>$roleAuthData,
-                'role_auth'=>$roleAuthArr,
+                'auth'=>$roleAuthArr,
                 'school_id'=>$adminUserSchoolId,
                 'admin_id' =>$adminId,
             ];
