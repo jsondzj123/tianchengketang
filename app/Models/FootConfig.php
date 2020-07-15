@@ -59,36 +59,36 @@ class FootConfig extends Model {
     	return ['code'=>200,'msg'=>'Success','data'=>['header'=>$headerArr,'footer'=>$footer,'icp'=>$icp,'school_name'=>$school_name]];
     }
 
-    public static function details(){
-    	if($type == 1){ //头部
-    		if(!isset($body['header_name']) || empty($body['header_name'])){
+    public static function details($body){
+    	if($body['type'] == 1){ //头部
+    		if(!isset($body['name']) || empty($body['name'])){
     			return ['code'=>201,'msg'=>'header_name为空'];
     		}	
-    		if(!isset($body['header_url']) || empty($body['header_url'])){
+    		if(!isset($body['url']) || empty($body['url'])){
     			return ['code'=>201,'msg'=>'header_url为空'];
     		}
-    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['header_name'],'url'=>$body['header_url'],'update'=>date('Y-m-d H:i:s')]);
+    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'url'=>$body['url'],'update'=>date('Y-m-d H:i:s')]);
     	}
-    	if($type == 2){ //尾部 
-    		if(!isset($body['foot_name']) || empty($body['foot_name'])){
+    	if($body['type'] == 2){ //尾部 
+    		if(!isset($body['name']) || empty($body['name'])){
     			return ['code'=>201,'msg'=>'foot_name为空'];
     		}	
-    		if(!isset($body['foot_url']) || empty($body['foot_url'])){
+    		if(!isset($body['url']) || empty($body['url'])){
     			return ['code'=>201,'msg'=>'foot_url为空'];
     		}
     		if(isset($body['text'])){
     			$update['text'] = $body['text'];
     		}
-    		$update['name'] = $body['foot_name'];
-    		$update['url'] = $body['header_url'];
+    		$update['name'] = $body['name'];
+    		$update['url'] = $body['url'];
     		$update['update_at'] = date('Y-m-d H:i:s');
     		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update($update);
     	}
-    	if($type == 3){ //icp
-    		if(!isset($body['icp_name']) || empty($body['icp_name'])){
+    	if($body['type'] == 3){ //icp
+    		if(!isset($body['name']) || empty($body['name'])){
     			return ['code'=>201,'msg'=>'icp为空'];
     		}	
-    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['icp_name'],'update'=>date('Y-m-d H:i:s')]);
+    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'update'=>date('Y-m-d H:i:s')]);
     	}
     	if($res){
     		return ['code'=>200,'msg'=>'Success'];
