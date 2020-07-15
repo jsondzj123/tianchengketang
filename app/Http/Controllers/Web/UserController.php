@@ -20,8 +20,15 @@ class UserController extends Controller {
     protected $userid;
     public function __construct(){
         $this->data = $_REQUEST;
+        print_r($this->data);die;
+        if(!isset($this->data['school_dns']) || empty($this->data['school_dns'])){
+            return response()->json(['code' => 201 , 'msg' => '请传分校域名']);
+        }
         $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
-        $this->userid = isset($this->data['user_info']['user_id'])?$this->data['user_info']['user_id']:0;
+        if(isset($_REQUEST['user_info']['user_id']) || empty($_REQUEST['user_info']['user_id'])){
+            return response()->json(['code' => 201 , 'msg' => '请先登录']);
+        }
+        $this->userid = isset($_REQUEST['user_info']['user_id'])?$_REQUEST['user_info']['user_id']:0;
     }
     /*
          * @param  个人信息
@@ -30,6 +37,7 @@ class UserController extends Controller {
          * return  array
          */
     public function userDetail(){
+        echo $this->userid;die;
         $user = Student::where(['id'=>$this->userid,'is_forbid'=>1])->first()->toArray();
         if(empty($user)){
             return response()->json(['code' => 201 , 'msg' => '成员不存在']);

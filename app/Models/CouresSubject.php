@@ -27,7 +27,6 @@ class CouresSubject extends Model {
        }
        $list =self::select('id','subject_name','description','is_open')
            ->where($where)
-           ->orderByDesc('id')
            ->get()->toArray();
        foreach ($list as $k=>&$v){
            $sun = self::select('id','subject_name','is_open')
@@ -175,7 +174,7 @@ class CouresSubject extends Model {
         $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
         $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')
             ->where(['is_del'=>0,'is_open'=>0,'school_id'=>$school_id])
-            ->orderBydesc('id')->get()->toArray();
+            ->get()->toArray();
         //根据授权课程 获取分类
         $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->groupBy('parent_id')->get()->toArray();
         $two=[];
@@ -201,7 +200,7 @@ class CouresSubject extends Model {
         $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
         $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')
             ->where(['is_del'=>0,'school_id'=>$school_id])
-            ->orderBydesc('id')->get()->toArray();
+            ->get()->toArray();
         foreach ($one as $ks=>&$vs){
             $vs['nature'] =0;
             $vs['nature_status'] =false;
