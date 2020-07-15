@@ -533,15 +533,15 @@ class SchoolController extends Controller {
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                 'create_at'      =>  date('Y-m-d H:i:s')
             ]);
-            $update = ['auth_id'=>empty($auth)?$auth:implode(",",$auth),'map_auth_id'=>empty($arr)?$arr:implode(",",$arr),'update_time'=>date('Y-m-d H:i:s')];
-            if(Roleauth::where('id',$data['role_id'])->update($update)){
-                DB::commit();
-                return response()->json(['code'=>200,'msg'=>'赋权成功']);
-            }else{
-                DB::rollBack();
-                return response()->json(['code'=>203,'msg'=>'网络错误，请重试']);
-            }
         } 
+        $update = ['auth_id'=>empty($auth)?$auth:implode(",",$auth),'map_auth_id'=>empty($arr)?$arr:implode(",",$arr),'update_time'=>date('Y-m-d H:i:s')];
+        if(Roleauth::where('id',$data['role_id'])->update($update)){
+            DB::commit();
+            return response()->json(['code'=>200,'msg'=>'赋权成功']);
+        }else{
+            DB::rollBack();
+            return response()->json(['code'=>203,'msg'=>'网络错误，请重试']);
+        }
     }
     /*
      * @param  description 修改分校信息---权限管理-账号编辑（获取）
