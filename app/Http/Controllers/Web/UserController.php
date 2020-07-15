@@ -30,6 +30,7 @@ class UserController extends Controller {
          * return  array
          */
     public function userDetail(){
+        echo $this->userid;
         $user = Student::where(['id'=>$this->userid,'is_forbid'=>1])->first()->toArray();
         if(empty($user)){
             return response()->json(['code' => 201 , 'msg' => '成员不存在']);

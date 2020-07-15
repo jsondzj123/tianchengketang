@@ -32,7 +32,7 @@ class CourseController extends Controller {
     public function __construct(){
         $this->data = $_REQUEST;
         $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
-        $this->userid = isset(AdminLog::getAdminInfo()->admin_user->id)?AdminLog::getAdminInfo()->admin_user->id:0;
+        $this->userid = isset($this->data['user_info']['user_id'])?$this->data['user_info']['user_id']:0;
     }
     /*
          * @param  学科列表
