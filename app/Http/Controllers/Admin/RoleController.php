@@ -135,6 +135,9 @@ class RoleController extends Controller {
                      array_push($arr,$vv);
                 }
             }
+            $publicAuthArr = Authrules::where(['parent_id'=>-1,'is_del'=>1,'is_forbid'=>1,'is_show'=>1])->pluck('id')->toArray();
+        
+            $arr = array_merge($arr,$publicAuthArr);
             $arr =implode(',',$arr);
             $data['auth_id'] = unique($arr);
             $data['map_auth_id'] = $auth_map_id;
@@ -263,6 +266,8 @@ class RoleController extends Controller {
                  array_push($arr,$vv);
             }
         }
+        $publicAuthArr = Authrules::where(['parent_id'=>-1,'is_del'=>1,'is_forbid'=>1,'is_show'=>1])->pluck('id')->toArray();
+        $arr = array_merge($arr,$publicAuthArr);
         $arr =implode(',',$arr);
         $data['auth_id'] = unique($arr);
         $data['map_auth_id'] = $auth_map_id;
