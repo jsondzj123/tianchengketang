@@ -3,7 +3,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-
 class Coures extends Model {
     //指定别的表名
     public $table = 'ld_course';
@@ -131,7 +130,7 @@ class Coures extends Model {
 //                        if(!empty($data['school_id']) && $data['school_id'] != ''){
 //                            $query->where('school_id',$data['school_id']);
 //                        }
-//                    }else{
+////                    }else{
                         //分校查询当前学校
                         $query->where('school_id',$school_id);
 //                    }
@@ -158,8 +157,8 @@ class Coures extends Model {
                         $where['method_id'] = $data['method'];
                     }
                     $method = Couresmethod::select('method_id')->where($where)->get()->toArray();
-                    if(!$method){
-                        unset($list[$k]);
+                    if(empty($method)){
+                        unset($list1[$k]);
                     }else{
                         foreach ($method as $key=>&$val){
                             if($val['method_id'] == 1){
@@ -210,7 +209,7 @@ class Coures extends Model {
                     }
                     $method = Couresmethod::select('method_id')->where($where)->get()->toArray();
                     if(!$method){
-                        unset($list[$k]);
+                        unset($list2[$ks]);
                     }else{
                         foreach ($method as $key=>&$val){
                             if($val['method_id'] == 1){
@@ -280,7 +279,7 @@ class Coures extends Model {
                             $v['method'] = $method;
                         }
                     }
-            }else{
+            }else if($data['nature']-1 == 2){
                 //自增
                 $list = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
@@ -334,7 +333,6 @@ class Coures extends Model {
                     }
                 }
             }
-
         }
         $page=[
             'pageSize'=>$pagesize,
