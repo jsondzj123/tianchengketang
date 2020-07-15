@@ -858,7 +858,7 @@ class Exam extends Model {
         $arr = [];
         foreach($exam_list as $k=>$v){
             //判断此题库此科目下面此试题是否被添加过
-            $is_insert_exam = Exam::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where('exam_content' , $v[1])->where('is_del' , 0)->count();
+            $is_insert_exam = Exam::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where('exam_content' , $v[1])->where('text_analysis' , $v[11])->where('is_del' , 0)->count();
             if($is_insert_exam <= 0){
                 //试题类型赋值
                 $exam_type = $v[0];
