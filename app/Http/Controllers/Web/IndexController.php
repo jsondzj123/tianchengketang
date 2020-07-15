@@ -60,7 +60,7 @@ class IndexController extends Controller {
 		    	}
     		}
             $arr['icp'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>3])->select('id','parent_id','name','url','text','create_at')->first();
-            $arr['header'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>3])->select('id','parent_id','name','url','create_at')->get();
+            $arr['header'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>1])->select('id','parent_id','name','url','create_at')->get();
     	}
     	return response()->json(['code'=>200,'msg'=>'Success','data'=>$arr]);
     }
