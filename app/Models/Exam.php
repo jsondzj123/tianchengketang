@@ -529,7 +529,7 @@ class Exam extends Model {
         }
         
         //key赋值
-        $key = 'exam:list:'.$body['bank_id'];
+        /*$key = 'exam:list:'.$body['bank_id'];
 
         //判断此试题是否被请求过一次(防止重复请求,且数据信息不存在)
         if(Redis::get($key)){
@@ -541,7 +541,7 @@ class Exam extends Model {
                 Redis::setex($key , 60 , $body['bank_id']);
                 return ['code' => 200 , 'msg' => '获取试题列表成功' , 'data' => ['exam_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
             }
-        }
+        }*/
         
         //判断试题类型是否为空和合法
         if(!isset($body['type']) || empty($body['type']) || $body['type'] <= 0 || !in_array($body['type'] , [1,2,3,4,5,6,7])){
@@ -595,7 +595,7 @@ class Exam extends Model {
             }
         })->count();
         
-        //if($exam_count > 0){
+        if($exam_count > 0){
             //获取试题列表
             $exam_list = self::select('id as exam_id','exam_content','is_publish','item_diffculty')->where(function($query) use ($body){
                 //题库id
@@ -638,8 +638,8 @@ class Exam extends Model {
                 }
             })->orderByDesc('create_at')->offset($offset)->limit($pagesize)->get();
             return ['code' => 200 , 'msg' => '获取试题列表成功' , 'data' => ['exam_list' => $exam_list , 'total' => $exam_count , 'pagesize' => $pagesize , 'page' => $page]];
-        //}
-        //return ['code' => 200 , 'msg' => '获取试题列表成功' , 'data' => ['exam_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
+        }
+        return ['code' => 200 , 'msg' => '获取试题列表成功' , 'data' => ['exam_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
     }
     
     /*
