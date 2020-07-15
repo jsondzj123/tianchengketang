@@ -67,7 +67,7 @@ class FootConfig extends Model {
     		if(!isset($body['url']) || empty($body['url'])){
     			return ['code'=>201,'msg'=>'header_url为空'];
     		}
-    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'url'=>$body['url'],'update'=>date('Y-m-d H:i:s')]);
+    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'url'=>$body['url'],'update_at'=>date('Y-m-d H:i:s')]);
     	}
     	if($body['type'] == 2){ //尾部 
     		if(!isset($body['name']) || empty($body['name'])){
@@ -88,7 +88,7 @@ class FootConfig extends Model {
     		if(!isset($body['name']) || empty($body['name'])){
     			return ['code'=>201,'msg'=>'icp为空'];
     		}	
-    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'update'=>date('Y-m-d H:i:s')]);
+    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'update_at'=>date('Y-m-d H:i:s')]);
     	}
     	if($res){
     		return ['code'=>200,'msg'=>'Success'];
