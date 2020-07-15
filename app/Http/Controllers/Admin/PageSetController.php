@@ -21,7 +21,7 @@ class PageSetController extends Controller {
             	'type' => 'required|integer',
            	],
             FootConfig::message());
-	    $res = FootConfig::details(self::$accept_data;)
+	    $res = FootConfig::details(self::$accept_data);
 		return response()->json($res);
 	}
 }
