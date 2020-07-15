@@ -11,6 +11,7 @@ use App\Models\LessonChild;
 use App\Models\LessonVideo;
 use App\Models\SubjectLesson;
 use App\Tools\MTCloud;
+use App\Exports\InvoicesExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -23,34 +24,42 @@ class TestController extends Controller
      */
     public function index()
     {
-        $file = $_FILES['file'];
-        $is_correct_extensiton = self::detectUploadFileMIME($file);
-        $excel_extension       = substr($_FILES['file']['name'], strrpos($_FILES['file']['name'], '.')+1);   //获取excel后缀名
-        if($is_correct_extensiton <= 0 || !in_array($excel_extension , ['xlsx' , 'xls'])){
-            return ['code' => 202 , 'msg' => '上传文件格式非法'];
-        }
-        //存放文件路径
-        $file_path= app()->basePath() . "/public/upload/excel/";
-        //判断上传的文件夹是否建立
-        if(!file_exists($file_path)){
-            mkdir($file_path , 0777 , true);
-        }
-        //重置文件名
-        $filename = time() . rand(1,10000) . uniqid() . substr($file['name'], stripos($file['name'], '.'));
-        $path     = $file_path.$filename;
-        //判断文件是否是通过 HTTP POST 上传的
-        if(is_uploaded_file($_FILES['file']['tmp_name'])){
-            //上传文件方法
-            move_uploaded_file($_FILES['file']['tmp_name'], $path);
-        }
-        //获取excel表格中试题列表
-        $exam_list = self::doImportExcel(new \App\Imports\UsersImport , $path);
-        foreach ($exam_list['data'] as $k=>$v){
-                $res[] = DB::table('edu_course_data')->select(['course_id','videoId'])->where(['course_id'=>$v[0]])->get()->toArray();
 
-        }
-        Excel::download($res, 'video.xlsx');
-    }
+        $arr = [
+            ['姓名', '地址', '性别'],
+            [4, 5, 6],
+        ];
+        $export = new InvoicesExport($arr);
+
+        return Excel::download($export, 'invoices.xlsx');
+
+        // $file = $_FILES['file'];
+        // $is_correct_extensiton = self::detectUploadFileMIME($file);
+        // $excel_extension       = substr($_FILES['file']['name'], strrpos($_FILES['file']['name'], '.')+1);   //获取excel后缀名
+        // if($is_correct_extensiton <= 0 || !in_array($excel_extension , ['xlsx' , 'xls'])){
+        //     return ['code' => 202 , 'msg' => '上传文件格式非法'];
+        // }
+        // //存放文件路径
+        // $file_path= app()->basePath() . "/public/upload/excel/";
+        // //判断上传的文件夹是否建立
+        // if(!file_exists($file_path)){
+        //     mkdir($file_path , 0777 , true);
+        // }
+        // //重置文件名
+        // $filename = time() . rand(1,10000) . uniqid() . substr($file['name'], stripos($file['name'], '.'));
+        // $path     = $file_path.$filename;
+        // //判断文件是否是通过 HTTP POST 上传的
+        // if(is_uploaded_file($_FILES['file']['tmp_name'])){
+        //     //上传文件方法
+        //     move_uploaded_file($_FILES['file']['tmp_name'], $path);
+        // }
+        // //获取excel表格中试题列表
+        // $exam_list = self::doImportExcel(new \App\Imports\UsersImport , $path);
+        // foreach ($exam_list['data'] as $k=>$v){
+        //         $res[] = DB::table('edu_course_data')->select(['course_id','videoId'])->where(['course_id'=>$v[0]])->first();
+        // }
+        // print_r($res);
+        //return Excel::download("222", 'vedio.xlsx');
         //获取excel表数据
 
         //获取录播数据
