@@ -79,6 +79,7 @@ class CourseController extends Controller {
          * return  array
      */
     public function courseList(){
+        echo 11111;die;
 //        $keys = json_encode($this->data).$this->school['id'];
 //        if(Redis::get($keys)){
 //            $data = json_decode(Redis::get($keys),true);
