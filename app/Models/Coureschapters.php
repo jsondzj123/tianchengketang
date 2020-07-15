@@ -10,11 +10,12 @@ class Coureschapters extends Model {
     //时间戳设置
     public $timestamps = false;
     /*=============章================*/
+
     //章节列表
     public static function chapterList($data){
         $nature = isset($data['nature'])?$data['nature']:0;
         if($nature == 1){
-            $course = CourseSchool::where(['id'=>$data['id']])->first();
+            $course = CourseSchool::where(['id'=>$data['course_id']])->first()->toArray();
             $data['course_id'] = $course['course_id'];
         }
         $lists = self::where(['course_id'=>$data['course_id'],'is_del'=>0,])->get()->toArray();
@@ -37,8 +38,8 @@ class Coureschapters extends Model {
             $user_id = AdminLog::getAdminInfo()->admin_user->id;
             //添加日志操作
             AdminLog::insertAdminLog([
-                'admin_id'       =>   $user_id  ,
-                'module_name'    =>  'chapterAdd' ,
+                'admin_id'       =>   $user_id,
+                'module_name'    =>  'chapterAdd',
                 'route_url'      =>  'admin/Course/chapterAdd' ,
                 'operate_method' =>  'Add' ,
                 'content'        =>  '添加章或节操作'.json_encode($data) ,

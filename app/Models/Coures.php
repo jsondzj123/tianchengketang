@@ -673,7 +673,12 @@ class Coures extends Model {
         if(!isset($data['status']) || empty($data['status'])){
             return ['code' => 201 , 'msg' => '课程状态不能为空'];
         }
-        $up = self::where('id',$data['id'])->update(['status'=>$data['status'],'update_at'=>date('Y-m-d H:i:s')]);
+        $nature = isset($data['nature'])?$data['nature']:0;
+        if($nature == 1){
+            $up = CourseSchool::where('id',$data['id'])->update(['status'=>$data['status'],'update_at'=>date('Y-m-d H:i:s')]);
+        }else{
+            $up = self::where('id',$data['id'])->update(['status'=>$data['status'],'update_at'=>date('Y-m-d H:i:s')]);
+        }
         if($up){
             $user_id = AdminLog::getAdminInfo()->admin_user->id;
             //添加日志操作

@@ -202,17 +202,24 @@ class CouresSubject extends Model {
         $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')
             ->where(['is_del'=>0,'school_id'=>$school_id])
             ->orderBydesc('id')->get()->toArray();
+        foreach ($one as $ks=>&$vs){
+            $vs['nature'] =0;
+            $vs['nature_status'] =false;
+        }
         //根据授权课程 获取分类
         $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->groupBy('parent_id')->get()->toArray();
         $two=[];
         if(!empty($course)){
             foreach ($course as $k=>$v){
                 $twos = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['id'=>$v['parent_id'],'is_del'=>0])->first();
+                $twos['nature'] = 1;
+                $twos['nature_status'] = true;
                 $twsss = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['parent_id'=>$twos['id'],'is_del'=>0])->get()->toArray();
                 $twos['childs'] = $twsss;
                 $two[] =$twos;
             }
         }
+
         $list = self::demo($one,0,0);
         if(!empty($list) && !empty($two)){
             $listss = array_merge($list,$two);

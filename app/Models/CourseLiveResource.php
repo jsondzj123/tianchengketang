@@ -20,19 +20,18 @@ class CourseLiveResource extends Model {
         $nature = isset($data['nature'])?$data['nature']:0;
         if($nature == 1){
             //课程信息
-            $course = CourseSchool::select('id','title','sale_price','status')->where(['id'=>$data['course_id'],'is_del'=>0])->first();
-            $data['course_id'] = $course['course_id'];
+            $course = CourseSchool::select('id','title','sale_price','status','course_id')->where(['id'=>$data['course_id'],'is_del'=>0])->first()->toArray();
             if(!$course){
                 return ['code' => 201 , 'msg' => '课程无效'];
             }
+            $data['course_id'] = $course['course_id'];
         }else{
             //课程信息
-            $course = Coures::select('id','title','sale_price','status')->where(['id'=>$data['course_id'],'is_del'=>0])->first();
+            $course = Coures::select('id','title','sale_price','status')->where(['id'=>$data['course_id'],'is_del'=>0])->first()->toArray();
             if(!$course){
                 return ['code' => 201 , 'msg' => '课程无效'];
             }
         }
-
         //取直播资源列表
         $where['is_del'] = 0;
         if(isset($data['parent']) && !empty($data['parent'])){
@@ -57,7 +56,8 @@ class CourseLiveResource extends Model {
         if(!empty($existLive)){
             $existLiveid = array_column($existLive, 'id');
         }
-        $livecast = Live::where($where)->whereNotIn('id',$existLiveid)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
+        $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
+        $livecast = Live::where($where)->where(['school_id'=>$school_id])->whereNotIn('id',$existLiveid)->where('is_forbid','<',2)->orderByDesc('id')->get()->toArray();
         foreach ($livecast as $k=>&$v){
             $ones = CouresSubject::where('id',$v['parent_id'])->first();
             if(!empty($ones)){
@@ -150,6 +150,10 @@ class CourseLiveResource extends Model {
         }
         if(!isset($data['course_id']) || empty($data['course_id'])){
             return ['code' => 201 , 'msg' => '课程id不能为空'];
+        }
+        $nature = isset($data['nature'])?$data['nature']:0;
+        if($nature == 1){
+            return ['code' => 201 , 'msg' => '授权课程无法修改'];
         }
         $resource = json_decode($data['id'],true);
         if(!empty($resource)){

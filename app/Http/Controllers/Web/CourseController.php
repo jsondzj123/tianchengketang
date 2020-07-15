@@ -162,7 +162,7 @@ class CourseController extends Controller {
             $ref_course = [];
             //授权课程
             if ($count2 != 0) {
-                $ref_course = CourseSchool::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'watch_num', 'create_at','course_id')
+                $ref_course = CourseSchool::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'watch_num', 'create_at', 'course_id')
                     ->where(function ($query) use ($parent) {
                         if (!empty($parent[0]) && $parent[0] != '') {
                             $query->where('parent_id', $parent[0]);
@@ -180,13 +180,13 @@ class CourseController extends Controller {
                     if (!empty($add_number)) {
                         //库存总数
                         $stocknum = 0;
-                        foreach ($add_number as $kstock=>$vstock){
+                        foreach ($add_number as $kstock => $vstock) {
                             $stocknum = $stocknum + $vstock['add_number'];
                         }
-                        if($stocknum != 0){
+                        if ($stocknum != 0) {
                             //查订单表
-                            $ordercount = Order::where(['status'=>2,'oa_status'=>1,'student_id'=>$school_id,'class_id'=>$vs['id'],'nature'=>1])->count();
-                            if($ordercount < $stocknum){
+                            $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'student_id' => $school_id, 'class_id' => $vs['id'], 'nature' => 1])->count();
+                            if ($ordercount < $stocknum) {
                                 $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])
                                     ->where(function ($query) use ($methodwhere) {
                                         if ($methodwhere != '') {
@@ -210,16 +210,17 @@ class CourseController extends Controller {
                                 } else {
                                     unset($ref_course[$ks]);
                                 }
-                            }else{
+                            } else {
                                 unset($ref_course[$ks]);
                             }
-                        }else{
+                        } else {
                             unset($ref_course[$ks]);
                         }
                     } else {
                         unset($ref_course[$ks]);
                     }
                 }
+            }
             //两数组合并 排序
             if (!empty($course) && !empty($ref_course)) {
                 $all = array_merge($course, $ref_course);//合并两个二维数组
@@ -248,7 +249,6 @@ class CourseController extends Controller {
             ];
 //            Redis::set($keys,json_encode($datas),300);
             return response()->json(['code' => 200, 'msg' => '获取成功', 'data' => $res, 'page' => $page, 'where' => $this->data]);
-        }
     }
     /*
          * @param  课程详情

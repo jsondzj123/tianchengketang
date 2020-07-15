@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Redis;
 use Validator;
 use App\Tools\CurrentAdmin;
 use App\Models\AdminLog;
+use App\Models\AuthMap;
 use Illuminate\Support\Facades\DB;
 class RoleController extends Controller {
   
@@ -122,22 +123,44 @@ class RoleController extends Controller {
         $data['create_time'] = date('Y-m-d H:i:s');
         if($role){  $data['is_super'] = 0; }
         else{       $data['is_super'] = 1; }
-        if(Roleauth::insert($data)){
-             AdminLog::insertAdminLog([
+        DB::beginTransaction();
+        try{
+            $auth_map_id = $data['auth_id'];
+            $map_auth_ids = explode(',',$data['auth_id']);
 
-                'admin_id'       =>   CurrentAdmin::user()['id'] ,
-                'module_name'    =>  'Role' ,
-                'route_url'      =>  'admin/role/doRoleInsert' , 
-                'operate_method' =>  'insert' ,
-                'content'        =>  json_encode($data),
-                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
-                'create_at'      =>  date('Y-m-d H:i:s')
-            ]);
-            return response()->json(['code'=>200,'msg'=>'添加成功']);
-        }else{
-            return response()->json(['code'=>201,'msg'=>'添加失败']);
-        }
+            $roleAuthData  = AuthMap::whereIn('id',$map_auth_ids)->where(['is_del'=>0,'is_forbid'=>0,'is_show'=>0])->select('auth_id')->get()->toArray();
+            $arr = [];
+            foreach($roleAuthData as $key=>$v){
+                foreach($v as $vv){
+                     array_push($arr,$vv);
+                }
+            }
+            $publicAuthArr = Authrules::where(['parent_id'=>-1,'is_del'=>1,'is_forbid'=>1,'is_show'=>1])->pluck('id')->toArray();
         
+            $arr = array_merge($arr,$publicAuthArr);
+            $arr =implode(',',$arr);
+            $data['auth_id'] = unique($arr);
+            $data['map_auth_id'] = $auth_map_id;
+            if(Roleauth::insert($data)){
+                AdminLog::insertAdminLog([
+
+                    'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                    'module_name'    =>  'Role' ,
+                    'route_url'      =>  'admin/role/doRoleInsert' , 
+                    'operate_method' =>  'insert' ,
+                    'content'        =>  json_encode($data),
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                DB::commit();  
+                return response()->json(['code'=>200,'msg'=>'添加成功']);
+            }else{
+                 DB::rollback();
+                return response()->json(['code'=>201,'msg'=>'添加失败']);
+            }    
+        } catch (Exception $e) {
+            return ['code' => 500 , 'msg' => $ex->getMessage()];
+        }    
     } 
     /*
      * @param  descriptsion   获取角色信息（编辑）
@@ -165,19 +188,21 @@ class RoleController extends Controller {
         if($data['school_status'] == 1){
             // echo '总校';
             //总校
-             $authArr = \App\Models\Authrules::getAuthAlls([],['id','name','title','parent_id']);
+             $authArr = \App\Models\AuthMap::getAuthAlls(['is_del'=>0,'is_forbid'=>0],['id','title','parent_id']);
         }else{
              // echo '分校';
             //分校
-                $schoolData = \App\Models\Roleauth::getRoleOne(['school_id'=>$roleAuthData['data']['school_id'],'is_del'=>1,'is_super'=>1],['id','role_name','auth_desc','auth_id']);
-                if( $schoolData['code'] != 200){    
-                     return response()->json(['code' => 403 , 'msg' => '请联系总校超级管理员' ]);
-                }
-                $auth_id_arr = explode(',',$schoolData['data']['auth_id']);
-                if(!$auth_id_arr){
-                     $auth_id_arr = [$auth_id];
-                }
-                $authArr = \App\Models\Authrules::getAuthAlls(['id'=>$auth_id_arr],['id','name','title','parent_id']);
+                // $schoolData = \App\Models\Roleauth::getRoleOne(['school_id'=>$roleAuthData['data']['school_id'],'is_del'=>1,'is_super'=>1],['id','role_name','auth_desc','auth_id']);
+                // if( $schoolData['code'] != 200){    
+                //      return response()->json(['code' => 403 , 'msg' => '请联系总校超级管理员' ]);
+                // }
+                // $auth_id_arr = explode(',',$schoolData['data']['auth_id']);
+                // if(!$auth_id_arr){
+                //      $auth_id_arr = [$auth_id];
+                // }
+                $mapAuthIds = \App\Models\Roleauth::where(['school_id'=>$adminUserSchoolId,'is_super'=>1])->select('map_auth_id')->first();
+                $authArr = \App\Models\AuthMap::whereIn('id',$mapAuthIds['map_auth_id'])->get()->toArray();
+                // $authArr = \App\Models\Authrules::getAuthAlls(['id'=>$auth_id_arr],['id','name','title','parent_id']);
         }   
         $authArr  = getAuthArr($authArr);
         $arr = [
@@ -185,7 +210,7 @@ class RoleController extends Controller {
             'msg'=>'获取角色成功',
             'data'=>[
                     'id' => $data['id'], //角色id
-                    'role_auth_arr'=>$roleAuthArr,
+                    // 'role_auth_arr'=>$roleAuthArr,
                     'role_auth_data' =>$roleAuthData['data'],
                     'auth' =>$authArr
                 ]
@@ -230,17 +255,28 @@ class RoleController extends Controller {
         if($count>=1){
             return response()->json(['code'=>205,'msg'=>'角色名称已存在']); 
         }
-        $auths_id = Authrules::where(['is_del'=>1,'is_show'=>1,'is_forbid'=>1])->pluck('id')->toarray();
-        $auth_id = explode(',', $data['auth_id']);
-        foreach ($auth_id as $v) {
-            if(in_array($v,$auths_id)){
-                $arr[]= $v;
+
+        $auth_map_id = $data['auth_id'];
+        $map_auth_ids = explode(',',$data['auth_id']);
+
+        $roleAuthData  = AuthMap::whereIn('id',$map_auth_ids)->where(['is_del'=>0,'is_forbid'=>0,'is_show'=>0])->select('auth_id')->get()->toArray();
+        $arr = [];
+        foreach($roleAuthData as $key=>$v){
+            foreach($v as $vv){
+                 array_push($arr,$vv);
             }
         }
+        $publicAuthArr = Authrules::where(['parent_id'=>-1,'is_del'=>1,'is_forbid'=>1,'is_show'=>1])->pluck('id')->toArray();
+        $arr = array_merge($arr,$publicAuthArr);
+        $arr =implode(',',$arr);
+        $data['auth_id'] = unique($arr);
+        $data['map_auth_id'] = $auth_map_id;
+
+
         try {  //5.15  
             DB::beginTransaction();
             $data['update_time'] = date('Y-m-d H:i:s');
-            $data['auth_id'] = implode(',', $arr);
+            
             AdminLog::insertAdminLog([
                 'admin_id'       =>   CurrentAdmin::user()['id'] ,
                 'module_name'    =>  'Role' ,

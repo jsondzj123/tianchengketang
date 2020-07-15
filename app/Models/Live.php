@@ -112,6 +112,10 @@ class Live extends Model {
                     }else{
                         $list=[];
                     }
+                    //自增数据
+                    foreach($list as $k => &$v){
+                        $v['nature'] = 1;
+                    }
                     if(isset($data['nature']) && $data['nature'] == 2){
                         $list=[];
                         $total = 0;
@@ -193,7 +197,6 @@ class Live extends Model {
                           ->get()->toArray();
                         }
                 //授权
-
                 $count2 = CourseRefResource::join("ld_course_livecast_resource","ld_course_ref_resource.resource_id","=","ld_course_livecast_resource.id")
                 ->join('ld_course_subject','ld_course_subject.id','=','ld_course_livecast_resource.parent_id')->select('*','ld_course_livecast_resource.parent_id','ld_course_livecast_resource.child_id')->where(function($query) use ($data){
                     // //获取后端的操作员id
@@ -273,6 +276,15 @@ class Live extends Model {
                     if(!isset($list2)){
                         $list2 = [];
                     }
+                    //自增数据
+                    foreach($list1 as $k => &$v){
+                        $v['nature'] = 1;
+                    }
+                    //授权数据
+                    foreach($list2 as $k => &$v){
+                            $v['nature'] = 2;
+                    }
+
                     //数据总数  等于  自增数据加授权数据
                     //判断搜索条件  自增资源和授权资源  1为自增  2为授权 3为全部
                     if(isset($data['nature']) && $data['nature']== 1){
@@ -323,9 +335,9 @@ class Live extends Model {
                     }
 
             }
-                foreach($list as $k => $live){
+                foreach($list as $k => &$live){
                     //获取班号数量
-                    $live['class_num'] = LiveClass::where("is_del",0)->where("resource_id",$live['id'])->count();
+                    $live['class_num'] = LiveClass::where(["is_del" => 0,"school_id"=>$live['school_id']])->where("resource_id",$live['id'])->count();
                     $live['admin_name'] = Admin::where("is_del",1)->where("id",$live['admin_id'])->select("username")->first()['username'];
                     $live['subject_child_name'] = Subject::where("is_del",0)->where("id",$live['child_id'])->select("subject_name")->first()['subject_name'];
                 }
