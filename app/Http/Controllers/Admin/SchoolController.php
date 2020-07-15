@@ -471,7 +471,7 @@ class SchoolController extends Controller {
                     'create_time' => date('Y-m-d H:i:s')
             ]; 
             $role_id = Roleauth::insertGetId($insert);
-
+            
              AdminLog::insertAdminLog([
                 'admin_id'       =>   CurrentAdmin::user()['id'] ,
                 'module_name'    =>  'School' ,
