@@ -70,10 +70,6 @@ class Video extends Model {
                 if(isset($data['resource_type']) && !empty(isset($data['resource_type'])) && $data['resource_type'] != 0){
                     $query->where('ld_course_video_resource.resource_type' , '=' , $data['resource_type']);
                 }
-                //判断资源属性是否为空 （没有授权  只有自增）
-                if(isset($data['nature']) && !empty(isset($data['nature']))){
-                    $query->where('ld_course_video_resource.nature' , '=' , $data['nature']);
-                }
                 //判断资源状态是否为空
                 if(isset($data['status']) && !empty(isset($data['status'])) && $data['status'] != 3){
                     $query->where('ld_course_video_resource.status' , '=' , $data['status']);
@@ -116,10 +112,6 @@ class Video extends Model {
                         if(isset($data['resource_type']) && !empty(isset($data['resource_type'])) && $data['resource_type'] != 0){
                             $query->where('ld_course_video_resource.resource_type' , '=' , $data['resource_type']);
                         }
-                        //判断资源属性是否为空（没有授权  只有自增）
-                        if(isset($data['nature']) && !empty(isset($data['nature']))){
-                            $query->where('ld_course_video_resource.nature' , '=' , $data['nature']);
-                        }
                         //判断资源状态是否为空
                         if(isset($data['status']) && !empty(isset($data['status']))  && $data['status'] != 3){
                             $query->where('ld_course_video_resource.status' , '=' , $data['status']);
@@ -143,6 +135,10 @@ class Video extends Model {
                 //自增数据
                 foreach($list as $k => &$v){
                     $v['nature'] = 1;
+                }
+                if(isset($data['nature']) && $data['nature'] == 2){
+                    $list=[];
+                    $total = 0;
                 }
             }
             }else{
