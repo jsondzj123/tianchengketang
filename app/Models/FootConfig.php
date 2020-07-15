@@ -60,6 +60,7 @@ class FootConfig extends Model {
     }
 
     public static function details($body){
+    	$body['open'] = isset($body['open']) && $body['open'] > 0 ?1:0;
     	if($body['type'] == 1){ //头部
     		if(!isset($body['name']) || empty($body['name'])){
     			return ['code'=>201,'msg'=>'header_name为空'];
@@ -67,7 +68,7 @@ class FootConfig extends Model {
     		if(!isset($body['url']) || empty($body['url'])){
     			return ['code'=>201,'msg'=>'header_url为空'];
     		}
-    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'url'=>$body['url'],'update_at'=>date('Y-m-d H:i:s')]);
+    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'url'=>$body['url'],'is_open'=>$body['open'],'update_at'=>date('Y-m-d H:i:s')]);
     	}
     	if($body['type'] == 2){ //尾部 
     		if(!isset($body['name']) || empty($body['name'])){
@@ -81,6 +82,7 @@ class FootConfig extends Model {
     		}
     		$update['name'] = $body['name'];
     		$update['url'] = $body['url'];
+    		$update['is_open'] = $body['open'];
     		$update['update_at'] = date('Y-m-d H:i:s');
     		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update($update);
     	}
@@ -88,7 +90,7 @@ class FootConfig extends Model {
     		if(!isset($body['name']) || empty($body['name'])){
     			return ['code'=>201,'msg'=>'icp为空'];
     		}	
-    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'update_at'=>date('Y-m-d H:i:s')]);
+    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'is_open'=>$body['open'],'update_at'=>date('Y-m-d H:i:s')]);
     	}
     	if($res){
     		return ['code'=>200,'msg'=>'Success'];
