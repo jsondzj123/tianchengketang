@@ -396,6 +396,7 @@ class SchoolController extends Controller {
         $adminUser['school_name'] =  !empty($schoolData['name']) ? $schoolData['name']  : '';
         $authRules = AuthMap::getAuthAlls(['is_del'=>0,'is_forbid'=>0],['id','title','parent_id']);
         $authRules = getAuthArr($authRules);
+
         $arr = [
             'admin' =>$adminUser,
             'auth_rules'=>$authRules,
@@ -534,7 +535,10 @@ class SchoolController extends Controller {
                 'create_at'      =>  date('Y-m-d H:i:s')
             ]);
         } 
-        $update = ['auth_id'=>empty($auth)?$auth:implode(",",$auth),'map_auth_id'=>empty($arr)?$arr:implode(",",$arr),'update_time'=>date('Y-m-d H:i:s')];
+        $auth = empty($auth)?$auth:implode(",",$auth);
+        $arr = empty($arr)?$arr:implode(",",$arr);
+        $update = ['auth_id'=>$auth,'map_auth_id'=>$arr,'update_time'=>date('Y-m-d H:i:s')];
+        
         if(Roleauth::where('id',$data['role_id'])->update($update)){
             DB::commit();
             return response()->json(['code'=>200,'msg'=>'赋权成功']);
