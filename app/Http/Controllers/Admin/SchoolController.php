@@ -16,6 +16,7 @@ use App\Models\AdminLog;
 use App\Models\AuthMap;
 use Illuminate\Support\Facades\DB;
 use App\Models\CouresSubject;
+use Log;
 class SchoolController extends Controller {
   
 
@@ -447,6 +448,7 @@ class SchoolController extends Controller {
             }
         }
 
+
         //map 表里边的数据
         $mapAuthIds  = AuthMap::whereIn('id',$arr)->pluck('auth_id')->toArray();
        
@@ -537,8 +539,9 @@ class SchoolController extends Controller {
         } 
         $auth = empty($auth)?$auth:implode(",",$auth);
         $arr = empty($arr)?$arr:implode(",",$arr);
+        print_r($auth);die;
         $update = ['auth_id'=>$auth,'map_auth_id'=>$arr,'update_time'=>date('Y-m-d H:i:s')];
-        
+        Log::info('数据.', ['data' => $update]);
         if(Roleauth::where('id',$data['role_id'])->update($update)){
             DB::commit();
             return response()->json(['code'=>200,'msg'=>'赋权成功']);
