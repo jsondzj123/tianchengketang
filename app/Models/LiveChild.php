@@ -119,10 +119,10 @@ class LiveChild extends Model {
             if(empty($data['start_at']) || !isset($data['start_at'])){
                 return ['code' => 201 , 'msg' => '课次开始时间不能为空'];
             }
-            //课次开始时间
-            if($data['start_at'] < time()){
-                return ['code' => 201 , 'msg' => '课次开始时间不能小于当前时间'];
-            }
+            // //课次开始时间
+            // if($data['start_at'] < time()){
+            //     return ['code' => 201 , 'msg' => '课次开始时间不能小于当前时间'];
+            // }
             //课次结束时间
             if(empty($data['end_at']) || !isset($data['end_at'])){
                 return ['code' => 201 , 'msg' => '课次结束时间不能为空'];
@@ -201,6 +201,10 @@ class LiveChild extends Model {
             if(empty($data['end_at']) || !isset($data['end_at'])){
                 return ['code' => 201 , 'msg' => '课次结束时间不能为空'];
             }
+            // //课次开始时间
+            // if($data['start_at'] < time()){
+            //     return ['code' => 201 , 'msg' => '课次开始时间不能小于当前时间'];
+            // }
             //课次名称
             if(empty($data['name']) || !isset($data['name'])){
                 return ['code' => 201 , 'msg' => '课次名称不能为空'];
