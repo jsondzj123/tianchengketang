@@ -595,7 +595,7 @@ class Exam extends Model {
             }
         })->count();
         
-        if($exam_count > 0){
+        //if($exam_count > 0){
             //获取试题列表
             $exam_list = self::select('id as exam_id','exam_content','is_publish','item_diffculty')->where(function($query) use ($body){
                 //题库id
@@ -638,8 +638,8 @@ class Exam extends Model {
                 }
             })->orderByDesc('create_at')->offset($offset)->limit($pagesize)->get();
             return ['code' => 200 , 'msg' => '获取试题列表成功' , 'data' => ['exam_list' => $exam_list , 'total' => $exam_count , 'pagesize' => $pagesize , 'page' => $page]];
-        }
-        return ['code' => 200 , 'msg' => '获取试题列表成功' , 'data' => ['exam_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
+        //}
+        //return ['code' => 200 , 'msg' => '获取试题列表成功' , 'data' => ['exam_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
     }
     
     /*
