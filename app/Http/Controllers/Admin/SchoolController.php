@@ -539,7 +539,7 @@ class SchoolController extends Controller {
         } 
         $auth = empty($auth)?$auth:implode(",",$auth);
         $arr = empty($arr)?$arr:implode(",",$arr);
-        print_r($auth);die;
+ 
         $update = ['auth_id'=>$auth,'map_auth_id'=>$arr,'update_time'=>date('Y-m-d H:i:s')];
         Log::info('数据.', ['data' => $update]);
         if(Roleauth::where('id',$data['role_id'])->update($update)){
