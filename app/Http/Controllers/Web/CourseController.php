@@ -585,6 +585,7 @@ class CourseController extends Controller {
         }else{
             //课程是否免费或者用户是否购买，如果购买，显示全部班号课次
             $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+            $course = Coures::where(['school_id'=>$this->school['id'],'id'=>$this->data['id'],'is_del'=>0])->first();
         }
         if(!$course){
             return response()->json(['code' => 201 , 'msg' => '无查看权限']);
