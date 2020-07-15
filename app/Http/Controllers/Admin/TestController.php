@@ -25,14 +25,6 @@ class TestController extends Controller
     public function index()
     {
 
-        $arr = [
-            ['姓名', '地址', '性别'],
-            [4, 5, 6],
-        ];
-        $export = new InvoicesExport($arr);
-
-        Excel::download($export, 'invoices.xlsx');
-
         // $file = $_FILES['file'];
         // $is_correct_extensiton = self::detectUploadFileMIME($file);
         // $excel_extension       = substr($_FILES['file']['name'], strrpos($_FILES['file']['name'], '.')+1);   //获取excel后缀名
