@@ -20,7 +20,13 @@ class UserController extends Controller {
     protected $userid;
     public function __construct(){
         $this->data = $_REQUEST;
+        if(!isset($this->data['school_dns']) || empty($this->data['school_dns'])){
+            return response()->json(['code' => 201 , 'msg' => '请传分校域名']);
+        }
         $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
+        if(isset($_REQUEST['user_info']['user_id']) || empty($_REQUEST['user_info']['user_id'])){
+            return response()->json(['code' => 201 , 'msg' => '请先登录']);
+        }
         $this->userid = isset($_REQUEST['user_info']['user_id'])?$_REQUEST['user_info']['user_id']:0;
     }
     /*
