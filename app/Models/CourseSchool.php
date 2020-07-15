@@ -189,6 +189,9 @@ class CourseSchool extends Model {
      //    $courseIds=$body['course_id'];
     	// $courseIds = explode(',',$body['course_id']);
         $courseIds = json_decode($body['course_id'],1); //前端传值
+        if(empty($courseIds)){
+            return ['code'=>205,'msg'=>'请选择授权课程'];
+        }
     	$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
         $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0; //当前登陆学校id
     	$user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0; //当前登录的用户id
