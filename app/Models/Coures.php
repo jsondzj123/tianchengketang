@@ -209,7 +209,7 @@ class Coures extends Model {
                     }
                     $method = Couresmethod::select('method_id')->where($where)->get()->toArray();
                     if(!$method){
-                        unset($list2[$k]);
+                        unset($list2[$ks]);
                     }else{
                         foreach ($method as $key=>&$val){
                             if($val['method_id'] == 1){
@@ -279,7 +279,7 @@ class Coures extends Model {
                             $v['method'] = $method;
                         }
                     }
-            }else{
+            }else if($data['nature']-1 == 2){
                 //自增
                 $list = self::where(['is_del'=>0])->where(function($query) use ($data,$school_id) {
                     //判断总校 查询所有或一个分校
@@ -333,7 +333,6 @@ class Coures extends Model {
                     }
                 }
             }
-
         }
         $page=[
             'pageSize'=>$pagesize,
