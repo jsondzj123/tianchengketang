@@ -504,56 +504,35 @@ class CourseController extends Controller {
             //免费
             $is_show = 1;
         }
-        //如果is_show是1  查询所有的课程   0查询能免费看的，试听的课程
-        if($is_show == 1){
-            //章总数
-            $count = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->count();
-            $recorde =[];
-            if($count > 0){
-                //获取分页的章
-                $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->offset($offset)->limit($pagesize)->get();
-                if(!empty($recorde)){
-                    //循环章  查询每个章下的节
-                    foreach ($recorde as $k=>&$v){
-                        $recordes = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>$v['id']])->get()->toArray();
-                        if(!empty($recordes)){
-                            foreach ($recordes as $key=>&$val){
 
-                            }
-                        }
-                    }
-                }
+        //章总数
+        $count = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->count();
+        $recorde =[];
+        if($count > 0){
+            //如果is_show是1  查询所有的课程   0查询能免费看的，试听的课程
+            if($is_show == 1){
+                $chapterswhere = [
+                    'is_del' => 0,
+                ];
+            }else{
+                //查询免费课程
+                $chapterswhere = [
+                    'is_del' => 0,
+                    'is_free' => 2
+                ];
             }
-        }else{
-
-        }
-
-
-
-
-
-
-
-
-        //免费或者已经购买，展示全部
-        if($course['sale_price'] == 0 ){
-            //章总数
-            $count = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->count();
-            $recorde =[];
-            if($count > 0){
-                //章
-                $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->offset($offset)->limit($pagesize)->get();
-                if(!empty($recorde)){
-                    //循环章，拿下面的小节
-                    foreach ($recorde as $ks=>&$vs){
-                        //查询出所有的小节
-                        $recordes = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>$vs['id']])->get()->toArray();
-                        //循环小节 小节绑定录播资源
+            //获取分页的章
+            $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->offset($offset)->limit($pagesize)->get();
+            if(!empty($recorde)){
+                //循环章  查询每个章下的节
+                foreach ($recorde as $k=>&$v){
+                    $recordes = Coureschapters::where(['course_id'=>$this->data['id'],'parent_id'=>$v['id']])->where($chapterswhere)->get()->toArray();
+                    if(!empty($recordes)){
+                        //循环每个小节 查询小节的进度
                         foreach ($recordes as $key=>&$val){
                             //查询小节绑定的录播资源
                             $ziyuan = Video::where(['id'=>$val['resource_id'],'is_del'=>0,'status'=>0])->first();
                             $val['ziyuan'] = $ziyuan;
-                            //获取 学习时长
                             $MTCloud = new MTCloud();
                             $use_duration  =  $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'],1,50);
                             if(isset($use_duration['data']) || !empty($use_duration['data'])){
@@ -570,46 +549,17 @@ class CourseController extends Controller {
                                 }
                             }
                         }
-                        $vs['chapters'] = $recordes;
                     }
                 }
+                $vs['chapters'] = $recordes;
             }
-            $page=[
-                'pageSize'=>$pagesize,
-                'page' =>$page,
-                'total'=>$count
-            ];
-            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde,'page'=>$page]);
-        }else{
-            //只展示试听章节
-            //章总数
-            $count = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>'> 0'])->count();
-            $recorde =[];
-            if($count > 0){
-                $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->get()->toArray();
-                if(!empty($recorde)){
-                    foreach ($recorde as $kss=>&$vss){
-                        $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>$vss['id'],'is_free'=>2])->get()->toArray();
-                        if(!empty($recorde)){
-                            foreach ($recorde as $key=>$val){
-                                //查询小节绑定的录播资源
-                                $ziyuan = Video::where(['id'=>$val['resource_id'],'is_del'=>0,'status'=>0])->first();
-                                $val['ziyuan'] = $ziyuan;
-                            }
-                            $vs['chapters'] = $recorde;
-                        }else{
-                            unset($recorde[$kss]);
-                        }
-                    }
-                }
-            }
-            $page=[
-                'pageSize'=>$pagesize,
-                'page' =>$page,
-                'total'=>$count
-            ];
-            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde,'page'=>$page]);
         }
+        $page=[
+            'pageSize'=>$pagesize,
+            'page' =>$page,
+            'total'=>$count
+        ];
+        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde,'page'=>$page]);
     }
     /*
          * @param  课程直播列表
