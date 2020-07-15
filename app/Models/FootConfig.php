@@ -25,9 +25,12 @@ class FootConfig extends Model {
     }
     public static function getList($body){
     	$schoolid = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登录的id
-
+	    $school_name='';
     	$school_id = isset($body['school_id']) && $body['school_id'] > 0 ? $body['school_id'] : $schoolid; //搜索条件
-
+    	if($school_id>0){
+    		$school=School::where(['id'=>$school_id,'is_del'=>1])->select('name')->first();
+    		$school_name = $school['name'];
+    	}
     	$pageSet = self::where(['is_open'=>0,'is_del'=>0])
     		->where(function($query) use ($body,$school_id){
     			if(isset($body['school_id']) && $body['school_id'] != '' ){
@@ -48,9 +51,12 @@ class FootConfig extends Model {
     				array_push($icp,$v);
     			}
     		}
+    		if(!empty($footer)){
+    			$footer =getParentsList($footer);
+    		}
     	}
     	
-    	return ['code'=>200,'msg'=>'Success','data'=>['header'=>$headerArr,'footer'=>$footer,'icp'=>$icp]];
+    	return ['code'=>200,'msg'=>'Success','data'=>['header'=>$headerArr,'footer'=>$footer,'icp'=>$icp,'school_name'=>$school_name]];
     }
 
     public static function details(){
