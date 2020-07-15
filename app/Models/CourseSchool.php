@@ -383,7 +383,9 @@ class CourseSchool extends Model {
                         }
                     }
                 }
+            
                 if(!empty($bankids)){
+                    $bankids=array_unique($bankids);
                     $natureQuestionBank = CourseRefBank::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->pluck('bank_id')->toArray();
                     $bankids = array_diff($bankids,$natureQuestionBank);
                     foreach($bankids as $key=>$bankid){
