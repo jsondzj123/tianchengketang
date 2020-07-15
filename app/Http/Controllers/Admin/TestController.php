@@ -31,7 +31,7 @@ class TestController extends Controller
         ];
         $export = new InvoicesExport($arr);
 
-        return Excel::download($export, 'invoices.xlsx');
+        Excel::download($export, 'invoices.xlsx');
 
         // $file = $_FILES['file'];
         // $is_correct_extensiton = self::detectUploadFileMIME($file);
