@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Video;
+use App\Models\LiveChild;
+use Illuminate\Support\Facades\DB;
 use App\Models\Lesson;
 use App\Models\LessonChild;
 use App\Models\LessonVideo;
@@ -21,6 +23,47 @@ class TestController extends Controller
      */
     public function index()
     {
+        $file = $_FILES['file'];
+        $is_correct_extensiton = self::detectUploadFileMIME($file);
+        $excel_extension       = substr($_FILES['file']['name'], strrpos($_FILES['file']['name'], '.')+1);   //获取excel后缀名
+        if($is_correct_extensiton <= 0 || !in_array($excel_extension , ['xlsx' , 'xls'])){
+            return ['code' => 202 , 'msg' => '上传文件格式非法'];
+        }
+        //存放文件路径
+        $file_path= app()->basePath() . "/public/upload/excel/";
+        //判断上传的文件夹是否建立
+        if(!file_exists($file_path)){
+            mkdir($file_path , 0777 , true);
+        }
+        //重置文件名
+        $filename = time() . rand(1,10000) . uniqid() . substr($file['name'], stripos($file['name'], '.'));
+        $path     = $file_path.$filename;
+        //判断文件是否是通过 HTTP POST 上传的
+        if(is_uploaded_file($_FILES['file']['tmp_name'])){
+            //上传文件方法
+            move_uploaded_file($_FILES['file']['tmp_name'], $path);
+        }
+        //获取excel表格中试题列表
+        $exam_list = self::doImportExcel(new \App\Imports\UsersImport , $path);
+        foreach ($exam_list['data'] as $k=>$v){
+                $res[] = DB::table('edu_course_data')->select(['course_id','videoId'])->where(['course_id'=>$v[0]])->get()->toArray();
+
+        }
+        Excel::download($res, 'video.xlsx');
+    }
+        //获取excel表数据
+
+        //获取录播数据
+
+        //通过course_id  获取视频id
+        // $res = DB::table('edu_course_data')->select(['course_id','videoId'])->where(['course_id'=>$v['id']])->get()->toArray();
+        // dd($res);
+        //通过视频id获取视频数据
+        //添加到录播资源表中
+
+
+
+
 //        $MTCloud = new MTCloud();
 //        $res = $MTCloud->courseGet(1048458);
 //        if(!array_key_exists('code', $res) && !$res['code'] == 0){
@@ -28,27 +71,27 @@ class TestController extends Controller
 //            return $this->response('进入直播间失败', 500);
 //        }
 //        return $this->response($res['data']);
-        $file = isset($_FILES['file']) && !empty($_FILES['file']) ? $_FILES['file'] : '';
+        // $file = isset($_FILES['file']) && !empty($_FILES['file']) ? $_FILES['file'] : '';
 
-        //存放文件路径
-        $file_path= app()->basePath() . "/public/upload/excel/";
-        //判断上传的文件夹是否建立
-        if(!file_exists($file_path)){
-            mkdir($file_path , 0777 , true);
-        }
+        // //存放文件路径
+        // $file_path= app()->basePath() . "/public/upload/excel/";
+        // //判断上传的文件夹是否建立
+        // if(!file_exists($file_path)){
+        //     mkdir($file_path , 0777 , true);
+        // }
 
-        //重置文件名
-        $filename = time() . rand(1,10000) . uniqid() . substr($file['name'], stripos($file['name'], '.'));
-        $path     = $file_path.$filename;
+        // //重置文件名
+        // $filename = time() . rand(1,10000) . uniqid() . substr($file['name'], stripos($file['name'], '.'));
+        // $path     = $file_path.$filename;
 
-        //判断文件是否是通过 HTTP POST 上传的
-        if(is_uploaded_file($_FILES['file']['tmp_name'])){
-            //上传文件方法
-            move_uploaded_file($_FILES['file']['tmp_name'], $path);
-        }
+        // //判断文件是否是通过 HTTP POST 上传的
+        // if(is_uploaded_file($_FILES['file']['tmp_name'])){
+        //     //上传文件方法
+        //     move_uploaded_file($_FILES['file']['tmp_name'], $path);
+        // }
         // $exam_array = Excel::toArray(new \App\Imports\VideoImport , $path);
         // dd(count($exam_array));
-        $exam_list = self::doImportExcel(new \App\Imports\UsersImport , $path);
+        //$exam_list = self::doImportExcel(new \App\Imports\UsersImport , $path);
        //导入资源数据
         /*foreach($exam_list['data'] as $key=>$value){
             $video = Video::where(['course_id' => trim($value[4]), 'name' => trim($value[3])])->get();
@@ -60,12 +103,12 @@ class TestController extends Controller
                     'url' => 'test.mp4',
                     'course_id' => trim($value[4])
                 ]);
-            } 
+            }
         }
         return $this->response('success');
         */
         //资源学科
-        
+
         /*foreach($exam_list['data'] as $key=>$value){
             $lesson = Lesson::where('title', $value[0])->first();
             if(!empty($lesson)){
@@ -85,7 +128,7 @@ class TestController extends Controller
                 //         }
                 //     }
                 // }
-            } 
+            }
         }
         return $this->response('success');*/
 
@@ -107,13 +150,13 @@ class TestController extends Controller
                         }
                     }
                 }
-            }    
+            }
         }*/
         //资源关联学科
         // foreach ($exam_list['data'] as $key=>$value) {
         //     $lesson = Lesson::where('title', trim($value[0]))->first();
         //     if(!empty($lesson)){
-                
+
         //         $subject = SubjectLesson::where('lesson_id', $lesson['id'])->get();
         //         if (!empty($subject)) {
         //                 $subject_id = $subject->pluck('subject_id');
@@ -121,12 +164,12 @@ class TestController extends Controller
         //                 if(!empty($video)){
         //                     //dd($subject_id);
         //                     $video->subjects()->attach($subject_id);
-                            
+
         //                 }
         //         }
-        //     }    
+        //     }
         // }
-        // return $this->response('success');      
-        
+        // return $this->response('success');
+
     }
 }
