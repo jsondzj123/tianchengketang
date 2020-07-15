@@ -3,7 +3,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-
 class Coures extends Model {
     //指定别的表名
     public $table = 'ld_course';
