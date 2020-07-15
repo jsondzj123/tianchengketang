@@ -177,12 +177,12 @@ class RoleController extends Controller {
         if( !isset($data['id']) ||  empty($data['id'])){
             return response()->json(['code'=>201,'msg'=>'参数为空或缺少参数']);
         }
-        $roleAuthData = Roleauth::getRoleOne(['id'=>$data['id'],'is_del'=>1],['id','role_name','auth_desc','auth_id','school_id']);
+        $roleAuthData = Roleauth::getRoleOne(['id'=>$data['id'],'is_del'=>1],['id','role_name','auth_desc','auth_id','school_id','map_auth_id']);
 
         if($roleAuthData['code'] != 200){
             return response()->json(['code'=>$roleAuthData['code'],'msg'=>$roleAuthData['msg']]); 
         }
-        $roleAuthArr = Roleauth::getRoleAuthAlls(['school_id'=>$roleAuthData['data']['school_id'],'is_del'=>1],['id','role_name','auth_desc','auth_id']); 
+        $roleAuthArr = Roleauth::getRoleAuthAlls(['school_id'=>$roleAuthData['data']['school_id'],'is_del'=>1],['id','role_name','auth_desc','auth_id','map_auth_id']); 
         $data['school_status'] = CurrentAdmin::user()['school_status'];
 
         if($data['school_status'] == 1){
@@ -205,6 +205,9 @@ class RoleController extends Controller {
                 // $authArr = \App\Models\Authrules::getAuthAlls(['id'=>$auth_id_arr],['id','name','title','parent_id']);
         }   
         $authArr  = getAuthArr($authArr);
+        if(empty($roleAuthData['data']['map_auth_id'])){
+            $roleAuthData['data']['map_auth_id'] = null;
+        }
         $arr = [
             'code'=>200,
             'msg'=>'获取角色成功',
