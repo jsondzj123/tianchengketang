@@ -20,6 +20,7 @@ class UserController extends Controller {
     protected $userid;
     public function __construct(){
         $this->data = $_REQUEST;
+        print_r($this->data);die;
         if(!isset($this->data['school_dns']) || empty($this->data['school_dns'])){
             return response()->json(['code' => 201 , 'msg' => '请传分校域名']);
         }
