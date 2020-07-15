@@ -377,19 +377,17 @@ class CourseSchool extends Model {
                 //题库
                 foreach($courseSubjectArr as $key=>&$vs){
                     $bankIdArr = QuestionBank::where(['parent_id'=>$vs['parent_id'],'child_id'=>$vs['child_id'],'is_del'=>0])->pluck('id')->toArray();
-                  
                     if(!empty($bankIdArr)){
-                        foreach($bankIdArr as $k=>$v){
-                            array_push($bankids,$v);        
+                        foreach($bankIdArr as $k=>$vb){
+                            array_push($bankids,$vb);        
                         }
                     }
                 }
-                
                 if(!empty($bankids)){
                     $natureQuestionBank = CourseRefBank::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->pluck('bank_id')->toArray();
                     $bankids = array_diff($bankids,$natureQuestionBank);
-                    foreach($bankids as $key=>$v){
-                        $InsertQuestionArr[$key]['bank_id'] =$v;
+                    foreach($bankids as $key=>$bankid){
+                        $InsertQuestionArr[$key]['bank_id'] =$bankid;
                         $InsertQuestionArr[$key]['from_school_id'] = $school_id;
                         $InsertQuestionArr[$key]['to_school_id'] = $body['school_id'];
                         $InsertQuestionArr[$key]['admin_id'] = $user_id;
