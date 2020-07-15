@@ -31,7 +31,7 @@ class FootConfig extends Model {
     		$school=School::where(['id'=>$school_id,'is_del'=>1])->select('name')->first();
     		$school_name = $school['name'];
     	}
-    	$pageSet = self::where(['is_open'=>0,'is_del'=>0])
+    	$pageSet = self::where(['is_del'=>0])
     		->where(function($query) use ($body,$school_id){
     			if(isset($body['school_id']) && $body['school_id'] != '' ){
     				$query->where('school_id',$school_id);
