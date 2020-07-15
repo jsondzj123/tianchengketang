@@ -361,7 +361,7 @@ class Live extends Model {
             $one['subject_child_name'] = Subject::where("is_del",0)->where("id",$one['child_id'])->select("subject_name")->first()['subject_name'];
             //添加总课时  该资源下所有班号下课次的所有课时
             $one['sum_class_hour'] = LiveClass::join('ld_course_class_number','ld_course_shift_no.id','=','ld_course_class_number.shift_no_id')
-            ->where("resource_id",$one['id'])->where("ld_course_class_number.is_del",0)->sum("class_hour");
+            ->where("resource_id",$one['id'])->where(["ld_course_class_number.is_del"=>0,"ld_course_shift_no.is_del"=>0])->sum("class_hour");
             if(!empty($one['child_id'])){
                 $one['parent_id'] = [$one['parent_id'],$one['child_id']];
             }
