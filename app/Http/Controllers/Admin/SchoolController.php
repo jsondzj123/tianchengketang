@@ -444,11 +444,17 @@ class SchoolController extends Controller {
                     $arr[]= $v;
                 }
             }
-        } //map 表里边的数据
-        $mapAuthIds  = AuthMap::whereIn('parent_id',$arr)->pluck('auth_id')->toArray();
-        $publicAuth = Authrules::where(['is_del'=>1,'is_show'=>0,'is_forbid'=>0,'parent_id'=>-1])->pluck('id')->toArray();//公共权限
+        }
+
+        //map 表里边的数据
+        $mapAuthIds  = AuthMap::whereIn('id',$arr)->pluck('auth_id')->toArray();
+       
+        $publicAuth = Authrules::where(['is_del'=>1,'is_show'=>1,'is_forbid'=>1,'parent_id'=>-1])->pluck('id')->toArray();//公共权限
         $auth = array_merge($mapAuthIds,$publicAuth);
+        $auth = implode(',', $auth);
+        $auth = explode(',', $auth);    
         $auth = array_unique($auth);
+
         $roleAuthArr = Roleauth::where(['school_id'=>$data['id'],'is_super'=>1,'is_del'=>1])->first(); //判断该网校有无超级管理员
         if(isset($data['admin/school/doSchoolAdminById'])) unset($data['admin/school/doSchoolAdminById']);
         DB::beginTransaction();
@@ -457,7 +463,7 @@ class SchoolController extends Controller {
             $insert =[
                     'role_name'=>'超级管理员',
                     'auth_desc'=>'拥有所有权限',
-                    'auth_id' => empty($auth)?$arr:implode(",",$auth),
+                    'auth_id' => empty($auth)?$auth:implode(",",$auth),
                     'map_auth_id'=> empty($arr)?$arr:implode(",",$arr),
                     'school_id'=>$data['id'],
                     'is_super'=>1,
@@ -497,9 +503,18 @@ class SchoolController extends Controller {
                     $fen_roles_id = explode(",", $v['map_auth_id']); 
                     $new_arr = array_diff($fen_roles_id,$arr);//取差集
                     $new_qita_role_ids = array_diff($fen_roles_id,$new_arr);//取共同的差集
-                    $fen_roles_id = Roleauth::whereIn('id',$new_qita_role_ids)->where(['is_del'=>1])->pluck('id')->toArray(); //取数据
+
+                    $fen_roles_id = AuthMap::whereIn('id',$new_qita_role_ids)->where(['is_del'=>0,'is_forbid'=>0,'is_show'=>0])->pluck('auth_id')->toArray(); //取数据
+                         
                     $publicAuthArr =  Authrules::where(['is_del'=>1,'is_forbid'=>1,'is_show'=>1,'parent_id'=>-1])->pluck('id')->toArray();//公共的部分
                     $updateAuthids = array_merge($fen_roles_id,$publicAuthArr);
+
+                    $updateAuthids = implode(',', $updateAuthids);
+
+                    $updateAuthids = explode(',', $updateAuthids);  
+
+                    $updateAuthids = array_unique($updateAuthids);
+                    
                     if(!empty($new_qita_role_ids)){
                         $res = Roleauth::where(['id'=>$v['id']])->update(['map_auth_id'=>implode(",", $new_qita_role_ids),'auth_id'=>implode(",", $updateAuthids),'update_time'=>date('Y-m-d H:i:s')]);
                         if(!$res){
