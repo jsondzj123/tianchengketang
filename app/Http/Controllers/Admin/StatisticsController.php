@@ -28,6 +28,7 @@ class StatisticsController extends Controller {
         * @param  ctime   2020/5/7 11:19
         * return  array
         */
+
    public function StudentList(){
        $data = self::$accept_data;
        //获取用户网校id
@@ -124,6 +125,7 @@ class StatisticsController extends Controller {
                }
            })
            ->whereBetween('ld_student.create_at', [$statetime, $endtime])
+           ->orderByDesc('ld_student.id')
            ->offset($offset)->limit($pagesize)->get();
        //根据时间将用户分类查询总数
        $website = 0; //官网
