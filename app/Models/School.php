@@ -248,6 +248,7 @@ class School extends Model {
                     if($v['nature'] == 1){
                         $v['sum_nember'] = CourseStocks::where(['school_pid'=>$school_id,'school_id'=>$data['school_id'],'course_id'=>$v['id'],'is_del'=>0])->sum('add_number');
                     }
+                    $v['surplus'] = $v['sum_nember']-$v['buy_nember'] <=0 ?0:$v['sum_nember']-$v['buy_nember'];
                     $where=[
                         'course_id'=>$v['id'],
                         'is_del'=>0
