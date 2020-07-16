@@ -154,12 +154,12 @@ class StatisticsController extends Controller {
                        $query->where('ld_student.school_id',$data['school_id']);
                    }
                    //来源
-                   if(!empty($data['reg_source'])&&$data['reg_source'] != ''){
-                       $query->where('ld_student.reg_source',$data['reg_source']);
+                   if(!empty($data['source'])&&$data['source'] != ''){
+                       $query->where('ld_student.reg_source',$data['source']);
                    }
                    //用户类型
                    if(!empty($data['enroll_status'])&&$data['enroll_status'] != ''){
-                       $query->where('ld_student.enrioll_status',$data['enroll_status']);
+                       $query->where('ld_student.enroll_status',$data['enroll_status']);
                    }
                    //用户姓名
                    if(!empty($data['real_name'])&&$data['real_name'] != ''){
