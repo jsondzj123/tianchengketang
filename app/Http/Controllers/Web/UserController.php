@@ -239,6 +239,7 @@ class UserController extends Controller {
         $method = isset($this->data['status'])?$this->data['status']:0;
         $collect = Collection::where(['student_id'=>$this->userid,'is_del'=>0])->get()->toArray();
         if(!empty($collect)) {
+            $coursearr=[];
             foreach ($collect as $k => &$v) {
                 if ($v['nature'] == 1) {
                     $course = CourseSchool::where(['id' => $v['lesson_id'], 'is_del' => 0, 'status' => 1])->first()->toArray();
@@ -266,7 +267,7 @@ class UserController extends Controller {
                             $val['method_name'] = '其他';
                         }
                     }
-                    $v['course'] = $course;
+                    $coursearr[] = $course;
                 } else {
                     unset($collect[$k]);
                 }
