@@ -359,7 +359,7 @@ class Order extends Model {
                             $teacherrealname[] = $lecturer_educationa['real_name'];
                         }
                         $teacherrealnames = implode($teacherrealname,',');
-                        $order_info['real_name'] = $teacherrealnames;
+                        $order_info['real_names'] = $teacherrealnames;
                     }
                 }
             }
