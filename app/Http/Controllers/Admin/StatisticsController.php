@@ -30,7 +30,6 @@ class StatisticsController extends Controller {
         */
    public function StudentList(){
        $data = self::$accept_data;
-
        //获取用户网校id
        $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
        if($role_id !=1 ){
@@ -42,6 +41,7 @@ class StatisticsController extends Controller {
        $pagesize = (int)isset($data['pageSize']) && $data['pageSize'] > 0 ? $data['pageSize'] : 20;
        $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
        $offset   = ($page - 1) * $pagesize;
+       //时间
        if(!empty($data['time'])){
            if($data['time'] == 1){
                $stime = date('Y-m-d');
@@ -71,21 +71,22 @@ class StatisticsController extends Controller {
        }
        $statetime = $stime . " 00:00:00";
        $endtime = $etime . " 23:59:59";
+
        //总条数
        $count = Student::leftJoin('ld_school','ld_school.id','=','ld_student.school_id')
            ->where(['ld_student.is_forbid'=>1,'ld_school.is_del'=>1,'ld_school.is_forbid'=>1])
            ->where(function($query) use ($data) {
                //分校
-               if(!empty($data['school_id'])&&$data['school_id'] != ''){
+               if(!empty($data['school_id'])&&$data['school_id'] != '' && $data['school_id'] != 0){
                    $query->where('ld_student.school_id',$data['school_id']);
                }
                //来源
-               if(!empty($data['reg_source'])&&$data['reg_source'] != ''){
-                   $query->where('ld_student.reg_source',$data['reg_source']);
+               if(!empty($data['source'])&&$data['source'] != ''){
+                   $query->where('ld_student.reg_source',$data['source']);
                }
                //用户类型
-               if(!empty($data['enroll_status'])&&$data['enroll_status'] != ''){
-                   $query->where('ld_student.enrioll_status',$data['enroll_status']);
+               if(!empty($data['enroll_status'])&&$data['enroll_status'] != ''&&$data['enroll_status'] !=0){
+                   $query->where('ld_student.enroll_status',$data['enroll_status']);
                }
                //用户姓名
                if(!empty($data['real_name'])&&$data['real_name'] != ''){
@@ -96,6 +97,7 @@ class StatisticsController extends Controller {
                    $query->where('ld_student.phone','like','%'.$data['phone'].'%');
                }
            })->whereBetween('ld_student.create_at', [$statetime, $endtime])->count();
+
        $studentList = Student::select('ld_student.phone','ld_student.real_name','ld_student.create_at','ld_student.reg_source','ld_student.enroll_status','ld_school.name')
            ->leftJoin('ld_school','ld_school.id','=','ld_student.school_id')
            ->where(['ld_student.is_forbid'=>1,'ld_school.is_del'=>1,'ld_school.is_forbid'=>1])
@@ -105,12 +107,12 @@ class StatisticsController extends Controller {
                    $query->where('ld_student.school_id',$data['school_id']);
                }
                //来源
-               if(!empty($data['reg_source'])&&$data['reg_source'] != ''){
-                   $query->where('ld_student.reg_source',$data['reg_source']);
+               if(!empty($data['source'])&&$data['source'] != ''){
+                   $query->where('ld_student.reg_source',$data['source']);
                }
                //用户类型
                if(!empty($data['enroll_status'])&&$data['enroll_status'] != ''){
-                   $query->where('ld_student.enrioll_status',$data['enroll_status']);
+                   $query->where('ld_student.enroll_status',$data['enroll_status']);
                }
                //用户姓名
                if(!empty($data['real_name'])&&$data['real_name'] != ''){
@@ -140,6 +142,7 @@ class StatisticsController extends Controller {
                }
            }
        }
+       //学生趋势图
        if(!empty($data['type']) && $data['type'] == 2){
            //根据时间分组，查询出人数 ，时间列表
            $lists = Student::select(DB::raw("date_format(ld_student.create_at,'%Y-%m-%d') as time"),DB::raw('count(*) as num'))
