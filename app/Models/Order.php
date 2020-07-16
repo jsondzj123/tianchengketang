@@ -355,7 +355,7 @@ class Order extends Model {
                     $teacher = Couresteacher::where(['course_id' => $lesson['id']])->get()->toArray();
                     if (!empty($teacher)) {
                         foreach ($teacher as $k=>$v){
-                            $lecturer_educationa = Lecturer::select('real_name')->where(['id' => $teacher['teacher_id']])->first();
+                            $lecturer_educationa = Lecturer::select('real_name')->where(['id' => $v['teacher_id']])->first();
                             $teacherrealname[] = $lecturer_educationa['real_name'];
                         }
                         $teacherrealnames = implode($teacherrealname,',');
