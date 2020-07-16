@@ -81,7 +81,7 @@ class StatisticsController extends Controller {
                    $query->where('ld_student.school_id',$data['school_id']);
                }
                //来源
-               if($data['source'] != ''){
+               if(!empty($data['source'])){
                    $query->where('ld_student.reg_source',$data['source']);
                }
                //用户类型
@@ -107,7 +107,7 @@ class StatisticsController extends Controller {
                    $query->where('ld_student.school_id',$data['school_id']);
                }
                //来源
-               if($data['source'] != ''){
+               if(!empty($data['source'])){
                    $query->where('ld_student.reg_source',$data['source']);
                }
                //用户类型
@@ -154,7 +154,7 @@ class StatisticsController extends Controller {
                        $query->where('ld_student.school_id',$data['school_id']);
                    }
                    //来源
-                   if($data['source'] != ''){
+                   if(!empty($data['source'])){
                        $query->where('ld_student.reg_source',$data['source']);
                    }
                    //用户类型
