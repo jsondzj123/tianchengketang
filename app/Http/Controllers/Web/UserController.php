@@ -291,7 +291,6 @@ class UserController extends Controller {
                     $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
                     $courseid = $course['id'];
                 }
-                $course['teacher']=[];
                 //查讲师
                 $teacherlist = Couresteacher::where(['course_id'=>$courseid,'is_del'=>0])->get();
                 if(!empty($teacherlist)){
