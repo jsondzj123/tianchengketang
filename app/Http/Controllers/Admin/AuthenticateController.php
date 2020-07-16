@@ -55,6 +55,7 @@ class AuthenticateController extends Controller {
      */
     protected function login(array $data)
     {
+        echo 2;die;
         try {
             if (!$token = JWTAuth::attempt($data)) {
                 return $this->response('用户名或密码不正确', 401);
@@ -69,7 +70,7 @@ class AuthenticateController extends Controller {
         $user['token'] = $token;
         $this->setTokenToRedis($user->id, $token);
         if($user['is_forbid'] != 1 ||$user['is_del'] != 1 ){
-              return response()->json(['code'=>403,'msg'=>'此用户已被禁用或删除，请联系管理员']);   
+              return response()->json(['code'=>403,'msg'=>'此用户已被禁用或删除，请联系管理员']);
         }
 
         $AdminUser = new AdminUser();
