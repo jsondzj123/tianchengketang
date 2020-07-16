@@ -359,7 +359,7 @@ class Order extends Model {
                             $lecturer_educationa = Lecturer::select('real_name')->where(['id' => $v['teacher_id']])->first();
                             $teacherrealname[] = $lecturer_educationa['real_name'];
                         }
-                        $teacherrealnames = implode($teacherrealname,',');
+                        $teacherrealnames = implode(',',$teacherrealname);
                         $order_info['real_names'] = $teacherrealnames;
                     }
                 }

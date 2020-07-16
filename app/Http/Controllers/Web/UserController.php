@@ -296,8 +296,9 @@ class UserController extends Controller {
                 if(!empty($teacherlist)){
                     foreach ($teacherlist as $ks=>$vs){
                         $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
-                        $course['teacher'][] = $teacher['real_name'];
+                        $string[] = $teacher['real_name'];
                     }
+                    $course['teachername'] = implode(',',$string);
                 }
             }
         }
