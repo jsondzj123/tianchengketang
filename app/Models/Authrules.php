@@ -37,29 +37,28 @@ class Authrules extends Model {
         if(!$auth_id_arr){
              $auth_id_arr = [$auth_id];
         }
-
         $authArr = self::whereIn('id',$auth_id_arr)->where(['is_del'=>1,'is_show'=>1,'is_forbid'=>1])->select('id','name','title','parent_id')->get()->toArray();
-        // print_r($authArr);die;
-        // $arr = [];
-        // foreach($authArr as $k=>$v){
-
-        //     if($v['parent_id'] == 0){
-        //         $arr[] = $v;    
-        //     }else{
-        //         foreach ($arr as $key => $value) {
-        //             if($v['parent_id'] == $value['id']){
-        //                 unset($v['id']);
+       
+        $arr = [];
+        foreach($authArr as $k=>$v){
+      
+            if($v['parent_id'] == 0){
+                $arr[] = $v;    
+            }else{
+                foreach ($arr as $key => $value) {
+                    if($v['parent_id'] == $value['id']){
+                        unset($v['id']);
                         
-        //                 $arr[$key]['child_array'][] = $v;
-        //             }
-        //         }
-        //     }
-        // }
-        //  print_r($arr);die;
-        if($authArr){
-            return ['code'=>200,'msg'=>'获取权限信息成功','data'=>$authArr];
+                        $arr[$key]['child_array'][] = $v;
+                    }
+                }
+            }
+        }
+        
+        if($arr){
+            return ['code'=>200,'msg'=>'获取权限信息成功','data'=>$arr];
         }else{
-            return ['code'=>204,'msg'=>'权限信息不存在'];
+            return ['code'=>204,'msg'=>'权限信息不存在,请联系管理员'];
         }
     }
         /*
