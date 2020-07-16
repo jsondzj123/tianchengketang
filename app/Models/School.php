@@ -166,12 +166,12 @@ class School extends Model {
                             ->get()->toArray();
             if(!empty($teacher)){
                 foreach($teacher as $key => &$v){
-                    $v['school_status'] ='分校讲师';
+                    $v['school_status'] ='自增讲师';
                 }
             }
              if(!empty($natureTeacher)){
                 foreach($natureTeacher as $key => &$vv){
-                    $vv['school_status'] ='总校讲师';
+                    $vv['school_status'] ='授权讲师';
                 }
             }
             $teacher = array_merge($teacher,$natureTeacher);

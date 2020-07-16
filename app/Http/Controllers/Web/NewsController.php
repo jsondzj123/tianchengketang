@@ -49,7 +49,7 @@ class NewsController extends Controller {
                                 $query->where('article_type_id',$body['subjectOne']);
                             }
                         })->orderBy('ld_article.create_at','desc')
-    				->select('ld_article.id','ld_article.article_type_id','ld_article.title','ld_article.share','ld_article.create_at','ld_article.image')
+    				->select('ld_article.id','ld_article.article_type_id','ld_article.title','ld_article.share','ld_article.create_at','ld_article.image','ld_article_type.typename')
     				->get();
     	}
     	return  ['code'=>200,'msg'=>'Success','data'=>$articleArr,'total'=>$count,'article_type'=>$Articletype];
