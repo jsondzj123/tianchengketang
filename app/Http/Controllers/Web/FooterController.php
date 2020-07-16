@@ -37,7 +37,7 @@ class FooterController extends Controller {
             return response()->json(['code'=>201,'msg'=>'类型为空或数据不合法']);
         }
 
-        if($type == 2){
+        if($this->data['type'] == 2){
             $left_navigation_bar = FootConfig::where(['parent_id'=>$this->data['parent_id'],'is_del'=>0,'is_open'=>0])->get();
             $data = FootConfig::where(['id'=>$this->data['id'],'is_del'=>0,'is_open'=>0])->select('text')->first();
             if($data['name'] == '对公账户'){
