@@ -106,4 +106,12 @@ class IndexController extends Controller {
     	}
         return response()->json(['code'=>200,'msg'=>'Success','data'=>$course]);
     }	
+    //获取公司信息
+    public function getCompany(){
+        $company['name'] = isset($this->school['name']) ?$this->school['name']:'';
+        $company['account_name'] = isset($this->school['account_name']) ?$this->school['account_name']:'';
+        $company['account_num'] =  isset($this->school['account_num']) ?$this->school['account_num']:'';
+        $company['open_bank'] =  isset($this->school['open_bank']) ?$this->school['open_bank']:'';
+        return response()->json(['code'=>200,'msg'=>'Success','data'=>$company]);
+    }
 }
