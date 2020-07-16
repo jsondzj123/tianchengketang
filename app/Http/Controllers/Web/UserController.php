@@ -238,62 +238,39 @@ class UserController extends Controller {
     public function myCollect(){
         $method = isset($this->data['status'])?$this->data['status']:0;
         $collect = Collection::where(['student_id'=>$this->userid,'is_del'=>0])->get()->toArray();
-        if(!empty($collect)){
-            foreach ($collect as $k=>&$v){
-                if($v['nature'] == 1){
-                    $course = CourseSchool::where(['id'=>$v['course_id'],'is_del'=>0,'status'=>1])->get()->toArray();
-                    $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id'], 'is_del' => 0])
-                        ->where(function ($query) use ($method) {
-                            if($method != '' || $method != 0){
-                                $query->where('method_id', $method);
-                            }
-                        })->get()->toArray();
-                    $course['method'] = array_column($method, 'method_id');
-
-                    if (!empty($course['method'])) {
-                        foreach ($course['method'] as $key => &$val) {
-                            if ($val['method_id'] == 1) {
-                                $val['method_name'] = '直播';
-                            }
-                            if ($val['method_id'] == 2) {
-                                $val['method_name'] = '录播';
-                            }
-                            if ($val['method_id'] == 3) {
-                                $val['method_name'] = '其他';
-                            }
-                        }
-                        $v['method'] = $method;
-                    } else {
-                        unset($course[$k]);
-                    }
-                }else{
-                    $course = Coures::where(['id'=>$v['id'],'is_del'=>0,'status'=>1])->get()->toArray();
-                    $method = Couresmethod::select('method_id')->where(['course_id' =>$v['id'], 'is_del' => 0])
-                        ->where(function ($query) use ($method) {
-                            if($method != ''){
-                                $query->where('method_id', $method);
-                            }
-                        })->get()->toArray();
-                    $course['method'] = array_column($method, 'method_id');
-
-                    if (!empty($course['method'])) {
-                        foreach ($course['method'] as $key => &$val) {
-                            if ($val['method_id'] == 1) {
-                                $val['method_name'] = '直播';
-                            }
-                            if ($val['method_id'] == 2) {
-                                $val['method_name'] = '录播';
-                            }
-                            if ($val['method_id'] == 3) {
-                                $val['method_name'] = '其他';
-                            }
-                        }
-                        $v['method'] = $method;
-                    } else {
-                        unset($course[$k]);
-                    }
+        if(!empty($collect)) {
+            foreach ($collect as $k => &$v) {
+                if ($v['nature'] == 1) {
+                    $course = CourseSchool::where(['id' => $v['course_id'], 'is_del' => 0, 'status' => 1])->first()->toArray();
+                    $courseid = $course['course_id'];
+                } else {
+                    $course = Coures::where(['id' => $v['course_id'], 'is_del' => 0, 'status' => 1])->first()->toArray();
+                    $courseid = $course['id'];
                 }
-                $v['course'] = $course;
+                $method = Couresmethod::select('method_id')->where(['course_id' => $courseid, 'is_del' => 0])
+                    ->where(function ($query) use ($method) {
+                        if ($method != '' || $method != 0) {
+                            $query->where('method_id', $method);
+                        }
+                    })->get()->toArray();
+                $course['method'] = array_column($method, 'method_id');
+
+                if (!empty($course['method'])) {
+                    foreach ($course['method'] as $key => &$val) {
+                        if ($val['method_id'] == 1) {
+                            $val['method_name'] = '直播';
+                        }
+                        if ($val['method_id'] == 2) {
+                            $val['method_name'] = '录播';
+                        }
+                        if ($val['method_id'] == 3) {
+                            $val['method_name'] = '其他';
+                        }
+                    }
+                    $v['method'] = $method;
+                } else {
+                    unset($course[$k]);
+                }
             }
         }
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$collect]);
