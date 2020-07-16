@@ -857,8 +857,10 @@ class Exam extends Model {
         //空数组赋值
         $arr = [];
         foreach($exam_list as $k=>$v){
+            $exam_content  = $v[1] && !empty($v[1]) ? trim($v[1]) : '';
+            $text_analysis = $v[11] && !empty($v[11]) ? trim($v[11]) : '';
             //判断此题库此科目下面此试题是否被添加过
-            $is_insert_exam = Exam::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where('exam_content' , $v[1])->where('text_analysis' , $v[11])->where('is_del' , 0)->count();
+            $is_insert_exam = Exam::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where('exam_content' , $exam_content)->where('text_analysis' , $text_analysis)->where('is_del' , 0)->count();
             if($is_insert_exam <= 0){
                 //试题类型赋值
                 $exam_type = $v[0];
@@ -954,9 +956,9 @@ class Exam extends Model {
                         'bank_id'        =>  $body['bank_id'] ,                                        //题库的id
                         'subject_id'     =>  $body['subject_id'] ,                                     //科目的id
                         'admin_id'       =>  $admin_id ,                                               //后端的操作员id
-                        'exam_content'   =>  $v[1] ,                                                   //试题内容
+                        'exam_content'   =>  !empty($v[1]) ? trim($v[1]) : '' ,                        //试题内容
                         'answer'         =>  $exam_type == 3 ? $v[2] == '正确' ?  1  : 0  : $v[2]  ,   //试题答案
-                        'text_analysis'  =>  !empty($v[11]) ? $v[11] : '' ,                            //文字解析
+                        'text_analysis'  =>  !empty($v[11]) ? trim($v[11]) : '' ,                      //文字解析
                         'item_diffculty' =>  !empty($v[12]) ? $diffculty_array[trim($v[12])] : 0 ,     //试题难度
                         'chapter_id'     =>  $v[13] && !empty($v[13]) ? $chapter_id > 0 ? $chapter_id : 0 : 0,         //章id
                         'joint_id'       =>  $v[14] && !empty($v[14]) ? $joint_id > 0 ? $joint_id : 0 : 0,             //节id
