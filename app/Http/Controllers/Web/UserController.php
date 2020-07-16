@@ -237,14 +237,14 @@ class UserController extends Controller {
     //我的收藏
     public function myCollect(){
         $method = isset($this->data['status'])?$this->data['status']:0;
-        $collect = Collection::where(['student_id'=>$this->userid,'status'=>0])->get()->toArray();
+        $collect = Collection::where(['student_id'=>$this->userid,'is_del'=>0])->get()->toArray();
         if(!empty($collect)){
             foreach ($collect as $k=>&$v){
                 if($v['nature'] == 1){
                     $course = CourseSchool::where(['id'=>$v['course_id'],'is_del'=>0,'status'=>1])->get()->toArray();
                     $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id'], 'is_del' => 0])
                         ->where(function ($query) use ($method) {
-                            if($method != ''){
+                            if($method != '' || $method != 0){
                                 $query->where('method_id', $method);
                             }
                         })->get()->toArray();
