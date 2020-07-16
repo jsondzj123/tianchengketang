@@ -55,7 +55,7 @@ class AuthenticateController extends Controller {
      */
     protected function login(array $data)
     {
-        echo 2;die;
+
         try {
             if (!$token = JWTAuth::attempt($data)) {
                 return $this->response('用户名或密码不正确', 401);
