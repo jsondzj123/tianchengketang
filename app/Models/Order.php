@@ -346,9 +346,9 @@ class Order extends Model {
             }
             if ($order_info['class_id'] != '') {
                 if($order_info['nature'] == 1){
-                    $lesson = CourseSchool::select('course_id as id', 'title')->where(['id' => $order_info['class_id']])->first();
+                    $lesson = CourseSchool::select('course_id as id', 'title','sale_price')->where(['id' => $order_info['class_id']])->first();
                 }else{
-                    $lesson = Coures::select('id', 'title')->where(['id' => $order_info['class_id']])->first();
+                    $lesson = Coures::select('id', 'title','sale_price')->where(['id' => $order_info['class_id']])->first();
                 }
                 if (!empty($lesson)) {
                     $order_info['title'] = $lesson['title'];
