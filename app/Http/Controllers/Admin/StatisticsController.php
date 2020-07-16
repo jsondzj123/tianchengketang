@@ -124,6 +124,7 @@ class StatisticsController extends Controller {
                }
            })
            ->whereBetween('ld_student.create_at', [$statetime, $endtime])
+           ->orderByDesc('ld_student.id')
            ->offset($offset)->limit($pagesize)->get();
        //根据时间将用户分类查询总数
        $website = 0; //官网
