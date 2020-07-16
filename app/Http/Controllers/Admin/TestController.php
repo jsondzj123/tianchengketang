@@ -54,7 +54,6 @@ class TestController extends Controller
         $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
         $testt = DB::table("testt")->offset($offset)->limit($pagesize)->get()->toArray();
-        echo 2;die;
         foreach ($testt as $k=>$v){
             // $data['course_id'] = $v[0];
             // $data['videoId'] = $v[1];
