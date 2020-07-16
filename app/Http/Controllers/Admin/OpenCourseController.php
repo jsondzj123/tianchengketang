@@ -206,7 +206,7 @@ class OpenCourseController extends Controller {
 	    $data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','status','start_at','end_at']);
 	    if($data['code']!= 200 ){
 	    	 return response()->json($data);
-	    }
+	    }       
 	    if($data['data']['status'] <1){
 	    	$update['status'] = 1;
 	    }else if($data['data']['status'] == 1){
@@ -251,10 +251,14 @@ class OpenCourseController extends Controller {
 	    $validator = Validator::make($openCourseArr, 
 	        [
 	        	'openless_id' => 'required|integer',
+	        	'nature' => 'required|integer' // 1自增 2授权
 	       	],
 	    OpenCourse::message());
 	    if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
+        }
+        if($opencourse['nature'] == 2){
+        	return response()->json(['code'=>207,'msg'=>'授权公开课，无法删除']);
         }
 	    $data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','is_del','start_at','end_at']);
 	    if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
