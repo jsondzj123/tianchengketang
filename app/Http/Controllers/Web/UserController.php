@@ -275,8 +275,18 @@ class UserController extends Controller {
         }
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$coursearr]);
     }
-    //我的题库
     //我的课程
+    public function myCourse(){
+        $order = Order::where(['student_id'=>$this->userid,'status'=>2])->where('validity_time','>',date('Y-m-d H:i:s'))->get()->toArray();
+        if(!empty($order)){
+            $course = [];
+            foreach ($order as $k=>$v){
+                if($v['nature'] == 1){
+                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                }
+            }
+        }
+    }
     //我的订单  status 1已完成2未完成3已失效
     public function myOrder(){
         $status = isset($this->data['status'])?$this->data['status']:'';
