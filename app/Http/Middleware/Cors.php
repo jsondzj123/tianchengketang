@@ -15,7 +15,7 @@ class Cors
      */
     public function handle($request, Closure $next)
     {
-        return $next($request)  
+        return $next($request)
         ->header('Access-Control-Max-Age', '1728000')
         ->header('Access-Control-Allow-Credentials', 'false')
         ->header('Access-Control-Allow-Origin', '*')

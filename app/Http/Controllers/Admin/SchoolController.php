@@ -16,6 +16,7 @@ use App\Models\AdminLog;
 use App\Models\AuthMap;
 use Illuminate\Support\Facades\DB;
 use App\Models\CouresSubject;
+use Log;
 class SchoolController extends Controller {
   
 
@@ -396,6 +397,7 @@ class SchoolController extends Controller {
         $adminUser['school_name'] =  !empty($schoolData['name']) ? $schoolData['name']  : '';
         $authRules = AuthMap::getAuthAlls(['is_del'=>0,'is_forbid'=>0],['id','title','parent_id']);
         $authRules = getAuthArr($authRules);
+
         $arr = [
             'admin' =>$adminUser,
             'auth_rules'=>$authRules,
@@ -445,6 +447,7 @@ class SchoolController extends Controller {
                 }
             }
         }
+
 
         //map 表里边的数据
         $mapAuthIds  = AuthMap::whereIn('id',$arr)->pluck('auth_id')->toArray();
@@ -533,15 +536,19 @@ class SchoolController extends Controller {
                 'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                 'create_at'      =>  date('Y-m-d H:i:s')
             ]);
-            $update = ['auth_id'=>empty($auth)?$auth:implode(",",$auth),'map_auth_id'=>empty($arr)?$arr:implode(",",$arr),'update_time'=>date('Y-m-d H:i:s')];
-            if(Roleauth::where('id',$data['role_id'])->update($update)){
-                DB::commit();
-                return response()->json(['code'=>200,'msg'=>'赋权成功']);
-            }else{
-                DB::rollBack();
-                return response()->json(['code'=>203,'msg'=>'网络错误，请重试']);
-            }
         } 
+        $auth = empty($auth)?$auth:implode(",",$auth);
+        $arr = empty($arr)?$arr:implode(",",$arr);
+ 
+        $update = ['auth_id'=>$auth,'map_auth_id'=>$arr,'update_time'=>date('Y-m-d H:i:s')];
+        Log::info('数据.', ['data' => $update]);
+        if(Roleauth::where('id',$data['role_id'])->update($update)){
+            DB::commit();
+            return response()->json(['code'=>200,'msg'=>'赋权成功']);
+        }else{
+            DB::rollBack();
+            return response()->json(['code'=>203,'msg'=>'网络错误，请重试']);
+        }
     }
     /*
      * @param  description 修改分校信息---权限管理-账号编辑（获取）

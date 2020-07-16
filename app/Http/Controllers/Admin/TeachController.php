@@ -63,7 +63,7 @@ class TeachController extends Controller {
         	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('course_id')->first();
         }
        	if($data['is_public']== 0){  //课程
- 			    $live = LiveChild::where('class_id',$data['id'])->select('course_id')->first();
+ 			     $live = LiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
        	}
         $MTCloud = new MTCloud();
         $res = $MTCloud->courseLaunch($live['course_id']);

@@ -160,6 +160,11 @@ class Coureschapters extends Model {
 //        if(!isset($data['resource_id']) || empty($data['resource_id'])){
 //            return ['code' => 201 , 'msg' => '请选择资源'];
 //        }
+        if($course['sale_price'] ==0){
+            $is_free = 0;
+        }else{
+            $is_free = 1;
+        }
         try{
             DB::beginTransaction();
             $insert = self::insertGetId([
@@ -170,7 +175,7 @@ class Coureschapters extends Model {
                 'resource_id' => isset($data['resource_id'])?$data['resource_id']:0,
                 'name' => $data['name'],
                 'type' => $data['type'],
-                'is_free' => isset($data['is_free'])?$data['is_free']:0
+                'is_free' => isset($data['is_free'])?$data['is_free']:$is_free
             ]);
             //判断小节资料
             if(!empty($data['filearr'])){

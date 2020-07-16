@@ -102,7 +102,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
      $router->group(['prefix' => 'index'], function () use ($router) {
         $router->post('teacher','IndexController@teacherList');//我们的团队
         $router->post('news','IndexController@newInformation');//新闻资讯
-        $router->post('footer','IndexController@footer');//页脚
+        $router->post('index','IndexController@index');//首页内容
         $router->post('course','IndexController@course');//精品课程
     });
 
@@ -595,6 +595,12 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getList', 'CourseStocksController@getList');  //库存列表
         $router->post('doInsertStocks', 'CourseStocksController@doInsertStocks');  //添加库存
     });
+    $router->group(['prefix' => 'pageset'], function () use ($router) {
+        $router->post('getList', 'PageSetController@getList');  //库存列表
+        $router->post('details', 'PageSetController@details');  //库存列表
+    });
+
+
     //end 网校系统     lys
 
     //课程模块（重构）【公开课】（lys）
@@ -618,6 +624,9 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('details','TeachController@details');  //教学详情
         $router->post('coursewareDel','TeachController@coursewareDel');  //课件删除（欢拓）
     });
+
+
+
 
 });
 /*****************end**********************/
