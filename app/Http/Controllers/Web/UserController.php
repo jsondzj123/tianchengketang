@@ -254,7 +254,6 @@ class UserController extends Controller {
                         }
                     })->get()->toArray();
                 $course['method'] = array_column($method, 'method_id');
-
                 if (!empty($course['method'])) {
                     foreach ($course['method'] as $key => &$val) {
                         if ($val['method_id'] == 1) {
@@ -267,9 +266,9 @@ class UserController extends Controller {
                             $val['method_name'] = '其他';
                         }
                     }
-                    $v['method'] = $method;
+                    $v['course'] = $course;
                 } else {
-                    unset($course[$k]);
+                    unset($collect[$k]);
                 }
             }
         }
