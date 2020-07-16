@@ -241,10 +241,10 @@ class UserController extends Controller {
         if(!empty($collect)) {
             foreach ($collect as $k => &$v) {
                 if ($v['nature'] == 1) {
-                    $course = CourseSchool::where(['id' => $v['course_id'], 'is_del' => 0, 'status' => 1])->first()->toArray();
+                    $course = CourseSchool::where(['id' => $v['lesson_id'], 'is_del' => 0, 'status' => 1])->first()->toArray();
                     $courseid = $course['course_id'];
                 } else {
-                    $course = Coures::where(['id' => $v['course_id'], 'is_del' => 0, 'status' => 1])->first()->toArray();
+                    $course = Coures::where(['id' => $v['lesson_id'], 'is_del' => 0, 'status' => 1])->first()->toArray();
                     $courseid = $course['id'];
                 }
                 $method = Couresmethod::select('method_id')->where(['course_id' => $courseid, 'is_del' => 0])
