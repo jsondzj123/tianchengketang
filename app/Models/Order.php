@@ -352,6 +352,7 @@ class Order extends Model {
                 }
                 if (!empty($lesson)) {
                     $order_info['title'] = $lesson['title'];
+                    $order_info['sale_price'] = $lesson['sale_price'];
                     $teacher = Couresteacher::where(['course_id' => $lesson['id']])->get()->toArray();
                     if (!empty($teacher)) {
                         foreach ($teacher as $k=>$v){
