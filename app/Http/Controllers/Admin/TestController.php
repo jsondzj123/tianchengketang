@@ -13,6 +13,8 @@ use App\Models\SubjectLesson;
 use App\Tools\MTCloud;
 use App\Exports\InvoicesExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\Request;
+
 
 
 class TestController extends Controller
@@ -22,7 +24,7 @@ class TestController extends Controller
      *
      * @return void
      */
-    public function index()
+    public function index(Request $request)
     {
 
         // $file = $_FILES['file'];
@@ -47,18 +49,44 @@ class TestController extends Controller
         // }
         // //获取excel表格中试题列表
         // $exam_list = self::doImportExcel(new \App\Imports\UsersImport , $path);
-        // foreach ($exam_list['data'] as $k=>$v){
-        //         $res[] = DB::table('edu_course_data')->select(['course_id','videoId'])->where(['course_id'=>$v[0]])->first();
+        $data = $request->all();
+        $pagesize = isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 15;
+        $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
+        $offset   = ($page - 1) * $pagesize;
+        $testt = DB::table("testt")->offset($offset)->limit($pagesize)->get()->toArray();
+        echo 2;die;
+        foreach ($testt as $k=>$v){
+            // $data['course_id'] = $v[0];
+            // $data['videoId'] = $v[1];
+            // $res = DB::table("testt")->insert($data);
+            $MTCloud = new MTCloud();
+            $res = $MTCloud->videoGet($v->videoId);
+            if($res['code']  == 0){
+                $test['mt_video_id'] = $res['data']['videoId'];
+                $test['mt_video_name'] = $res['data']['title'];
+                $test['mt_url'] = $res['data']['videoUrl'];
+                $test['mt_duration'] = $res['data']['duration'];
+                $test['resource_size'] = $res['data']['filesize'];
+                $d = DB::table("test")->insert($test);
+            }
+        }
+        dd($d);
+        //
+        //写入数据
+        // foreach($res as $k => $v){
+        //     dd($v->videoId);
+        //     $MTCloud = new MTCloud();
+        //     $res = $MTCloud->videoGet($v->videoId);
+        //     dd($res);
         // }
-        // print_r($res);
-        //return Excel::download("222", 'vedio.xlsx');
+
+
+        // dd($d);
+        //获取数据
+
         //获取excel表数据
 
         //获取录播数据
-
-        //通过course_id  获取视频id
-        // $res = DB::table('edu_course_data')->select(['course_id','videoId'])->where(['course_id'=>$v['id']])->get()->toArray();
-        // dd($res);
         //通过视频id获取视频数据
         //添加到录播资源表中
 
