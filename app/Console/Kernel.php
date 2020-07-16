@@ -25,5 +25,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         //
+        $schedule->call(function () {
+                echo 2;die;
+        })->cron('*/1 * * * *');
     }
 }
