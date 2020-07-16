@@ -333,7 +333,7 @@ class Order extends Model {
         if (empty($data['order_id'])) {
             return ['code' => 201, 'msg' => '订单id错误'];
         }
-        $order_info = self::select('order_number', 'create_at', 'price', 'order_type', 'status', 'pay_time', 'student_id', 'class_id','nature')->where(['id' => $data['order_id']])->first();
+        $order_info = self::select('order_number', 'create_at', 'price', 'order_type', 'status', 'pay_time', 'student_id', 'class_id','nature','lession_price')->where(['id' => $data['order_id']])->first();
         if (!empty($order_info)) {
             if ($order_info['student_id'] != '') {
                 $student = Student::select('real_name', 'phone', 'school_id')->where(['id' => $order_info['student_id']])->first();

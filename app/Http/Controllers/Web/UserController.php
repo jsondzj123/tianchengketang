@@ -283,6 +283,8 @@ class UserController extends Controller {
             foreach ($order as $k=>$v){
                 if($v['nature'] == 1){
                     $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                }else{
+                    $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
                 }
             }
         }
