@@ -67,7 +67,7 @@ class OpenCourse extends Model {
          */
     public static function getList($body){
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
- 
+
         $pagesize = !isset($body['pagesize']) || $body['pagesize'] < 0 ?  15:$body['pagesize'];
         
         $page     = !isset($body['page']) || $body['page'] < 0 ?1:$body['page'];
@@ -105,7 +105,7 @@ class OpenCourse extends Model {
             }
             $query->where('school_id',$school_id);
             $query->where('is_del',0);
-         })->get();
+         })->get()->toArray();
         
         //授权公开课
         $ref_open_less_arr = CourseRefOpen::leftJoin('ld_course_open','ld_course_ref_open.course_id','=','ld_course_open.id')
@@ -130,8 +130,17 @@ class OpenCourse extends Model {
             $query->where('to_school_id',$school_id);
             $query->where('ld_course_ref_open.is_del',0);
         })->select('ld_course_open.id','title','cover','start_at','end_at','is_recommend','status')
-            ->orderBy('ld_course_ref_open.create_at','desc')->get();
-            print_r($open_less_arr);
+            ->orderBy('ld_course_ref_open.create_at','desc')->get()->toArray();
+            if(!empty($open_less_arr)){
+                foreach($open_less_arr as $ka=>&$va){
+                    $va['nature'] = 1; //自增
+                }
+            }
+            if(!empty($ref_open_less_arr)){
+                foreach($ref_open_less_arr as $kb=>&$vb){
+                    $va['nature'] = 2; //授权
+                }
+            }
             if($nature == 1){ //自增
                 $openCourseArr = $open_less_arr;
             }
@@ -151,8 +160,8 @@ class OpenCourse extends Model {
             $limit_s=$start+$pagesize;
             $data=[];
             for($i=$start;$i<$limit_s;$i++){
-                if(!empty($arr[$i])){
-                    array_push($data,$arr[$i]);
+                if(!empty($openCourseArr[$i])){
+                    array_push($data,$openCourseArr[$i]);
                 }
             }
 
