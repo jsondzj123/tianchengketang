@@ -30,10 +30,12 @@ class NewsController extends Controller {
     	$pagesize = !isset($this->data['pagesize']) || $this->data['pagesize']  <= 0 ? 8:$this->data['pagesize'];   
     	$page = !isset($this->data['page']) || $this->data['page'] <= 0 ?1 :$this->data['page'];
     	$offset   = ($page - 1) * $pagesize;
-    	$count = Article::where(['school_id'=>$this->school['id'],'status'=>1,'is_del'=>1])
+
+    	$count = Article::leftJoin('ld_article_type','ld_article.article_type_id','=','ld_article_type.id')
+                        ->where(['ld_article_type.school_id'=>$this->school['id'],'ld_article_type.status'=>1,'ld_article_type.is_del'=>1,'ld_article.status'=>1,'ld_article.is_del'=>1])
     					->where(function($query) use ($data) {
                             if(!empty($data['articleOne']) && $data['articleOne'] != ''){
-                                $query->where('article_type_id',$data['subjectOne']);
+                                $query->where('article_type_id',$data['articleOne']);
                             }
                         })->orderBy('ld_article.create_at','desc')
     				->select('ld_article.id')
@@ -46,7 +48,7 @@ class NewsController extends Controller {
     					->where($where)
     					->where(function($query) use ($data) {
                             if(!empty($data['articleOne']) && $data['articleOne'] != ''){
-                                $query->where('article_type_id',$body['subjectOne']);
+                                $query->where('article_type_id',$data['articleOne']);
                             }
                         })->orderBy('ld_article.create_at','desc')
     				->select('ld_article.id','ld_article.article_type_id','ld_article.title','ld_article.share','ld_article.create_at','ld_article.image','ld_article_type.typename')
