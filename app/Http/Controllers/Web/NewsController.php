@@ -61,13 +61,13 @@ class NewsController extends Controller {
     	->limit(10)->get();
     	return ['code'=>200,'msg'=>'Success','data'=>$hotList];
     } 
-    //最新文章
+    //推荐文章
     public function newestList(){    	
     	$where = ['ld_article_type.school_id'=>$this->school['id'],'ld_article_type.status'=>1,'ld_article_type.is_del'=>1,'ld_article.status'=>1,'ld_article.is_del'=>1];
     	$newestList = Articletype::leftJoin('ld_article','ld_article.article_type_id','=','ld_article_type.id')
              ->where($where)
              ->select('ld_article.id','ld_article.article_type_id','ld_article.title','ld_article.share','ld_article.create_at','ld_article.image')
-             ->orderBy('ld_article.create_at','desc')->limit(5)->get();
+             ->orderBy('ld_article.create_at','desc')->limit(4)->get();
     	return ['code'=>200,'msg'=>'Success','data'=>$newestList];
     }
     //查看详情
