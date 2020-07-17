@@ -12,6 +12,8 @@ use App\Models\Teacher;
 use App\Tools\CurrentAdmin;
 use App\Tools\MTCloud;
 use App\Models\OpenLivesChilds;
+use App\Models\AdminLog;
+use App\Models\CourseRefOpen;
 
 class OpenCourseController extends Controller {
     /*
@@ -150,42 +152,81 @@ class OpenCourseController extends Controller {
     * return  array
     */
    	public function doUpdateRecomend(){
+   		$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登录的学校id
 	    $openCourseArr = self::$accept_data;
 	    $validator = Validator::make($openCourseArr, 
 	        [
 	        	'openless_id' => 'required|integer',
+	        	'nature' =>'required|integer'  //是否为授权 1 自增  2授权
 	       	],
 	    OpenCourse::message());
 	    if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-	    $data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','is_recommend']);
-	    if($data['code']!= 200 ){
-	    	 return response()->json($data);
-	    }
-	    try {
-		    $update['is_recommend'] = $data['data']['is_recommend'] >0 ? 0:1;
-		    $update['update_at'] = date('Y-m-d H:i:s');
-		    $update['id'] =  $data['data']['id'];
-		    $update['admin_id'] =  isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
-		    $res = openCourse::where('id',$data['data']['id'])->update($update);
-	        if($res){
-	        	AdminLog::insertAdminLog([
-	                'admin_id'       =>   isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0  ,
-	                'module_name'    =>  'OpenCourse' ,
-	                'route_url'      =>  'admin/OpenCourse/doUpdateRecomend' , 
-	                'operate_method' =>  'update',
-	                'content'        =>  json_encode($update) ,
-	                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
-	                'create_at'      =>  date('Y-m-d H:i:s')
-            	]);
-	    		return response()->json(['code'=>200,'msg'=>'更改成功']);
-		    }else{
-		    	return response()->json(['code'=>203,'msg'=>'更改成功']);
-		    }
-       	} catch (Exception $ex) {
-            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
-        }  
+        if($openCourseArr['nature'] == 1 || $openCourseArr == 2 ){
+        	if($openCourseArr['nature'] == 1){
+        		//自增  
+	        	$data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','is_recommend']);
+			    if($data['code']!= 200 ){
+			    	 return response()->json($data);
+			    }
+			    try {
+				    $update['is_recommend'] = $data['data']['is_recommend'] >0 ? 0:1;
+				    $update['update_at'] = date('Y-m-d H:i:s');
+				    $update['id'] =  $data['data']['id'];
+				    $update['admin_id'] =  isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
+				    $res = openCourse::where('id',$data['data']['id'])->update($update);
+			        if($res){
+			        	AdminLog::insertAdminLog([
+			                'admin_id'       =>   isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0  ,
+			                'module_name'    =>  'OpenCourse' ,
+			                'route_url'      =>  'admin/OpenCourse/doUpdateRecomend' , 
+			                'operate_method' =>  'update',
+			                'content'        =>  json_encode($update) ,
+			                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+			                'create_at'      =>  date('Y-m-d H:i:s')
+		            	]);
+			    		return response()->json(['code'=>200,'msg'=>'更改成功']);
+				    }else{
+				    	return response()->json(['code'=>203,'msg'=>'更改成功']);
+				    }
+		       	} catch (Exception $ex) {
+		            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+		        }  
+        	}
+        	if($openCourseArr['nature'] == 2){
+        		//授权
+        		$natureOpenCourseArr  = CourseRefOpen::where(['to_school_id'=>$school_id,'is_del'=>0,'course_id'=>$openCourseArr['openless_id']])->first();
+        		if(!$natureOpenCourseArr){
+        			return response()->json(['code'=>204,'msg'=>'公开课信息不存在']);
+        		}
+        		try {
+	        		$update['is_recommend'] = $natureOpenCourseArr['is_recommend'] >0 ? 0:1;
+				    $update['update_at'] = date('Y-m-d H:i:s');
+				    $update['admin_id'] =  isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
+
+	        		$res = CourseRefOpen::where('id',$natureOpenCourseArr['id'])->update($update);
+		        	if($res){
+				        	AdminLog::insertAdminLog([
+				                'admin_id'       =>   isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0  ,
+				                'module_name'    =>  'OpenCourse' ,
+				                'route_url'      =>  'admin/OpenCourse/doUpdateRecomend' , 
+				                'operate_method' =>  'update',
+				                'content'        =>  json_encode($update) ,
+				                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+				                'create_at'      =>  date('Y-m-d H:i:s')
+			            	]);
+				    		return response()->json(['code'=>200,'msg'=>'更改成功']);
+					    }else{
+					    	return response()->json(['code'=>203,'msg'=>'更改成功']);
+					    }
+			       	} catch (Exception $ex) {
+			            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+			        }  	
+        	}
+        }else
+        	 return response()->json(['code'=>400,'msg'=>'非法请求']);
+        }
     }
     /*
     * @param  修改课程状态
@@ -194,51 +235,86 @@ class OpenCourseController extends Controller {
     * return  array
     */
    	public function doUpdateStatus(){
+   		$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登录的学校id
 	    $openCourseArr = self::$accept_data;
 	    $validator = Validator::make($openCourseArr, 
 	        [
 	        	'openless_id' => 'required|integer',
+	        	'nature' = >'required|integer'
 	       	],
 	    OpenCourse::message());
 	    if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-	    $data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','status','start_at','end_at']);
-	    if($data['code']!= 200 ){
-	    	 return response()->json($data);
-	    }       
-	    if($data['data']['status'] <1){
-	    	$update['status'] = 1;
-	    }else if($data['data']['status'] == 1){
-	    	if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
-	    		return response()->json(['code'=>207,'msg'=>'直播中，无法停售!']);
-	    	}
-	    	$update['status'] = 2;
-	    }else if($data['data']['status'] == 2){
-	    	$update['status'] = 1;
-	    }
-	    try { 
-		    $update['admin_id'] =  isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
-		    $update['update_at'] = date('Y-m-d H:i:s');
-		    $update['id'] =  $data['data']['id'];
-		    $res = OpenCourse::where('id',$data['data']['id'])->update($update);
-		    if($res){
-		    	AdminLog::insertAdminLog([
-	                'admin_id'       =>   isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0  ,
-	                'module_name'    =>  'OpenCourse' ,
-	                'route_url'      =>  'admin/OpenCourse/doUpdateStatus' , 
-	                'operate_method' =>  'update',
-	                'content'        =>  json_encode($update) ,
-	                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
-	                'create_at'      =>  date('Y-m-d H:i:s')
-            	]);
-		    	return response()->json(['code'=>200,'msg'=>'更改成功']);
-		    }else{
-		    	return response()->json(['code'=>203,'msg'=>'更改成功']);
+       	if($openCourseArr['nature'] == 1 || $openCourseArr['nature'] == 2){
+       		$data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','status','start_at','end_at']);
+		    if($data['code']!= 200 ){
+		    	 return response()->json($data);
+		    } 
+		    if($data['data']['status'] <1){
+			    	$update['status'] = 1;
+		    }else if($data['data']['status'] == 1){
+		    	if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
+		    		return response()->json(['code'=>207,'msg'=>'直播中，无法停售!']);
+		    	}
+		    	$update['status'] = 2;
+		    }else if($data['data']['status'] == 2){
+		    	$update['status'] = 1;
 		    }
-		} catch (Exception $ex) {
-            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
-        }
+       		if($openCourseArr['nature'] == 1){
+       			//自增       
+			    try { 
+				    $update['admin_id'] =  isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
+				    $update['update_at'] = date('Y-m-d H:i:s');
+				    $update['id'] =  $data['data']['id'];
+				    $res = OpenCourse::where('id',$data['data']['id'])->update($update);
+				    if($res){
+				    	AdminLog::insertAdminLog([
+			                'admin_id'       =>   isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0  ,
+			                'module_name'    =>  'OpenCourse' ,
+			                'route_url'      =>  'admin/OpenCourse/doUpdateStatus' , 
+			                'operate_method' =>  'update',
+			                'content'        =>  json_encode($update) ,
+			                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+			                'create_at'      =>  date('Y-m-d H:i:s')
+		            	]);
+				    	return response()->json(['code'=>200,'msg'=>'更改成功']);
+				    }else{
+				    	return response()->json(['code'=>203,'msg'=>'更改成功']);
+				    }
+				} catch (Exception $ex) {
+		            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+		        }
+
+       		}
+       		if($openCourseArr['nature'] == 2){
+       			//授权
+       			 try { 
+				    $update['admin_id'] =  isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
+				    $update['update_at'] = date('Y-m-d H:i:s');
+				    $res = CourseRefOpen::where(['course_id'=>$data['data']['id'],'to_school_id'=>$school_id])->update($update);
+				    if($res){
+				    	AdminLog::insertAdminLog([
+			                'admin_id'       =>   isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0  ,
+			                'module_name'    =>  'OpenCourse' ,
+			                'route_url'      =>  'admin/OpenCourse/doUpdateStatus' , 
+			                'operate_method' =>  'update',
+			                'content'        =>  json_encode($update) ,
+			                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+			                'create_at'      =>  date('Y-m-d H:i:s')
+		            	]);
+				    	return response()->json(['code'=>200,'msg'=>'更改成功']);
+				    }else{
+				    	return response()->json(['code'=>203,'msg'=>'更改成功']);
+				    }
+				} catch (Exception $ex) {
+		            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+		        }
+
+       		}
+       	}else{
+       		return response()->json(['code'=>400,'msg'=>'非法请求']);
+       	}
     }
     /*
     * @param  是否删除
@@ -387,13 +463,19 @@ class OpenCourseController extends Controller {
             	'is_barrage' => 'required',
             	'live_type' => 'required',
             	'introduce' => 'required',
-            	// 'edu_teacher_id' => 'required',
+            	// // 'edu_teacher_id' => 'required',
+            	// 'nature'=>'required',   //是否授权  1自增  2 授权
             	'lect_teacher_id'=>'required',
 	       	],
 	    OpenCourse::message());
 	    if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
+        //是否授权
+        // if($openCourseArr['nature'] == 2){
+        // 	return response()->json(['code'=>207,'msg'=>'授权公开课，无法修改']);
+        // }
+
 	    $data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','start_at','end_at']);
 	    if($data['code']!= 200 ){
 	    	return response()->json($data);
