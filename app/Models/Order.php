@@ -333,7 +333,7 @@ class Order extends Model {
         if (empty($data['order_id'])) {
             return ['code' => 201, 'msg' => '订单id错误'];
         }
-        $order_info = self::select('order_number', 'create_at', 'price', 'order_type', 'status', 'pay_time', 'student_id', 'class_id')->where(['id' => $data['order_id']])->first();
+        $order_info = self::select('order_number', 'create_at', 'price', 'order_type', 'status', 'pay_time', 'student_id', 'class_id','nature','lession_price')->where(['id' => $data['order_id']])->first();
         if (!empty($order_info)) {
             if ($order_info['student_id'] != '') {
                 $student = Student::select('real_name', 'phone', 'school_id')->where(['id' => $order_info['student_id']])->first();
@@ -345,13 +345,22 @@ class Order extends Model {
                 }
             }
             if ($order_info['class_id'] != '') {
-                $lesson = Coures::select('id', 'title')->where(['id' => $order_info['class_id']])->first();
+                if($order_info['nature'] == 1){
+                    $lesson = CourseSchool::select('course_id as id', 'title','sale_price')->where(['id' => $order_info['class_id']])->first();
+                }else{
+                    $lesson = Coures::select('id', 'title','sale_price')->where(['id' => $order_info['class_id']])->first();
+                }
                 if (!empty($lesson)) {
                     $order_info['title'] = $lesson['title'];
-                    $teacher = LessonTeacher::where(['lesson_id' => $lesson['id']])->first();
+                    $order_info['sale_price'] = $lesson['sale_price'];
+                    $teacher = Couresteacher::where(['course_id' => $lesson['id']])->get()->toArray();
                     if (!empty($teacher)) {
-                        $lecturer_educationa = Lecturer::select('real_name')->where(['id' => $teacher['teacher_id']])->first();
-                        $order_info['real_name'] = $lecturer_educationa['real_name'];
+                        foreach ($teacher as $k=>$v){
+                            $lecturer_educationa = Lecturer::select('real_name')->where(['id' => $v['teacher_id']])->first();
+                            $teacherrealname[] = $lecturer_educationa['real_name'];
+                        }
+                        $teacherrealnames = implode(',',$teacherrealname);
+                        $order_info['real_names'] = $teacherrealnames;
                     }
                 }
             }

@@ -33,12 +33,15 @@ class Authrules extends Model {
             return ['code'=>202,'msg'=>'参数类型有误'];
         }
         $auth_id_arr = explode(',',$auth_id);
+
         if(!$auth_id_arr){
              $auth_id_arr = [$auth_id];
         }
         $authArr = self::whereIn('id',$auth_id_arr)->where(['is_del'=>1,'is_show'=>1,'is_forbid'=>1])->select('id','name','title','parent_id')->get()->toArray();
+       
         $arr = [];
         foreach($authArr as $k=>$v){
+      
             if($v['parent_id'] == 0){
                 $arr[] = $v;    
             }else{
@@ -51,11 +54,11 @@ class Authrules extends Model {
                 }
             }
         }
-     
+        
         if($arr){
             return ['code'=>200,'msg'=>'获取权限信息成功','data'=>$arr];
         }else{
-            return ['code'=>204,'msg'=>'权限信息不存在'];
+            return ['code'=>204,'msg'=>'权限信息不存在,请联系管理员'];
         }
     }
         /*

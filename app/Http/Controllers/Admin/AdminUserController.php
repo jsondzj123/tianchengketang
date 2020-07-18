@@ -396,10 +396,12 @@ class AdminUserController extends Controller {
             return ['code'=>201,'msg'=>'参数值为空或参数类型错误'];
         }
         $adminRole =  Roleauth::getRoleOne(['id'=>$admin_role_id,'is_del'=>1],['id','role_name','auth_id']);
+
         if($adminRole['code'] != 200){
             return ['code'=>$adminRole['code'],'msg'=>$adminRole['msg']];
         }
         $adminRuths = Authrules::getAdminAuthAll($adminRole['data']['auth_id']);
+
         if($adminRuths['code'] != 200){
             return ['code'=>$adminRuths['code'],'msg'=>$adminRuths['msg']];
         }

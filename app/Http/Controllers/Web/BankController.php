@@ -43,16 +43,11 @@ class BankController extends Controller {
                 return response()->json(['code' => 203 , 'msg' => '此域名不合法']);
             }
             
-            //获取分校id
-            $school_id = $school_info['id'];
-            
             //题库数组赋值
             $bank_array = [];
             
             //获取全部题库的列表
-            $bank_list = DB::table('ld_question_bank')->leftJoin("ld_admin" , function($join){
-                $join->on('ld_admin.id', '=', 'ld_question_bank.admin_id');
-            })->select('ld_question_bank.id' , 'ld_question_bank.subject_id' , 'ld_question_bank.topic_name')->where("ld_admin.school_id" , $school_id)->where('ld_question_bank.is_del' , '=' , 0)->where("ld_question_bank.is_open" , 0)->orderByDesc('ld_question_bank.id')->get()->toArray();
+            $bank_list = Bank::select('id' , 'subject_id' , 'topic_name')->where('school_id' , $school_info['id'])->where('is_del' , 0)->where('is_open' , 0)->orderByDesc('id')->get();
             if($bank_list && !empty($bank_list)){
                 foreach($bank_list as $k=>$v){
                     //判断科目的id是否为空

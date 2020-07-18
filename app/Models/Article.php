@@ -37,7 +37,7 @@ class Article extends Model {
                 }else{
                     $query->where('ld_article.school_id',$school_id);
                 }
-                if(isset($data['type_id']) && !empty($data['type_id'] != '')){
+                if(isset($data['type_id']) && !empty($data['type_id'] != ''&&$data['type_id'] != 0 )){
                     $query->where('ld_article.article_type_id',$data['type_id']);
                 }
                 if(isset($data['title']) && !empty($data['title'] != '')){
@@ -62,7 +62,7 @@ class Article extends Model {
                         //分校查询当前学校
                         $query->where('ld_article.school_id',$school_id);
                     }
-                    if(isset($data['type_id']) && !empty($data['type_id'] != '')){
+                    if(isset($data['type_id']) && !empty($data['type_id'] != '' &&$data['type_id'] != 0)){
                         $query->where('ld_article.article_type_id',$data['type_id']);
                     }
                     if(isset($data['title']) && !empty($data['title'] != '')){

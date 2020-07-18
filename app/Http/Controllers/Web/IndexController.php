@@ -39,11 +39,13 @@ class IndexController extends Controller {
     }
     //新闻资讯
     public function newInformation(){
+      
     	$limit = !isset($this->data['limit']) || empty($this->data['limit']) || $this->data['limit']<=0 ? 4 : $this->data['limit'];
-    	$where = ['ld_article_type.school_id'=>$this->school['id'],'ld_article_type.status'=>1,'ld_article_type.is_del'=>1,'ld_article.status'=>1,'ld_article.is_del'=>1];
+    	$where = ['ld_article_type.school_id'=>$this->school['id'],'ld_article_type.status'=>1,'ld_article_type.is_del'=>1];
     	$news = Articletype::leftJoin('ld_article','ld_article.article_type_id','=','ld_article_type.id')
              ->where($where)
              ->limit($limit)->get();
+
         return response()->json(['code'=>200,'msg'=>'Success','data'=>$news]);
     }
     //首页信息
@@ -54,7 +56,7 @@ class IndexController extends Controller {
     	$admin = Admin::where('school_id',$this->school['id'])->select('school_status')->first();
     	if(!empty($admin)){
     		if($admin['school_status'] > 0){
-    			$footer = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>2])->select('id','parent_id','name','url','text','create_at')->get();
+    			$footer = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>2])->select('id','parent_id','name','url','create_at')->get();
 		    	if(!empty($footer)){
 		    		$arr['footer'] = getParentsList($footer);
 		    	}

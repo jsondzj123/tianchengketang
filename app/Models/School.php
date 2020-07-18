@@ -166,12 +166,12 @@ class School extends Model {
                             ->get()->toArray();
             if(!empty($teacher)){
                 foreach($teacher as $key => &$v){
-                    $v['school_status'] ='分校讲师';
+                    $v['school_status'] ='自增讲师';
                 }
             }
              if(!empty($natureTeacher)){
                 foreach($natureTeacher as $key => &$vv){
-                    $vv['school_status'] ='总校讲师';
+                    $vv['school_status'] ='授权讲师';
                 }
             }
             $teacher = array_merge($teacher,$natureTeacher);
@@ -248,6 +248,7 @@ class School extends Model {
                     if($v['nature'] == 1){
                         $v['sum_nember'] = CourseStocks::where(['school_pid'=>$school_id,'school_id'=>$data['school_id'],'course_id'=>$v['id'],'is_del'=>0])->sum('add_number');
                     }
+                    $v['surplus'] = $v['sum_nember']-$v['buy_nember'] <=0 ?0:$v['sum_nember']-$v['buy_nember'];
                     $where=[
                         'course_id'=>$v['id'],
                         'is_del'=>0
