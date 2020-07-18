@@ -267,9 +267,9 @@ class UserController extends Controller {
                             $query->where('method_id', $methods);
                         }
                     })->get()->toArray();
-                $course['method'] = array_column($method, 'method_id');
-                if (!empty($course['method'])) {
-                    foreach ($course['method'] as $key => &$val) {
+                $coursemethod= array_column($method, 'method_id');
+                if (!empty($coursemethod)) {
+                    foreach ($coursemethod as $key => &$val) {
                         if ($val['method_id'] == 1) {
                             $val['method_name'] = '直播';
                         }
@@ -280,6 +280,7 @@ class UserController extends Controller {
                             $val['method_name'] = '其他';
                         }
                     }
+                    $course['method'] = $coursemethod;
                     $coursearr[] = $course;
                 } else {
                     unset($collect[$k]);
