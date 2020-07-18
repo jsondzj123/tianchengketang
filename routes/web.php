@@ -142,6 +142,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->post('doUserVerifyPassword','AuthenticateController@doUserVerifyPassword');              //忘记密码验证接口
     $router->post('doUserForgetPassword','AuthenticateController@doUserForgetPassword');              //找回密码接口
     $router->post('captchaInfo','AuthenticateController@captchaInfo');          //WEB生成图片验证码接口
+    $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');   //OA流转订单
 
     //题库部分
     $router->post('getBankList','BankController@getBankList');                  //全部题库接口
@@ -188,10 +189,6 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('material','CourseController@material');//课程资料列表
         $router->post('collect','CourseController@collect');//课程收藏
         $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
-    });
-    //对公购买模块（szw）
-    $router->group(['prefix' => 'publicpay'], function () use ($router) {
-        $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');//OA流转订单
     });
 });
 //后台端路由接口
