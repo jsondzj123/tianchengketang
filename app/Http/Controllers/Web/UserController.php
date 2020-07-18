@@ -216,7 +216,7 @@ class UserController extends Controller {
         }
         $user = Student::where(['id'=>$this->userid])->first()->toArray();
         //验证密码是否合法
-        if(password_verify($this->data['news_pass']  , $user['password']) === false){
+        if(password_verify($this->data['old_pass']  , $user['password']) === false){
             return response()->json(['code' => 203 , 'msg' => '密码错误']);
         }
         if($this->data['new_pass'] != $this->data['news_pass']){
