@@ -78,7 +78,7 @@ class PublicpayController extends Controller {
            'price' => $couser['pricing'],
            'lession_price' =>$couser['sale_price'],
            'pay_status' =>$this->data['pay_status'],
-           'pay_type' =>$this->data['pay_time'],
+           'pay_type' =>$this->data['pay_type'],
            'status' =>2,
            'pay_time' =>$this->data['pay_time'],
            'oa_status' =>1,
