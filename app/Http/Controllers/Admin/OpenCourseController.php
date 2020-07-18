@@ -12,7 +12,6 @@ use App\Models\Teacher;
 use App\Tools\CurrentAdmin;
 use App\Tools\MTCloud;
 use App\Models\OpenLivesChilds;
-use App\Models\AdminLog;
 use App\Models\CourseRefOpen;
 
 class OpenCourseController extends Controller {
@@ -153,6 +152,7 @@ class OpenCourseController extends Controller {
     */
    	public function doUpdateRecomend(){
    		$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登录的学校id
+
 	    $openCourseArr = self::$accept_data;
 	    $validator = Validator::make($openCourseArr, 
 	        [
@@ -224,7 +224,7 @@ class OpenCourseController extends Controller {
 			            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
 			        }  	
         	}
-        }else
+        }else{
         	 return response()->json(['code'=>400,'msg'=>'非法请求']);
         }
     }
@@ -240,7 +240,7 @@ class OpenCourseController extends Controller {
 	    $validator = Validator::make($openCourseArr, 
 	        [
 	        	'openless_id' => 'required|integer',
-	        	'nature' = >'required|integer'
+	        	'nature' =>'required|integer'
 	       	],
 	    OpenCourse::message());
 	    if($validator->fails()) {
@@ -464,7 +464,7 @@ class OpenCourseController extends Controller {
             	'live_type' => 'required',
             	'introduce' => 'required',
             	// // 'edu_teacher_id' => 'required',
-            	// 'nature'=>'required',   //是否授权  1自增  2 授权
+            	'nature'=>'required',   //是否授权  1自增  2 授权
             	'lect_teacher_id'=>'required',
 	       	],
 	    OpenCourse::message());
@@ -472,9 +472,9 @@ class OpenCourseController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
         //是否授权
-        // if($openCourseArr['nature'] == 2){
-        // 	return response()->json(['code'=>207,'msg'=>'授权公开课，无法修改']);
-        // }
+        if($openCourseArr['nature'] == 2){
+        	return response()->json(['code'=>207,'msg'=>'授权公开课，无法修改']);
+        }
 
 	    $data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','start_at','end_at']);
 	    if($data['code']!= 200 ){

@@ -67,7 +67,9 @@ class OpenCourse extends Model {
          */
     public static function getList($body){
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+
         $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+
         $ref_open_less_arr = $open_less_arr = [];
         $pagesize = !isset($body['pagesize']) || $body['pagesize'] < 0 ?  15:$body['pagesize'];
         $page     = !isset($body['page']) || $body['page'] < 0 ?1:$body['page'];
@@ -143,6 +145,7 @@ class OpenCourse extends Model {
             }
         }
         if($nature == 1){ //自增
+            
             $openCourseArr = $open_less_arr;
         }
         if($nature == 2){ //授权
@@ -150,6 +153,7 @@ class OpenCourse extends Model {
         }else{
             $openCourseArr = array_merge($open_less_arr,$ref_open_less_arr);
         }
+        
         if(!empty($openCourseArr)){
             foreach ($openCourseArr as $k => &$v) {          
                 $v['time'] = [date('Y-m-d H:i:s',$v['start_at']),date('Y-m-d H:i:s',$v['end_at'])];
