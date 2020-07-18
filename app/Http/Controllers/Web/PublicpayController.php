@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
 use App\Models\Coures;
 use App\Models\CourseSchool;
+use App\Models\Order;
 use App\Models\School;
 use App\Models\Student;
 
@@ -86,8 +87,10 @@ class PublicpayController extends Controller {
            'validity_time' =>$validity,
            'school_id' =>$school_id
        ];
+       Order::insert($arr);
        //修改用户报名状态
        Student::where(['id'=>$this->data['class_id']])->update(['enroll_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+       return response()->json(['code' => 200 , 'msg' => '成功']);
    }
 }
 

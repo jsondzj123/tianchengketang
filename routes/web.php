@@ -190,7 +190,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
     });
     //对公购买模块（szw）
-    $router->group(['prefix' => 'publicpay', 'middleware'=> 'user'], function () use ($router) {
+    $router->group(['prefix' => 'publicpay'], function () use ($router) {
         $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');//OA流转订单
     });
 });
