@@ -20,8 +20,8 @@ class NewsController extends Controller {
     protected $data;
     public function __construct(){
         $this->data = $_REQUEST;
-        // $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
-        $this->school = School::where(['dns'=>$_SERVER['SERVER_NAME']])->first();
+        $this->school = School::where(['dns'=>$this->data['dns']])->first();
+        // $this->school = School::where(['dns'=>$_SERVER['SERVER_NAME']])->first();
     }
     //列表
     public function getList(){
@@ -30,10 +30,12 @@ class NewsController extends Controller {
     	$pagesize = !isset($this->data['pagesize']) || $this->data['pagesize']  <= 0 ? 8:$this->data['pagesize'];   
     	$page = !isset($this->data['page']) || $this->data['page'] <= 0 ?1 :$this->data['page'];
     	$offset   = ($page - 1) * $pagesize;
-    	$count = Article::where(['school_id'=>$this->school['id'],'status'=>1,'is_del'=>1])
+
+    	$count = Article::leftJoin('ld_article_type','ld_article.article_type_id','=','ld_article_type.id')
+                        ->where(['ld_article_type.school_id'=>$this->school['id'],'ld_article_type.status'=>1,'ld_article_type.is_del'=>1,'ld_article.status'=>1,'ld_article.is_del'=>1])
     					->where(function($query) use ($data) {
                             if(!empty($data['articleOne']) && $data['articleOne'] != ''){
-                                $query->where('article_type_id',$data['subjectOne']);
+                                $query->where('article_type_id',$data['articleOne']);
                             }
                         })->orderBy('ld_article.create_at','desc')
     				->select('ld_article.id')
@@ -46,10 +48,10 @@ class NewsController extends Controller {
     					->where($where)
     					->where(function($query) use ($data) {
                             if(!empty($data['articleOne']) && $data['articleOne'] != ''){
-                                $query->where('article_type_id',$body['subjectOne']);
+                                $query->where('article_type_id',$data['articleOne']);
                             }
                         })->orderBy('ld_article.create_at','desc')
-    				->select('ld_article.id','ld_article.article_type_id','ld_article.title','ld_article.share','ld_article.create_at','ld_article.image')
+    				->select('ld_article.id','ld_article.article_type_id','ld_article.title','ld_article.share','ld_article.create_at','ld_article.image','ld_article_type.typename')
     				->get();
     	}
     	return  ['code'=>200,'msg'=>'Success','data'=>$articleArr,'total'=>$count,'article_type'=>$Articletype];
@@ -61,13 +63,13 @@ class NewsController extends Controller {
     	->limit(10)->get();
     	return ['code'=>200,'msg'=>'Success','data'=>$hotList];
     } 
-    //最新文章
+    //推荐文章
     public function newestList(){    	
     	$where = ['ld_article_type.school_id'=>$this->school['id'],'ld_article_type.status'=>1,'ld_article_type.is_del'=>1,'ld_article.status'=>1,'ld_article.is_del'=>1];
     	$newestList = Articletype::leftJoin('ld_article','ld_article.article_type_id','=','ld_article_type.id')
              ->where($where)
-             ->select('ld_article.id','ld_article.article_type_id','ld_article.title','ld_article.share','ld_article.create_at','ld_article.image')
-             ->orderBy('ld_article.create_at','desc')->limit(5)->get();
+             ->select('ld_article.id','ld_article.article_type_id','ld_article.title','ld_article.share','ld_article.create_at','ld_article.image','ld_article.description')
+             ->orderBy('ld_article.create_at','desc')->limit(4)->get();
     	return ['code'=>200,'msg'=>'Success','data'=>$newestList];
     }
     //查看详情

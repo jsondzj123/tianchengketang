@@ -352,13 +352,14 @@ class Order extends Model {
                 }
                 if (!empty($lesson)) {
                     $order_info['title'] = $lesson['title'];
+                    $order_info['sale_price'] = $lesson['sale_price'];
                     $teacher = Couresteacher::where(['course_id' => $lesson['id']])->get()->toArray();
                     if (!empty($teacher)) {
                         foreach ($teacher as $k=>$v){
                             $lecturer_educationa = Lecturer::select('real_name')->where(['id' => $v['teacher_id']])->first();
                             $teacherrealname[] = $lecturer_educationa['real_name'];
                         }
-                        $teacherrealnames = implode($teacherrealname,',');
+                        $teacherrealnames = implode(',',$teacherrealname);
                         $order_info['real_names'] = $teacherrealnames;
                     }
                 }

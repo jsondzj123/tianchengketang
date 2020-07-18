@@ -7,12 +7,14 @@ use App\Models\AdminLog;
 use App\Models\Collection;
 use App\Models\Coures;
 use App\Models\Couresmethod;
+use App\Models\Couresteacher;
 use App\Models\CourseSchool;
 use App\Models\Order;
 use App\Models\Region;
 use App\Models\School;
 use App\Models\Student;
 use App\Models\StudentCollect;
+use App\Models\Teacher;
 use Illuminate\Support\Facades\Redis;
 
 class UserController extends Controller {
@@ -275,19 +277,32 @@ class UserController extends Controller {
         }
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$coursearr]);
     }
+
     //我的课程
     public function myCourse(){
         $order = Order::where(['student_id'=>$this->userid,'status'=>2])->where('validity_time','>',date('Y-m-d H:i:s'))->get()->toArray();
+        $course = [];
         if(!empty($order)){
-            $course = [];
             foreach ($order as $k=>$v){
                 if($v['nature'] == 1){
                     $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    $courseid = $course['course_id'];
                 }else{
                     $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    $courseid = $course['id'];
+                }
+                //查讲师
+                $teacherlist = Couresteacher::where(['course_id'=>$courseid,'is_del'=>0])->get();
+                if(!empty($teacherlist)){
+                    foreach ($teacherlist as $ks=>$vs){
+                        $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
+                        $string[] = $teacher['real_name'];
+                    }
+                    $course['teachername'] = implode(',',$string);
                 }
             }
         }
+        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$course]);
     }
     //我的订单  status 1已完成2未完成3已失效
     public function myOrder(){
