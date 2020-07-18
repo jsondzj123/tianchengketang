@@ -235,19 +235,15 @@ class OrderController extends Controller
             if ($order['status'] > 0) {
                 return ['code' => 202, 'msg' => '此订单已支付'];
             }
-            //判断用户网校，根据网校查询课程信息
-            if ($user_school_id == 1) {
-                //根据课程id 查询价格
-                $lesson = Coures::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','expiry')->where(['id' => $order['class_id'], 'is_del' => 0, 'status' => 2])->first();
-                if (!$lesson) {
-                    return ['code' => 202, 'msg' => '此课程选择无效'];
-                }
-            } else {
-                //根据课程id 网校id 查询网校课程详情
-                $lesson = CourseSchool::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','expiry')->where(['course_id' => $order['class_id'], 'school_id' => $user_school_id, 'is_del' => 0, 'status' => 1])->first();
-                if (!$lesson) {
-                    return ['code' => 202, 'msg' => '此课程选择无效'];
-                }
+
+            //订单查询课程
+            if($order['nature'] == 1){
+                $lesson = CourseSchool::where(['id' => $order['class_id'], 'is_del' => 0, 'status' => 1])->first();
+            }else{
+                $lesson = Coures::where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1])->first();
+            }
+            if (!$lesson) {
+                return ['code' => 202, 'msg' => '此课程选择无效'];
             }
             if ($data['pay_type'] == 5) {
                 if ($lesson['sale_price'] > $user_balance) {
