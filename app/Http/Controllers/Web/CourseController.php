@@ -360,7 +360,7 @@ class CourseController extends Controller {
     }
 
     public function urlcode(){
-        $urlcode = $this->generateQRfromGoogle("www.baidu.com");
+        $urlcode = $this->generateQRfromGoogle("11111");
         echo $urlcode;die;
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $urlcode]);
     }
