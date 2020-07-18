@@ -142,7 +142,6 @@ class Teach extends Model {
 						$query->where('ld_lecturer_educationa.type',2);
 				})->select('ld_course_shift_no.name as classno_name','ld_course_class_number.name as class_name','ld_course_class_number.start_at','ld_course_class_number.end_at','ld_lecturer_educationa.real_name as teacher_name','ld_course_live_childs.watch_num','ld_course_class_number.id as class_id','ld_course_class_number.shift_no_id as classno_id')
 				->get()->toArray();
-					print_r($courseArr);die;
 				$newcourseArr = [];
 				if(!empty($openCourseArr)){
 					foreach($openCourseArr as $k=>$v){

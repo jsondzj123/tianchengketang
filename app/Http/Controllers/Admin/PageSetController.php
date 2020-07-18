@@ -10,10 +10,12 @@ use DB;
 use Validator;
 
 class PageSetController extends Controller {
+	//列表
 	public function getList(){
 	    $res = FootConfig::getList(self::$accept_data);
 		return response()->json($res);
 	}
+	//详情-修改
 	public function details(){
 	    $validator = Validator::make(self::$accept_data, 
             [
@@ -24,4 +26,18 @@ class PageSetController extends Controller {
 	    $res = FootConfig::details(self::$accept_data);
 		return response()->json($res);
 	}
+	//修改logo
+	public function doLogoUpdate(){
+		 $validator = Validator::make(self::$accept_data, 
+            [
+            	'curSchool_id' => 'required|integer',
+            	'logo' => 'required',
+           	],
+            FootConfig::message());
+	    $res = FootConfig::doLogoUpdate(self::$accept_data);
+		return response()->json($res);
+	}
+
+
+
 }
