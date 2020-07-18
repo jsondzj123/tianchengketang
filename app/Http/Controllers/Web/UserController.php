@@ -215,9 +215,9 @@ class UserController extends Controller {
             return response()->json(['code' => 201 , 'msg' => '请再次输入新密码']);
         }
         $user = Student::where(['id'=>$this->userid])->first()->toArray();
-        $olds_pass = password_hash($this->data['old_pass'] , PASSWORD_DEFAULT);
-        if($olds_pass != $user['password']){
-            return response()->json(['code' => 202 , 'msg' => '密码错误']);
+        //验证密码是否合法
+        if(password_verify($this->data['news_pass']  , $user['password']) === false){
+            return response()->json(['code' => 203 , 'msg' => '密码错误']);
         }
         if($this->data['new_pass'] != $this->data['news_pass']){
             return response()->json(['code' => 202 , 'msg' => '两次输入不一致']);
