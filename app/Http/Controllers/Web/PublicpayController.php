@@ -37,7 +37,7 @@ class PublicpayController extends Controller {
         * return  array
         */
    public function orderOAtoPay(){
-       if(!isset($this->data['nature']) || empty($this->data['nature'])){
+       if(!isset($this->data['nature'])){
            return response()->json(['code' => 201 , 'msg' => '课程类型(授权自增)不能为空']);
        }
        if(!isset($this->data['class_id']) || empty($this->data['class_id'])){
