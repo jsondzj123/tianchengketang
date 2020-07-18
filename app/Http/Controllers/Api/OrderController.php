@@ -288,7 +288,7 @@ class OrderController extends Controller
             ];
             $add = StudentAccounts::insert($sutdent_price);
             if ($add) {
-                $return = self::payStatus($sutdent_price['order_number'], $data['type'], $data['price'],$user_school_id,2);
+                $return = self::payStatus('充值',$sutdent_price['order_number'], $data['type'], $data['price'],$user_school_id,2);
                 return response()->json(['code' => 200, 'msg' => '生成预订单成功', 'data' => $return]);
             }
         }
