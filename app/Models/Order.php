@@ -184,7 +184,7 @@ class Order extends Model {
             if(!isset($arr['type']) || empty($arr['type'] || !in_array($arr['type'],[1,2,3]))){
                 return ['code' => 201 , 'msg' => '机型不匹配'];
             }
-            $course = Coures::select('id','title','cover','pricing','sale_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1])->first();
+            $course = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1])->first();
 
 
             //判断用户网校，根据网校查询课程信息
@@ -198,7 +198,7 @@ class Order extends Model {
             if(!$course){
                 return ['code' => 204 , 'msg' => '此课程选择无效'];
             }
-            if(empty($course['sale_price']) || empty($course['pricing'])){
+            if(empty($course['favorable_price']) || empty($course['price'])){
                 return ['code' => 204 , 'msg' => '此课程信息有误选择无效'];
             }
 
@@ -233,8 +233,8 @@ class Order extends Model {
             $data['admin_id'] = 0;  //操作员id
             $data['order_type'] = 2;        //1线下支付 2 线上支付
             $data['student_id'] = $arr['student_id'];
-            $data['price'] = $course['sale_price'];
-            $data['lession_price'] = $course['pricing'];
+            $data['price'] = $course['favorable_price'];
+            $data['lession_price'] = $course['price'];
             $data['pay_status'] = 4;
             $data['pay_type'] = 0;
             $data['status'] = 0;
@@ -243,9 +243,9 @@ class Order extends Model {
             $data['school_id'] = $student['school_id'];
             $add = self::insertGetId($data);
             if($add){
-                $lesson['order_id'] = $add;
-                $lesson['order_number'] = $data['order_number'];
-                $lesson['user_balance'] = $student['balance'];
+                $course['order_id'] = $add;
+                $course['order_number'] = $data['order_number'];
+                $course['user_balance'] = $student['balance'];
                 DB::commit();
                 return ['code' => 200 , 'msg' => '生成预订单成功','data'=>$course,'paylist'=>$newpay];
             }else{
