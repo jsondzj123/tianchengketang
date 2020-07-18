@@ -292,12 +292,12 @@ class CourseController extends Controller {
                 }
             }
             //是否购买
-//            if ($course['sale_price'] > 0) {
-//                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['course_id'], 'status' => 2,'nature'=>1])->count();
-//                $course['is_pay'] = $order > 0 ? 1 : 0;
-//            } else {
+            if ($course['sale_price'] > 0) {
+                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['course_id'], 'status' => 2,'nature'=>1])->count();
+                $course['is_pay'] = $order > 0 ? 1 : 0;
+            } else {
                 $course['is_pay'] = 1;
-//            }
+            }
             //收藏数量
             $collect = Collection::where(['lesson_id'=>$course['course_id']])->count();
             $course['collect'] = $collect;
@@ -333,22 +333,22 @@ class CourseController extends Controller {
                 }
             }
             //是否购买
-//            if ($course['sale_price'] > 0) {
-//                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
-//                $course['is_pay'] = $order > 0 ? 1 : 0;
-//            } else {
+            if ($course['sale_price'] > 0) {
+                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
+                $course['is_pay'] = $order > 0 ? 1 : 0;
+            } else {
                 $course['is_pay'] = 1;
-//            }
+            }
             //收藏数量
             $collect = Collection::where(['lesson_id'=>$this->data['id']])->count();
             $course['collect'] = $collect;
             //判断用户是否收藏
-//            $collect = Collection::where(['course_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0])->count();
-//            if($collect != 0){
-//                $course['is_collect'] = 1;
-//            }else{
+            $collect = Collection::where(['course_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0])->count();
+            if($collect != 0){
+                $course['is_collect'] = 1;
+            }else{
                 $course['is_collect'] = 0;
-//            }
+            }
         }
         //分类信息
         $parent = CouresSubject::select('id', 'subject_name')->where(['id' => $course['parent_id'], 'parent_id' => 0, 'is_del' => 0, 'is_open' => 0])->first();
