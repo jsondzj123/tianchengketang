@@ -75,6 +75,10 @@ class PublicpayController extends Controller {
        }else{
            $validity = "3000-03-03 12:12:12";
        }
+       $find = Order::where(['order_number'=>$this->data['order_number']])->first();
+       if(!empty($find)){
+           return response()->json(['code' => 202 , 'msg' => '此订单已存在']);
+       }
        $arr=[
            'order_number' => $this->data['order_number'],
            'order_type' => 1,
