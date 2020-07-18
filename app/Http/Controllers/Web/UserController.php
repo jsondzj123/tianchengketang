@@ -214,6 +214,9 @@ class UserController extends Controller {
         if(!isset($this->data['news_pass']) || empty($this->data['news_pass'])){
             return response()->json(['code' => 201 , 'msg' => '请再次输入新密码']);
         }
+        if(strlen($this->data['new_pass']) <6 || strlen($this->data['new_pass']) >15){
+            return response()->json(['code' => 201 , 'msg' => '密码长度为6到15']);
+        }
         $user = Student::where(['id'=>$this->userid])->first()->toArray();
         //验证密码是否合法
         if(password_verify($this->data['old_pass']  , $user['password']) === false){
