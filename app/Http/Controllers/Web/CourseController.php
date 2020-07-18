@@ -366,15 +366,16 @@ class CourseController extends Controller {
         if(!isset($this->data['id'])||empty($this->data['id'])){
             return response()->json(['code' => 201, 'msg' => '课程id为空']);
         }
-        $list = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>39])->first();
+        $list = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'nature'=>$this->data['nature']])->first();
         if($list){
             $status = $list['is_del'] == 1?0:1;
-            $add = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>39])->update(['is_del'=>$status]);
+            $add = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid])->update(['is_del'=>$status]);
         }else{
             $add = Collection::insert([
                 'lesson_id' => $this->data['id'],
-                'student_id' => 39,
-                'created_at' => date('Y-m-d H:i:s')
+                'student_id' => $this->userid,
+                'created_at' => date('Y-m-d H:i:s'),
+                'nature' => $this->data['nature']
             ]);
         }
         if($add){
