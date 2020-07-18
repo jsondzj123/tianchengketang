@@ -37,7 +37,7 @@ class LessonChildController extends Controller {
                 if($redis_token && $redis_token > 0) {
                     //通过token获取用户信息
                     $json_info = Redis::hGetAll($key);
-                    $uid       = $json_info['user_id'];
+                    $uid = $json_info['user_id'];
                 } else {
                     return $this->response('请登录账号', 401);
                 }
@@ -54,15 +54,29 @@ class LessonChildController extends Controller {
                 ->select('ld_course_chapters.id','ld_course_chapters.name','ld_course_chapters.resource_id','ld_course_video_resource.course_id','ld_course_video_resource.mt_video_id','ld_course_video_resource.mt_duration')
                 ->where(['ld_course_chapters.is_del'=> 0, 'ld_course_chapters.parent_id' => $value['id'], 'ld_course_chapters.course_id' => $course_id])->get()->toArray();
         }
+
+        //进行缓存
+
         foreach ($chapters as $k => &$v) {
             //获取用户使用课程时长
             foreach($v['childs'] as $kk => &$vv){
                 if(isset(self::$accept_data['user_token']) && !empty(self::$accept_data['user_token'])){
                     $course_id = $vv['course_id'];
-                    $MTCloud = new MTCloud();
-                    $res =  $MTCloud->coursePlaybackVisitorList($course_id,1,50)['data'];
-                    if(!empty($res)){
-                        $vv['use_duration']  = $res;
+                    //获取缓存  判断是否存在
+                    if(Redis::get('VisitorList')){
+                        //存在
+                        $data  = Redis::get('VisitorList');
+                    }else{
+                        //不存在
+                        $MTCloud = new MTCloud();
+                        $VisitorList =  $MTCloud->coursePlaybackVisitorList($course_id,1,50);
+                        Redis::set('VisitorList', json_encode($VisitorList));
+                        Redis::expire('VisitorList',3600);
+                        $data  = Redis::get('VisitorList');
+                    }
+                    $res = json_decode($data,1);
+                    if(!empty($res['data'])){
+                        $vv['use_duration']  = $res['data'];
                     }else{
                         $vv['use_duration']  = array();
                     }
