@@ -46,7 +46,7 @@ class LessonChildController extends Controller {
         //查询章
         $chapters =  Coureschapters::select('id', 'name', 'parent_id as pid')
                 ->where(['is_del'=> 0,'parent_id' => 0, 'course_id' => $course_id])
-                ->orderBy('create_at', 'desc')->get()->toArray();
+                ->orderBy('create_at', 'asc')->get()->toArray();
 
         foreach ($chapters as $key => $value) {
             //查询小节
