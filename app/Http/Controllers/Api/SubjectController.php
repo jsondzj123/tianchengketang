@@ -19,6 +19,7 @@ class SubjectController extends Controller {
         $subjects = Subject::where('parent_id', 0)
                 ->select('id', 'subject_name as name', 'parent_id as pid')
                 ->orderBy('create_at', 'desc')
+                ->where('is_del',0)
                 ->get();
         foreach ($subjects as $value) {
                 $child = [['id' => 0, 'name' => '全部']];
