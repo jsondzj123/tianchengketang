@@ -101,4 +101,3 @@ class PublicpayController extends Controller {
        return response()->json(['code' => 200 , 'msg' => '成功']);
    }
 }
-
