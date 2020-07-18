@@ -461,7 +461,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseUpdate', 'CourseController@courseUpdate');//课程修改
         $router->post('courseRecommend', 'CourseController@courseRecommend');//课程推荐
         $router->post('courseUpStatus', 'CourseController@courseUpStatus');//课程发布
-        $router->post('recommendId', 'CourseController@recommendId');//课程发布
+
 
 
         //录播课程
@@ -492,6 +492,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('editDelToId', 'ArticleController@editDelToId');//文章删除
         $router->post('findToId', 'ArticleController@findToId');//获取单条文章数据
         $router->post('exitForId', 'ArticleController@exitForId');//文章修改
+        $router->post('recommendId', 'CourseController@recommendId');//课程发布
         /*------------文章分类模块------------------*/
         $router->post('addType', 'ArticletypeController@addType');//文章分类添加
         $router->post('getTypeList', 'ArticletypeController@getTypeList');//获取文章分类列表
