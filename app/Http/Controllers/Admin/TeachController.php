@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Live;
 use App\Models\Subject;
 use App\Models\Teach;
-use App\Listeners\Teacher;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use App\Tools\CurrentAdmin;
 use Validator;
