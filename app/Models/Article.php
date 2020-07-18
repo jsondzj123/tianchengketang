@@ -350,7 +350,7 @@ class Article extends Model {
          * @param  ctime   2020/7/18 15:37
          * return  array
          */
-    public static function recommendId(){
+    public static function recommendId($data){
         if(empty($data['id'])){
             return ['code' => 201 , 'msg' => 'id为空或格式不正确'];
         }
