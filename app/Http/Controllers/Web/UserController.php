@@ -250,8 +250,8 @@ class UserController extends Controller {
     public function myCollect(){
         $method = isset($this->data['method'])?$this->data['method']:0;
         $collect = Collection::where(['student_id'=>$this->userid,'is_del'=>0])->get();
+        $coursearr=[];
         if(!empty($collect)) {
-            $coursearr=[];
             foreach ($collect as $k => &$v) {
                 if ($v['nature'] == 1) {
                     $course = CourseSchool::where(['id' => $v['lesson_id'], 'is_del' => 0, 'status' => 1])->first()->toArray();
