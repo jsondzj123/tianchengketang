@@ -48,7 +48,7 @@ class Article extends Model {
             ->where(['ld_article.is_del'=>1,'ld_article_type.is_del'=>1,'ld_article_type.status'=>1,'ld_admin.is_del'=>1,'ld_admin.is_forbid'=>1,'ld_school.is_del'=>1,'ld_school.is_forbid'=>1])
             ->count();
         if($total > 0){
-            $list = self::select('ld_article.id','ld_article.title','ld_article.create_at','ld_article.status','ld_school.name','ld_article_type.typename','ld_admin.username')
+            $list = self::select('ld_article.id','ld_article.title','ld_article.create_at','ld_article.status','ld_article.is_recommend','ld_school.name','ld_article_type.typename','ld_admin.username')
                 ->leftJoin('ld_school','ld_school.id','=','ld_article.school_id')
                 ->leftJoin('ld_article_type','ld_article_type.id','=','ld_article.article_type_id')
                 ->leftJoin('ld_admin','ld_admin.id','=','ld_article.user_id')
