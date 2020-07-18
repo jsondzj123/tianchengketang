@@ -163,7 +163,7 @@ class OrderController extends Controller
         if($count > 0){
             $list = Collection::select('ld_lessons.id','ld_lessons.title','ld_lessons.cover','ld_lessons.method','ld_lessons.buy_num')
                 ->leftJoin('ld_lessons','ld_lessons.id','=','ld_collections.lesson_id')
-                ->where(['ld_collections.is_del'=>0,'ld_lessons.is_del'=>0,'status'=>2,'is_forbid'=>0])
+                ->where(['ld_collections.is_del'=>0,'ld_lessons.is_del'=>0,'status'=>2])
                 ->orderByDesc('ld_collections.created_at')
                 ->offset($offset)->limit($pagesize)
                 ->get()->toArray();
@@ -238,13 +238,13 @@ class OrderController extends Controller
             //判断用户网校，根据网校查询课程信息
             if ($user_school_id == 1) {
                 //根据课程id 查询价格
-                $lesson = Coures::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','title')->where(['id' => $order['class_id'], 'is_del' => 0, 'is_forbid' => 0, 'status' => 2, 'is_public' => 0])->first();
+                $lesson = Coures::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','title')->where(['id' => $order['class_id'], 'is_del' => 0, 'status' => 2, 'is_public' => 0])->first();
                 if (!$lesson) {
                     return ['code' => 202, 'msg' => '此课程选择无效'];
                 }
             } else {
                 //根据课程id 网校id 查询网校课程详情
-                $lesson = CourseSchool::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','title')->where(['course_id' => $order['class_id'], 'school_id' => $user_school_id, 'is_del' => 0, 'is_forbid' => 0, 'status' => 1, 'is_public' => 0])->first();
+                $lesson = CourseSchool::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','title')->where(['course_id' => $order['class_id'], 'school_id' => $user_school_id, 'is_del' => 0, 'status' => 1, 'is_public' => 0])->first();
                 if (!$lesson) {
                     return ['code' => 202, 'msg' => '此课程选择无效'];
                 }
