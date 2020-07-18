@@ -207,9 +207,10 @@ class OpenCourseController extends Controller {
         if(!isset($this->data['user_id'])  || $this->data['user_id'] <=0){
             return response()->json(['code'=>201,'msg'=>'user_id为空或不合法']);
         }
-        if(!isset($this->data['nickname'])  || $this->data['nickname'] <=0){
+        if(!isset($this->data['nickname'])  || empty($this->data['nickname'])){
             return response()->json(['code'=>201,'msg'=>'nickname为空或不合法']);
         }
+       
         $openCourse = OpenLivesChilds::where(['lesson_id'=>$this->data['course_id'],'is_del'=>0,'is_forbid'=>0])->first();
         if(empty($openCourse)){
             return response()->json(['code'=>201,'msg'=>'非法请求！！！']);

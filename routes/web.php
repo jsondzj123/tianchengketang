@@ -124,7 +124,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('preStart','OpenCourseController@preStart');//预开始
         $router->post('underway','OpenCourseController@underway');//直播中
         $router->post('finish','OpenCourseController@end');//往期公开课程 (暂时没做分页)
-        $router->post('details','OpenCourseController@details');//查看详情
+     
     });
     //教师
     $router->group(['prefix' => 'teacher'], function () use ($router) {
@@ -143,7 +143,10 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->post('doUserForgetPassword','AuthenticateController@doUserForgetPassword');              //找回密码接口
     $router->post('captchaInfo','AuthenticateController@captchaInfo');          //WEB生成图片验证码接口
     $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');   //OA流转订单
-
+     //公开课 
+    $router->group(['prefix' => 'openclass','middleware'=> 'user'], function () use ($router) {
+        $router->post('details','OpenCourseController@details');//查看详情
+    });
     //题库部分
     $router->post('getBankList','BankController@getBankList');                  //全部题库接口
     $router->group(['prefix' => 'bank' , 'middleware'=> 'user'], function () use ($router) {
