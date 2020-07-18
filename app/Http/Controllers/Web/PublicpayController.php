@@ -70,13 +70,11 @@ class PublicpayController extends Controller {
            return response()->json(['code' => 201 , 'msg' => '课程id错误']);
        }
        //计算用户购买课程到期时间
-       echo $couser['expiry'];
        if($couser['expiry'] != 0){
            $validity = date('Y-m-d H:i:s',strtotime('+'.$couser['expiry'].' day'));
        }else{
            $validity = "3000-03-03 12:12:12";
        }
-       echo $validity;die;
        $arr=[
            'order_number' => $this->data['order_number'],
            'order_type' => 1,
@@ -94,7 +92,6 @@ class PublicpayController extends Controller {
            'school_id' =>$school_id
        ];
        Order::insert($arr);
-
        //修改用户报名状态
        Student::where(['id'=>$this->data['class_id']])->update(['enroll_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
        return response()->json(['code' => 200 , 'msg' => '成功']);
