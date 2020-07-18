@@ -238,13 +238,13 @@ class OrderController extends Controller
             //判断用户网校，根据网校查询课程信息
             if ($user_school_id == 1) {
                 //根据课程id 查询价格
-                $lesson = Coures::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','title')->where(['id' => $order['class_id'], 'is_del' => 0, 'status' => 2, 'is_public' => 0])->first();
+                $lesson = Coures::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','expiry')->where(['id' => $order['class_id'], 'is_del' => 0, 'status' => 2])->first();
                 if (!$lesson) {
                     return ['code' => 202, 'msg' => '此课程选择无效'];
                 }
             } else {
                 //根据课程id 网校id 查询网校课程详情
-                $lesson = CourseSchool::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','title')->where(['course_id' => $order['class_id'], 'school_id' => $user_school_id, 'is_del' => 0, 'status' => 1, 'is_public' => 0])->first();
+                $lesson = CourseSchool::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','expiry')->where(['course_id' => $order['class_id'], 'school_id' => $user_school_id, 'is_del' => 0, 'status' => 1])->first();
                 if (!$lesson) {
                     return ['code' => 202, 'msg' => '此课程选择无效'];
                 }
@@ -259,7 +259,7 @@ class OrderController extends Controller
                     $end_balance = $user_balance - $lesson['sale_price'];
                     $studentstatus = Student::where(['id' => $user_id])->update(['balance' => $end_balance]);
                     //计算用户购买课程到期时间
-                    $validity = date('Y-m-d H:i:s',strtotime('+'.$lesson['title'].' day'));
+                    $validity = date('Y-m-d H:i:s',strtotime('+'.$lesson['expiry'].' day'));
                     //修改用户报名状态
                     Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1]);
                     $orderstatus = Order::where(['id' => $data['order_id']])->update(['pay_type' => 5, 'status' => 2,'oa_status'=>1,'validity_time'=>$validity,'pay_time' => date('Y-m-d H:i:s'),'update_at' =>date('Y-m-d H:i:s')]);
