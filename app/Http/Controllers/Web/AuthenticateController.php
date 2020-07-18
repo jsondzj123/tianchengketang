@@ -470,6 +470,11 @@ class AuthenticateController extends Controller {
             //短信模板code码
             $template_code = 'SMS_190727799';
             
+            //判断验证码是否为空
+            if((!isset($body['captchacode']) || empty($body['captchacode'])) || (!isset($body['key']) || empty($body['key']))){
+                return response()->json(['code' => 201 , 'msg' => '请输入验证码']);
+            }
+            
             //判断验证码是否合法
             $captch_code = Redis::get($body['key']);
             if(!app('captcha')->check(strtolower($body['captchacode']),$captch_code)){

@@ -367,7 +367,7 @@ class BankController extends Controller {
 
                 //根据设置的条件筛选试题
                 $exam_list = Exam::select("id")->where([['bank_id' , '=' , $bank_id] , ['subject_id' , '=' , $subject_id] , ['chapter_id' , '=' , $chapter_id] , ['joint_id' , '=' , $joint_id] , ['is_del' , '=' , 0] , ['is_publish' , '=' , 1]])->whereIn('type' , $question_type)->orderByRaw("RAND()")->limit($exam_count_array[$exam_count])->get();
-                if(!$exam_list || empty($exam_list)){
+                if(!$exam_list || empty($exam_list) || count($exam_list) <= 0){
                     return response()->json(['code' => 203 , 'msg' => '暂无随机生成的试题']);
                 }
                 
@@ -489,7 +489,7 @@ class BankController extends Controller {
             if($rand_exam_count <= 0){
                 //快速做题随机生成20条数据
                 $exam_list = Exam::select("id","exam_content","answer")->where([['bank_id' , '=' , $bank_id] , ['subject_id' , '=' , $subject_id] , ['is_del' , '=' , 0] , ['is_publish' , '=' , 1]])->whereIn('type' , [1,2,3,4])->orderByRaw("RAND()")->limit(20)->get();
-                if(!$exam_list || empty($exam_list)){
+                if(!$exam_list || empty($exam_list) || count($exam_list) <= 0){
                     return response()->json(['code' => 203 , 'msg' => '暂无随机生成的试题']);
                 }
                 
@@ -612,7 +612,7 @@ class BankController extends Controller {
             
             //通过试卷的id获取下面的试题列表
             $papers_exam = PapersExam::where("papers_id" , $papers_id)->where("subject_id" , $subject_id)->where("is_del" , 0)->whereIn("type" ,[1,2,3,4])->get();
-            if(!$papers_exam || empty($papers_exam)){
+            if(!$papers_exam || empty($papers_exam) || count($papers_exam) <= 0){
                 return response()->json(['code' => 209 , 'msg' => '此试卷下暂无试题']);
             }
             
