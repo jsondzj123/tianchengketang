@@ -246,6 +246,7 @@ class UserController extends Controller {
          * @param  ctime   2020/7/9 19:38
          * return  array
          */
+
     //我的收藏
     public function myCollect(){
         $methods = isset($this->data['method'])?$this->data['method']:0;
