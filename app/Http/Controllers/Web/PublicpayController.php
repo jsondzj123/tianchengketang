@@ -27,7 +27,6 @@ class PublicpayController extends Controller {
         * @param  author  苏振文
         * student_id  用户id
         * order_number 订单号
-        * third_party_number 第三方支付订单号
         * pay_status 1定金2尾款3最后一笔款4全款
         * pay_type 1微信2支付宝3银行转账4汇聚5余额
         * pay_time 支付时间
@@ -69,12 +68,6 @@ class PublicpayController extends Controller {
        if(!$couser){
            return response()->json(['code' => 201 , 'msg' => '课程id错误']);
        }
-       //计算用户购买课程到期时间
-       if($couser['expiry'] != 0){
-           $validity = date('Y-m-d H:i:s',strtotime('+'.$couser['expiry'].' day'));
-       }else{
-           $validity = "3000-03-03 12:12:12";
-       }
        $find = Order::where(['order_number'=>$this->data['order_number']])->first();
        if(!empty($find)){
            return response()->json(['code' => 202 , 'msg' => '此订单已存在']);
@@ -87,17 +80,16 @@ class PublicpayController extends Controller {
            'lession_price' =>$couser['sale_price'],
            'pay_status' =>$this->data['pay_status'],
            'pay_type' =>$this->data['pay_type'],
-           'status' =>2,
+           'status' =>1,
            'pay_time' =>$this->data['pay_time'],
-           'oa_status' =>1,
+           'oa_status' =>0,
            'class_id' =>$this->data['class_id'],
            'nature' =>$this->data['nature'],
-           'validity_time' =>$validity,
            'school_id' =>$school_id
        ];
        Order::insert($arr);
        //修改用户报名状态
-       Student::where(['id'=>$this->data['class_id']])->update(['enroll_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+//       Student::where(['id'=>$this->data['class_id']])->update(['enroll_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
        return response()->json(['code' => 200 , 'msg' => '成功']);
    }
 }
