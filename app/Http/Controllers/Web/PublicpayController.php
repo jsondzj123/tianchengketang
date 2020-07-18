@@ -88,6 +88,7 @@ class PublicpayController extends Controller {
            'school_id' =>$school_id
        ];
        Order::insert($arr);
+
        //修改用户报名状态
        Student::where(['id'=>$this->data['class_id']])->update(['enroll_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
        return response()->json(['code' => 200 , 'msg' => '成功']);
