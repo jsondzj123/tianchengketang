@@ -262,7 +262,7 @@ class UserController extends Controller {
                 }
                 $method = Couresmethod::select('method_id')->where(['course_id' => $courseid, 'is_del' => 0])
                     ->where(function ($query) use ($method) {
-                        if ($method != '' || $method != 0) {
+                        if ($method != '' && $method != 0) {
                             $query->where('method_id', $method);
                         }
                     })->get()->toArray();
