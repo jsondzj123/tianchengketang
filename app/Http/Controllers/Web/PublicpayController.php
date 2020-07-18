@@ -22,16 +22,6 @@ class PublicpayController extends Controller {
         $this->userid = isset(AdminLog::getAdminInfo()->admin_user->id)?AdminLog::getAdminInfo()->admin_user->id:0;
     }
    /*
-        * @param  对公信息
-        * @param  author  苏振文
-        * @param  ctime   2020/7/8 15:52
-        * return  array
-        */
-   public function Transfer(){
-       //根据学校查询支付信息
-       return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$this->school]);
-   }
-   /*
         * @param  OA流转订单
         * @param  author  苏振文
         * student_id  用户id

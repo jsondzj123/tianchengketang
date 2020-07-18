@@ -191,7 +191,6 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     });
     //对公购买模块（szw）
     $router->group(['prefix' => 'publicpay', 'middleware'=> 'user'], function () use ($router) {
-        $router->post('Transfer','PublicpayController@Transfer');//对公转账
         $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');//OA流转订单
     });
 });
