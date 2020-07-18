@@ -353,16 +353,12 @@ class CourseController extends Controller {
         unset($course['child_id']);
 //        Redis::set($keys,json_encode($course),60);
         //根据课程id 课程属性 生成二维码
-        $urlcode = $this->generateQRfromGoogle("www.baidu.com");
-        $course['urlcode'] = $urlcode;
+//        $urlcode = $this->generateQRfromGoogle("www.baidu.com");
+//        $course['urlcode'] = $urlcode;
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
 //        }
     }
 
-    public function urlcode(){
-        $urlcode = $this->generateQRfromGoogle("11111");
-        return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $urlcode]);
-    }
     //课程收藏
     public function collect(){
         if(!isset($this->data['id'])||empty($this->data['id'])){
