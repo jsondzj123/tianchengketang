@@ -110,7 +110,7 @@ class FootConfig extends Model {
         $body['curSchool_id'] = isset($body['curSchool_id']) && $body['curSchool_id'] > 0 ?$body['curSchool_id']:$school_id;
         $Logo = self::where(['school_id'=>$body['curSchool_id'],'type'=>4,'is_del'=>0])->first();
         if(empty($Logo)){
-            return ['code'=>203,'msg'=>'数据不存在！']
+            return ['code'=>203,'msg'=>'数据不存在！'];
         }
         $udpate['update_at'] = date('Y-m-d H:i:s');
         $udpate['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
