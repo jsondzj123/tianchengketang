@@ -342,6 +342,28 @@ class Article extends Model {
             return ['code' => 202 , 'msg' => '更新失败'];
         }
     }
+
+
+    /*
+         * @param  推荐
+         * @param  author  苏振文
+         * @param  ctime   2020/7/18 15:37
+         * return  array
+         */
+    public static function recommendId(){
+        if(empty($data['id'])){
+            return ['code' => 201 , 'msg' => 'id为空或格式不正确'];
+        }
+        $article = self::where(['id'=>$data['id']])->first();
+        $recom = $article['is_recommend'] == 1 ? 0 : 1;
+        $up = self::where(['id'=>$data['id']])->update(['is_recommend'=>$recom]);
+        if($up){
+            return ['code' => 200 , 'msg' => '状态修改成功'];
+        }else{
+            return ['code' => 202 , 'msg' => '状态修改失败'];
+        }
+    }
+
     public static function schoolANDtype($role_id,$school_id=0){
         if($role_id == 1){
             if($school_id != 0){

@@ -79,11 +79,6 @@ class CourseController extends Controller {
          * return  array
      */
     public function courseList(){
-//        $keys = json_encode($this->data).$this->school['id'];
-//        if(Redis::get($keys)){
-//            $data = json_decode(Redis::get($keys),true);
-//            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$data[0],'page'=>$data[1],'where'=>$data[2]]);
-//        }else {
             $school_id = $this->school['id'];
             //每页显示的条数
             $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 20;
@@ -247,7 +242,6 @@ class CourseController extends Controller {
                 1=>$page,
                 2=>$this->data,
             ];
-//            Redis::set($keys,json_encode($datas),300);
             return response()->json(['code' => 200, 'msg' => '获取成功', 'data' => $res, 'page' => $page, 'where' => $this->data]);
     }
     /*

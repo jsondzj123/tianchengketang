@@ -461,6 +461,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseUpdate', 'CourseController@courseUpdate');//课程修改
         $router->post('courseRecommend', 'CourseController@courseRecommend');//课程推荐
         $router->post('courseUpStatus', 'CourseController@courseUpStatus');//课程发布
+        $router->post('recommendId', 'CourseController@recommendId');//课程发布
 
 
         //录播课程
