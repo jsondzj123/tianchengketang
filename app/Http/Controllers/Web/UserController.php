@@ -223,7 +223,7 @@ class UserController extends Controller {
             return response()->json(['code' => 202 , 'msg' => '两次输入不一致']);
         }
         $news_pass = password_hash($this->data['new_pass'] , PASSWORD_DEFAULT);
-        $up = Student::where(['id'=>$this->userid])->update(['pass'=>$news_pass]);
+        $up = Student::where(['id'=>$this->userid])->update(['password'=>$news_pass]);
         if($up){
             return response()->json(['code' => 200 , 'msg' => '修改成功']);
         }else{
