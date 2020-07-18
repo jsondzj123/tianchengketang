@@ -33,9 +33,7 @@ class FootConfig extends Model {
     	}
     	$pageSet = self::where(['is_del'=>0])
     		->where(function($query) use ($body,$school_id){
-    			if(isset($body['school_id']) && $body['school_id'] != '' ){
     				$query->where('school_id',$school_id);
-    			}
     	})->get()->toArray(); //
     		
     	$headerArr = $footer = $icp=[];
