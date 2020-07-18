@@ -248,7 +248,7 @@ class UserController extends Controller {
          */
     //我的收藏
     public function myCollect(){
-        $method = isset($this->data['method'])?$this->data['method']:0;
+        $methods = isset($this->data['method'])?$this->data['method']:0;
         $collect = Collection::where(['student_id'=>$this->userid,'is_del'=>0])->get();
         $coursearr=[];
         if(!empty($collect)) {
@@ -261,9 +261,9 @@ class UserController extends Controller {
                     $courseid = $course['id'];
                 }
                 $method = Couresmethod::select('method_id')->where(['course_id' => $courseid, 'is_del' => 0])
-                    ->where(function ($query) use ($method) {
-                        if ($method != '' && $method != 0) {
-                            $query->where('method_id', $method);
+                    ->where(function ($query) use ($methods) {
+                        if ($methods != '' && $methods != 0) {
+                            $query->where('method_id', $methods);
                         }
                     })->get()->toArray();
                 $course['method'] = array_column($method, 'method_id');
