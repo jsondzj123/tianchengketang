@@ -522,6 +522,7 @@ class CourseController extends Controller {
                     if(!empty($recordes)){
                         //循环每个小节 查询小节的进度
                         foreach ($recordes as $key=>&$val){
+
                             //查询小节绑定的录播资源
                             $ziyuan = Video::where(['id'=>$val['resource_id'],'is_del'=>0,'status'=>0])->first();
                             $val['ziyuan'] = $ziyuan;
@@ -540,6 +541,7 @@ class CourseController extends Controller {
                                     }
                                 }
                             }
+
                         }
                     }
                 }

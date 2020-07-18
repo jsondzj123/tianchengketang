@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Collection;
+use App\Models\Coures;
 use App\Models\Couresmethod;
+use App\Models\CourseSchool;
 use App\Models\Lesson;
 use App\Models\LessonMethod;
 use App\Models\LessonSchool;
@@ -236,13 +238,13 @@ class OrderController extends Controller
             //判断用户网校，根据网校查询课程信息
             if ($user_school_id == 1) {
                 //根据课程id 查询价格
-                $lesson = Lesson::select('id', 'title', 'cover', 'price', 'favorable_price','buy_num','ttl')->where(['id' => $order['class_id'], 'is_del' => 0, 'is_forbid' => 0, 'status' => 2, 'is_public' => 0])->first();
+                $lesson = Coures::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','ttl')->where(['id' => $order['class_id'], 'is_del' => 0, 'is_forbid' => 0, 'status' => 2, 'is_public' => 0])->first();
                 if (!$lesson) {
                     return ['code' => 202, 'msg' => '此课程选择无效'];
                 }
             } else {
                 //根据课程id 网校id 查询网校课程详情
-                $lesson = LessonSchool::select('id', 'title', 'cover', 'price', 'favorable_price','buy_num','ttl')->where(['lesson_id' => $order['class_id'], 'school_id' => $user_school_id, 'is_del' => 0, 'is_forbid' => 0, 'status' => 1, 'is_public' => 0])->first();
+                $lesson = CourseSchool::select('id', 'title', 'cover', 'pricing', 'sale_price','buy_num','ttl')->where(['course_id' => $order['class_id'], 'school_id' => $user_school_id, 'is_del' => 0, 'is_forbid' => 0, 'status' => 1, 'is_public' => 0])->first();
                 if (!$lesson) {
                     return ['code' => 202, 'msg' => '此课程选择无效'];
                 }
@@ -301,7 +303,7 @@ class OrderController extends Controller
         if($school_id != 1){
             $branchChool = PaySet::where(['school_id'=>$school_id])->first();
             if(empty($branchChool)){
-                $school_id ==1;
+                $school_id =1;
             }
         }
         switch($type) {
