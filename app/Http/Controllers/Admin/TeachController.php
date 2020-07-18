@@ -11,6 +11,7 @@ use Validator;
 use App\Tools\MTCloud;
 use App\Models\LiveChild;
 use App\Models\OpenLivesChilds;
+use App\Models\CourseLiveClassChild;
 use Log;
 use App\Listeners\LiveListener;
 //教学模块
@@ -89,7 +90,7 @@ class TeachController extends Controller {
         	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('playbackUrl')->first();
         }
        	if($data['is_public']== 0){  //课程
- 			$live = LiveChild::where('class_id',$data['id'])->select('playbackUrl')->first();
+ 			    $live = CourseLiveClassChild::where('class_id',$data['id'])->select('playbackUrl')->first();
        	}
        	return ['code'=>200,'msg'=>'Success','data'=>$live];
    	}
