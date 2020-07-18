@@ -96,10 +96,10 @@ class TeachController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
       }
       if($data['is_public'] == 1){ //公开课
-          $live = OpenLivesChilds::where('lesson_id',$data['id'])->select('playbackUrl')->first();
+          $live = OpenLivesChilds::where('lesson_id',$data['id'])->select('course_id')->first();
       }
       if($data['is_public']== 0){  //课程
-          $live = CourseLiveClassChild::where('class_id',$data['id'])->select('playbackUrl')->first();
+          $live = CourseLiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
       }
       if($teacherArr['type'] == 1){
         //教务
@@ -112,7 +112,7 @@ class TeachController extends Controller {
       if($teacherArr['type'] == 2){
         //讲师
         $MTCloud = new MTCloud();
-        $res = $MTCloud->courseLaunch($live['course_id']);
+        $res = $MTCloud->courseLaunch($live['course_id']); 
         Log::error('直播器启动:'.json_encode($res));
         if(!array_key_exists('code', $res) && !$res["code"] == 0){
             return $this->response('直播器启动失败', 500);
@@ -148,10 +148,10 @@ class TeachController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
       }
       if($data['is_public'] == 1){ //公开课
-      	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('playbackUrl')->first();
+      	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('course_id')->first();
       }
      	if($data['is_public']== 0){  //课程
-			    $live = CourseLiveClassChild::where('class_id',$data['id'])->select('playbackUrl')->first();
+			    $live = CourseLiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
      	}
       $liveArr['course_id'] = $live['course_id'];
       $liveArr['uid'] = $teacherArr['id'];
