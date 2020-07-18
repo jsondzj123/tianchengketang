@@ -87,11 +87,12 @@ class LessonController extends Controller {
                         $query->where($where);
                         if(!empty($keyWord)){
                             $query->where('ld_course.title', 'like', $keyWord);
-                            $query->Where('ld_course.keywords', 'like', $keyWord);
+                            $query->orWhere('ld_course.keywords', 'like', $keyWord);
                         }
                         })->orderBy($sort_name, $sort_type)
                         ->groupBy("ld_course.id")
                         ->get()->toArray();
+
                 foreach($data_list as $k => &$v){
                     //二级分类
                     $res = DB::table('ld_course_subject')->select('subject_name')->where(['id'=>$v['child_id']])->first();
