@@ -223,12 +223,10 @@ class Teach extends Model {
 				return ['code'=>201,'data'=>'班号标识为空或者不合法'];
 			}
 			$live = []; 
-			$LiveChildArr  = LiveChild::where('id',$body['class_id'])->select('name')->first();//课次名称
+			$LiveChildArr  = LiveChild::where('id',$body['class_id'])->select('name','start_at','end_at')->first();//课次名称
 			$liveChildClassArr	= CourseLiveClassChild::where('class_id',$body['class_id'])->select('start_time as start_at','end_time as end_at','watch_num','status','course_id')->first();//开始/结束时间/时长/观看人数/课程id(欢拓)
 			$classno_id = LiveClass::where('id',$body['classno_id'])->select('name')->first();//班号名称
-
 			$teacherIds = LiveClassChildTeacher::where('class_id',$body['class_id'])->pluck('teacher_id'); //教师id组
-		
 			$live['lect_teacher_name'] = Teacher::whereIn('id',$teacherIds)->where('type',2)->select('real_name')->first()['real_name'];//讲师
 			$eduTeacherName = Teacher::whereIn('id',$teacherIds)->where('type',1)->pluck('real_name')->toArray(); //教务
 			$live['edu_teacher_name'] = '';
@@ -251,7 +249,6 @@ class Teach extends Model {
 				'start_at'=>date('Y-m-d H:i:s',$liveChildClassArr['start_at']),
 				'end_at'=>date('Y-m-d H:i:s',$liveChildClassArr['end_at']),
 				'watch_num'=>$liveChildClassArr['watch_num'],
-				'state'=> $liveChildClassArr['status'] == 1?1:($liveChildClassArr['status']==2?2:3),
 				'status'=> $liveChildClassArr['status'] == 1?'预直播':($liveChildClassArr['status']==2?'直播中':'直播已结束'),
 				'duration'=>timetodate((int)$liveChildClassArr['end_at']-(int)$liveChildClassArr['start_at']),
 				'courseware'=>$live['courseware'],

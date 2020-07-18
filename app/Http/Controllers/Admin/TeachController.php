@@ -11,6 +11,7 @@ use App\Tools\CurrentAdmin;
 use Validator;
 use App\Tools\MTCloud;
 use App\Models\LiveChild;
+use App\Models\LiveClassChild;
 use App\Models\OpenLivesChilds;
 use App\Models\CourseLiveClassChild;
 use Log;
@@ -54,7 +55,17 @@ class TeachController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function startLive()
-    {   $data = self::$accept_data;
+    {   
+       $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+       $teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->teacher_id : 0;
+      if($teacher_id <= 0){
+        return response()->json(['code'=>207,'msg'=>'非讲师开始直播']);
+      }
+      $teacherArr = Teacher::where(['school_id'=>$school_id,'id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0,'type'=>2])->first();
+      if(empty($teacherArr)){
+        return response()->json(['code'=>207,'msg'=>'非讲师开始直播']);
+      }
+        $data = self::$accept_data;
         $validator = Validator::make($data, [
         	'is_public'=>'required',
           'id' => 'required', 
@@ -66,7 +77,7 @@ class TeachController extends Controller {
         	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('course_id')->first();
         }
        	if($data['is_public']== 0){  //课程
- 			     $live = LiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
+ 			     $live = CourseLiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
        	}
         $MTCloud = new MTCloud();
         $res = $MTCloud->courseLaunch($live['course_id']);
