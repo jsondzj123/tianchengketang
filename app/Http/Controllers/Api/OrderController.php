@@ -250,20 +250,20 @@ class OrderController extends Controller
                 }
             }
             if ($data['pay_type'] == 5) {
-                if ($lesson['favorable_price'] > $user_balance) {
+                if ($lesson['sale_price'] > $user_balance) {
                     return ['code' => 210, 'msg' => '余额不足，请充值！！！！！'];
                 } else {
                     DB::beginTransaction();
                     //2020.06.09  订单支付为2，算出课程有效期
                     //扣除用户余额 修改订单信息 加入用户消费记录日志
-                    $end_balance = $user_balance - $lesson['favorable_price'];
+                    $end_balance = $user_balance - $lesson['sale_price'];
                     $studentstatus = Student::where(['id' => $user_id])->update(['balance' => $end_balance]);
                     //计算用户购买课程到期时间
                     $validity = date('Y-m-d H:i:s',strtotime('+'.$lesson['title'].' day'));
                     //修改用户报名状态
                     Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1]);
                     $orderstatus = Order::where(['id' => $data['order_id']])->update(['pay_type' => 5, 'status' => 2,'oa_status'=>1,'validity_time'=>$validity,'pay_time' => date('Y-m-d H:i:s'),'update_at' =>date('Y-m-d H:i:s')]);
-                    $studentlogstatus = StudentAccountlog::insert(['user_id' => $user_id, 'price' => $lesson['favorable_price'], 'end_price' => $end_balance, 'status' => 2, 'class_id' => $order['class_id']]);
+                    $studentlogstatus = StudentAccountlog::insert(['user_id' => $user_id, 'price' => $lesson['sale_price'], 'end_price' => $end_balance, 'status' => 2, 'class_id' => $order['class_id']]);
                     if($studentstatus && $orderstatus&&$studentlogstatus){
                         DB::commit();
                         return response()->json(['code' => 200, 'msg' => '购买成功']);
@@ -274,7 +274,7 @@ class OrderController extends Controller
                 }
             } else {
                  Order::where(['id' => $data['order_id']])->update(['pay_type' =>$data['pay_type'],'update_at' =>date('Y-m-d H:i:s')]);
-                $return = $this->payStatus($lesson['title'],$order['order_number'], $data['pay_type'], $lesson['favorable_price'],$user_school_id,1);
+                $return = $this->payStatus($lesson['title'],$order['order_number'], $data['pay_type'], $lesson['sale_price'],$user_school_id,1);
                 return response()->json(['code' => 200, 'msg' => '生成预订单成功', 'data' => $return]);
             }
         } else {
