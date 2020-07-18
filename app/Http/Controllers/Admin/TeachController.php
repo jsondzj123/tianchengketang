@@ -13,6 +13,7 @@ use App\Models\LiveChild;
 use App\Models\OpenLivesChilds;
 use App\Models\CourseLiveClassChild;
 use Log;
+use App\Models\AdminLog;
 use App\Listeners\LiveListener;
 //教学模块
 class TeachController extends Controller {
