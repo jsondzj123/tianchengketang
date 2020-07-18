@@ -133,6 +133,13 @@ class UserController extends Controller {
         if(!isset($this->data['address_locus']) || empty($this->data['address_locus'])){
             return response()->json(['code' => 201 , 'msg' => '户口地址不能为空']);
         }
+        //证件号验证
+        if($this->data['papers_type'] == 1){
+            $preg_card='/^\d{15}$)|(^\d{17}([0-9]|X)$/isu';
+            if(!preg_match($preg_card,$this->data['papers_num'])) {
+                 return response()->json(['code' => 201, 'msg' => '请填写正确身份证号']);
+            }
+        }
         $res['real_name'] = $this->data['real_name'];
         $res['sex'] = $this->data['sex'];
         $res['nickname'] = $this->data['nickname'];
