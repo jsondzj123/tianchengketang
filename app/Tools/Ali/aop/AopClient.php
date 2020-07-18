@@ -152,7 +152,6 @@ class AopClient
         $sign = base64_encode($sign);
         return $sign;
     }
-
     /**
      * RSA单独签名方法，未做字符串处理,字符串处理见getSignContent()
      * @param $data 待签名字符串
