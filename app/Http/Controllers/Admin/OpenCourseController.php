@@ -333,7 +333,7 @@ class OpenCourseController extends Controller {
 	    if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-        if($opencourse['nature'] == 2){
+        if($openCourseArr['nature'] == 2){
         	return response()->json(['code'=>207,'msg'=>'授权公开课，无法删除']);
         }
 	    $data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','is_del','start_at','end_at']);
