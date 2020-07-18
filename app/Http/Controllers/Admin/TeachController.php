@@ -133,8 +133,6 @@ class TeachController extends Controller {
         }
       }
       return $this->response($res['data']);
-
-
     }
 
    	/**
