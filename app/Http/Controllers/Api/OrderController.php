@@ -306,7 +306,7 @@ class OrderController extends Controller
             case "1":
                 $wxpay = new WxpayFactory();
                 return $return = $wxpay->getPrePayOrder($title,$order_number, $price,$school_id, $pay_type);
-            case 2:
+            case "2":
                 $alipay = new AlipayFactory($school_id);
                 $return = $alipay->createAppPay($title,$order_number, 0.01,$pay_type);
                 $alipay = [
