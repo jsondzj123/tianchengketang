@@ -299,11 +299,11 @@ class CourseController extends Controller {
                 $course['is_pay'] = 1;
             }
             //收藏数量
-            $collect = Collection::where(['lesson_id'=>$course['course_id']])->count();
+            $collect = Collection::where(['lesson_id'=>$course['course_id'],'is_del'=>0,'nature'=>1])->count();
             $course['collect'] = $collect;
             //判断用户是否收藏
-            $collect = Collection::where(['lesson_id'=>$course['course_id'],'student_id'=>$this->userid,'is_del'=>0])->count();
-            if($collect != 0){
+            $collects = Collection::where(['lesson_id'=>$course['course_id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
+            if($collects != 0){
                 $course['is_collect'] = 1;
             }else{
                 $course['is_collect'] = 0;
@@ -340,11 +340,11 @@ class CourseController extends Controller {
                 $course['is_pay'] = 1;
             }
             //收藏数量
-            $collect = Collection::where(['lesson_id'=>$this->data['id']])->count();
+            $collect = Collection::where(['lesson_id'=>$this->data['id'],'is_del'=>0,'nature'=>0])->count();
             $course['collect'] = $collect;
             //判断用户是否收藏
-            $collect = Collection::where(['course_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0])->count();
-            if($collect != 0){
+            $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->count();
+            if($collects != 0){
                 $course['is_collect'] = 1;
             }else{
                 $course['is_collect'] = 0;
