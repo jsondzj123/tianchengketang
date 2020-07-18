@@ -83,7 +83,7 @@ class TeachController extends Controller {
       if($teacher_id <= 0){
         return response()->json(['code'=>207,'msg'=>'非讲师教务进入直播间']);
       }
-      $teacherArr = Teacher::where(['school_id'=>$school_id,'teacher_id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
+      $teacherArr = Teacher::where(['school_id'=>$school_id,'id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
       if(empty($teacherArr)){
         return response()->json(['code'=>207,'msg'=>'非讲师教务进入直播间']);
       }
@@ -135,7 +135,7 @@ class TeachController extends Controller {
       if($teacher_id <= 0){
         return response()->json(['code'=>207,'msg'=>'非讲师教务查看回放']);
       }
-      $teacherArr = Teacher::where(['school_id'=>$school_id,'teacher_id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
+      $teacherArr = Teacher::where(['school_id'=>$school_id,'id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
       if(empty($teacherArr)){
         return response()->json(['code'=>207,'msg'=>'非讲师教务查看回放']);
       }
