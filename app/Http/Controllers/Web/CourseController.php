@@ -414,28 +414,21 @@ class CourseController extends Controller {
          * return  array
          */
     public function courseIntroduce(){
-        $keys = json_encode($this->data).$this->userid;
-        if(Redis::get($keys)){
-            return response()->json(['code' => 201 , 'msg' => '查询成功','data'=>json_decode(Redis::get($keys),true)]);
-        }else{
-            $nature = $this->data['nature'];
-            if($nature == 1){
-                //课程基本信息
-                $course = CourseSchool::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first();
-                if(!$course){
-                    return response()->json(['code' => 201 , 'msg' => '无查看权限']);
-                }
-            }else{
-                //课程基本信息
-                $course = Coures::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first();
-                if(!$course){
-                    return response()->json(['code' => 201 , 'msg' => '无查看权限']);
-                }
+        $nature = $this->data['nature'];
+        if($nature == 1){
+            //课程基本信息
+            $course = CourseSchool::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first();
+            if(!$course){
+                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
             }
-            Redis::set($keys,json_encode($course),300);
-            return response()->json(['code' => 201 , 'msg' => '查询成功','data'=>$course]);
+        }else{
+            //课程基本信息
+            $course = Coures::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first();
+            if(!$course){
+                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+            }
         }
-
+        return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$course]);
     }
     /*
          * @param  课程录播列表
