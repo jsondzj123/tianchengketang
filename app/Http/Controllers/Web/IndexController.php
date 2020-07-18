@@ -89,9 +89,7 @@ class IndexController extends Controller {
     			}
        		}
     		$subjectIds = array_merge($subjectOne,$natuerSubjectOne);
-
     		$subjectIds	= array_unique($subjectIds);
-
     		$course['subjectOne'] = CouresSubject::whereIn('id',$subjectIds)->where(['is_del'=>0,'is_open'=>0])->select('id','subject_name')->get();//授权/自增学科大类	
     		if(!empty($subjectOne)){
     			foreach($subjectOne as $key=>$v){
@@ -99,10 +97,24 @@ class IndexController extends Controller {
     			}
     		}
 
+            if(!empty($zizengCourseData)){
+                foreach($zizengCourseData as $key=>&$zizeng){
+                    foreach($zizeng as $k=>&$vz)
+                    $vz['nature'] = 1;
+                }
+            }
+            if(!empty($natureCourseData)){
+                foreach($natureCourseData as $key=>&$nature){
+                    foreach($nature as $k=>&$vn){
+                        $vn['nature'] = 2;
+                    }
+                    
+                }
+            }
             if(!empty($natureCourseData)){
                 $course['course'] = array_merge($natureCourseData,$zizengCourseData);
             }else{
-                 $course['course'] =$zizengCourseData;
+                $course['course'] =$zizengCourseData;
             }
     		
     	}
