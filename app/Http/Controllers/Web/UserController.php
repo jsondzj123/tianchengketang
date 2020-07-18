@@ -248,7 +248,7 @@ class UserController extends Controller {
          */
     //我的收藏
     public function myCollect(){
-        $method = isset($this->data['status'])?$this->data['status']:0;
+        $method = isset($this->data['method'])?$this->data['method']:0;
         $collect = Collection::where(['student_id'=>$this->userid,'is_del'=>0])->get();
         if(!empty($collect)) {
             $coursearr=[];
