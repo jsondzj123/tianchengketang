@@ -189,6 +189,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('material','CourseController@material');//课程资料列表
         $router->post('collect','CourseController@collect');//课程收藏
         $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
+        $router->post('urlcode','CourseController@urlcode');//二维码测试
     });
 });
 //后台端路由接口

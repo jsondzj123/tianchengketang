@@ -358,6 +358,11 @@ class CourseController extends Controller {
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
 //        }
     }
+
+    public function urlcode(){
+        $urlcode = $this->generateQRfromGoogle("www.baidu.com");
+        return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $urlcode]);
+    }
     //课程收藏
     public function collect(){
         if(!isset($this->data['id'])||empty($this->data['id'])){
@@ -675,7 +680,7 @@ class CourseController extends Controller {
      */
     function generateQRfromGoogle($chl,$widhtHeight ='150',$EC_level='L',$margin='0'){
         $chl = urlencode($chl);
-        return 'http://chart.apis.google.com/chart?chs='.$widhtHeight.'x'.$widhtHeight.'&cht=qr&chld='.$EC_level.'|'.$margin.'&chl='.$chl;
+        echo 'http://chart.apis.google.com/chart?chs='.$widhtHeight.'x'.$widhtHeight.'&cht=qr&chld='.$EC_level.'|'.$margin.'&chl='.$chl;
     }
 }
 
