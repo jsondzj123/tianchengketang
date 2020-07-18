@@ -70,7 +70,11 @@ class PublicpayController extends Controller {
            return response()->json(['code' => 201 , 'msg' => '课程id错误']);
        }
        //计算用户购买课程到期时间
-       $validity = date('Y-m-d H:i:s',strtotime('+'.$couser['expiry'].' day'));
+       if($couser['expiry'] > 0){
+           $validity = date('Y-m-d H:i:s',strtotime('+'.$couser['expiry'].' day'));
+       }else{
+           $validity = "3000-03-03 12:12:12";
+       }
        $arr=[
            'order_number' => $this->data['order_number'],
            'order_type' => 1,
