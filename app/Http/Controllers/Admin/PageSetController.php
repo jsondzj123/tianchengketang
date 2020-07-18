@@ -30,7 +30,7 @@ class PageSetController extends Controller {
 	public function doLogoUpdate(){
 		 $validator = Validator::make(self::$accept_data, 
             [
-            	'curSchool_id' => 'required|integer',
+            	'school_id' => 'required|integer',
             	'logo' => 'required',
            	],
             FootConfig::message());

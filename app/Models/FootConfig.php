@@ -21,7 +21,7 @@ class FootConfig extends Model {
             'id.integer'   => json_encode(['code'=>'202','msg'=>'id类型不合法']),
             'type.required' => json_encode(['code'=>'201','msg'=>'类型不能为空']),
             'type.integer'  => json_encode(['code'=>'202','msg'=>'类型类型不合法']),
-            'curSchool_id.required' => json_encode(['code'=>'201','msg'=>'学校标识不能为空']),
+            'school_id.required' => json_encode(['code'=>'201','msg'=>'学校标识不能为空']),
             'logo.required'  => json_encode(['code'=>'201','msg'=>'logo标识不合法']),
         ];
     }
@@ -107,15 +107,15 @@ class FootConfig extends Model {
 
     public static function doLogoUpdate($body){
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登录的id
-        $body['curSchool_id'] = isset($body['curSchool_id']) && $body['curSchool_id'] > 0 ?$body['curSchool_id']:$school_id;
-        $Logo = self::where(['school_id'=>$body['curSchool_id'],'type'=>4,'is_del'=>0])->first();
+        $body['school_id'] = isset($body['school_id']) && $body['school_id'] > 0 ?$body['school_id']:$school_id;
+        $Logo = self::where(['school_id'=>$body['school_id'],'type'=>4,'is_del'=>0])->first();
         if(empty($Logo)){
             return ['code'=>203,'msg'=>'数据不存在！'];
         }
-        $udpate['update_at'] = date('Y-m-d H:i:s');
-        $udpate['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-        $udpate['logo']  = $body['logo'];
-        $res = self::where(['school_id'=>$body['curSchool_id'],'type'=>4,'is_del'=>0])->update($update);  
+        $update['update_at'] = date('Y-m-d H:i:s');
+        $update['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+        $update['logo']  = $body['logo'];
+        $res = self::where(['school_id'=>$body['school_id'],'type'=>4,'is_del'=>0])->update($update);  
         if($res){
             return ['code'=>200,'msg'=>'更改成功'];
         }else{

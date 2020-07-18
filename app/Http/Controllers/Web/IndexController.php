@@ -52,18 +52,17 @@ class IndexController extends Controller {
     public function index(){
     	$arr = [];
         $arr['logo'] = empty($this->school['logo_url'])?'':$this->school['logo_url'];
+
         $arr['header'] = $arr['footer'] = $arr['icp'] = [];
     	$admin = Admin::where('school_id',$this->school['id'])->select('school_status')->first();
-    	if(!empty($admin)){
-    		if($admin['school_status'] > 0){
-    			$footer = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>2])->select('id','parent_id','name','url','create_at')->get();
-		    	if(!empty($footer)){
-		    		$arr['footer'] = getParentsList($footer);
-		    	}
-    		}
-            $arr['icp'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>3])->select('id','parent_id','name','url','text','create_at')->first();
-            $arr['header'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>1])->select('id','parent_id','name','url','create_at')->orderBy('sort')->get();
+
+		$footer = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>2])->select('id','parent_id','name','url','create_at')->get();
+    	if(!empty($footer)){
+    		$arr['footer'] = getParentsList($footer);
     	}
+        $arr['icp'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>3])->select('id','parent_id','name','url','text','create_at')->first();
+        $arr['header'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>1])->select('id','parent_id','name','url','create_at')->orderBy('sort')->get();
+        $arr['index_logo'] =  FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>4])->select('logo')->orderBy('sort')->first();
     	return response()->json(['code'=>200,'msg'=>'Success','data'=>$arr]);
     }
     //精品课程
