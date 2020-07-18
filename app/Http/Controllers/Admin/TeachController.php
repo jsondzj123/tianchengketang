@@ -55,7 +55,7 @@ class TeachController extends Controller {
     {   $data = self::$accept_data;
         $validator = Validator::make($data, [
         	'is_public'=>'required',
-            'id' => 'required', 
+          'id' => 'required', 
         ],Teach::message());
         if ($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
@@ -74,6 +74,53 @@ class TeachController extends Controller {
         }
         return $this->response($res['data']);
     }
+    //进入直播间
+    public function liveInRoom(){
+      $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+      $teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->teacher_id : 0;
+      if($teacher_id <= 0){
+        return response()->json(['code'=>207,'msg'=>'非讲师教务进入直播间']);
+      }
+      $teacherArr = Teacher::where(['school_id'=>$school_id,'teacher_id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
+      if(empty($teacherArr)){
+        return response()->json(['code'=>207,'msg'=>'非讲师教务进入直播间']);
+      }
+      $data = self::$accept_data;
+      $validator = Validator::make($data, [
+          'is_public'=>'required',
+          'id' => 'required', 
+        ],Teach::message());
+      if ($validator->fails()) {
+            return response()->json(json_decode($validator->errors()->first(),1));
+      }
+      if($data['is_public'] == 1){ //公开课
+          $live = OpenLivesChilds::where('lesson_id',$data['id'])->select('playbackUrl')->first();
+      }
+      if($data['is_public']== 0){  //课程
+          $live = CourseLiveClassChild::where('class_id',$data['id'])->select('playbackUrl')->first();
+      }
+      if($teacherArr['type'] == 1){
+        //教务
+        $liveArr['course_id'] = $live['course_id'];
+        $liveArr['uid'] = $teacherArr['id'];
+        $liveArr['nickname'] = $teacherArr['real_name'];
+        $liveArr['role'] = 'admin';
+        $res = $this->courseAccess($liveArr);
+      }
+      if($teacherArr['type'] == 2){
+        //讲师
+        $MTCloud = new MTCloud();
+        $res = $MTCloud->courseLaunch($live['course_id']);
+        Log::error('直播器启动:'.json_encode($res));
+        if(!array_key_exists('code', $res) && !$res["code"] == 0){
+            return $this->response('直播器启动失败', 500);
+        }
+      }
+      return $this->response($res['data']);
+
+
+    }
+
    	/**
      * 查看回放
      * @param   auther  lys  2020.7.2
@@ -81,18 +128,35 @@ class TeachController extends Controller {
      * @return \Illuminate\Http\Response
      */
    	public function livePlayback(){
+      $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+      $teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->teacher_id : 0;
+      if($teacher_id <= 0){
+        return response()->json(['code'=>207,'msg'=>'非讲师教务查看回放']);
+      }
+      $teacherArr = Teacher::where(['school_id'=>$school_id,'teacher_id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
+      if(empty($teacherArr)){
+        return response()->json(['code'=>207,'msg'=>'非讲师教务查看回放']);
+      }
    		$data = self::$accept_data;
    		$validator = Validator::make($data, [
    			'is_public'=>'required',
             'id' => 'required', 
         ],Teach::message());
-        if($data['is_public'] == 1){ //公开课
-        	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('playbackUrl')->first();
-        }
-       	if($data['is_public']== 0){  //课程
- 			    $live = CourseLiveClassChild::where('class_id',$data['id'])->select('playbackUrl')->first();
-       	}
-       	return ['code'=>200,'msg'=>'Success','data'=>$live];
+      if ($validator->fails()) {
+            return response()->json(json_decode($validator->errors()->first(),1));
+      }
+      if($data['is_public'] == 1){ //公开课
+      	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('playbackUrl')->first();
+      }
+     	if($data['is_public']== 0){  //课程
+			    $live = CourseLiveClassChild::where('class_id',$data['id'])->select('playbackUrl')->first();
+     	}
+      $liveArr['course_id'] = $live['course_id'];
+      $liveArr['uid'] = $teacherArr['id'];
+      $liveArr['nickname'] = $teacherArr['real_name'];
+      $liveArr['role'] = 'admin';
+      $res = $this->courseAccessPlayback($liveArr);
+     	return ['code'=>200,'msg'=>'Success','data'=>$res];
    	}
 
  	/**
@@ -174,8 +238,25 @@ class TeachController extends Controller {
         }
         return ['code'=>200,'msg'=>'课件删除成功'];
     }
+    //观看直播【欢拓】  lys
+    public function courseAccess($data){
+      $MTCloud = new MTCloud();
+      $res = $MTCloud->courseAccess($data);
+      if(!array_key_exists('code', $res) && !$res["code"] == 0){
+          return $this->response('观看直播失败，请重试！', 500);
+      }
+      return $res['data'];
+    }
 
-
+     //查看回放[欢拓]  lys
+    public function courseAccessPlayback($data){
+        $MTCloud = new MTCloud();
+        $res = $MTCloud->courseAccessPlayback($data);
+        if(!array_key_exists('code', $res) && !$res["code"] == 0){
+            return $this->response('课程查看回放失败，请重试！', 500);
+        }
+        return $res['data'];
+    }
 
 
 

@@ -621,6 +621,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->group(['prefix' => 'teach'], function () use ($router) {
         $router->post('getList', 'TeachController@getList');//教学列表
         $router->post('startLiveChild', 'TeachController@startLive');  //启动直播
+        $router->post('liveInRoom', 'TeachController@liveInRoom');  //进入直播间   
         $router->post('livePlayback','TeachController@livePlayback');  //课程回放
         $router->post('coursewareUpload','TeachController@courseUpload');  //课件上传
         $router->post('details','TeachController@details');  //教学详情
