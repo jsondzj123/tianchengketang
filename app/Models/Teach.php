@@ -251,6 +251,7 @@ class Teach extends Model {
 				'start_at'=>date('Y-m-d H:i:s',$liveChildClassArr['start_at']),
 				'end_at'=>date('Y-m-d H:i:s',$liveChildClassArr['end_at']),
 				'watch_num'=>$liveChildClassArr['watch_num'],
+				'state'=> $liveChildClassArr['state'] == 1?1:($liveChildClassArr['state']==2?2:3),
 				'status'=> $liveChildClassArr['status'] == 1?'预直播':($liveChildClassArr['status']==2?'直播中':'直播已结束'),
 				'duration'=>timetodate((int)$liveChildClassArr['end_at']-(int)$liveChildClassArr['start_at']),
 				'courseware'=>$live['courseware'],

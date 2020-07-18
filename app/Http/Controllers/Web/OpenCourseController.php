@@ -225,6 +225,9 @@ class OpenCourseController extends Controller {
         }
         if($openCourse['status'] == 3){
             $result=$this->courseAccessPlayback($data);
+            if($result['code'] ==1203){ //暂时没有公开课回放记录
+                return response()->json($result);
+            }
             $result['code'] = 200;
             $result['msg'] = 'success';
         }
@@ -251,21 +254,21 @@ class OpenCourseController extends Controller {
      //观看直播【欢拓】  lys
     public function courseAccess($data){
       $MTCloud = new MTCloud();
-      $res = $MTCloud->courseAccess($data);
+      $res = $MTCloud->courseAccess($data['course_id'],$data['uid'],$data['nickname'],$data['role']);
       if(!array_key_exists('code', $res) && !$res["code"] == 0){
           return $this->response('观看直播失败，请重试！', 500);
       }
-      return $res['data'];
+      return $res;
     }
 
      //查看回放[欢拓]  lys
     public function courseAccessPlayback($data){
         $MTCloud = new MTCloud();
-        $res = $MTCloud->courseAccessPlayback($data);
+        $res = $MTCloud->courseAccessPlayback($data['course_id'],$data['uid'],$data['nickname'],$data['role']);
         if(!array_key_exists('code', $res) && !$res["code"] == 0){
             return $this->response('课程查看回放失败，请重试！', 500);
         }
-        return $res['data'];
+        return $res;
     }
 
 
