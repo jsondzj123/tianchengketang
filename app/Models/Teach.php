@@ -191,12 +191,15 @@ class Teach extends Model {
 			}
 			$openCourseArr['time'] = timetodate((int)$openCourseArr['end_at']-(int)$openCourseArr['start_at']);//时长
 			if($openCourseArr['start_at']>time()){
-				$openCourseArr['status'] = '待直播';
+				$openCourseArr['state'] = 1;
+				$openCourseArr['status'] = '预开始';
 			}
 			if($openCourseArr['end_at']<time()){
+				$openCourseArr['state'] = 3;
 				$openCourseArr['status'] = '直播已结束';
 			}
 			if($openCourseArr['start_at']<time() && $openCourseArr['end_at']>time()){
+				$openCourseArr['state'] = 2;
 				$openCourseArr['status'] = '直播中';
 			} 
 			$openCourseArr['start_at'] = date('Y-m-d H:i:s',$openCourseArr['start_at']);
