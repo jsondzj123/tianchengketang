@@ -75,7 +75,7 @@ class PublicpayController extends Controller {
        $arr=[
            'order_number' => $this->data['order_number'],
            'order_type' => 1,
-           'student_id' => $this->data['student_id'],
+           'student_id' => $this->userid,
            'price' => $couser['pricing'],
            'lession_price' =>$couser['sale_price'],
            'pay_status' =>$this->data['pay_status'],
