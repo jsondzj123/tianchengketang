@@ -163,6 +163,7 @@ class NotifyController extends Controller {
                 return response()->json(['code' => 200 , 'msg' =>'支付成功']);
             }
         }
+
         file_put_contents('./orderpaylog/'.$order_number.'.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
         // 判断是否购买成功  【状态码,0为成功（无论是沙箱环境还是正式环境只要数据正确status都会是：0）】
         if (intval($arr['status']) === 0) {
