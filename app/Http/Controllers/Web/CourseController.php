@@ -237,11 +237,6 @@ class CourseController extends Controller {
                 'page' => $page,
                 'total' => $count
             ];
-            $datas = [
-                0=>$res,
-                1=>$page,
-                2=>$this->data,
-            ];
             return response()->json(['code' => 200, 'msg' => '获取成功', 'data' => $res, 'page' => $page, 'where' => $this->data]);
     }
     /*
