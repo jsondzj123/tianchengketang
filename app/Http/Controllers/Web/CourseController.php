@@ -547,8 +547,9 @@ class CourseController extends Controller {
                         }
 
                     }
+                    $v['chapters'] = $recordes;
                 }
-                $v['chapters'] = $recordes;
+
             }
         }
 //        $page=[
