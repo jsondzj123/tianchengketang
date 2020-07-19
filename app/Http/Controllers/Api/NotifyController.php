@@ -177,7 +177,7 @@ class NotifyController extends Controller {
             //用户余额信息
             $student = Student::where(['id'=>$studentprice['user_id']])->first();
             foreach ($arr['receipt']['in_app']  as $k=>$v){
-                if($codearr[$v['product_id']] = $studentprice['price']){
+                if($codearr[$v['product_id']] == $studentprice['price']){
                     $endbalance = $student['balance'] + $studentprice['price']; //用户充值后的余额
                     Student::where(['id'=>$studentprice['user_id']])->update(['balance'=>$endbalance]);  //修改用户余额
                     $userorder = StudentAccounts::where(['user_id'=>$studentprice['user_id'],'order_number'=>$order_number,'price'=>$studentprice['price'],'pay_type'=>5,'order_type'=>1])->update(['third_party_number'=>$v['transaction_id'],'content'=>$arr['receipt']['in_app'][$k],'status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
