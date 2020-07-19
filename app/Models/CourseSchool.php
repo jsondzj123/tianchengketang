@@ -301,7 +301,7 @@ class CourseSchool extends Model {
                 $ids = Couresteacher::whereIn('course_id',$courseIds)->where('is_del',0)->pluck('teacher_id')->toArray(); //要授权的教师信息
                 if(!empty($ids)){
                     $ids = array_unique($ids);
-                    $teacherIds = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>1])->pluck('teacher_id')->toArray();//已经授权过的讲师信息
+                    $teacherIds = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->pluck('teacher_id')->toArray();//已经授权过的讲师信息
                     if(!empty($teacherIds)){
                         $teacherIdArr = array_diff($ids,$teacherIds);//不在授权讲师表里的数据   
                     }else{
