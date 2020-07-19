@@ -124,7 +124,6 @@ class NotifyController extends Controller {
     }
     //iphone 内部支付 回调
     public function iphonePaynotify(){
-        return response()->json(['code' => 200 , 'msg' =>'支付成功']);
         $data = self::$accept_data;
         $receiptData = $data['receiptData'];
         $order_number = $data['order_number'];
@@ -159,10 +158,10 @@ class NotifyController extends Controller {
             //获取域名   正式环境 沙箱请求 不处理
 //            $url = $_SERVER["HTTP_REFERER"];
 //            if($url == 'tiancheng.longde999.cn'){
-                $arr['pay_namess'] = "沙箱环境，不予处理金额变动";
+//                $arr['pay_namess'] = "沙箱环境，不予处理金额变动";
 //                $arr['http_referer'] = $_SERVER["HTTP_REFERER"];
-                file_put_contents('./orderpaylog/'.$order_number.'.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
-                return response()->json(['code' => 200 , 'msg' =>'支付成功']);
+//                file_put_contents('./orderpaylog/'.$order_number.'.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
+//                return response()->json(['code' => 200 , 'msg' =>'支付成功']);
 //            }
         }
         file_put_contents('./orderpaylog/'.$order_number.'.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
