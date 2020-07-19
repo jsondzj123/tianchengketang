@@ -497,16 +497,17 @@ class CourseController extends Controller {
         $recorde =[];
         if($count > 0) {
             //如果is_show是1  查询所有的课程   0查询能免费看的，试听的课程
-//            if($is_show == 1){
-//                $chapterswhere = [
-//                    'is_del' => 0,
-//                ];
-//            }else{
-//                //查询免费课程
-//                $chapterswhere = [
-//                    'is_del' => 0,
-////                    'is_free' => 2
-//                ];
+            if($is_show == 1){
+                $chapterswhere = [
+                    'is_del' => 0,
+                ];
+            }else {
+                //查询免费课程
+                $chapterswhere = [
+                    'is_del' => 0,
+                    'is_free' => 2
+                ];
+            }
 
             $key = "webCourse" . $this->data['id'] . $this->userid;
             if (Redis::get($key)) {
@@ -517,7 +518,7 @@ class CourseController extends Controller {
                 if (!empty($recorde)) {
                     //循环章  查询每个章下的节
                     foreach ($recorde as $k => &$v) {
-                        $recordes = Coureschapters::where(['course_id' => $this->data['id'], 'parent_id' => $v['id'], 'is_del' => 0])->get()->toArray();
+                        $recordes = Coureschapters::where(['course_id' => $this->data['id'], 'parent_id' => $v['id']])->where($chapterswhere)->get()->toArray();
                         if (!empty($recordes)) {
 
                             //循环每个小节 查询小节的进度
