@@ -512,7 +512,7 @@ class CourseController extends Controller {
 //                    'is_del' => 0,
 ////                    'is_free' => 2
 //                ];
-//            }
+            }
             //获取章
             $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->get()->toArray();
             if(!empty($recorde)){
@@ -549,7 +549,6 @@ class CourseController extends Controller {
                     }
                 }
             }
-        }
 //        $page=[
 //            'pageSize'=>$pagesize,
 //            'page' =>$page,
