@@ -236,7 +236,6 @@ class IndexController extends Controller {
                 //获取版本的最新更新信息
                 $version_info = DB::table('ld_version')->select('is_online','is_mustup','version','content','download_url')->orderBy('create_at' , 'DESC')->first();
                 $version_info->content = json_decode($version_info->content , true);
-                $version_info->download_url = 'http://ketang.longde999.cn/downloadApp/release.apk';
                 //判断两个版本是否相等
                 /*if(empty($channel_info->version) || $version_info->version != $channel_info->version){
                     $version_info->content = json_decode($version_info->content , true);
