@@ -551,12 +551,12 @@ class CourseController extends Controller {
                 $v['chapters'] = $recordes;
             }
         }
-        $page=[
-            'pageSize'=>$pagesize,
-            'page' =>$page,
-            'total'=>$count
-        ];
-        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde,'page'=>$page]);
+//        $page=[
+//            'pageSize'=>$pagesize,
+//            'page' =>$page,
+//            'total'=>$count
+//        ];
+        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde]);
     }
     /*
          * @param  课程直播列表
