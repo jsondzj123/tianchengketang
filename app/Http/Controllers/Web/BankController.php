@@ -884,16 +884,16 @@ class BankController extends Controller {
         $exam_id      = isset(self::$accept_data['exam_id']) && !empty(self::$accept_data['exam_id']) ? self::$accept_data['exam_id'] : 0;                //试题id
         $myanswer     = isset(self::$accept_data['myanswer']) && !empty(self::$accept_data['myanswer']) ? self::$accept_data['myanswer'] : '';            //我的答案
         
-        //检验用户是否有做题权限
-        $iurisdiction = self::verifyUserExamJurisdiction($bank_id);
-        if($iurisdiction['code'] == 209){
-            return response()->json(['code' => 209 , 'msg' => $iurisdiction['msg']]);
-        }
-        
         
         //判断题库的id是否传递合法
         if(!$bank_id || $bank_id <= 0){
             return response()->json(['code' => 202 , 'msg' => '题库id不合法']);
+        }
+        
+        //检验用户是否有做题权限
+        $iurisdiction = self::verifyUserExamJurisdiction($bank_id);
+        if($iurisdiction['code'] == 209){
+            return response()->json(['code' => 209 , 'msg' => $iurisdiction['msg']]);
         }
         
         //判断科目的id是否传递合法
