@@ -1057,7 +1057,7 @@ class BankController extends Controller {
                 StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'exam_id' => $exam_id])->update(['answer' => $myanswer , 'is_right' => $is_right , 'update_at' => date('Y-m-d H:i:s')]);
                 //事务回滚
                 DB::commit();
-                return response()->json(['code' => 208 , 'msg' => '答题成功']);
+                return response()->json(['code' => 200 , 'msg' => '答题成功']);
             } else {
                 //事务回滚
                 DB::rollBack();
