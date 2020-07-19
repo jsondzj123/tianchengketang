@@ -668,7 +668,8 @@ class CourseController extends Controller {
      */
     function generateQRfromGoogle($chl,$widhtHeight ='150',$EC_level='L',$margin='0'){
         $chl = urlencode($chl);
-        echo 'http://chart.apis.google.com/chart?chs='.$widhtHeight.'x'.$widhtHeight.'&cht=qr&chld='.$EC_level.'|'.$margin.'&chl='.$chl;
+        echo '<img src="http://chart.apis.google.com/chart?chs='.$widhtHeight.'x'.$widhtHeight.'&cht=qr&chld='.$EC_level.'|'.$margin.'&chl='.$chl.'" alt="QR code" widthHeight="'.$widhtHeight.'" widhtHeight="'.$widhtHeight.'"/>';
+//        echo 'http://chart.apis.google.com/chart?chs='.$widhtHeight.'x'.$widhtHeight.'&cht=qr&chld='.$EC_level.'|'.$margin.'&chl='.$chl;
     }
 }
 
