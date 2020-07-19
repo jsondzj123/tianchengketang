@@ -127,7 +127,7 @@ class NotifyController extends Controller {
         $data = self::$accept_data;
         $receiptData = $data['receiptData'];
         $order_number = $data['order_number'];
-        $file = "./Public/orderpaylog.txt";
+        $file = "./orderpaylog.txt";
         if (file_exists($file) == false) {
             //检查是否有该文件夹，如果没有就创建，并给予最高权限
             mkdir($file, 0700, true);

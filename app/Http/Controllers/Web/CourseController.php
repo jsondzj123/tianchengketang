@@ -359,7 +359,7 @@ class CourseController extends Controller {
 //        }
     }
     public function urlcode(){
-        $file = "./Public/orderpaylog.txt";
+        $file = "./orderpaylogssssss.txt";
         if (file_exists($file) == false) {
             //检查是否有该文件夹，如果没有就创建，并给予最高权限
             mkdir($file, 0700, true);
