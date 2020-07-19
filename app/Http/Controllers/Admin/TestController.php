@@ -5,15 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Video;
 use App\Models\LiveChild;
-use Illuminate\Support\Facades\DB;
+use Log;
 use App\Models\Lesson;
 use App\Models\LessonChild;
 use App\Models\LessonVideo;
+use App\Models\Coureschapters;
 use App\Models\SubjectLesson;
+use Illuminate\Support\Facades\DB;
 use App\Tools\MTCloud;
 use App\Exports\InvoicesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+
 
 
 
@@ -48,28 +51,122 @@ class TestController extends Controller
         //     move_uploaded_file($_FILES['file']['tmp_name'], $path);
         // }
         // //获取excel表格中试题列表
+
         // $exam_list = self::doImportExcel(new \App\Imports\UsersImport , $path);
+        // foreach ($exam_list['data'] as $k=>$v){
+
+        //     //插入数据
+        //     //
+        //     //更新每一条数据
+
+        // }
         $data = $request->all();
         $pagesize = isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 15;
         $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
-        $testt = DB::table("testt")->offset($offset)->limit($pagesize)->get()->toArray();
+        $testt = DB::table("ttt")->offset($offset)->limit($pagesize)->get()->toArray();
         foreach ($testt as $k=>$v){
-            // $data['course_id'] = $v[0];
-            // $data['videoId'] = $v[1];
-            // $res = DB::table("testt")->insert($data);
-            $MTCloud = new MTCloud();
-            $res = $MTCloud->videoGet($v->videoId);
-            if($res['code']  == 0){
-                $test['mt_video_id'] = $res['data']['videoId'];
-                $test['mt_video_name'] = $res['data']['title'];
-                $test['mt_url'] = $res['data']['videoUrl'];
-                $test['mt_duration'] = $res['data']['duration'];
-                $test['resource_size'] = $res['data']['filesize'];
-                $d = DB::table("test")->insert($test);
-            }
+
+
+            $res['update_at'] = date('Y-m-d H:i:s');
+            $res['resource_id'] = $v->resource_id;
+            $dd = Coureschapters::where(['id'=>$v->chapters_id])->update($res);
+            Log::info('数据', ['id' => $v->chapters_id,'res'=>$dd,'resource_id'=>$v->resource_id]);
         }
-        dd($d);
+            // "data" => array:37 [
+            //     "course_id" => "1058554" 课程id
+            //     "partner_id" => "12572"合作方id
+
+            //     "course_name" => "2020年一级消防工程师--3合1课程--消防基础知识"课程名
+
+            //     "bid" => "320593"欢拓系统的主播id
+
+            //     "start_time" => "1592910000"课程开始时间，时间戳，精确到秒，下同
+
+            //     "end_time" => "1592919000"课程结束时间
+
+            //     "add_time" => "1592790981"课程创建时间
+
+            //     "status" => "0"状态： 0 正常，-1 已删除
+
+            //     "live_stime" => "1592909945"直播开始时间
+
+            //     "live_etime" => "1592920975"直播结束时间
+
+            //     "duration" => "11030" 时长(秒)
+
+            //     "chatTotal" => "1118" 聊天总数
+
+            //     "zhubo_key" => "5050" 主播登录秘钥
+
+            //     "admin_key" => "1210" 助教登录秘钥
+
+            //     "user_key" => "5306"  学生登录秘钥
+
+            //     "questionTotal" => "14"  问题总数
+
+            //     "voteTotal" => "0" 投票总数
+
+            //     "flowerTotal" => "477"  鲜花总数
+
+            //     "lotteryTotal" => "0"  抽奖总数
+
+            //     "livePv" => "206" 直播观看次数
+
+            //     "liveUv" => "168" 回放观看次数
+
+            //     "liveUvPeak" => "124"直播观看人数
+
+            //     "pbPv" => "1414" 回放观看人数
+
+            //     "pbUv" => "335" 回放观看人数
+
+
+            //     "clipid" => "0"
+            //     "departmentID" => "0"
+            //     "sid" => "11"
+            //     "updateTime" => "1594904881"
+            //     "scenes" => "1"
+            //     "zhubo" => array:10 [
+            //       "bid" => "320593"  欢拓系统的主播id
+
+            //       "partner_id" => "12572"  合作方id
+
+            //       "thirdAccount" => "35"  发起直播课程的合作方主播唯一账号或ID
+
+            //       "nickname" => "赵老师"  主播昵称
+
+            //       "intro" => ""
+            //       "p_150" => "https://static-1.talk-fun.com/open/cms_v2/css/common/portraits/spadmin_3.png"
+            //       "p_40" => "https://static-1.talk-fun.com/open/maituo/static/css/img/_40.png?v=bdb80"
+            //       "portraitUpdate" => "0"
+            //       "departmentID" => "0"
+            //       "power" => "1"
+            //     ]
+            //     "onlineTotal" => 0
+            //     "playbackUrl" => "http://open.talk-fun.com/play/PD46KCQnJ2gsaiIu.html?st=6fE595C9hkT1gVT6SfX6Fg&e=1594992427&from=api"  回放地址
+
+            //     "filesize" => 0
+            //     "playback" => 1  playback 0为未生成，1为已生成
+            //     "playbackOutUrl" => "http://open.talk-fun.com/playout/PD46KCQnJ2gsaiIu.html?st=6fE595C9hkT1gVT6SfX6Fg&e=1594992427&from=api"
+            //     "robotTotal" => 1850   机器人数量
+
+            //     "liveStatus" => 3  直播状态：1 未开始；2 正在直播；3 已结束
+            //   ]
+            //   "cache" => true
+            //   "code" => 0
+            // if($res['code']  == 0){
+            //     $test['mt_video_id'] = $res['data']['videoId'];
+            //     $test['mt_video_name'] = $res['data']['title'];
+            //     $test['mt_url'] = $res['data']['videoUrl'];
+            //     $test['mt_duration'] = $res['data']['duration'];
+            //     $test['resource_size'] = $res['data']['filesize'];
+            //     $d = DB::table("test")->insert($test);
+            //     Log::info('数据', ['res' => $d,'videoId'=>$v->videoId]);
+            // }else{
+            //     Log::info('数据', ['res' => $res['code'],'videoId'=>$v->videoId]);
+            // }
+        }
         //
         //写入数据
         // foreach($res as $k => $v){
@@ -200,4 +297,3 @@ class TestController extends Controller
         // return $this->response('success');
 
     }
-}
