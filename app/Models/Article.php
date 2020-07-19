@@ -48,7 +48,7 @@ class Article extends Model {
             ->where(['ld_article.is_del'=>1,'ld_article_type.is_del'=>1,'ld_article_type.status'=>1,'ld_admin.is_del'=>1,'ld_admin.is_forbid'=>1,'ld_school.is_del'=>1,'ld_school.is_forbid'=>1])
             ->count();
         if($total > 0){
-            $list = self::select('ld_article.id','ld_article.title','ld_article.create_at','ld_article.status','ld_school.name','ld_article_type.typename','ld_admin.username')
+            $list = self::select('ld_article.id','ld_article.title','ld_article.create_at','ld_article.status','ld_article.is_recommend','ld_school.name','ld_article_type.typename','ld_admin.username')
                 ->leftJoin('ld_school','ld_school.id','=','ld_article.school_id')
                 ->leftJoin('ld_article_type','ld_article_type.id','=','ld_article.article_type_id')
                 ->leftJoin('ld_admin','ld_admin.id','=','ld_article.user_id')
@@ -342,6 +342,28 @@ class Article extends Model {
             return ['code' => 202 , 'msg' => '更新失败'];
         }
     }
+
+
+    /*
+         * @param  推荐
+         * @param  author  苏振文
+         * @param  ctime   2020/7/18 15:37
+         * return  array
+         */
+    public static function recommendId($data){
+        if(empty($data['id'])){
+            return ['code' => 201 , 'msg' => 'id为空或格式不正确'];
+        }
+        $article = self::where(['id'=>$data['id']])->first();
+        $recom = $article['is_recommend'] == 1 ? 0 : 1;
+        $up = self::where(['id'=>$data['id']])->update(['is_recommend'=>$recom]);
+        if($up){
+            return ['code' => 200 , 'msg' => '状态修改成功'];
+        }else{
+            return ['code' => 202 , 'msg' => '状态修改失败'];
+        }
+    }
+
     public static function schoolANDtype($role_id,$school_id=0){
         if($role_id == 1){
             if($school_id != 0){

@@ -82,6 +82,7 @@ class OpenCourse extends Model {
             $where['start_at'] =  substr($where['time'][0],0,10);
             $where['end_at']  = substr($where['time'][1],0,10);
         } 
+
         //自增公开课
         $open_less_arr = self::where(function($query) use ($where,$school_id){
             if(!empty($where['parent_id']) && $where['parent_id'] != '' && $where['parent_id'] > 0){
@@ -102,12 +103,13 @@ class OpenCourse extends Model {
                 }
             }
             if(!empty($where['time']) && $where['time'] != ''){
-                $query->where('start_at','<',$where['start_at']);
-                $query->where('end_at','>',$where['end_at']);
+                $query->where('start_at','>',$where['start_at']);
+                $query->where('end_at','<',$where['end_at']);
             }
             $query->where('school_id',$school_id);
             $query->where('is_del',0);
          })->get()->toArray();
+   
         if($school_status <1){
             //授权公开课
             $ref_open_less_arr = CourseRefOpen::leftJoin('ld_course_open','ld_course_ref_open.course_id','=','ld_course_open.id')
@@ -126,8 +128,8 @@ class OpenCourse extends Model {
                     }
                 }
                 if(!empty($where['time']) && $where['time'] != ''){
-                    $query->where('start_at','<',$where['start_at']);
-                    $query->where('end_at','>',$where['end_at']);
+                    $query->where('start_at','>',$where['start_at']);
+                    $query->where('end_at','<',$where['end_at']);
                 }
                 $query->where('to_school_id',$school_id);
                 $query->where('ld_course_ref_open.is_del',0);

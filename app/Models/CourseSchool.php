@@ -65,12 +65,6 @@ class CourseSchool extends Model {
         $zizengSubjectArr = CouresSubject::where('school_id',$school_id)->where(['is_open'=>0,'is_del'=>0])->select('id','subject_name')->get()->toArray();//自增大类小类（总校）
         $subjectArr = array_column($zizengSubjectArr,'subject_name','id');
         $schoolArr =Admin::where(['school_id'=>$body['school_id'],'is_del'=>1])->first();
-        if($schoolArr['school_status'] > $school_status){
-            return ['code'=>205,'msg'=>'分校不能给总校授权'];
-        }
-        if($body['school_id'] == $school_id){
-            return ['code'=>205,'msg'=>'自己不能给自己授权'];
-        }
         if($body['is_public'] == 1){//公开课
             $zizengOpenCourse = OpenCourse::where(function($query) use ($body,$school_id) {
                             if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
@@ -125,7 +119,6 @@ class CourseSchool extends Model {
                         $query->where('title','like',"%".$body['search']."%");
                     }
                     $query->where('is_del',0);
-                    $query->where('status',1);
                 })->select('id','parent_id','child_id','title')->get()->toArray(); 
             $natureCourse = self::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
                 ->where(function($query) use ($body,$school_id) {

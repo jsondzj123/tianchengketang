@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
 use App\Models\Coures;
 use App\Models\CourseSchool;
+use App\Models\Order;
 use App\Models\School;
 use App\Models\Student;
 
@@ -26,7 +27,6 @@ class PublicpayController extends Controller {
         * @param  author  苏振文
         * student_id  用户id
         * order_number 订单号
-        * third_party_number 第三方支付订单号
         * pay_status 1定金2尾款3最后一笔款4全款
         * pay_type 1微信2支付宝3银行转账4汇聚5余额
         * pay_time 支付时间
@@ -36,7 +36,7 @@ class PublicpayController extends Controller {
         * return  array
         */
    public function orderOAtoPay(){
-       if(!isset($this->data['nature']) || empty($this->data['nature'])){
+       if(!isset($this->data['nature'])){
            return response()->json(['code' => 201 , 'msg' => '课程类型(授权自增)不能为空']);
        }
        if(!isset($this->data['class_id']) || empty($this->data['class_id'])){
@@ -68,26 +68,28 @@ class PublicpayController extends Controller {
        if(!$couser){
            return response()->json(['code' => 201 , 'msg' => '课程id错误']);
        }
-       //计算用户购买课程到期时间
-       $validity = date('Y-m-d H:i:s',strtotime('+'.$couser['expiry'].' day'));
+       $find = Order::where(['order_number'=>$this->data['order_number']])->first();
+       if(!empty($find)){
+           return response()->json(['code' => 202 , 'msg' => '此订单已存在']);
+       }
        $arr=[
            'order_number' => $this->data['order_number'],
            'order_type' => 1,
-           'student_id' => $this->data['student_id'],
+           'student_id' => $this->userid,
            'price' => $couser['pricing'],
            'lession_price' =>$couser['sale_price'],
            'pay_status' =>$this->data['pay_status'],
-           'pay_type' =>$this->data['pay_time'],
-           'status' =>2,
+           'pay_type' =>$this->data['pay_type'],
+           'status' =>1,
            'pay_time' =>$this->data['pay_time'],
-           'oa_status' =>1,
+           'oa_status' =>0,
            'class_id' =>$this->data['class_id'],
            'nature' =>$this->data['nature'],
-           'validity_time' =>$validity,
            'school_id' =>$school_id
        ];
+       Order::insert($arr);
        //修改用户报名状态
-       Student::where(['id'=>$this->data['class_id']])->update(['enroll_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+//       Student::where(['id'=>$this->data['class_id']])->update(['enroll_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+       return response()->json(['code' => 200 , 'msg' => '成功']);
    }
 }
-

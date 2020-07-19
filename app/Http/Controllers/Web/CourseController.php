@@ -79,11 +79,6 @@ class CourseController extends Controller {
          * return  array
      */
     public function courseList(){
-//        $keys = json_encode($this->data).$this->school['id'];
-//        if(Redis::get($keys)){
-//            $data = json_decode(Redis::get($keys),true);
-//            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$data[0],'page'=>$data[1],'where'=>$data[2]]);
-//        }else {
             $school_id = $this->school['id'];
             //每页显示的条数
             $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 20;
@@ -247,7 +242,6 @@ class CourseController extends Controller {
                 1=>$page,
                 2=>$this->data,
             ];
-//            Redis::set($keys,json_encode($datas),300);
             return response()->json(['code' => 200, 'msg' => '获取成功', 'data' => $res, 'page' => $page, 'where' => $this->data]);
     }
     /*
@@ -292,18 +286,18 @@ class CourseController extends Controller {
                 }
             }
             //是否购买
-//            if ($course['sale_price'] > 0) {
-//                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['course_id'], 'status' => 2,'nature'=>1])->count();
-//                $course['is_pay'] = $order > 0 ? 1 : 0;
-//            } else {
+            if ($course['sale_price'] > 0) {
+                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['course_id'], 'status' => 2,'nature'=>1])->count();
+                $course['is_pay'] = $order > 0 ? 1 : 0;
+            } else {
                 $course['is_pay'] = 1;
-//            }
+            }
             //收藏数量
-            $collect = Collection::where(['lesson_id'=>$course['course_id']])->count();
+            $collect = Collection::where(['lesson_id'=>$course['course_id'],'is_del'=>0,'nature'=>1])->count();
             $course['collect'] = $collect;
             //判断用户是否收藏
-            $collect = Collection::where(['lesson_id'=>$course['course_id'],'student_id'=>$this->userid,'is_del'=>0])->count();
-            if($collect != 0){
+            $collects = Collection::where(['lesson_id'=>$course['course_id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
+            if($collects != 0){
                 $course['is_collect'] = 1;
             }else{
                 $course['is_collect'] = 0;
@@ -333,22 +327,22 @@ class CourseController extends Controller {
                 }
             }
             //是否购买
-//            if ($course['sale_price'] > 0) {
-//                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
-//                $course['is_pay'] = $order > 0 ? 1 : 0;
-//            } else {
+            if ($course['sale_price'] > 0) {
+                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
+                $course['is_pay'] = $order > 0 ? 1 : 0;
+            } else {
                 $course['is_pay'] = 1;
-//            }
+            }
             //收藏数量
-            $collect = Collection::where(['lesson_id'=>$this->data['id']])->count();
+            $collect = Collection::where(['lesson_id'=>$this->data['id'],'is_del'=>0,'nature'=>0])->count();
             $course['collect'] = $collect;
             //判断用户是否收藏
-//            $collect = Collection::where(['course_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0])->count();
-//            if($collect != 0){
-//                $course['is_collect'] = 1;
-//            }else{
+            $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->count();
+            if($collects != 0){
+                $course['is_collect'] = 1;
+            }else{
                 $course['is_collect'] = 0;
-//            }
+            }
         }
         //分类信息
         $parent = CouresSubject::select('id', 'subject_name')->where(['id' => $course['parent_id'], 'parent_id' => 0, 'is_del' => 0, 'is_open' => 0])->first();
@@ -358,27 +352,33 @@ class CourseController extends Controller {
         unset($course['parent_id']);
         unset($course['child_id']);
 //        Redis::set($keys,json_encode($course),60);
+        //根据课程id 课程属性 生成二维码
+//        $urlcode = $this->generateQRfromGoogle("www.baidu.com");
+//        $course['urlcode'] = $urlcode;
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
 //        }
     }
+
     //课程收藏
     public function collect(){
         if(!isset($this->data['id'])||empty($this->data['id'])){
             return response()->json(['code' => 201, 'msg' => '课程id为空']);
         }
-        $list = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>39])->first();
+        $list = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'nature'=>$this->data['nature']])->first();
         if($list){
             $status = $list['is_del'] == 1?0:1;
-            $add = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>39])->update(['is_del'=>$status]);
+            $add = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid])->update(['is_del'=>$status]);
         }else{
             $add = Collection::insert([
                 'lesson_id' => $this->data['id'],
-                'student_id' => 39,
-                'created_at' => date('Y-m-d H:i:s')
+                'student_id' => $this->userid,
+                'created_at' => date('Y-m-d H:i:s'),
+                'nature' => $this->data['nature']
             ]);
         }
         if($add){
-            return response()->json(['code' => 200, 'msg' => '操作成功']);
+            $count = Collection::where(['lesson_id'=>$this->data['id'],'nature'=>$this->data['nature'],'is_del'=>0])->count();
+            return response()->json(['code' => 200, 'msg' => '操作成功','data'=>$count]);
         }else{
             return response()->json(['code' => 203, 'msg' => '操作失败']);
         }
@@ -415,28 +415,21 @@ class CourseController extends Controller {
          * return  array
          */
     public function courseIntroduce(){
-        $keys = json_encode($this->data).$this->userid;
-        if(Redis::get($keys)){
-            return response()->json(['code' => 201 , 'msg' => '查询成功','data'=>json_decode(Redis::get($keys),true)]);
-        }else{
-            $nature = $this->data['nature'];
-            if($nature == 1){
-                //课程基本信息
-                $course = CourseSchool::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first();
-                if(!$course){
-                    return response()->json(['code' => 201 , 'msg' => '无查看权限']);
-                }
-            }else{
-                //课程基本信息
-                $course = Coures::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first();
-                if(!$course){
-                    return response()->json(['code' => 201 , 'msg' => '无查看权限']);
-                }
+        $nature = $this->data['nature'];
+        if($nature == 1){
+            //课程基本信息
+            $course = CourseSchool::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first();
+            if(!$course){
+                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
             }
-            Redis::set($keys,json_encode($course),300);
-            return response()->json(['code' => 201 , 'msg' => '查询成功','data'=>$course]);
+        }else{
+            //课程基本信息
+            $course = Coures::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first();
+            if(!$course){
+                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+            }
         }
-
+        return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$course]);
     }
     /*
          * @param  课程录播列表
@@ -510,23 +503,23 @@ class CourseController extends Controller {
         $recorde =[];
         if($count > 0){
             //如果is_show是1  查询所有的课程   0查询能免费看的，试听的课程
-            if($is_show == 1){
-                $chapterswhere = [
-                    'is_del' => 0,
-                ];
-            }else{
-                //查询免费课程
-                $chapterswhere = [
-                    'is_del' => 0,
-//                    'is_free' => 2
-                ];
-            }
+//            if($is_show == 1){
+//                $chapterswhere = [
+//                    'is_del' => 0,
+//                ];
+//            }else{
+//                //查询免费课程
+//                $chapterswhere = [
+//                    'is_del' => 0,
+////                    'is_free' => 2
+//                ];
+//            }
             //获取分页的章
             $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->offset($offset)->limit($pagesize)->get();
             if(!empty($recorde)){
                 //循环章  查询每个章下的节
                 foreach ($recorde as $k=>&$v){
-                    $recordes = Coureschapters::where(['course_id'=>$this->data['id'],'parent_id'=>$v['id']])->where($chapterswhere)->get()->toArray();
+                    $recordes = Coureschapters::where(['course_id'=>$this->data['id'],'parent_id'=>$v['id'],'is_del'=>0])->get()->toArray();
                     if(!empty($recordes)){
                         //循环每个小节 查询小节的进度
                         foreach ($recordes as $key=>&$val){
@@ -548,10 +541,12 @@ class CourseController extends Controller {
                                     }
                                 }
                             }
+
                         }
+
                     }
                 }
-                $vs['chapters'] = $recordes;
+                $v['chapters'] = $recordes;
             }
         }
         $page=[

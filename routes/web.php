@@ -124,7 +124,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('preStart','OpenCourseController@preStart');//预开始
         $router->post('underway','OpenCourseController@underway');//直播中
         $router->post('finish','OpenCourseController@end');//往期公开课程 (暂时没做分页)
-        $router->post('details','OpenCourseController@details');//查看详情
+     
     });
     //教师
     $router->group(['prefix' => 'teacher'], function () use ($router) {
@@ -142,7 +142,11 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->post('doUserVerifyPassword','AuthenticateController@doUserVerifyPassword');              //忘记密码验证接口
     $router->post('doUserForgetPassword','AuthenticateController@doUserForgetPassword');              //找回密码接口
     $router->post('captchaInfo','AuthenticateController@captchaInfo');          //WEB生成图片验证码接口
-
+    $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');   //OA流转订单
+     //公开课 
+    $router->group(['prefix' => 'openclass','middleware'=> 'user'], function () use ($router) {
+        $router->post('details','OpenCourseController@details');//查看详情
+    });
     //题库部分
     $router->post('getBankList','BankController@getBankList');                  //全部题库接口
     $router->group(['prefix' => 'bank' , 'middleware'=> 'user'], function () use ($router) {
@@ -188,10 +192,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('material','CourseController@material');//课程资料列表
         $router->post('collect','CourseController@collect');//课程收藏
         $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
-    });
-    //对公购买模块（szw）
-    $router->group(['prefix' => 'publicpay', 'middleware'=> 'user'], function () use ($router) {
-        $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');//OA流转订单
+        $router->post('urlcode','CourseController@urlcode');//二维码测试
     });
 });
 //后台端路由接口
@@ -466,6 +467,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseUpStatus', 'CourseController@courseUpStatus');//课程发布
 
 
+
         //录播课程
         $router->post('chapterList', 'CourseController@chapterList');//章/节列表
         $router->post('chapterAdd', 'CourseController@chapterAdd');//章添加
@@ -494,6 +496,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('editDelToId', 'ArticleController@editDelToId');//文章删除
         $router->post('findToId', 'ArticleController@findToId');//获取单条文章数据
         $router->post('exitForId', 'ArticleController@exitForId');//文章修改
+        $router->post('recommendId', 'ArticleController@recommendId');//课程发布
         /*------------文章分类模块------------------*/
         $router->post('addType', 'ArticletypeController@addType');//文章分类添加
         $router->post('getTypeList', 'ArticletypeController@getTypeList');//获取文章分类列表
@@ -599,6 +602,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->group(['prefix' => 'pageset'], function () use ($router) {
         $router->post('getList', 'PageSetController@getList');  //页面设置 列表
         $router->post('details', 'PageSetController@details');  //详情 （修改动作）
+        $router->post('doLogoUpdate', 'PageSetController@doLogoUpdate');  //修改logo
     });
 
 
@@ -620,6 +624,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->group(['prefix' => 'teach'], function () use ($router) {
         $router->post('getList', 'TeachController@getList');//教学列表
         $router->post('startLiveChild', 'TeachController@startLive');  //启动直播
+        $router->post('liveInRoom', 'TeachController@liveInRoom');  //进入直播间   
         $router->post('livePlayback','TeachController@livePlayback');  //课程回放
         $router->post('coursewareUpload','TeachController@courseUpload');  //课件上传
         $router->post('details','TeachController@details');  //教学详情

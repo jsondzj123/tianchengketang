@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Collection;
+use App\Models\Coures;
 use App\Models\Couresmethod;
+use App\Models\CourseSchool;
 use App\Models\Lesson;
 use App\Models\LessonMethod;
 use App\Models\LessonSchool;
@@ -161,7 +163,7 @@ class OrderController extends Controller
         if($count > 0){
             $list = Collection::select('ld_lessons.id','ld_lessons.title','ld_lessons.cover','ld_lessons.method','ld_lessons.buy_num')
                 ->leftJoin('ld_lessons','ld_lessons.id','=','ld_collections.lesson_id')
-                ->where(['ld_collections.is_del'=>0,'ld_lessons.is_del'=>0,'status'=>2,'is_forbid'=>0])
+                ->where(['ld_collections.is_del'=>0,'ld_lessons.is_del'=>0,'status'=>2])
                 ->orderByDesc('ld_collections.created_at')
                 ->offset($offset)->limit($pagesize)
                 ->get()->toArray();
@@ -233,35 +235,31 @@ class OrderController extends Controller
             if ($order['status'] > 0) {
                 return ['code' => 202, 'msg' => '此订单已支付'];
             }
-            //判断用户网校，根据网校查询课程信息
-            if ($user_school_id == 1) {
-                //根据课程id 查询价格
-                $lesson = Lesson::select('id', 'title', 'cover', 'price', 'favorable_price','buy_num','ttl')->where(['id' => $order['class_id'], 'is_del' => 0, 'is_forbid' => 0, 'status' => 2, 'is_public' => 0])->first();
-                if (!$lesson) {
-                    return ['code' => 202, 'msg' => '此课程选择无效'];
-                }
-            } else {
-                //根据课程id 网校id 查询网校课程详情
-                $lesson = LessonSchool::select('id', 'title', 'cover', 'price', 'favorable_price','buy_num','ttl')->where(['lesson_id' => $order['class_id'], 'school_id' => $user_school_id, 'is_del' => 0, 'is_forbid' => 0, 'status' => 1, 'is_public' => 0])->first();
-                if (!$lesson) {
-                    return ['code' => 202, 'msg' => '此课程选择无效'];
-                }
+
+            //订单查询课程
+            if($order['nature'] == 1){
+                $lesson = CourseSchool::where(['id' => $order['class_id'], 'is_del' => 0, 'status' => 1])->first();
+            }else{
+                $lesson = Coures::where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1])->first();
+            }
+            if (!$lesson) {
+                return ['code' => 202, 'msg' => '此课程选择无效'];
             }
             if ($data['pay_type'] == 5) {
-                if ($lesson['favorable_price'] > $user_balance) {
+                if ($lesson['sale_price'] > $user_balance) {
                     return ['code' => 210, 'msg' => '余额不足，请充值！！！！！'];
                 } else {
                     DB::beginTransaction();
                     //2020.06.09  订单支付为2，算出课程有效期
                     //扣除用户余额 修改订单信息 加入用户消费记录日志
-                    $end_balance = $user_balance - $lesson['favorable_price'];
+                    $end_balance = $user_balance - $lesson['sale_price'];
                     $studentstatus = Student::where(['id' => $user_id])->update(['balance' => $end_balance]);
                     //计算用户购买课程到期时间
-                    $validity = date('Y-m-d H:i:s',strtotime('+'.$lesson['ttl'].' day'));
+                    $validity = date('Y-m-d H:i:s',strtotime('+'.$lesson['expiry'].' day'));
                     //修改用户报名状态
                     Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1]);
                     $orderstatus = Order::where(['id' => $data['order_id']])->update(['pay_type' => 5, 'status' => 2,'oa_status'=>1,'validity_time'=>$validity,'pay_time' => date('Y-m-d H:i:s'),'update_at' =>date('Y-m-d H:i:s')]);
-                    $studentlogstatus = StudentAccountlog::insert(['user_id' => $user_id, 'price' => $lesson['favorable_price'], 'end_price' => $end_balance, 'status' => 2, 'class_id' => $order['class_id']]);
+                    $studentlogstatus = StudentAccountlog::insert(['user_id' => $user_id, 'price' => $lesson['sale_price'], 'end_price' => $end_balance, 'status' => 2, 'class_id' => $order['class_id']]);
                     if($studentstatus && $orderstatus&&$studentlogstatus){
                         DB::commit();
                         return response()->json(['code' => 200, 'msg' => '购买成功']);
@@ -272,7 +270,7 @@ class OrderController extends Controller
                 }
             } else {
                  Order::where(['id' => $data['order_id']])->update(['pay_type' =>$data['pay_type'],'update_at' =>date('Y-m-d H:i:s')]);
-                $return = $this->payStatus($lesson['title'],$order['order_number'], $data['pay_type'], $lesson['favorable_price'],$user_school_id,1);
+                $return = $this->payStatus($lesson['title'],$order['order_number'], $data['pay_type'], $lesson['sale_price'],$user_school_id,1);
                 return response()->json(['code' => 200, 'msg' => '生成预订单成功', 'data' => $return]);
             }
         } else {
@@ -286,7 +284,7 @@ class OrderController extends Controller
             ];
             $add = StudentAccounts::insert($sutdent_price);
             if ($add) {
-                $return = self::payStatus($sutdent_price['order_number'], $data['type'], $data['price'],$user_school_id,2);
+                $return = self::payStatus('充值',$sutdent_price['order_number'], $data['type'], $data['price'],$user_school_id,2);
                 return response()->json(['code' => 200, 'msg' => '生成预订单成功', 'data' => $return]);
             }
         }
@@ -301,14 +299,14 @@ class OrderController extends Controller
         if($school_id != 1){
             $branchChool = PaySet::where(['school_id'=>$school_id])->first();
             if(empty($branchChool)){
-                $school_id ==1;
+                $school_id =1;
             }
         }
         switch($type) {
             case "1":
                 $wxpay = new WxpayFactory();
                 return $return = $wxpay->getPrePayOrder($title,$order_number, $price,$school_id, $pay_type);
-            case 2:
+            case "2":
                 $alipay = new AlipayFactory($school_id);
                 $return = $alipay->createAppPay($title,$order_number, 0.01,$pay_type);
                 $alipay = [

@@ -21,6 +21,8 @@ class FootConfig extends Model {
             'id.integer'   => json_encode(['code'=>'202','msg'=>'id类型不合法']),
             'type.required' => json_encode(['code'=>'201','msg'=>'类型不能为空']),
             'type.integer'  => json_encode(['code'=>'202','msg'=>'类型类型不合法']),
+            'school_id.required' => json_encode(['code'=>'201','msg'=>'学校标识不能为空']),
+            'logo.required'  => json_encode(['code'=>'201','msg'=>'logo标识不合法']),
         ];
     }
     public static function getList($body){
@@ -33,12 +35,10 @@ class FootConfig extends Model {
     	}
     	$pageSet = self::where(['is_del'=>0])
     		->where(function($query) use ($body,$school_id){
-    			if(isset($body['school_id']) && $body['school_id'] != '' ){
     				$query->where('school_id',$school_id);
-    			}
     	})->get()->toArray(); //
     		
-    	$headerArr = $footer = $icp=[];
+    	$headerArr = $footer = $icp= $logo =[];
     	if(!empty($pageSet)){
     		foreach($pageSet  as $key=>$v){
     			if($v['type']== 1){
@@ -50,13 +50,16 @@ class FootConfig extends Model {
     			if($v['type']== 3){
     				array_push($icp,$v);
     			}
+                if($v['type']== 4){
+                    array_push($logo,$v);
+                }
     		}
     		if(!empty($footer)){
     			$footer =getParentsList($footer);
     		}
     	}
     	
-    	return ['code'=>200,'msg'=>'Success','data'=>['header'=>$headerArr,'footer'=>$footer,'icp'=>$icp,'school_name'=>$school_name]];
+    	return ['code'=>200,'msg'=>'Success','data'=>['header'=>$headerArr,'footer'=>$footer,'icp'=>$icp,'school_name'=>$school_name,'logo'=>$logo]];
     }
 
     public static function details($body){
@@ -97,6 +100,25 @@ class FootConfig extends Model {
     	}else{
     		return ['code'=>203,'msg'=>'网络错误，请重试'];
     	}
+    }
+
+
+    public static function doLogoUpdate($body){
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登录的id
+        $body['school_id'] = isset($body['school_id']) && $body['school_id'] > 0 ?$body['school_id']:$school_id;
+        $Logo = self::where(['school_id'=>$body['school_id'],'type'=>4,'is_del'=>0])->first();
+        if(empty($Logo)){
+            return ['code'=>203,'msg'=>'数据不存在！'];
+        }
+        $update['update_at'] = date('Y-m-d H:i:s');
+        $update['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+        $update['logo']  = $body['logo'];
+        $res = self::where(['school_id'=>$body['school_id'],'type'=>4,'is_del'=>0])->update($update);  
+        if($res){
+            return ['code'=>200,'msg'=>'更改成功'];
+        }else{
+            return ['code'=>203,'msg'=>'网络错误，请重试'];
+        }  
     }
 
 

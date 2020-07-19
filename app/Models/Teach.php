@@ -24,6 +24,7 @@ class Teach extends Model {
 	//教学列表
 	public static function getList($body){
 		$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
+
 		//公开课数据
 		$openCourseArr = OpenCourse::rightJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_open.id') 
 						->rightJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_open.id')
@@ -81,11 +82,12 @@ class Teach extends Model {
 			if(isset($body['classNoSearch']) && !empty($body['classNoSearch'])){
 				$openCourseArr = [];
 			}
+
 			//课程
-		$courseArr = CourseShiftNo::rightJoin('ld_course_class_number','ld_course_class_number.id','=','ld_course_shift_no.id')
+		$courseArr = CourseShiftNo::rightJoin('ld_course_class_number','ld_course_class_number.shift_no_id','=','ld_course_shift_no.id')
 					->rightJoin('ld_course_class_teacher','ld_course_class_number.id','=','ld_course_class_teacher.class_id')
 					->rightJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_class_teacher.teacher_id')
-					->rightJoin('ld_course_live_childs','ld_course_live_childs.class_id','=','ld_course_shift_no.id')
+					->rightJoin('ld_course_live_childs','ld_course_live_childs.class_id','=','ld_course_class_number.id')
 					->where(function($query) use ($body,$school_id) {
 						if(isset($body['time']) && !empty($body['time'])){
 							switch ($body['time']) {
@@ -104,7 +106,6 @@ class Teach extends Model {
 							}	
 						}
 						if(isset($body['timerange']) && !empty($body['timerange'])){
-							
 							$time = json_decode($body['timerange'],1);
 							if(!empty($time)){
 								$query->where('ld_course_class_number.start_at','>',substr($time[0],0,10));
@@ -190,12 +191,15 @@ class Teach extends Model {
 			}
 			$openCourseArr['time'] = timetodate((int)$openCourseArr['end_at']-(int)$openCourseArr['start_at']);//时长
 			if($openCourseArr['start_at']>time()){
-				$openCourseArr['status'] = '待直播';
+				$openCourseArr['state'] = 1;
+				$openCourseArr['status'] = '预开始';
 			}
 			if($openCourseArr['end_at']<time()){
+				$openCourseArr['state'] = 3;
 				$openCourseArr['status'] = '直播已结束';
 			}
 			if($openCourseArr['start_at']<time() && $openCourseArr['end_at']>time()){
+				$openCourseArr['state'] = 2;
 				$openCourseArr['status'] = '直播中';
 			} 
 			$openCourseArr['start_at'] = date('Y-m-d H:i:s',$openCourseArr['start_at']);
@@ -219,12 +223,10 @@ class Teach extends Model {
 				return ['code'=>201,'data'=>'班号标识为空或者不合法'];
 			}
 			$live = []; 
-			$LiveChildArr  = LiveChild::where('id',$body['class_id'])->select('name')->first();//课次名称
+			$LiveChildArr  = LiveChild::where('id',$body['class_id'])->select('name','start_at','end_at')->first();//课次名称
 			$liveChildClassArr	= CourseLiveClassChild::where('class_id',$body['class_id'])->select('start_time as start_at','end_time as end_at','watch_num','status','course_id')->first();//开始/结束时间/时长/观看人数/课程id(欢拓)
 			$classno_id = LiveClass::where('id',$body['classno_id'])->select('name')->first();//班号名称
-
 			$teacherIds = LiveClassChildTeacher::where('class_id',$body['class_id'])->pluck('teacher_id'); //教师id组
-		
 			$live['lect_teacher_name'] = Teacher::whereIn('id',$teacherIds)->where('type',2)->select('real_name')->first()['real_name'];//讲师
 			$eduTeacherName = Teacher::whereIn('id',$teacherIds)->where('type',1)->pluck('real_name')->toArray(); //教务
 			$live['edu_teacher_name'] = '';

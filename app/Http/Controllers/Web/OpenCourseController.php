@@ -204,21 +204,33 @@ class OpenCourseController extends Controller {
         if(!isset($this->data['course_id'])  || $this->data['course_id'] <=0){
             return response()->json(['code'=>201,'msg'=>'course_id为空或不合法']);
         }
+        if(!isset($this->data['user_id'])  || $this->data['user_id'] <=0){
+            return response()->json(['code'=>201,'msg'=>'user_id为空或不合法']);
+        }
+        if(!isset($this->data['nickname'])  || empty($this->data['nickname'])){
+            return response()->json(['code'=>201,'msg'=>'nickname为空或不合法']);
+        }
+       
         $openCourse = OpenLivesChilds::where(['lesson_id'=>$this->data['course_id'],'is_del'=>0,'is_forbid'=>0])->first();
         if(empty($openCourse)){
             return response()->json(['code'=>201,'msg'=>'非法请求！！！']);
         }
+        $data['course_id'] = $openCourse['course_id'];
+        $data['uid'] = $this->data['user_id'];  
+        $data['nickname'] =$this->data['nickname']; 
+        $data['role'] = 'user';
         if($openCourse['status'] == 1 || $openCourse['status'] == 2){
-            $result=$this->startLive($openCourse['course_id']);
+            $result=$this->courseAccess($data);
             $result['code'] = 200;
             $result['msg'] = 'success';
         }
         if($openCourse['status'] == 3){
-            if($openCourse['playback'] == 0){
-                $result =  ['code'=>202,'msg'=>'未生成回放，请耐心等待！！！'];
-            }else{
-                $result =  ['code'=>200,'msg'=>'Success','playbackUrl'=>$openCourse['playbackUrl']];
+            $result=$this->courseAccessPlayback($data);
+            if($result['code'] ==1203){ //暂时没有公开课回放记录
+                return response()->json($result);
             }
+            $result['code'] = 200;
+            $result['msg'] = 'success';
         }
         return response()->json($result);
 
@@ -239,6 +251,25 @@ class OpenCourseController extends Controller {
             return $this->response('直播器启动失败', 500);
         }
         return $res['data'];
+    }
+     //观看直播【欢拓】  lys
+    public function courseAccess($data){
+      $MTCloud = new MTCloud();
+      $res = $MTCloud->courseAccess($data['course_id'],$data['uid'],$data['nickname'],$data['role']);
+      if(!array_key_exists('code', $res) && !$res["code"] == 0){
+          return $this->response('观看直播失败，请重试！', 500);
+      }
+      return $res;
+    }
+
+     //查看回放[欢拓]  lys
+    public function courseAccessPlayback($data){
+        $MTCloud = new MTCloud();
+        $res = $MTCloud->courseAccessPlayback($data['course_id'],$data['uid'],$data['nickname'],$data['role']);
+        if(!array_key_exists('code', $res) && !$res["code"] == 0){
+            return $this->response('课程查看回放失败，请重试！', 500);
+        }
+        return $res;
     }
 
 

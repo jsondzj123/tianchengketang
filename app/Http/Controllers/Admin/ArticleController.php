@@ -145,6 +145,20 @@ class ArticleController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
+    /*
+         * @param  是否推荐
+         * @param  author  苏振文
+         * @param  ctime   2020/7/18 15:36
+         * return  array
+         */
+    public function recommendId(){
+        try{
+            $list = Article::recommendId(self::$accept_data);
+            return response()->json($list);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
 
     /*
         * @param  导入

@@ -133,6 +133,13 @@ class UserController extends Controller {
         if(!isset($this->data['address_locus']) || empty($this->data['address_locus'])){
             return response()->json(['code' => 201 , 'msg' => '户口地址不能为空']);
         }
+        //证件号验证
+//        if($this->data['papers_type'] == 1){
+//            $preg_card='/^\d{15}$)|(^\d{17}([0-9]|X)$/isu';
+//            if(!preg_match($preg_card,$this->data['papers_num'])) {
+//                 return response()->json(['code' => 201, 'msg' => '请填写正确身份证号']);
+//            }
+//        }
         $res['real_name'] = $this->data['real_name'];
         $res['sex'] = $this->data['sex'];
         $res['nickname'] = $this->data['nickname'];
@@ -214,16 +221,19 @@ class UserController extends Controller {
         if(!isset($this->data['news_pass']) || empty($this->data['news_pass'])){
             return response()->json(['code' => 201 , 'msg' => '请再次输入新密码']);
         }
+        if(strlen($this->data['new_pass']) <6 || strlen($this->data['new_pass']) >15){
+            return response()->json(['code' => 201 , 'msg' => '密码长度为6到15']);
+        }
         $user = Student::where(['id'=>$this->userid])->first()->toArray();
-        $olds_pass = password_hash($this->data['old_pass'] , PASSWORD_DEFAULT);
-        if($olds_pass != $user['password']){
-            return response()->json(['code' => 202 , 'msg' => '密码错误']);
+        //验证密码是否合法
+        if(password_verify($this->data['old_pass']  , $user['password']) === false){
+            return response()->json(['code' => 203 , 'msg' => '密码错误']);
         }
         if($this->data['new_pass'] != $this->data['news_pass']){
             return response()->json(['code' => 202 , 'msg' => '两次输入不一致']);
         }
         $news_pass = password_hash($this->data['new_pass'] , PASSWORD_DEFAULT);
-        $up = Student::where(['id'=>$this->userid])->update(['pass'=>$news_pass]);
+        $up = Student::where(['id'=>$this->userid])->update(['password'=>$news_pass]);
         if($up){
             return response()->json(['code' => 200 , 'msg' => '修改成功']);
         }else{
@@ -236,29 +246,30 @@ class UserController extends Controller {
          * @param  ctime   2020/7/9 19:38
          * return  array
          */
+
     //我的收藏
     public function myCollect(){
-        $method = isset($this->data['status'])?$this->data['status']:0;
+        $methods = isset($this->data['method'])?$this->data['method']:0;
         $collect = Collection::where(['student_id'=>$this->userid,'is_del'=>0])->get();
+        $coursearr=[];
         if(!empty($collect)) {
-            $coursearr=[];
             foreach ($collect as $k => &$v) {
                 if ($v['nature'] == 1) {
-                    $course = CourseSchool::where(['id' => $v['lesson_id'], 'is_del' => 0, 'status' => 1])->first()->toArray();
+                    $course = CourseSchool::where(['id' => $v['lesson_id'], 'is_del' => 0, 'status' => 1])->first();
                     $courseid = $course['course_id'];
                 } else {
-                    $course = Coures::where(['id' => $v['lesson_id'], 'is_del' => 0, 'status' => 1])->first()->toArray();
+                    $course = Coures::where(['id' => $v['lesson_id'], 'is_del' => 0, 'status' => 1])->first();
                     $courseid = $course['id'];
                 }
                 $method = Couresmethod::select('method_id')->where(['course_id' => $courseid, 'is_del' => 0])
-                    ->where(function ($query) use ($method) {
-                        if ($method != '' || $method != 0) {
-                            $query->where('method_id', $method);
+                    ->where(function ($query) use ($methods) {
+                        if ($methods != '' && $methods != 0) {
+                            $query->where('method_id', $methods);
                         }
                     })->get()->toArray();
-                $course['method'] = array_column($method, 'method_id');
-                if (!empty($course['method'])) {
-                    foreach ($course['method'] as $key => &$val) {
+                $coursemethod= array_column($method, 'method_id');
+                if (!empty($coursemethod)) {
+                    foreach ($coursemethod as $key => &$val) {
                         if ($val['method_id'] == 1) {
                             $val['method_name'] = '直播';
                         }
@@ -269,6 +280,7 @@ class UserController extends Controller {
                             $val['method_name'] = '其他';
                         }
                     }
+                    $course['method'] = $coursemethod;
                     $coursearr[] = $course;
                 } else {
                     unset($collect[$k]);

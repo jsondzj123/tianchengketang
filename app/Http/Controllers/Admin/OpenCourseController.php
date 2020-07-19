@@ -607,7 +607,8 @@ class OpenCourseController extends Controller {
                             'admin_key'   => $res['data']['admin_key'],
                             'user_key'    => $res['data']['user_key'],
                             'add_time'    => $res['data']['add_time'],
-                            'create_at'   =>date('Y-m-d H:i:s')
+                            'create_at'   =>date('Y-m-d H:i:s'),
+                            'status' =>1
                         ]);
             if($result) return true;  
             else return false;
