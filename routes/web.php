@@ -124,7 +124,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('preStart','OpenCourseController@preStart');//预开始
         $router->post('underway','OpenCourseController@underway');//直播中
         $router->post('finish','OpenCourseController@end');//往期公开课程 (暂时没做分页)
-     
+
     });
     //教师
     $router->group(['prefix' => 'teacher'], function () use ($router) {
@@ -143,7 +143,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->post('doUserForgetPassword','AuthenticateController@doUserForgetPassword');              //找回密码接口
     $router->post('captchaInfo','AuthenticateController@captchaInfo');          //WEB生成图片验证码接口
     $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');   //OA流转订单
-     //公开课 
+     //公开课
     $router->group(['prefix' => 'openclass','middleware'=> 'user'], function () use ($router) {
         $router->post('details','OpenCourseController@details');//查看详情
     });
@@ -195,6 +195,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('urlcode','CourseController@urlcode');//二维码测试
     });
 });
+
 //后台端路由接口
 /*****************start**********************/
 //后端登录注册接口
@@ -624,7 +625,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->group(['prefix' => 'teach'], function () use ($router) {
         $router->post('getList', 'TeachController@getList');//教学列表
         $router->post('startLiveChild', 'TeachController@startLive');  //启动直播
-        $router->post('liveInRoom', 'TeachController@liveInRoom');  //进入直播间   
+        $router->post('liveInRoom', 'TeachController@liveInRoom');  //进入直播间
         $router->post('livePlayback','TeachController@livePlayback');  //课程回放
         $router->post('coursewareUpload','TeachController@courseUpload');  //课件上传
         $router->post('details','TeachController@details');  //教学详情
