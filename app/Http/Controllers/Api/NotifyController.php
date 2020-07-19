@@ -156,10 +156,10 @@ class NotifyController extends Controller {
             $html = $this->acurl($receiptData, 1);
             $arr = json_decode($html, true);
             //获取域名   正式环境 沙箱请求 不处理
-            $url = $_SERVER["HTTP_REFERER"];
+            $url = $_SERVER["SERVER_NAME"];
             if($url == 'tiancheng.longde999.cn'){
                 $arr['pay_namess'] = "沙箱环境，不予处理金额变动";
-                $arr['http_referer'] = $_SERVER["HTTP_REFERER"];
+                $arr['http_referer'] = $_SERVER["SERVER_NAME"];
                 file_put_contents('./orderpaylog/'.$order_number.'.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
                 return response()->json(['code' => 200 , 'msg' =>'支付成功']);
             }
