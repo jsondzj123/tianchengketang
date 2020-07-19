@@ -377,7 +377,8 @@ class CourseController extends Controller {
             ]);
         }
         if($add){
-            return response()->json(['code' => 200, 'msg' => '操作成功']);
+            $count = Collection::where(['lesson_id'=>$this->data['id'],'nature'=>$this->data['nature'],'is_del'=>0])->count();
+            return response()->json(['code' => 200, 'msg' => '操作成功','data'=>$count]);
         }else{
             return response()->json(['code' => 203, 'msg' => '操作失败']);
         }
