@@ -124,6 +124,7 @@ class NotifyController extends Controller {
     }
     //iphone 内部支付 回调
     public function iphonePaynotify(){
+        return response()->json(['code' => 200 , 'msg' =>'支付成功']);
         $data = self::$accept_data;
         $receiptData = $data['receiptData'];
         $order_number = $data['order_number'];
