@@ -513,8 +513,8 @@ class CourseController extends Controller {
 ////                    'is_free' => 2
 //                ];
 //            }
-            //获取分页的章
-            $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->offset($offset)->limit($pagesize)->get();
+            //获取章
+            $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->get();
             if(!empty($recorde)){
                 //循环章  查询每个章下的节
                 foreach ($recorde as $k=>&$v){
