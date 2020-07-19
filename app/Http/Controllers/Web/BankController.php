@@ -420,7 +420,7 @@ class BankController extends Controller {
                         $exam_type_name = $exam_type_arr[$exam_info['type']];
                     } else {
                         $option_content = [];
-                        $exam_type_name = "";
+                        $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                     }
                     
                     //试题随机展示
@@ -462,7 +462,7 @@ class BankController extends Controller {
                         $exam_type_name = $exam_type_arr[$exam_info['type']];
                     } else {
                         $option_content = [];
-                        $exam_type_name = "";
+                        $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                     }
                     
                     //判断学员是否收藏此题
@@ -538,7 +538,7 @@ class BankController extends Controller {
                         $exam_type_name = $exam_type_arr[$exam_info['type']];
                     } else {
                         $option_content = [];
-                        $exam_type_name = "";
+                        $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                     }
                     
                     //试题随机展示
@@ -580,7 +580,7 @@ class BankController extends Controller {
                         $exam_type_name = $exam_type_arr[$exam_info['type']];
                     } else {
                         $option_content = [];
-                        $exam_type_name = "";
+                        $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                     }
                     
                     //判断学员是否收藏此题
@@ -640,7 +640,7 @@ class BankController extends Controller {
                     $exam_type_name = $exam_type_arr[$exam_info['type']];
                 } else {
                     $option_content = [];
-                    $exam_type_name = "";
+                    $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                 }
                 
                 //判断学员是否收藏此题
@@ -1160,7 +1160,7 @@ class BankController extends Controller {
                     $exam_type_name = $exam_type_arr[$exam_info['type']];
                 } else {
                     $option_content = [];
-                    $exam_type_name = "";
+                    $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                 }
                 
                 //根据条件获取此学生此题是否答了
@@ -1239,7 +1239,7 @@ class BankController extends Controller {
                     $exam_type_name = $exam_type_arr[$exam_info['type']];
                 } else {
                     $option_content = [];
-                    $exam_type_name = "";
+                    $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                 }
                 
                 //判断学员是否收藏此题
@@ -1447,7 +1447,7 @@ class BankController extends Controller {
                     $exam_type_name = $exam_type_arr[$exam_info['type']];
                 } else {
                     $option_content = [];
-                    $exam_type_name = "";
+                    $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                 }
 
                 //判断学员是否收藏此题
@@ -1490,7 +1490,7 @@ class BankController extends Controller {
                     $exam_type_name = $exam_type_arr[$exam_info['type']];
                 } else {
                     $option_content = [];
-                    $exam_type_name = "";
+                    $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                 }
 
                 //判断学员是否收藏此题
@@ -1539,7 +1539,7 @@ class BankController extends Controller {
                     $exam_type_name = $exam_type_arr[$exam_info['type']];
                 } else {
                     $option_content = [];
-                    $exam_type_name = "";
+                    $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                 }
                 
                 //判断学员是否收藏此题
