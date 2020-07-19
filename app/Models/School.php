@@ -240,15 +240,17 @@ class School extends Model {
                     $natureCourse[$key]['nature'] = 1; //授权
                 }
             }
-            if($nature == 1){ //自增
-                $arr = $course;
+            switch ($nature) {
+                case '1':
+                    $arr = $course;
+                    break;
+                 case '2':
+                    $arr = $natureCourse;
+                    break;
+                default:
+                    $arr = array_merge($course,$natureCourse);
+                    break;
             }
-            if($nature == 2){ //授权
-                $arr = $natureCourse;
-            }else{
-                $arr = array_merge($course,$natureCourse);
-            }
-
             if(!empty($arr)){
                 foreach($arr  as $k=>&$v){
                     $v['school_dns'] = School::where('id',$data['school_id'])->select('dns')->first()['dns'];
@@ -284,6 +286,7 @@ class School extends Model {
                     }
                 }
             }
+
             $start=($page-1)*$pagesize;
             $limit_s=$start+$pagesize;
             $info=[];
@@ -346,16 +349,18 @@ class School extends Model {
                 $natureOpenCourse[$key]['nature'] = '授权课程';
             }
         }
-
-
-        if($nature == 1){ //自增
-            $arr = $openCourse;
+       switch ($nature) {
+            case '1':
+              $arr = $openCourse;
+                break;
+             case '2':
+                $arr = $natureOpenCourse;
+                break;
+            default:
+                $arr = array_merge($openCourse,$natureOpenCourse);
+                break;
         }
-        if($nature == 2){ //授权
-            $arr = $natureOpenCourse;
-        }else{
-            $arr = array_merge($openCourse,$natureOpenCourse);
-        }
+
         if(!empty($arr)){
            
             foreach($arr as $k =>$v){
