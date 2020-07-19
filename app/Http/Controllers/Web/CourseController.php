@@ -439,9 +439,9 @@ class CourseController extends Controller {
          */
     public function recordedarr(){
         //每页显示的条数
-        $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 3;
-        $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
-        $offset   = ($page - 1) * $pagesize;
+//        $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 3;
+//        $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
+//        $offset   = ($page - 1) * $pagesize;
         //课程基本信息
         if(!isset($this->data['id'])||empty($this->data['id'])){
             return response()->json(['code' => 201 , 'msg' => '课程id为空']);
@@ -514,7 +514,7 @@ class CourseController extends Controller {
 //                ];
 //            }
             //获取章
-            $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->get();
+            $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->get()->toArray();
             if(!empty($recorde)){
                 //循环章  查询每个章下的节
                 foreach ($recorde as $k=>&$v){
