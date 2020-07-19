@@ -127,7 +127,11 @@ class NotifyController extends Controller {
         $data = self::$accept_data;
         $receiptData = $data['receiptData'];
         $order_number = $data['order_number'];
-//        $file = "orderpaylog.txt";
+        $file = "./Public/orderpaylog.txt";
+        if (file_exists($file) == false) {
+            //检查是否有该文件夹，如果没有就创建，并给予最高权限
+            mkdir($file, 0700, true);
+        }
         file_put_contents('./orderpaylog/'.$order_number.'.txt', '时间:'.date('Y-m-d H:i:s').print_r($data,true),FILE_APPEND);
         if(!isset($data['receiptData']) ||empty($receiptData)){
             return response()->json(['code' => 201 , 'msg' => 'receiptData没有']);
