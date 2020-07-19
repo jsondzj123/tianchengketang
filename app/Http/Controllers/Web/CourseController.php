@@ -497,7 +497,6 @@ class CourseController extends Controller {
             //免费
             $is_show = 1;
         }
-
         //章总数
         $count = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->count();
         $recorde =[];
