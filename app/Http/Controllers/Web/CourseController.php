@@ -438,10 +438,6 @@ class CourseController extends Controller {
          * return  array
          */
     public function recordedarr(){
-        //每页显示的条数
-//        $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 3;
-//        $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
-//        $offset   = ($page - 1) * $pagesize;
         //课程基本信息
         if(!isset($this->data['id'])||empty($this->data['id'])){
             return response()->json(['code' => 201 , 'msg' => '课程id为空']);
@@ -500,7 +496,7 @@ class CourseController extends Controller {
         //章总数
         $count = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->count();
         $recorde =[];
-        if($count > 0){
+        if($count > 0) {
             //如果is_show是1  查询所有的课程   0查询能免费看的，试听的课程
 //            if($is_show == 1){
 //                $chapterswhere = [
@@ -512,22 +508,22 @@ class CourseController extends Controller {
 //                    'is_del' => 0,
 ////                    'is_free' => 2
 //                ];
-            }
+
             //获取章
-            $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->get()->toArray();
-            if(!empty($recorde)){
+            $recorde = Coureschapters::where(['course_id' => $this->data['id'], 'is_del' => 0, 'parent_id' => 0])->get()->toArray();
+            if (!empty($recorde)) {
                 //循环章  查询每个章下的节
-                foreach ($recorde as $k=>&$v){
-                    $recordes = Coureschapters::where(['course_id'=>$this->data['id'],'parent_id'=>$v['id'],'is_del'=>0])->get()->toArray();
-                    if(!empty($recordes)){
+                foreach ($recorde as $k => &$v) {
+                    $recordes = Coureschapters::where(['course_id' => $this->data['id'], 'parent_id' => $v['id'], 'is_del' => 0])->get()->toArray();
+                    if (!empty($recordes)) {
                         //循环每个小节 查询小节的进度
-                        foreach ($recordes as $key=>&$val){
+                        foreach ($recordes as $key => &$val) {
                             //查询小节绑定的录播资源
-                            $ziyuan = Video::where(['id'=>$val['resource_id'],'is_del'=>0,'status'=>0])->first();
+                            $ziyuan = Video::where(['id' => $val['resource_id'], 'is_del' => 0, 'status' => 0])->first();
                             $val['ziyuan'] = $ziyuan;
-                            if(empty($ziyuan)){
+                            if (empty($ziyuan)) {
                                 $val['study'] = 0;
-                            }else {
+                            } else {
                                 $MTCloud = new MTCloud();
                                 $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
                                 if (isset($use_duration['data']) || !empty($use_duration['data'])) {
@@ -549,11 +545,7 @@ class CourseController extends Controller {
                     }
                 }
             }
-//        $page=[
-//            'pageSize'=>$pagesize,
-//            'page' =>$page,
-//            'total'=>$count
-//        ];
+        }
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde]);
     }
     /*
