@@ -518,7 +518,7 @@ class CourseController extends Controller {
             if(!empty($recorde)){
                 //循环章  查询每个章下的节
                 foreach ($recorde as $k=>&$v){
-                    $recordes = Coureschapters::where(['course_id'=>$this->data['id'],'parent_id'=>$v['id'],'is_del'=>0])->where($chapterswhere)->get()->toArray();
+                    $recordes = Coureschapters::where(['course_id'=>$this->data['id'],'parent_id'=>$v['id'],'is_del'=>0])->get()->toArray();
                     if(!empty($recordes)){
                         //循环每个小节 查询小节的进度
                         foreach ($recordes as $key=>&$val){
