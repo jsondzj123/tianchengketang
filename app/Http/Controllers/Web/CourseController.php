@@ -520,11 +520,9 @@ class CourseController extends Controller {
                 //循环章  查询每个章下的节
                 foreach ($recorde as $k=>&$v){
                     $recordes = Coureschapters::where(['course_id'=>$this->data['id'],'parent_id'=>$v['id'],'is_del'=>0])->get()->toArray();
-                    print_r($recordes);die;
                     if(!empty($recordes)){
                         //循环每个小节 查询小节的进度
                         foreach ($recordes as $key=>&$val){
-
                             //查询小节绑定的录播资源
                             $ziyuan = Video::where(['id'=>$val['resource_id'],'is_del'=>0,'status'=>0])->first();
                             $val['ziyuan'] = $ziyuan;
@@ -545,9 +543,10 @@ class CourseController extends Controller {
                             }
 
                         }
+
                     }
                 }
-                $vs['chapters'] = $recordes;
+                $v['chapters'] = $recordes;
             }
         }
         $page=[
