@@ -358,6 +358,10 @@ class CourseController extends Controller {
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
 //        }
     }
+    public function urlcode(){
+        $urlcode = $this->generateQRfromGoogle("www.baidu.com");
+        echo $urlcode;
+    }
 
     //课程收藏
     public function collect(){
