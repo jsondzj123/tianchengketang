@@ -512,6 +512,7 @@ class CourseController extends Controller {
 //                    'is_del' => 0,
 ////                    'is_free' => 2
 //                ];
+
             $key = "webCourse" . $this->data['id'] . $this->userid;
             if (Redis::get($key)) {
                 $recorde = json_decode(Redis::get($key), true);
