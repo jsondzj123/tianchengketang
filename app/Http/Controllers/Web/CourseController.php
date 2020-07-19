@@ -514,7 +514,7 @@ class CourseController extends Controller {
 //                ];
 //            }
             //获取分页的章
-            $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->get();
+            $recorde = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->offset($offset)->limit($pagesize)->get();
             if(!empty($recorde)){
                 //循环章  查询每个章下的节
                 foreach ($recorde as $k=>&$v){
@@ -525,9 +525,8 @@ class CourseController extends Controller {
                             //查询小节绑定的录播资源
                             $ziyuan = Video::where(['id'=>$val['resource_id'],'is_del'=>0,'status'=>0])->first();
                             $val['ziyuan'] = $ziyuan;
-                            $val['study'] = 0;
 //                            if(empty($ziyuan)){
-//                                $val['study'] = 0;
+                                $val['study'] = 0;
 //                            }else {
 //                                $MTCloud = new MTCloud();
 //                                $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
