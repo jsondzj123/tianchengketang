@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Coures;
 use App\Models\Couresmethod;
 use App\Models\CourseRefResource;
+use App\Models\CourseRefTeacher;
 use App\Models\CourseSchool;
 use App\Models\School;
 use App\Models\Teacher;
@@ -13,7 +14,7 @@ use App\Models\Articletype;
 use App\Models\FootConfig;
 use App\Models\Admin;
 use App\Models\CouresSubject;
-
+use App\Models\Subject;
 
 class IndexController extends Controller {
     protected $school;
@@ -26,15 +27,16 @@ class IndexController extends Controller {
     }
     //讲师列表
     public function teacherList(){
-    	$limit = !isset($this->data['limit']) || empty($this->data['limit']) || $this->data['limit'] <= 0 ? 8 : $this->data['limit'];
-    	$recomendTeacherArr = Teacher::where(['school_id'=>$this->school['id'],'is_del'=>0,'type'=>2])->orderBy('number','desc')->select('id','head_icon','real_name','describe','number','teacher_icon')->limit($limit)->get()->toArray();
-
-    	$count = count($recomendTeacherArr);
+    	$limit = 8;
+        $courseRefTeacher = CourseRefTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_ref_teacher.teacher_id')
+            ->where(['to_school_id'=>$this->school['id'],'type'=>2])->limit($limit)->get()->toArray();
+        $count = count($courseRefTeacher);
     	if($count<$limit){
     		$teacherData = Teacher::where(['school_id'=>$this->school['id'],'is_del'=>0,'type'=>2])->orderBy('number','desc')->select('id','head_icon','real_name','describe','number','teacher_icon')->limit($limit-$count)->get()->toArray();
-    		$recomendTeacherArr=array_merge($recomendTeacherArr,$teacherData);
-    	}
-   		
+    		$recomendTeacherArr=array_merge($courseRefTeacher,$teacherData);
+    	}else{
+            $recomendTeacherArr = $courseRefTeacher;
+        }
     	return response()->json(['code'=>200,'msg'=>'Success','data'=>$recomendTeacherArr]);
     }
     //新闻资讯
@@ -67,57 +69,58 @@ class IndexController extends Controller {
     }
     //精品课程
     public function course(){
-       
-    	$course =  $zizengCourseData = $natureCourseData = [];
-    	$subjectOne = CouresSubject::where(['school_id'=>$this->school['id'],'is_open'=>0,'is_del'=>0,'parent_id'=>0])->pluck('id')->toArray();//自增学科大类
-
-    	$natureCourseIds = CourseSchool::where(['to_school_id'=>$this->school['id'],'is_del'=>0])->pluck('course_id')->toArray();//授权课程
-
-        $natuerSubjectOne =[];
-    	if(empty($subjectOne) && empty($natureCourseIds) ){
-    		$course = [];
-    	}else{
-    		if(!empty($natureCourseIds)){
-    			$natuerSubjectOne = Coures::whereIn('id',$natureCourseIds)->where(['is_del'=>0,'status'=>1])->pluck('parent_id as id')->toArray();//授权学科大类
-                
-    			foreach($natuerSubjectOne as $key=>$v){
-    				 $natureCourseData[] = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
-				            ->where('ld_course_school.from_school_id',$this->school['id']) //授权学校
-				            ->where('ld_course_school.is_del',0)
-				            ->select('ld_course_school.course_id as id','ld_course.parent_id','ld_course.child_id','ld_course.title')->limit(8)->get()->toArray(); //授权课程
-    			}
-       		}
-    		$subjectIds = array_merge($subjectOne,$natuerSubjectOne);
-    		$subjectIds	= array_unique($subjectIds);
-    		$course['subjectOne'] = CouresSubject::whereIn('id',$subjectIds)->where(['is_del'=>0,'is_open'=>0])->select('id','subject_name')->get();//授权/自增学科大类	
-    		if(!empty($subjectOne)){
-    			foreach($subjectOne as $key=>$v){
-    				$zizengCourseData[$v] = Coures::where(['parent_id'=>$v,'status'=>1,'is_del'=>0])->limit(8)->get()->toArray();
-    			}
-    		}
-
-            if(!empty($zizengCourseData)){
-                foreach($zizengCourseData as $key=>&$zizeng){
-                    foreach($zizeng as $k=>&$vz)
-                    $vz['nature'] = 1;
-                }
+    	$course =  $zizengCourseData = $natureCourseData = $CouresData = [];
+    	$subjectOne = CouresSubject::where(['school_id'=>$this->school['id'],'is_open'=>0,'is_del'=>0,'parent_id'=>0])->select('id')->get()->toArray();//自增学科大类
+        $natuerSubjectOne = CourseSchool::select('parent_id')->where(['to_school_id'=>$this->school['id'],'is_del'=>0,'status'=>1])->groupBy('parent_id')->get()->toArray();//授权学科大类
+        if(!empty($natuerSubjectOne)){
+            foreach($natuerSubjectOne as $key=>&$v){
+                $subject_name= Subject::where(['id'=>$v['parent_id'],'is_del'=>0])->select('subject_name')->first();
+                $v['subject_name'] =$subject_name['subject_name'];
             }
+        }
+        if(!empty($subjectOne)){
+            foreach($subjectOne as $key=>&$va){
+                $subject_name = Subject::where(['id'=>$va['id'],'is_del'=>0])->select('subject_name')->first();
+                 $va['subject_name'] =$subject_name['subject_name'];
+            }
+        }
+        
+        if(!empty($subjectOne)&& !empty($natuerSubjectOne)){
+             $subject=array_merge($subjectOne,$natuerSubjectOne);
+        }else{
+            $subject = empty($subjectOne) ?$natuerSubjectOne:$subjectOne;
+        }
+        $newArr = [];
+        foreach ($subject as $key => $val) {
+            $natureCourseData = CourseSchool::where(['to_school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id']])->limit(8)->get()->toArray();//授权课程
+            $count = count($natureCourseData);
+            if($count<8){
+                $CouresData =Coures::where(['school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id']])->limit(8-$count)->get()->toArray(); //自增
+            }
+          
+            if(!empty($CouresData)){
+                    foreach($CouresData as $key=>&$zizeng){
+                        $zizeng['nature'] = 1;
+                    }
+                }
             if(!empty($natureCourseData)){
                 foreach($natureCourseData as $key=>&$nature){
-                    foreach($nature as $k=>&$vn){
-                        $vn['nature'] = 2;
-                    }
-                    
+                    $nature['nature'] = 2;
                 }
             }
-            if(!empty($natureCourseData)){
-                $course['course'] = array_merge($natureCourseData,$zizengCourseData);
+            if(!empty($natureCourseData)&& !empty($CouresData)){
+                $courseArr =array_merge($natureCourseData,$CouresData);
             }else{
-                $course['course'] =$zizengCourseData;
+                $courseArr = empty($natureCourseData) ?$CouresData:$natureCourseData;
             }
-    		
-    	}
-        return response()->json(['code'=>200,'msg'=>'Success','data'=>$course]);
+           $newArr[$val['id']] = $courseArr;
+        }
+        
+    	$arr = [
+            'course'=>$newArr,
+            'subjectOne'=>$subject,
+        ];
+        return response()->json(['code'=>200,'msg'=>'Success','data'=>$arr]);
     }	
     //获取公司信息
     public function getCompany(){
