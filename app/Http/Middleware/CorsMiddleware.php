@@ -52,7 +52,7 @@ class CorsMiddleware
             'http://gl.tiancheng989.com',
             'http://yl.tiancheng989.com',
             'http://zz.tiancheng989.com',
-
+            'http://ty.tiancheng989.com',
 
         
         ];
