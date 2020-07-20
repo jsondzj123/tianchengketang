@@ -109,7 +109,7 @@ class IndexController extends Controller {
             }else{
                 $courseArr = empty($natureCourseData) ?$CouresData:$natureCourseData;
             }
-           $newArr[][$val['id']] = $courseArr;
+           $newArr[$val['id']] = $courseArr;
         }
         
     	$arr = [
