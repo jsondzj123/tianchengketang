@@ -573,6 +573,11 @@ class CourseController extends Controller {
                         }
                     }
                 }
+                if($order > 0){
+                    $recorde['is_pay'] = 1;
+                }else{
+                    $recorde['is_pay'] = 0;
+                }
                 Redis::set($key,json_encode($recorde),300);
             }
         }
@@ -609,6 +614,7 @@ class CourseController extends Controller {
         }
         $courseArr=[];
         if($order == 0 || $course['sale_price'] == 0){
+            $courseArr['is_pay'] = 1;
             //获取所有的班号
             $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get()->toArray();
             if($courseArr != 0){
@@ -646,6 +652,8 @@ class CourseController extends Controller {
                     }
                 }
             }
+        }else{
+            $courseArr['is_pay'] = 0;
         }
         return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$courseArr]);
     }
@@ -715,7 +723,7 @@ class CourseController extends Controller {
                 }
             }
 //        }
-
+        $ziyuan['is_pay'] = $is_pay;
         $res = array_slice($ziyuan, $offset, $pagesize);
         return ['code' => 200 , 'msg' => '查询成功','data'=>$res,'page'=>$page];
     }
