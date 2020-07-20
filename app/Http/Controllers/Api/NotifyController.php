@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Coures;
+use App\Models\CourseSchool;
 use App\Models\Lesson;
 use App\Models\Order;
 use App\Models\Student;
@@ -82,7 +84,11 @@ class NotifyController extends Controller {
                 try{
                     DB::beginTransaction();
                     //修改订单状态  增加课程  修改用户收费状态
-                    $lesson = Lesson::where(['id'=>$orders['class_id']])->first();
+                    if($orders['nature'] == 1){
+                        $lesson = CourseSchool::where(['id'=>$orders['class_id']])->first();
+                    }else{
+                        $lesson = Coures::where(['id'=>$orders['class_id']])->first();
+                    }
                     if($lesson['expiry'] ==0){
                         $validity = '3000-01-02 12:12:12';
                     }else{

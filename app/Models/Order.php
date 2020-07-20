@@ -280,9 +280,13 @@ class Order extends Model {
                     //最后一笔款或全款 开课
                     if ($order['pay_status'] == 3 || $order['pay_status'] == 4) {
                         //修改学员报名  订单状态 课程有效期
-                        $lessons = Coures::where(['id' => $order['class_id']])->first();
+                        if($order['nature'] == 1){
+                            $lessons = CourseSchool::where(['id'=>$order['class_id']])->first();
+                        }else{
+                            $lessons = Coures::where(['id'=>$order['class_id']])->first();
+                        }
                         //计算用户购买课程到期时间
-                        if($lessons['expiry'] ==0){
+                        if($lessons['expiry'] == 0){
                             $validity = '3000-01-02 12:12:12';
                         }else{
                             $validity = date('Y-m-d H:i:s', strtotime('+' . $lessons['expiry'] . ' day'));
