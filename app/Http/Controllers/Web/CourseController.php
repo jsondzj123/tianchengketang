@@ -520,7 +520,7 @@ class CourseController extends Controller {
                 //查询免费课程
                 $chapterswhere = [
                     'is_del' => 0,
-                    'is_free' => 2
+//                    'is_free' => 2
                 ];
             }
 
@@ -543,22 +543,22 @@ class CourseController extends Controller {
                                 if (empty($ziyuan)) {
                                     $val['study'] = 0;
                                 } else {
-                                    $val['study'] = 0;
-//                                    $MTCloud = new MTCloud();
-//                                    $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
-//                                    if (isset($use_duration['data']) || !empty($use_duration['data'])) {
-//                                        foreach ($use_duration['data'] as $kk => $vv) {
-//                                            if ($vv['uid'] == $this->userid) {
-//                                                if ($vv['use_duration'] == 0) {
-//                                                    $val['study'] = 0;
-//                                                } else {
-//                                                    $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
-//                                                }
-//                                            } else {
-//                                                $val['study'] = 0;
-//                                            }
-//                                        }
-//                                    }
+//                                    $val['study'] = 0;
+                                    $MTCloud = new MTCloud();
+                                    $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
+                                    if (isset($use_duration['data']) || !empty($use_duration['data'])) {
+                                        foreach ($use_duration['data'] as $kk => $vv) {
+                                            if ($vv['uid'] == $this->userid) {
+                                                if ($vv['use_duration'] == 0) {
+                                                    $val['study'] = 0;
+                                                } else {
+                                                    $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
+                                                }
+                                            } else {
+                                                $val['study'] = 0;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                             $v['chapters'] = $recordes;
@@ -674,10 +674,10 @@ class CourseController extends Controller {
             }
         }
         $type = isset($this->data['type'])?$this->data['type']:'';
-        $ziyuan = [];
-        if($is_pay > 0){
+        $ziyuan=[];
+//        if($is_pay > 0){
             //录播资料
-            $jie = Coureschapters::where(['course_id'=>$this->data['id'],'parent_id'=>0,'is_del'=>0])->get();
+            $jie = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0])->where('parent_id','>',0)->get();
             if(!empty($jie)){
                 foreach ($jie as $k=>$v){
                     $ziliao = Couresmaterial::where(['parent_id'=>$v['id'],'is_del'=>0,'mold'=>1])
@@ -690,21 +690,21 @@ class CourseController extends Controller {
                 }
             }
             //直播资料
-            $ban = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
-            if(!empty($ban)){
-                foreach ($ban as $ks=>$vs){
-                    $ziliaos = Couresmaterial::where(['parent_id'=>$vs['id'],'is_del'=>0,'mold'=>2])
-                        ->where(function ($query) use ($type) {
-                            if (!empty($type) && $type != '' && $type != 0) {
-                                $query->where('type', $type);
-                            }
-                        })->first();
-                    $ziyuan[] = $ziliaos;
-                }
-            }
-        }
-        $res = array_slice($ziyuan, $offset, $pagesize);
-        return ['code' => 200 , 'msg' => '查询成功','data'=>$res,'page'=>$page];
+//            $ban = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
+//            if(!empty($ban)){
+//                foreach ($ban as $ks=>$vs){
+//                    $ziliaos = Couresmaterial::where(['parent_id'=>$vs['id'],'is_del'=>0,'mold'=>2])
+//                        ->where(function ($query) use ($type) {
+//                            if (!empty($type) && $type != '' && $type != 0) {
+//                                $query->where('type', $type);
+//                            }
+//                        })->first();
+//                    $ziyuan[] = $ziliaos;
+//                }
+//            }
+//        }
+//        $res = array_slice($ziyuan, $offset, $pagesize);
+        return ['code' => 200 , 'msg' => '查询成功','data'=>$ziyuan,'page'=>$page];
     }
     /**
      * google api 二维码生成【QRcode可以存储最多4296个字母数字类型的任意文本，具体可以查看二维码数据格式】
