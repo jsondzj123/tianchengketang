@@ -114,8 +114,8 @@ class Coureschapters extends Model {
         //资源名称resource_id
         $resource='';
         if($list['resource_id'] != ''){
-            $r= Video::select('mt_video_name')->where(['id'=>$list['resource_id'],'is_del'=>0])->first();
-            $resource = $r['mt_video_name'];
+            $r= Video::select('resource_name')->where(['id'=>$list['resource_id'],'is_del'=>0])->first();
+            $resource = $r['resource_name'];
         }
         $list['mt_video_name'] = $resource;
         //查询录播课程名称
