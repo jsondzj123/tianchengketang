@@ -476,12 +476,12 @@ class Order extends Model {
                     $v['bgcolor'] = '#FDA426';
                 }
                 if($v['status'] == 2){
-                    if($v['pay_status'] = 3){
-                        $v['learning'] = "尾款未付清";
+                    if($v['pay_status'] = 3 || $v['pay_status'] = 4){
+                        $v['learning'] = "已开课";
                         $v['bgcolor'] = '#FF4545';
                     }else{
-                        $v['learning'] = "已开课";
-                        $v['bgcolor'] = '#909399';
+                        $v['learning'] = "尾款未结清";
+                        $v['bgcolor'] = '#FDA426';
                     }
                 }
                 if($v['status'] == 3){
