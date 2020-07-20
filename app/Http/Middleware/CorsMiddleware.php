@@ -33,7 +33,7 @@ class CorsMiddleware
             'http://tiancheng.admin.longde999.cn',
             'http://tiancheng.longde999.cn',
             'http://qc.qcedu101.com',
-            'http://yd.bijyangde.com',
+            'http://yd.bjyangde.com',
             'http://gl.tiancheng27.com',
             'http://hs.hongsheng369.com',
             'http://yl.tiancheng27.com',
