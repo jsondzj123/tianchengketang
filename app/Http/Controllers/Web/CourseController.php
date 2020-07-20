@@ -443,7 +443,6 @@ class CourseController extends Controller {
         }else{
             //课程基本信息
             $course = Coures::select('introduce')->where(['id'=>$this->data['id'],'is_del'=>0])->first();
-            print_r($course);die;
             if(!$course){
                 return response()->json(['code' => 201 , 'msg' => '无查看权限']);
             }
