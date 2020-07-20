@@ -45,8 +45,8 @@ class TeacherController extends Controller {
 				$courseIds = array_column($natureCourseArr, 'course_id');
 				$v['number'] = count($natureCourseArr);//开课数量
 				$sumNatureCourseArr = array_sum(array_column($natureCourseArr,'buy_num'));//虚拟购买量
-				$realityBuyumOrder::whereIn('class_id',$courseIds)->where(['school_id'=>$this->school['id'],'nature'=>1,'status'=>2])->whereIn('pay_status',[3,4])->count();//实际购买量
-				$v['buy_num'] = $sumNatureCourseArr+$realityBuyumOrder;
+				$realityBuyum= Order::whereIn('class_id',$courseIds)->where(['school_id'=>$this->school['id'],'nature'=>1,'status'=>2])->whereIn('pay_status',[3,4])->count();//实际购买量
+				$v['buy_num'] = $sumNatureCourseArr+$realityBuyum;
 				$v['grade'] =  '5.0';
 				$v['is_nature'] = 1;
 			}
