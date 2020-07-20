@@ -37,6 +37,11 @@ class IndexController extends Controller {
     	}else{
             $recomendTeacherArr = $courseRefTeacher;
         }
+        if(!empty($recomendTeacherArr)){
+            foreach ($recomendTeacherArr as $k => &$v) {
+                $v['star_num'] = 5;
+            }
+        }
     	return response()->json(['code'=>200,'msg'=>'Success','data'=>$recomendTeacherArr]);
     }
     //新闻资讯
