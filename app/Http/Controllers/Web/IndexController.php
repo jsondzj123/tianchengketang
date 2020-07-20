@@ -69,7 +69,7 @@ class IndexController extends Controller {
     }
     //精品课程
     public function course(){
-    	$course =  $zizengCourseData = $natureCourseData = [];
+    	$course =  $zizengCourseData = $natureCourseData = $CouresData = [];
     	$subjectOne = CouresSubject::where(['school_id'=>$this->school['id'],'is_open'=>0,'is_del'=>0,'parent_id'=>0])->select('id')->get()->toArray();//自增学科大类
         $natuerSubjectOne = CourseSchool::select('parent_id')->where(['to_school_id'=>$this->school['id'],'is_del'=>0,'status'=>1])->groupBy('parent_id')->get()->toArray();//授权学科大类
         if(!empty($natuerSubjectOne)){
@@ -92,8 +92,12 @@ class IndexController extends Controller {
         }
         $newArr = [];
         foreach ($subject as $key => $val) {
-            $natureCourseData = CourseSchool::where(['to_school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id']])->get()->toArray();//授权课程
-            $CouresData =Coures::where(['school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id']])->get()->toArray(); //自增
+            $natureCourseData = CourseSchool::where(['to_school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id']])->limit(8)->get()->toArray();//授权课程
+            $count = count($natureCourseData);
+            if($count<8){
+                $CouresData =Coures::where(['school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id']])->limit(8-$count)->get()->toArray(); //自增
+            }
+          
             if(!empty($CouresData)){
                     foreach($CouresData as $key=>&$zizeng){
                         $zizeng['nature'] = 1;
