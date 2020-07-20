@@ -146,15 +146,18 @@ class OpenCourse extends Model {
                 $va['nature'] = 1; //自增
             }
         }
-        if($nature == 1){ //自增
-            
-            $openCourseArr = $open_less_arr;
+        switch ($nature) {
+            case '1'://自增
+               $openCourseArr = $open_less_arr;
+                break;
+             case '2':
+                 $openCourseArr = $ref_open_less_arr;
+                break;
+            default:
+               $openCourseArr = array_merge($open_less_arr,$ref_open_less_arr);
+                break;
         }
-        if($nature == 2){ //授权
-            $openCourseArr = $ref_open_less_arr;
-        }else{
-            $openCourseArr = array_merge($open_less_arr,$ref_open_less_arr);
-        }
+    
         
         if(!empty($openCourseArr)){
             foreach ($openCourseArr as $k => &$v) {          

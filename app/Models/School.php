@@ -27,6 +27,7 @@ class School extends Model {
     }
     //错误信息
      public static function message(){
+
         return [
             'page.required'  => json_encode(['code'=>'201','msg'=>'页码不能为空']),
             'page.integer'   => json_encode(['code'=>'202','msg'=>'页码类型不合法']),
@@ -200,47 +201,57 @@ class School extends Model {
         $pagesize = (int)isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 20;
         $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
+        $nature = !isset($data['nature']) || empty($data['nature']) ?'':$data['nature'];  //授权搜索 1 自增 2 授权
         $arr = [];
-            $course = Coures::where(function($query) use ($data) {
-                    $query->where('school_id',$data['school_id']);
-                    //学科大类
-                    if(!empty($data['subjectOne']) && $data['subjectOne'] != ''){
-                        $query->where('parent_id',$data['subjectOne']);
-                    }
-                    //学科小类
-                    if(!empty($data['subjectTwo']) && $data['subjectTwo'] != ''){
-                        $query->where('child_id',$data['subjectTwo']);
-                    }
-                })->select('id','title','cover','nature','status','pricing','school_id')
-                ->orderBy('id','desc')->get()->toArray();//自增课程
+        $course = Coures::where(function($query) use ($data) {
+                $query->where('school_id',$data['school_id']);
+                //学科大类
+                if(!empty($data['subjectOne']) && $data['subjectOne'] != ''){
+                    $query->where('parent_id',$data['subjectOne']);
+                }
+                //学科小类
+                if(!empty($data['subjectTwo']) && $data['subjectTwo'] != ''){
+                    $query->where('child_id',$data['subjectTwo']);
+                }
+            })->select('id','title','cover','nature','status','pricing','school_id')
+            ->orderBy('id','desc')->get()->toArray();//自增课程
 
-            $natureCourse = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
-                            ->where(function($query) use ($data,$school_id) {
-                                if(!empty($data['subjectOne']) && $data['subjectOne'] != ''){
-                                    $query->where('ld_course.parent_id',$data['subjectOne']);
-                                }
-                                if(!empty($data['subjectTwo']) && $data['subjectTwo'] != ''){
-                                    $query->where('ld_course.child_id',$data['subjectTwo']);
-                                }
-                                $query->where('ld_course_school.to_school_id',$data['school_id']);
-                                $query->where('ld_course_school.from_school_id',$school_id);
-                                $query->where('ld_course_school.is_del',0);
-                    })->select('ld_course_school.course_id as id','ld_course_school.title','ld_course_school.cover','ld_course_school.pricing','ld_course.status')
-                    ->get()->toArray(); //授权课程信息（分校）
-
+        $natureCourse = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
+                        ->where(function($query) use ($data,$school_id) {
+                            if(!empty($data['subjectOne']) && $data['subjectOne'] != ''){
+                                $query->where('ld_course.parent_id',$data['subjectOne']);
+                            }
+                            if(!empty($data['subjectTwo']) && $data['subjectTwo'] != ''){
+                                $query->where('ld_course.child_id',$data['subjectTwo']);
+                            }
+                            $query->where('ld_course_school.to_school_id',$data['school_id']);
+                            $query->where('ld_course_school.from_school_id',$school_id);
+                            $query->where('ld_course_school.is_del',0);
+                })->select('ld_course_school.course_id as id','ld_course_school.title','ld_course_school.cover','ld_course_school.pricing','ld_course.status')
+                ->get()->toArray(); //授权课程信息（分校）
+           
             if(!empty($course)){
-                foreach($course as $key=>$v){
+                foreach($course as $key=>$va){
                     $course[$key]['nature'] = 0; //自增
                 }
             }
             if(!empty($natureCourse)){
-                foreach($natureCourse as $key=>$v){
+                foreach($natureCourse as $key=>$vb){
                     $natureCourse[$key]['nature'] = 1; //授权
                 }
             }
-            if(!empty($course) || !empty($natureCourse)){
-                $arr = array_merge($course,$natureCourse);
-
+            switch ($nature) {
+                case '1':
+                    $arr = $course;
+                    break;
+                 case '2':
+                    $arr = $natureCourse;
+                    break;
+                default:
+                    $arr = array_merge($course,$natureCourse);
+                    break;
+            }
+            if(!empty($arr)){
                 foreach($arr  as $k=>&$v){
                     $v['school_dns'] = School::where('id',$data['school_id'])->select('dns')->first()['dns'];
                     $v['buy_nember'] = Order::whereIn('pay_status',[3,4])->whereIn('nature',[0,1])->where(['class_id'=>$v['id'],'status'=>2,'oa_status'=>1])->count();
@@ -274,8 +285,8 @@ class School extends Model {
                         $v['method'] = $method;
                     }
                 }
-
             }
+
             $start=($page-1)*$pagesize;
             $limit_s=$start+$pagesize;
             $info=[];
@@ -299,6 +310,7 @@ class School extends Model {
         $pagesize = (int)isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 20;
         $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登陆学校id
+        $nature = !isset($data['nature']) || empty($data['nature']) ?'':$data['nature'];  //授权搜索 1 自增 2 授权
         $arr = [];
         $openCourse = OpenCourse::where(function($query) use ($data) {//自增
                 $query->where('school_id',$data['school_id']);
@@ -337,8 +349,20 @@ class School extends Model {
                 $natureOpenCourse[$key]['nature'] = '授权课程';
             }
         }
-        if(!empty($openCourse) || !empty($natureOpenCourse)){
-            $arr = array_merge($openCourse,$natureOpenCourse);
+       switch ($nature) {
+            case '1':
+              $arr = $openCourse;
+                break;
+             case '2':
+                $arr = $natureOpenCourse;
+                break;
+            default:
+                $arr = array_merge($openCourse,$natureOpenCourse);
+                break;
+        }
+
+        if(!empty($arr)){
+           
             foreach($arr as $k =>$v){
                 $arr[$k]['school_dns'] =  School::where('id',$data['school_id'])->select('dns')->first()['dns'];
                 $watch_num = OpenLivesChilds::where('lesson_id',$v['id'])->where(['is_del'=>0])->select('watch_num')->first();
