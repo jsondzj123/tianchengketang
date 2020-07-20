@@ -93,7 +93,18 @@ class NotifyController extends Controller {
                         'update_at'=>date('Y-m-d H:i:s')
                     );
                     $res = Order::where(['order_number'=>$arr['out_trade_no']])->update($arrs);
-                    Student::where(['id'=>$orders['student_id']])->update(['enroll_status'=>1]);
+                    $overorder = Order::where(['student_id'=>$orders['student_id'],'status'=>2])->count(); //用户已完成订单
+                    $userorder = Order::where(['student_id'=>$orders['student_id']])->count(); //用户所有订单
+                    if($overorder == $userorder){
+                       $state_status = 2;
+                    }else{
+                        if($overorder > 0 ){
+                            $state_status = 1;
+                        }else{
+                            $state_status = 0;
+                        }
+                    }
+                    Student::where(['id'=>$orders['student_id']])->update(['enroll_status'=>1,'state_status'=>$state_status]);
                     if (!$res) {
                         //修改用户类型
                         throw new Exception('回调失败');

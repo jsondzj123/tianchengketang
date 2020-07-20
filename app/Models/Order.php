@@ -86,6 +86,7 @@ class Order extends Model {
        * @param  $lession_id 学科id
        * @param  $lession_price 原价
        * @param  $student_price 现价
+       * @param  $payment_fee 学员价格
        * @param  $payment_type 1定金2尾款3最后一笔尾款4全款
        * @param  $payment_method 1微信2支付宝3银行转账
        * @param  $payment_time 支付时间
@@ -129,7 +130,8 @@ class Order extends Model {
         $data['order_number'] = date('YmdHis', time()) . rand(1111, 9999); //订单号  随机生成
         $data['order_type'] = 1;        //1线下支付 2 线上支付
         $data['student_id'] = $arr['student_id'];
-        $data['price'] = $arr['student_price'];
+        $data['price'] = $arr['payment_fee']; //学员价格
+        $data['student_price'] = $arr['student_price'];
         $data['lession_price'] = $arr['lession_price'];
         $data['pay_status'] = $arr['payment_type'];
         $data['pay_type'] = $arr['payment_method'];
@@ -271,31 +273,48 @@ class Order extends Model {
         }
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
-        if($order['status'] == 1){
-            if($data['status'] == 2){
-                $update = self::where(['id'=>$data['order_id']])->update(['status'=>2]);
-                if($update){
-                    //修改学员报名  订单状态 课程有效期
-                    $lessons = Coures::where(['id'=>$order['class_id']])->first();
-                    //计算用户购买课程到期时间
-                    $validity = date('Y-m-d H:i:s',strtotime('+'.$lessons['ttl'].' day'));
-                    //修改订单状态 课程有效期 oa状态
-                    $update = self::where(['id'=>$order['id']])->update(['status'=>2,'validity_time'=>$validity,'oa_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
-                    //修改用户报名状态
-                    Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1]);
-                    //添加日志操作
-                    AdminLog::insertAdminLog([
-                        'admin_id'       =>   $admin_id  ,
-                        'module_name'    =>  'Order' ,
-                        'route_url'      =>  'admin/Order/exitForIdStatus' ,
-                        'operate_method' =>  'update' ,
-                        'content'        =>  '审核成功，修改id为'.$data['order_id'].json_encode($data) ,
-                        'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
-                        'create_at'      =>  date('Y-m-d H:i:s')
-                    ]);
-                    return ['code' => 200 , 'msg' => '回审通过'];
-                }else{
-                    return ['code' => 202 , 'msg' => '操作失败'];
+        if($order['status'] == 1) {
+            if ($data['status'] == 2) {
+                $update = self::where(['id' => $data['order_id']])->update(['status' => 2]);
+                if ($update) {
+                    //最后一笔款或全款 开课
+                    if ($order['pay_status'] == 3 || $order['pay_status'] == 4) {
+                        //修改学员报名  订单状态 课程有效期
+                        $lessons = Coures::where(['id' => $order['class_id']])->first();
+                        //计算用户购买课程到期时间
+                        $validity = date('Y-m-d H:i:s', strtotime('+' . $lessons['ttl'] . ' day'));
+                        //修改订单状态 课程有效期 oa状态
+                        $update = self::where(['id' => $order['id']])->update(['status' => 2, 'validity_time' => $validity, 'oa_status' => 1, 'update_at' => date('Y-m-d H:i:s')]);
+                        //修改用户报名状态
+                        //判断此用户所有订单数量
+                        $overorder = Order::where(['student_id'=>$order['student_id'],'status'=>2])->count(); //用户已完成订单
+                        $userorder = Order::where(['student_id'=>$order['student_id']])->count(); //用户所有订单
+                        if($overorder == $userorder){
+                            $state_status = 2;
+                        }else{
+                            if($overorder > 0 ){
+                                $state_status = 1;
+                            }else{
+                                $state_status = 0;
+                            }
+                        }
+                        Student::where(['id' => $order['student_id']])->update(['enroll_status' => 1, 'state_status' => $state_status]);
+                        //添加日志操作
+                        AdminLog::insertAdminLog([
+                            'admin_id' => $admin_id,
+                            'module_name' => 'Order',
+                            'route_url' => 'admin/Order/exitForIdStatus',
+                            'operate_method' => 'update',
+                            'content' => '审核成功，修改id为' . $data['order_id'] . json_encode($data),
+                            'ip' => $_SERVER["REMOTE_ADDR"],
+                            'create_at' => date('Y-m-d H:i:s')
+                        ]);
+                        return ['code' => 200, 'msg' => '回审通过'];
+                    }else{
+                        return ['code' => 200, 'msg' => '回审通过'];
+                    }
+                } else {
+                    return ['code' => 202, 'msg' => '操作失败'];
                 }
            }else if($data['status'] == 3){
                 $update = self::where(['id'=>$data['order_id']])->update(['status'=>3]);
@@ -398,8 +417,8 @@ class Order extends Model {
             $validity = date('Y-m-d H:i:s',strtotime('+'.$lessons['ttl'].' day'));
             //修改订单状态 课程有效期 oa状态
             $update = self::where(['id'=>$order['id']])->update(['status'=>2,'validity_time'=>$validity,'oa_status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
-            //修改用户报名状态
-            Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1]);
+            //修改用户报名状态,修改开课状态
+            Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1,'state_status'=>2]);
         }else{
             $update = self::where(['id'=>$order['id']])->update(['status'=>3,'oa_status'=>$data['status'],'update_at'=>date('Y-m-d H:i:s')]);
         }
@@ -420,7 +439,7 @@ class Order extends Model {
         if(empty($data['student_id'])){
             return ['code' => 201 , 'msg' => '学员id为空'];
         }
-        $order = self::where(['student_id'=>$data['student_id']])->get()->toArray();
+        $order = self::select('*')->where(['student_id'=>$data['student_id']])->groupBy('class_id')->get()->toArray();
         if(!empty($order)){
             foreach ($order as $k=>&$v){
                 if($v['pay_type'] == 0){

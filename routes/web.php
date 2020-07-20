@@ -187,6 +187,13 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('livearr','CourseController@livearr');//课程直播列表
         $router->post('recordedarr','CourseController@recordedarr');//课程录播列表
         $router->post('material','CourseController@material');//课程资料列表
+        $router->post('userPay','CourseController@userPay');//用户生成订单
+        $router->post('userPaying','CourseController@userPaying');//用户进行支付
+    });
+    //站内支付
+    $router->group(['prefix' => 'order', 'middleware'=> 'user'], function () use ($router) {
+        $router->post('userPay','OrderController@userPay');//用户生成订单
+        $router->post('userPaying','OrderController@userPaying');//用户进行支付
     });
     //课程 无需token
     $router->group(['prefix' => 'course'], function () use ($router) {
