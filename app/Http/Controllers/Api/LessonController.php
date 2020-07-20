@@ -128,14 +128,17 @@ class LessonController extends Controller {
                 if($method > 0){
                     $where_two['ld_course_method.method_id'] = $method;
                 }
+                if(!empty($keyWord)){
+                    $keyWord = "%$keyWord%";
+                }
                 $sort_type = $request->input('sort_type') ?: 'asc';
                 $data_list_accredit = CourseSchool::join("ld_course_subject","ld_course_subject.id","=","ld_course_school.parent_id")
                         ->join("ld_course_method","ld_course_school.course_id","=","ld_course_method.course_id")
                         ->select('ld_course_school.course_id as id', 'ld_course_school.admin_id','ld_course_school.child_id','ld_course_school.parent_id', 'ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.pricing as price', 'ld_course_school.sale_price as favorable_price','ld_course_school.buy_num','ld_course_school.is_del','ld_course_school.status','ld_course_school.watch_num','ld_course_school.keywords','ld_course_subject.subject_name')->where(function($query) use ($where_two,$keyWord){
                             $query->where($where_two);
                             if(!empty($keyWord)){
-                                $query->where('ld_course.title', 'like', $keyWord);
-                                $query->orWhere('ld_course.keywords', 'like', $keyWord);
+                                $query->where('ld_course_school.title', 'like', $keyWord);
+                                $query->orWhere('ld_course_school.keywords', 'like', $keyWord);
                             }
                         })->groupBy("ld_course_school.id")->get()->toArray();
                 foreach($data_list_accredit as $k => &$v){
@@ -183,6 +186,9 @@ class LessonController extends Controller {
                 }
                 if($method > 0){
                     $where['ld_course_method.method_id'] = $method;
+                }
+                if(!empty($keyWord)){
+                    $keyWord = "%$keyWord%";
                 }
                 $sort_type = $request->input('sort_type') ?: 'asc';
                 $data =  Lesson::join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
