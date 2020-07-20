@@ -85,7 +85,9 @@ class Video extends Model {
             })->get()->count();
             //获取所有列表
             if($total > 0){
-                    $list = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->select('*','ld_course_video_resource.parent_id','ld_course_video_resource.id')->where(function($query) use ($data){
+                    $list = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')
+                    ->select('*','ld_course_video_resource.parent_id','ld_course_video_resource.id','ld_course_video_resource.create_at')
+                    ->where(function($query) use ($data){
                         // //获取后端的操作员id
                         // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                         // //操作员id
@@ -193,7 +195,7 @@ class Video extends Model {
                     })->get()->count();
                     //获取所有列表
                     if($count1 > 0){
-                            $list1 = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->select('*','ld_course_video_resource.parent_id','ld_course_video_resource.id')->where(function($query) use ($data){
+                            $list1 = self::join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->select('*','ld_course_video_resource.parent_id','ld_course_video_resource.id','ld_course_video_resource.create_at')->where(function($query) use ($data){
                                 // //获取后端的操作员id
                                 // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                                 // //操作员id
@@ -279,7 +281,7 @@ class Video extends Model {
                         }
                     })->get()->count();
                     if($count2 > 0){
-                        $list2 = CourseRefResource::join("ld_course_video_resource","ld_course_ref_resource.resource_id","=","ld_course_video_resource.id")
+                        $list2 = CourseRefResource::join("ld_course_video_resource","ld_course_ref_resource.resource_id","=","ld_course_video_resource.id")->select('*','ld_course_video_resource.parent_id','ld_course_video_resource.id','ld_course_video_resource.create_at')
                         ->join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->where(function($query) use ($data){
                             // //获取后端的操作员id
                             // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
