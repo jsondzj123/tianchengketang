@@ -96,9 +96,9 @@ class CourseController extends Controller {
             $count1 = Coures::where(['school_id' => $school_id, 'is_del' => 0,'status'=>1])
                 ->where('title', 'like', '%' . $name . '%')
                 ->where(function ($query) use ($parent) {
-                    if (!empty($parent[0]) && $parent[0] != '') {
+//                    if (!empty($parent[0]) && $parent[0] != '') {
                         $query->where('parent_id', $parent[0]);
-                    }
+//                    }
                     if (!empty($parent[1]) && $parent[1] != '') {
                         $query->where('child_id', $parent[1]);
                     }
@@ -106,9 +106,9 @@ class CourseController extends Controller {
             $count2 = CourseSchool::where(['to_school_id' => $school_id, 'is_del' => 0,'status'=>1])
                 ->where('title', 'like', '%' . $name . '%')
                 ->where(function ($query) use ($parent) {
-                    if (!empty($parent[0]) && $parent[0] != '') {
+//                    if (!empty($parent[0]) && $parent[0] != '') {
                         $query->where('parent_id', $parent[0]);
-                    }
+//                    }
                     if (!empty($parent[1]) && $parent[1] != '') {
                         $query->where('child_id', $parent[1]);
                     }
@@ -159,9 +159,9 @@ class CourseController extends Controller {
             if ($count2 != 0) {
                 $ref_course = CourseSchool::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'watch_num', 'create_at', 'course_id')
                     ->where(function ($query) use ($parent) {
-                        if (!empty($parent[0]) && $parent[0] != '') {
+//                        if (!empty($parent[0]) && $parent[0] != '') {
                             $query->where('parent_id', $parent[0]);
-                        }
+//                        }
                         if (!empty($parent[1]) && $parent[1] != '') {
                             $query->where('child_id', $parent[1]);
                         }
