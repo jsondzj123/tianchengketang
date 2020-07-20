@@ -297,7 +297,7 @@ class Order extends Model {
                 }else{
                     return ['code' => 202 , 'msg' => '操作失败'];
                 }
-           }else if($data['status'] == 4){
+           }else if($data['status'] == 3){
                 $update = self::where(['id'=>$data['order_id']])->update(['status'=>3]);
                 if($update){
                     //添加日志操作
