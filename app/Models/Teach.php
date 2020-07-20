@@ -172,7 +172,10 @@ class Teach extends Model {
 							$newcourseArr[$k]['status'] = '直播中';
 						}
 					} 
+					
 				}
+
+
 			return ['code'=>200,'msg'=>'Success','data'=>$newcourseArr,'where'=>$body];
 	}
 	//教学详情
