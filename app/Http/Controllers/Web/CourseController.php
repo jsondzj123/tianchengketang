@@ -61,9 +61,9 @@ class CourseController extends Controller {
                 ->where(['ld_course_school.to_school_id'=>$this->school['id'],'ld_course_school.is_del'=>0,'ld_course.is_del'=>0])->groupBy('ld_course.parent_id')->get()->toArray();
             if(!empty($course)){
                 foreach ($course as $ks=>$vs){
-                    $ones = CouresSubject::where(['id'=>$v['parent_id'],'parent_id'=>0,'is_open'=>0,'is_del'=>0])->first()->toArray();
+                    $ones = CouresSubject::where(['id'=>$vs['parent_id'],'parent_id'=>0,'is_open'=>0,'is_del'=>0])->first()->toArray();
                     if(!empty($ones)){
-                        $ones['son'] = CouresSubject::where(['parent_id'=>$v['parent_id'],'is_open'=>0,'is_del'=>0])->get()->toArray();
+                        $ones['son'] = CouresSubject::where(['parent_id'=>$vs['parent_id'],'is_open'=>0,'is_del'=>0])->get()->toArray();
                     }
                     array_push($subject,$ones);
                 }
@@ -543,7 +543,6 @@ class CourseController extends Controller {
                                 if (empty($ziyuan)) {
                                     $val['study'] = 0;
                                 } else {
-//                                    $val['study'] = 0;
                                     $MTCloud = new MTCloud();
                                     $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
                                     if (isset($use_duration['data']) || !empty($use_duration['data'])) {
@@ -685,25 +684,30 @@ class CourseController extends Controller {
                             if (!empty($type) && $type != '' && $type != 0) {
                                 $query->where('type', $type);
                             }
-                        })->first();
-                    $ziyuan[] = $ziliao;
+                        })->get();
+                    if(!empty($ziliao)){
+                        foreach ($ziliao as $kss=>$vss){
+                            $ziyuan[] = $vss;
+                        }
+                    }
                 }
             }
             //直播资料
-//            $ban = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
-//            if(!empty($ban)){
-//                foreach ($ban as $ks=>$vs){
-//                    $ziliaos = Couresmaterial::where(['parent_id'=>$vs['id'],'is_del'=>0,'mold'=>2])
-//                        ->where(function ($query) use ($type) {
-//                            if (!empty($type) && $type != '' && $type != 0) {
-//                                $query->where('type', $type);
-//                            }
-//                        })->first();
-//                    $ziyuan[] = $ziliaos;
-//                }
-//            }
+            $ban = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
+            if(!empty($ban)){
+                foreach ($ban as $ks=>$vs){
+                    $ziliaos = Couresmaterial::where(['parent_id'=>$vs['id'],'is_del'=>0,'mold'=>2])
+                        ->where(function ($query) use ($type) {
+                            if (!empty($type) && $type != '' && $type != 0) {
+                                $query->where('type', $type);
+                            }
+                        })->first();
+                    $ziyuan[] = $ziliaos;
+                }
+            }
 //        }
-//        $res = array_slice($ziyuan, $offset, $pagesize);
+
+        $res = array_slice($ziyuan, $offset, $pagesize);
         return ['code' => 200 , 'msg' => '查询成功','data'=>$ziyuan,'page'=>$page];
     }
     /**
