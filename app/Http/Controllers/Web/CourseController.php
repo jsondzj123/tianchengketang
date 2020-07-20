@@ -674,6 +674,7 @@ class CourseController extends Controller {
             }
         }
         $type = isset($this->data['type'])?$this->data['type']:'';
+        $ziyuan=[];
 //        if($is_pay > 0){
             //录播资料
             $jie = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0])->where('parent_id','>',0)->get();
