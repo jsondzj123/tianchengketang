@@ -84,6 +84,9 @@ class CourseController extends Controller {
             $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 20;
             $page = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
             $offset = ($page - 1) * $pagesize;
+            if(isset($this->data['name']) && !empty($this->data['name'])){
+                $page =1;
+            }
             //学科大类小类条件
             $parent = [];
             if (!empty($this->data['parent'])) {
