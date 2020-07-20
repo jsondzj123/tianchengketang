@@ -92,10 +92,10 @@ class OrderController extends Controller {
                 $endprice = $user['balance'] + $orderinfo['price'];
                 Student::where(['id'=>$orderinfo['student_id']])->update(['balance'=>$endprice]);
                 StudentAccountlog::insert(['user_id'=>$orderinfo['student_id'],'price'=>$orderinfo['price'],'end_price'=>$endprice,'status'=>1]);
-                $up = Order::where(['id'=>$data['order_id']])->update(['status'=>4]);
+                $up = Order::where(['id'=>$data['order_id']])->update(['status'=>4,'validity_time'=>'']);
             }else{
                 //其他修改状态
-                $up = Order::where(['id'=>$data['order_id']])->update(['status'=>4]);
+                $up = Order::where(['id'=>$data['order_id']])->update(['status'=>4,'validity_time'=>'']);
             }
             if($up){
                 DB::commit();
