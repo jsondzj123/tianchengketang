@@ -83,7 +83,11 @@ class NotifyController extends Controller {
                     DB::beginTransaction();
                     //修改订单状态  增加课程  修改用户收费状态
                     $lesson = Lesson::where(['id'=>$orders['class_id']])->first();
-                    $validity = date('Y-m-d H:i:s',strtotime('+'.$lesson['ttl'].' day'));
+                    if($lesson['expiry'] ==0){
+                        $validity = '3000-01-02 12:12:12';
+                    }else{
+                        $validity = date('Y-m-d H:i:s', strtotime('+' . $lesson['expiry'] . ' day'));
+                    }
                     $arrs = array(
                         'third_party_number'=>$arr['trade_no'],
                         'validity_time'=>$validity,

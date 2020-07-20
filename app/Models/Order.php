@@ -282,7 +282,11 @@ class Order extends Model {
                         //修改学员报名  订单状态 课程有效期
                         $lessons = Coures::where(['id' => $order['class_id']])->first();
                         //计算用户购买课程到期时间
-                        $validity = date('Y-m-d H:i:s', strtotime('+' . $lessons['ttl'] . ' day'));
+                        if($lessons['expiry'] ==0){
+                            $validity = '3000-01-02 12:12:12';
+                        }else{
+                            $validity = date('Y-m-d H:i:s', strtotime('+' . $lessons['expiry'] . ' day'));
+                        }
                         //修改订单状态 课程有效期 oa状态
                         self::where(['id' => $order['id']])->update(['status' => 2, 'validity_time' => $validity, 'update_at' => date('Y-m-d H:i:s')]);
                         //修改用户报名状态

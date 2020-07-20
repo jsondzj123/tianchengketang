@@ -254,7 +254,11 @@ class OrderController extends Controller
                     $end_balance = $user_balance - $lesson['sale_price'];
                     $studentstatus = Student::where(['id' => $user_id])->update(['balance' => $end_balance]);
                     //计算用户购买课程到期时间
-                    $validity = date('Y-m-d H:i:s',strtotime('+'.$lesson['expiry'].' day'));
+                    if($lesson['expiry'] ==0){
+                        $validity = '3000-01-02 12:12:12';
+                    }else{
+                        $validity = date('Y-m-d H:i:s', strtotime('+' . $lesson['expiry'] . ' day'));
+                    }
                     //修改用户报名状态 开课状态
                      //判断此用户所有订单数量
                     $overorder = Order::where(['student_id'=>$order['student_id'],'status'=>2])->count(); //用户已完成订单
