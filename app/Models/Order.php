@@ -439,7 +439,11 @@ class Order extends Model {
         if(empty($data['student_id'])){
             return ['code' => 201 , 'msg' => '学员id为空'];
         }
+        DB::enableQueryLog();
         $order = self::selectRaw("any_value(class_id),pay_type,nature,id")->where(['student_id'=>$data['student_id']])->orderByDesc('create_at')->groupBy('class_id')->get()->toArray();
+
+        $a = DB::getQueryLog();
+        return ['code' => 201 , 'msg' => $a];
 //        $order = self::where(['student_id'=>$data['student_id']])->get()->toArray();
         if(!empty($order)){
             foreach ($order as $k=>&$v){
