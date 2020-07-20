@@ -119,9 +119,9 @@ class CourseController extends Controller {
             if ($count1 != 0) {
                 $course = Coures::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'nature', 'watch_num', 'create_at')
                     ->where(function ($query) use ($parent) {
-                        if (!empty($parent[0]) && $parent[0] != '') {
+//                        if (!empty($parent[0]) && $parent[0] != '') {
                             $query->where('parent_id', $parent[0]);
-                        }
+//                        }
                         if (!empty($parent[1]) && $parent[1] != '') {
                             $query->where('child_id', $parent[1]);
                         }
