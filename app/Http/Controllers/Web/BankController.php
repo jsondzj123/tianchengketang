@@ -126,7 +126,7 @@ class BankController extends Controller {
      */
     public static function verifyUserExamJurisdiction($bank_id){
         //判断用户是否有做题的权限
-        /*$bank_info = Bank::where('id' , $bank_id)->where('is_del' , 0)->where('is_open' , 0)->first();
+        $bank_info = Bank::where('id' , $bank_id)->where('is_del' , 0)->where('is_open' , 0)->first();
         
         //判断题库是否存在
         if(!$bank_info || empty($bank_info)){
@@ -147,10 +147,10 @@ class BankController extends Controller {
         if($order_count <= 0){
             return ['code' => 209 , 'msg' => '您没有做题权限'];
         }
-        return ['code' => 200 , 'msg' => '可以做题啦'];*/
+        return ['code' => 200 , 'msg' => '可以做题啦'];
         
         //可做题库数量
-        $bank_list11 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_course" , function($join){
+        /*$bank_list11 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_course" , function($join){
             $join->on('ld_course.parent_id', '=', 'ld_question_bank.parent_id');
         })->join("ld_order" , function($join){
             $join->on('ld_course.id', '=', 'ld_order.class_id');
@@ -167,7 +167,7 @@ class BankController extends Controller {
         if($count <= 0){
             return ['code' => 209 , 'msg' => '您没有做题权限'];
         }
-        return ['code' => 200 , 'msg' => '可以做题啦'];
+        return ['code' => 200 , 'msg' => '可以做题啦'];*/
     }
     
     /*
