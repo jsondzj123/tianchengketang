@@ -183,19 +183,21 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     });
     //课程（szw）
     $router->group(['prefix' => 'course', 'middleware'=> 'user'], function () use ($router) {
+        $router->post('collect','CourseController@collect');//课程收藏
+        $router->post('livearr','CourseController@livearr');//课程直播列表
+        $router->post('recordedarr','CourseController@recordedarr');//课程录播列表
+        $router->post('material','CourseController@material');//课程资料列表
+    });
+    //课程 无需token
+    $router->group(['prefix' => 'course'], function () use ($router) {
         $router->post('subjectList','CourseController@subjectList');//学科列表
         $router->post('courseList','CourseController@courseList');//课程列表
         $router->post('courseDetail','CourseController@courseDetail');//课程详情
         $router->post('courseIntroduce','CourseController@courseIntroduce');//课程简介
-        $router->post('livearr','CourseController@livearr');//课程直播列表
-        $router->post('recordedarr','CourseController@recordedarr');//课程录播列表
-        $router->post('material','CourseController@material');//课程资料列表
-        $router->post('collect','CourseController@collect');//课程收藏
         $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
         $router->post('urlcode','CourseController@urlcode');//二维码测试
     });
 });
-
 //后台端路由接口
 /*****************start**********************/
 //后端登录注册接口

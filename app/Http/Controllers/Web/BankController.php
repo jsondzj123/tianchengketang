@@ -50,8 +50,9 @@ class BankController extends Controller {
             $bank_list = Bank::select('id' , 'subject_id' , 'topic_name')->where('school_id' , $school_info['id'])->where('is_del' , 0)->where('is_open' , 0)->orderByDesc('id')->get();
             if($bank_list && !empty($bank_list)){
                 foreach($bank_list as $k=>$v){
-                    //判断科目的id是否为空
-                    if($v->subject_id && !empty($v->subject_id)){
+                    //根据科目的id获取列表数据
+                    $subject_list = QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->id)->where('is_del' , 0)->get();
+                    /*if($v->subject_id && !empty($v->subject_id)){
                         //科目id数据格式转化
                         $subject_id   = explode(',' , $v->subject_id);
                         
@@ -59,7 +60,7 @@ class BankController extends Controller {
                         $subject_list = QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->id)->whereIn('id' , $subject_id)->where('is_del' , 0)->get();
                     } else {
                         $subject_list = [];
-                    }
+                    }*/
                     
                     //新数组赋值
                     $bank_array[] = [
