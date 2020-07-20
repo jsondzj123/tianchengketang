@@ -236,7 +236,7 @@ class Video extends Model {
                             })->orderBy('ld_course_video_resource.id','desc')->get()->toArray();
                         }
                     //授权数据
-                    $count2 =CourseRefResource::join("ld_course_video_resource","ld_course_ref_resource.resource_id","=","ld_course_video_resource.id")
+                    $count2 =CourseRefResource::join("ld_course_video_resource","ld_course_ref_resource.resource_id","=","ld_course_video_resource.id")->select('*','ld_course_video_resource.parent_id','ld_course_video_resource.id')
                     ->join('ld_course_subject', 'ld_course_subject.id', '=', 'ld_course_video_resource.parent_id')->where(function($query) use ($data){
                         // //获取后端的操作员id
                         // $admin_id= isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;

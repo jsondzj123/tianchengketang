@@ -301,7 +301,7 @@ class CourseSchool extends Model {
                 $ids = Couresteacher::whereIn('course_id',$courseIds)->where('is_del',0)->pluck('teacher_id')->toArray(); //要授权的教师信息
                 if(!empty($ids)){
                     $ids = array_unique($ids);
-                    $teacherIds = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>1])->pluck('teacher_id')->toArray();//已经授权过的讲师信息
+                    $teacherIds = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->pluck('teacher_id')->toArray();//已经授权过的讲师信息
                     if(!empty($teacherIds)){
                         $teacherIdArr = array_diff($ids,$teacherIds);//不在授权讲师表里的数据   
                     }else{
@@ -369,6 +369,7 @@ class CourseSchool extends Model {
                         $InsertZhiboVideoArr[$key]['create_at'] = date('Y-m-d H:i:s');    
                     }
                 }   
+                // print_r($InsertZhiboVideoArr);die;
                 
                 //题库
                 foreach($courseSubjectArr as $key=>&$vs){
@@ -405,16 +406,30 @@ class CourseSchool extends Model {
                         DB::rollback();
                         return ['code'=>203,'msg'=>'学科授权未成功！'];
                     }
-                    $recordRes = CourseRefResource::insert($InsertRecordVideoArr); //录播
-                    if(!$recordRes){
-                        DB::rollback();
-                        return ['code'=>203,'msg'=>'录播资源授权未成功！'];
+
+                    if(!empty($InsertRecordVideoArr)){
+                        $InsertRecordVideoArr = array_chunk($InsertRecordVideoArr,500);
+                        foreach($InsertRecordVideoArr as $key=>$lvbo){
+                            $recordRes = CourseRefResource::insert($lvbo); //录播
+                            if(!$recordRes){
+                                DB::rollback();
+                                return ['code'=>203,'msg'=>'录播资源授权未成功！'];
+                            }
+                        }
                     }
-                    $zhiboRes = CourseRefResource::insert($InsertZhiboVideoArr); //直播
-                    if(!$zhiboRes){
-                        DB::rollback();
-                        return ['code'=>203,'msg'=>'直播资源授权未成功！'];
+
+                    if(!empty($InsertZhiboVideoArr)){
+                        $InsertZhiboVideoArr = array_chunk($InsertZhiboVideoArr,500);
+
+                        foreach($InsertZhiboVideoArr as $key=>$zhibo){
+                            $zhiboRes = CourseRefResource::insert($zhibo); //直播
+                            if(!$zhiboRes){
+                                DB::rollback();
+                                return ['code'=>203,'msg'=>'直播资源授权未成功！'];
+                            }
+                        } 
                     }
+                    
                     $bankRes = CourseRefBank::insert($InsertQuestionArr); //题库
                     if(!$bankRes){
                         DB::rollback();
@@ -430,7 +445,6 @@ class CourseSchool extends Model {
                         return ['code'=>200,'msg'=>'课程授权成功'];
                     }
                   
-                   
                 } catch (Exception $e) {
                     return ['code' => 500 , 'msg' => $ex->getMessage()];
                 }

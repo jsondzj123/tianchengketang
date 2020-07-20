@@ -24,12 +24,14 @@ class CorsMiddleware
             'http://localhost:8080',
             'http://localhost:8081',
             'http://192.168.1.12:8080',
+            'http://192.168.1.11:8081',
             'http://test.admin.longde999.cn',
             'http://admin.longde999.cn',
             'http://testwo.admin.longde999.cn',
             'http://pay.manage.longde99.com',
             'http://ketang.longde999.cn',
             'http://tiancheng.admin.longde999.cn',
+            'http://tiancheng.longde999.cn',
         ];
         $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 

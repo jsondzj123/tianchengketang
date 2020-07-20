@@ -56,15 +56,12 @@ class TeachController extends Controller {
      */
     public function startLive()
     {   
-       $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
-       $teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->teacher_id : 0;
+      $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+      $teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->teacher_id : 0;
       if($teacher_id <= 0){
-        return response()->json(['code'=>207,'msg'=>'非讲师开始直播']);
+        return response()->json(['code'=>207,'msg'=>'非讲师教务进入直播间']);
       }
-      $teacherArr = Teacher::where(['school_id'=>$school_id,'id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0,'type'=>2])->first();
-      if(empty($teacherArr)){
-        return response()->json(['code'=>207,'msg'=>'非讲师开始直播']);
-      }
+      $teacherArr = Teacher::where(['school_id'=>$school_id,'id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
         $data = self::$accept_data;
         $validator = Validator::make($data, [
         	'is_public'=>'required',
@@ -79,13 +76,27 @@ class TeachController extends Controller {
        	if($data['is_public']== 0){  //课程
  			     $live = CourseLiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
        	}
+       if($teacherArr['type'] == 1){
+        //教务
+        $liveArr['course_id'] = $live['course_id'];
+        $liveArr['uid'] = $teacherArr['id'];
+        $liveArr['nickname'] = $teacherArr['real_name'];
+        $liveArr['role'] = 'admin';
+        $res = $this->courseAccess($liveArr);
+        if($res['code'] == 1203){ //该课程没有回放记录!
+          return response()->json($res);
+        }
+      }
+      if($teacherArr['type'] == 2){
+        //讲师
         $MTCloud = new MTCloud();
-        $res = $MTCloud->courseLaunch($live['course_id']);
+        $res = $MTCloud->courseLaunch($live['course_id']); 
         Log::error('直播器启动:'.json_encode($res));
         if(!array_key_exists('code', $res) && !$res["code"] == 0){
             return $this->response('直播器启动失败', 500);
         }
-        return $this->response($res['data']);
+      }
+      return $this->response($res['data']);
     }
     //进入直播间
     public function liveInRoom(){

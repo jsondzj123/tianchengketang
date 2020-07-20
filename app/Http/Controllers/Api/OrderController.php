@@ -308,7 +308,12 @@ class OrderController extends Controller
                 return $return = $wxpay->getPrePayOrder($title,$order_number, $price,$school_id, $pay_type);
             case "2":
                 $alipay = new AlipayFactory($school_id);
-                $return = $alipay->createAppPay($title,$order_number, 0.01,$pay_type);
+                $url = $_SERVER["SERVER_NAME"];
+                if($url == 'testwo.longde999.cn'){
+                    $return = $alipay->createAppPay($title,$order_number, 0.01,$pay_type);
+                }else{
+                    $return = $alipay->createAppPay($title,$order_number, $price,$pay_type);
+                }
                 $alipay = [
                     'alipay' => $return
                 ];
@@ -367,6 +372,7 @@ class OrderController extends Controller
                 }
         }
     }
+
     //  苹果内购 充值余额 生成预订单
     public function iphonePayCreateOrder(){
         $data = self::$accept_data;

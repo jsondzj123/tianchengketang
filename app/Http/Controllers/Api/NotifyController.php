@@ -127,7 +127,11 @@ class NotifyController extends Controller {
         $data = self::$accept_data;
         $receiptData = $data['receiptData'];
         $order_number = $data['order_number'];
-//        $file = "orderpaylog.txt";
+        $file = "./orderpaylog";
+        if (file_exists($file) == false) {
+            //检查是否有该文件夹，如果没有就创建，并给予最高权限
+            mkdir($file, 0700, true);
+        }
         file_put_contents('./orderpaylog/'.$order_number.'.txt', '时间:'.date('Y-m-d H:i:s').print_r($data,true),FILE_APPEND);
         if(!isset($data['receiptData']) ||empty($receiptData)){
             return response()->json(['code' => 201 , 'msg' => 'receiptData没有']);
@@ -151,6 +155,14 @@ class NotifyController extends Controller {
             // 请求验证  1代表向沙箱环境url发送验证请求
             $html = $this->acurl($receiptData, 1);
             $arr = json_decode($html, true);
+            //获取域名   正式环境 沙箱请求 不处理
+            $url = $_SERVER["SERVER_NAME"];
+            if($url == 'api.longde999.cn'){
+                $arr['pay_namess'] = "沙箱环境，不予处理金额变动";
+                $arr['http_referer'] = $_SERVER["SERVER_NAME"];
+                file_put_contents('./orderpaylog/'.$order_number.'.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
+                return response()->json(['code' => 200 , 'msg' =>'支付成功']);
+            }
         }
         file_put_contents('./orderpaylog/'.$order_number.'.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
         // 判断是否购买成功  【状态码,0为成功（无论是沙箱环境还是正式环境只要数据正确status都会是：0）】
@@ -173,10 +185,10 @@ class NotifyController extends Controller {
             //用户余额信息
             $student = Student::where(['id'=>$studentprice['user_id']])->first();
             foreach ($arr['receipt']['in_app']  as $k=>$v){
-                if($codearr[$v['product_id']] = $studentprice['price']){
+                if($codearr[$v['product_id']] == $studentprice['price']){
                     $endbalance = $student['balance'] + $studentprice['price']; //用户充值后的余额
                     Student::where(['id'=>$studentprice['user_id']])->update(['balance'=>$endbalance]);  //修改用户余额
-                    $userorder = StudentAccounts::where(['order_number'=>$order_number,'price'=>$studentprice['price'],'pay_type'=>5,'order_type'=>1])->update(['third_party_number'=>$v['transaction_id'],'content'=>$arr['receipt']['in_app'][$k],'status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+                    $userorder = StudentAccounts::where(['user_id'=>$studentprice['user_id'],'order_number'=>$order_number,'price'=>$studentprice['price'],'pay_type'=>5,'order_type'=>1])->update(['third_party_number'=>$v['transaction_id'],'content'=>$arr['receipt']['in_app'][$k],'status'=>1,'update_at'=>date('Y-m-d H:i:s')]);
                     if($userorder){
                         StudentAccountlog::insert(['user_id'=>$studentprice['user_id'],'price'=>$studentprice['price'],'end_price'=>$endbalance,'status'=>1]);
                     }

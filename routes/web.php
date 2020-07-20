@@ -124,7 +124,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('preStart','OpenCourseController@preStart');//预开始
         $router->post('underway','OpenCourseController@underway');//直播中
         $router->post('finish','OpenCourseController@end');//往期公开课程 (暂时没做分页)
-     
+
     });
     //教师
     $router->group(['prefix' => 'teacher'], function () use ($router) {
@@ -143,7 +143,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->post('doUserForgetPassword','AuthenticateController@doUserForgetPassword');              //找回密码接口
     $router->post('captchaInfo','AuthenticateController@captchaInfo');          //WEB生成图片验证码接口
     $router->post('orderOAtoPay','PublicpayController@orderOAtoPay');   //OA流转订单
-     //公开课 
+     //公开课
     $router->group(['prefix' => 'openclass','middleware'=> 'user'], function () use ($router) {
         $router->post('details','OpenCourseController@details');//查看详情
     });
@@ -183,14 +183,17 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     });
     //课程（szw）
     $router->group(['prefix' => 'course', 'middleware'=> 'user'], function () use ($router) {
+        $router->post('collect','CourseController@collect');//课程收藏
+        $router->post('livearr','CourseController@livearr');//课程直播列表
+        $router->post('recordedarr','CourseController@recordedarr');//课程录播列表
+        $router->post('material','CourseController@material');//课程资料列表
+    });
+    //课程 无需token
+    $router->group(['prefix' => 'course'], function () use ($router) {
         $router->post('subjectList','CourseController@subjectList');//学科列表
         $router->post('courseList','CourseController@courseList');//课程列表
         $router->post('courseDetail','CourseController@courseDetail');//课程详情
         $router->post('courseIntroduce','CourseController@courseIntroduce');//课程简介
-        $router->post('livearr','CourseController@livearr');//课程直播列表
-        $router->post('recordedarr','CourseController@recordedarr');//课程录播列表
-        $router->post('material','CourseController@material');//课程资料列表
-        $router->post('collect','CourseController@collect');//课程收藏
         $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
         $router->post('urlcode','CourseController@urlcode');//二维码测试
     });
@@ -577,7 +580,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('doSchoolUpdate', 'SchoolController@doSchoolUpdate');                  //编辑分校信息  √√   +1
         $router->post('getSchoolAdminById', 'SchoolController@getSchoolAdminById');          //查看分校超级管理角色信息 √√
         $router->post('doSchoolAdminById', 'SchoolController@doSchoolAdminById');            //编辑分校超级管理角色信息（给分校超管赋权限） √√
-        $router->post('getAdminById', 'SchoolController@postAdminById');                      //获取分校超级管理用户信息（编辑） √√
+        $router->post('getAdminById', 'SchoolController@postAdminById');                     //获取分校超级管理用户信息（编辑） √√
         $router->post('doAdminUpdate', 'SchoolController@doAdminUpdate');                    //编辑分校超级管理用户信息   √√  +1
         $router->post('getSchoolTeacherList', 'SchoolController@getSchoolTeacherList');      //获取分校讲师列表  √√√  5.11
         $router->post('getLessonList', 'SchoolController@getLessonLists');      //获取分校课程列表
@@ -624,7 +627,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->group(['prefix' => 'teach'], function () use ($router) {
         $router->post('getList', 'TeachController@getList');//教学列表
         $router->post('startLiveChild', 'TeachController@startLive');  //启动直播
-        $router->post('liveInRoom', 'TeachController@liveInRoom');  //进入直播间   
+        $router->post('liveInRoom', 'TeachController@liveInRoom');  //进入直播间
         $router->post('livePlayback','TeachController@livePlayback');  //课程回放
         $router->post('coursewareUpload','TeachController@courseUpload');  //课件上传
         $router->post('details','TeachController@details');  //教学详情
