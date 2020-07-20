@@ -702,7 +702,7 @@ class CourseController extends Controller {
 //                }
 //            }
 //        }
-        $res = array_slice($ziyuan, $offset, $pagesize);
+//        $res = array_slice($ziyuan, $offset, $pagesize);
         return ['code' => 200 , 'msg' => '查询成功','data'=>$ziyuan,'page'=>$page];
     }
     /**
