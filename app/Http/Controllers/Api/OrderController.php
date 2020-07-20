@@ -263,6 +263,7 @@ class OrderController extends Controller
                      //判断此用户所有订单数量
                     $overorder = Order::where(['student_id'=>$order['student_id'],'status'=>2])->count(); //用户已完成订单
                     $userorder = Order::where(['student_id'=>$order['student_id']])->count(); //用户所有订单
+
                     if($overorder == $userorder){
                         $state_status = 2;
                     }else{
