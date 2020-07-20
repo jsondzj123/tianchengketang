@@ -426,6 +426,24 @@ class Order extends Model {
         $order = self::where(['student_id'=>$data['student_id']])->get()->toArray();
         if(!empty($order)){
             foreach ($order as $k=>&$v){
+                if($v['pay_type'] == 0){
+                    $v['pay_name'] = "未支付";
+                }
+                if($v['pay_type'] == 1){
+                    $v['pay_name'] = "微信";
+                }
+                if($v['pay_type'] == 2){
+                    $v['pay_name'] = "支付宝";
+                }
+                if($v['pay_type'] == 3){
+                    $v['pay_name'] = "银行转账";
+                }
+                if($v['pay_type'] == 4){
+                    $v['pay_name'] = "汇聚";
+                }
+                if($v['pay_type'] == 5){
+                    $v['pay_name'] = "余额";
+                }
                 if($v['nature'] == 1){
                     $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
                 }else{

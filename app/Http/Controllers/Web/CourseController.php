@@ -693,21 +693,21 @@ class CourseController extends Controller {
                 }
             }
             //直播资料
-//            $ban = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
-//            if(!empty($ban)){
-//                foreach ($ban as $ks=>$vs){
-//                    $ziliaos = Couresmaterial::where(['parent_id'=>$vs['id'],'is_del'=>0,'mold'=>2])
-//                        ->where(function ($query) use ($type) {
-//                            if (!empty($type) && $type != '' && $type != 0) {
-//                                $query->where('type', $type);
-//                            }
-//                        })->first();
-//                    $ziyuan[] = $ziliaos;
-//                }
-//            }
+            $ban = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
+            if(!empty($ban)){
+                foreach ($ban as $ks=>$vs){
+                    $ziliaos = Couresmaterial::where(['parent_id'=>$vs['id'],'is_del'=>0,'mold'=>2])
+                        ->where(function ($query) use ($type) {
+                            if (!empty($type) && $type != '' && $type != 0) {
+                                $query->where('type', $type);
+                            }
+                        })->first();
+                    $ziyuan[] = $ziliaos;
+                }
+            }
 //        }
 
-//        $res = array_slice($ziyuan, $offset, $pagesize);
+        $res = array_slice($ziyuan, $offset, $pagesize);
         return ['code' => 200 , 'msg' => '查询成功','data'=>$ziyuan,'page'=>$page];
     }
     /**
