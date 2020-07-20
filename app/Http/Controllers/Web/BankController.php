@@ -1839,12 +1839,13 @@ class BankController extends Controller {
                    $bank_info = Bank::where('id' , $v->bank_id)->first();
                    
                    //获取科目id
-                   if($bank_info['subject_id'] && !empty($bank_info['subject_id'])){
+                   /*if($bank_info['subject_id'] && !empty($bank_info['subject_id'])){
                        $subject_ids = explode(',' , $bank_info['subject_id']);
                        $subject_list= QuestionSubject::select('id as subject_id' , 'subject_name')->whereIn('id' , $subject_ids)->where('subject_name' , '!=' , "")->where('is_del' , 0)->get();
                    } else {
                        $subject_list= [];
-                   }
+                   }*/
+                   $subject_list= QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->bank_id)->where('subject_name' , '!=' , "")->where('is_del' , 0)->get();
                    
                    $arr[] =[
                        'bank_id'     =>  $v->bank_id ,
