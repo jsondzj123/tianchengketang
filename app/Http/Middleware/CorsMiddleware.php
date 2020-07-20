@@ -47,6 +47,13 @@ class CorsMiddleware
             'http://jl.jinlong567.com',
             'http://bk.tiancheng27.com',
             'http://dc.tiancheng27.com',
+            'http://dc.tiancheng989.com',
+            'http://bk.tiancheng989.com',
+            'http://gl.tiancheng989.com',
+            'http://yl.tiancheng989.com',
+            'http://zz.tiancheng989.com',
+
+
         
         ];
         $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
