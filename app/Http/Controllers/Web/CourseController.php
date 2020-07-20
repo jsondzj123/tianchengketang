@@ -83,9 +83,9 @@ class CourseController extends Controller {
             //每页显示的条数
             $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 20;
             $page = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
-            if(isset($this->data['name']) && !empty($this->data['name'])){
-                $page = 1;
-            }
+//            if(isset($this->data['name']) && !empty($this->data['name'])){
+//                $page = 1;
+//            }
            $offset = ($page - 1) * $pagesize;
             //学科大类小类条件
             $parent = [];
@@ -238,6 +238,9 @@ class CourseController extends Controller {
                 array_multisort($date, SORT_DESC, $all);
             }
             $res = array_slice($all, $offset, $pagesize);
+            if(empty($res)){
+                $res = array_slice($all, 1, $pagesize);
+            }
             $page = [
                 'pageSize' => $pagesize,
                 'page' => $page,
