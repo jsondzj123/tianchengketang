@@ -489,7 +489,7 @@ class Order extends Model {
                     $v['bgcolor'] = '#FDA426';
                 }
                 if($v['status'] == 2){
-                    if($v['pay_status'] = 3 || $v['pay_status'] = 4){
+                    if($v['pay_status'] == 3 || $v['pay_status'] == 4){
                         $v['learning'] = "已开课";
                         $v['bgcolor'] = '#FF4545';
                     }else{
