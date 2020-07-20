@@ -674,7 +674,6 @@ class CourseController extends Controller {
 //            }
 //        }
         $type = isset($this->data['type'])?$this->data['type']:'';
-        echo $type;die;
         $ziyuan = [];
 //        if($is_pay > 0){
             //录播资料
