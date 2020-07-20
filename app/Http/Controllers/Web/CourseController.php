@@ -42,10 +42,10 @@ class CourseController extends Controller {
          */
     public function subjectList(){
         //存redis
-        $key = 'Websubjectlist'.$this->school['id'];
-        if(Redis::get($key)){
-            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>json_decode(Redis::get($key),true)]);
-        }else{
+//        $key = 'Websubjectlist'.$this->school['id'];
+//        if(Redis::get($key)){
+//            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>json_decode(Redis::get($key),true)]);
+//        }else{
             //自增学科
             $subject = CouresSubject::where(['school_id'=>$this->school['id'],'parent_id'=>0,'is_open'=>0,'is_del'=>0])->get()->toArray();
             if(!empty($subject)){
@@ -56,6 +56,7 @@ class CourseController extends Controller {
                     }
                 }
             }
+            print_r($subject);die;
             //授权学科
             $course = CourseSchool::select('ld_course.parent_id')->leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
                 ->where(['ld_course_school.to_school_id'=>$this->school['id'],'ld_course_school.is_del'=>0,'ld_course.is_del'=>0])->groupBy('ld_course.parent_id')->get()->toArray();
@@ -68,9 +69,9 @@ class CourseController extends Controller {
                     array_push($subject,$ones);
                 }
             }
-            Redis::set($key,json_encode($subject),300);
+//            Redis::set($key,json_encode($subject),300);
             return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$subject]);
-        }
+//        }
     }
     /*
          * @param  课程列表
