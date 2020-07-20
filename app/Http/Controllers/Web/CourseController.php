@@ -131,6 +131,7 @@ class CourseController extends Controller {
                     ->where('title', 'like', '%' . $name . '%')
                     ->get()->toArray();
                 print_r($course);die;
+
                 foreach ($course as $k => &$v) {
                     $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])
                         ->where(function ($query) use ($methodwhere) {
