@@ -126,7 +126,7 @@ class BankController extends Controller {
      */
     public static function verifyUserExamJurisdiction($bank_id){
         //判断用户是否有做题的权限
-        $bank_info = Bank::where('id' , $bank_id)->where('is_del' , 0)->where('is_open' , 0)->first();
+        /*$bank_info = Bank::where('id' , $bank_id)->where('is_del' , 0)->where('is_open' , 0)->first();
         
         //判断题库是否存在
         if(!$bank_info || empty($bank_info)){
@@ -145,6 +145,26 @@ class BankController extends Controller {
         //通过订单表查询是否购买过
         $order_count = Order::where('student_id' , self::$accept_data['user_info']['user_id'])->whereIn('class_id' , $course_id_list)->where('status' , 2)->count();
         if($order_count <= 0){
+            return ['code' => 209 , 'msg' => '您没有做题权限'];
+        }
+        return ['code' => 200 , 'msg' => '可以做题啦'];*/
+        
+        //可做题库数量
+        $bank_list11 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_course" , function($join){
+            $join->on('ld_course.parent_id', '=', 'ld_question_bank.parent_id');
+        })->join("ld_order" , function($join){
+            $join->on('ld_course.id', '=', 'ld_order.class_id');
+        })->where('ld_question_bank.id' , $bank_id)->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->where('ld_order.nature' , 0)->groupBy('ld_question_bank.id')->get()->count();
+
+        //授权题库
+        $bank_list12 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_course_school" , function($join){
+            $join->on('ld_course_school.parent_id', '=', 'ld_question_bank.parent_id');
+        })->join("ld_order" , function($join){
+            $join->on('ld_course_school.id', '=', 'ld_order.class_id');
+        })->where('ld_question_bank.id' , $bank_id)->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->where('ld_order.nature' , 1)->groupBy('ld_question_bank.id')->get()->count();
+        
+        $count = $bank_list11 + $bank_list12;
+        if($count <= 0){
             return ['code' => 209 , 'msg' => '您没有做题权限'];
         }
         return ['code' => 200 , 'msg' => '可以做题啦'];
@@ -1865,11 +1885,21 @@ class BankController extends Controller {
         $bank_count = DB::table('ld_student_papers')->selectRaw("any_value(ld_student_papers.bank_id) as bank_id")->where('student_id' , self::$accept_data['user_info']['user_id'])->groupBy('bank_id')->get()->count();
         
         //可做题库数量
-        $ke_bank_count = DB::table('ld_question_bank')->join("ld_course" , function($join){
+        $bank_list11 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_course" , function($join){
             $join->on('ld_course.parent_id', '=', 'ld_question_bank.parent_id');
         })->join("ld_order" , function($join){
             $join->on('ld_course.id', '=', 'ld_order.class_id');
-        })->where('ld_order.student_id' , self::$accept_data['user_info']['user_id'])->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->get()->count();
+        })->where('ld_order.student_id' , self::$accept_data['user_info']['user_id'])->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->where('ld_order.nature' , 0)->groupBy('ld_question_bank.id')->get()->count();
+
+        //授权题库
+        $bank_list12 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_course_school" , function($join){
+            $join->on('ld_course_school.parent_id', '=', 'ld_question_bank.parent_id');
+        })->join("ld_order" , function($join){
+            $join->on('ld_course_school.id', '=', 'ld_order.class_id');
+        })->where('ld_order.student_id' , self::$accept_data['user_info']['user_id'])->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->where('ld_order.nature' , 1)->groupBy('ld_question_bank.id')->get()->count();
+        
+        //可做题库数量
+        $ke_bank_count = $bank_list11 + $bank_list12;
         
         //已做题库数量
         if($type == 1){
@@ -1880,12 +1910,6 @@ class BankController extends Controller {
                    $bank_info = Bank::where('id' , $v->bank_id)->first();
                    
                    //获取科目id
-                   /*if($bank_info['subject_id'] && !empty($bank_info['subject_id'])){
-                       $subject_ids = explode(',' , $bank_info['subject_id']);
-                       $subject_list= QuestionSubject::select('id as subject_id' , 'subject_name')->whereIn('id' , $subject_ids)->where('subject_name' , '!=' , "")->where('is_del' , 0)->get();
-                   } else {
-                       $subject_list= [];
-                   }*/
                    $subject_list= QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->bank_id)->where('subject_name' , '!=' , "")->where('is_del' , 0)->get();
                    
                    $arr[] =[
@@ -1897,29 +1921,37 @@ class BankController extends Controller {
             }
         } else {  //可做题库数量
             if($ke_bank_count && $ke_bank_count > 0){
-                $bank_list = DB::table('ld_question_bank')->join("ld_course" , function($join){
+                $bank_list1 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_course" , function($join){
                     $join->on('ld_course.parent_id', '=', 'ld_question_bank.parent_id');
                 })->join("ld_order" , function($join){
                     $join->on('ld_course.id', '=', 'ld_order.class_id');
-                })->select('ld_question_bank.id as bank_id')->where('ld_order.student_id' , self::$accept_data['user_info']['user_id'])->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->offset($offset)->limit($pagesize)->get()->toArray();
-               foreach($bank_list as $k=>$v){
-                   //题库名称
-                   $bank_info = Bank::where('id' , $v->bank_id)->first();
-                   
-                   //获取科目id
-                   if($bank_info['subject_id'] && !empty($bank_info['subject_id'])){
-                       $subject_ids = explode(',' , $bank_info['subject_id']);
-                       $subject_list= QuestionSubject::select('id as subject_id' , 'subject_name')->whereIn('id' , $subject_ids)->where('subject_name' , '!=' , "")->where('is_del' , 0)->get();
-                   } else {
-                       $subject_list= [];
-                   }
-                   
-                   $arr[] =[
-                       'bank_id'     =>  $v->bank_id ,
-                       'bank_name'   =>  $bank_info['topic_name'] , 
-                       'subject_list'=>  $subject_list
-                   ];
-               }
+                })->where('ld_order.student_id' , self::$accept_data['user_info']['user_id'])->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->where('ld_order.nature' , 0)->groupBy('ld_question_bank.id')->get()->toArray();
+               
+                //授权题库
+                $bank_list2 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_course_school" , function($join){
+                    $join->on('ld_course_school.parent_id', '=', 'ld_question_bank.parent_id');
+                })->join("ld_order" , function($join){
+                    $join->on('ld_course_school.id', '=', 'ld_order.class_id');
+                })->where('ld_order.student_id' , self::$accept_data['user_info']['user_id'])->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->where('ld_order.nature' , 1)->groupBy('ld_question_bank.id')->get()->toArray();
+                
+                //获取总条数
+                $bank_list = array_merge((array)$bank_list1 , (array)$bank_list2);
+                if($bank_list && !empty($bank_list)){
+                    foreach($bank_list as $k=>$v){
+                        //题库名称
+                        $bank_info = Bank::where('id' , $v->bank_id)->first();
+
+                        //获取科目id
+                        $subject_list= QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->bank_id)->where('subject_name' , '!=' , "")->where('is_del' , 0)->get();
+
+                        $arr[] =[
+                            'bank_id'     =>  $v->bank_id ,
+                            'bank_name'   =>  $bank_info['topic_name'] , 
+                            'subject_list'=>  $subject_list
+                        ];
+                    }
+                    $arr   = array_slice($arr,$offset,$pagesize);
+                }
             }
         }
         return response()->json(['code' => 200 , 'msg' => '获取信息成功' , 'data' => ['bank_list' => $arr , 'yi_bank_count' => $bank_count , 'ke_bank_count' => $ke_bank_count , 'page' => (int)$page , 'pagesize' => (int)$pagesize]]);
