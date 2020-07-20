@@ -431,6 +431,7 @@ class CourseController extends Controller {
          * @param  ctime   2020/7/7 15:18
          * return  array
          */
+
     public function courseIntroduce(){
         $nature = $this->data['nature'];
         if($nature == 1){
