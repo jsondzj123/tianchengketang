@@ -275,7 +275,7 @@ class Order extends Model {
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         if($order['status'] == 1) {
             if ($data['status'] == 2) {
-                $update = self::where(['id' => $data['order_id']])->update(['status' => 2]);
+                $update = self::where(['id' => $data['order_id']])->update(['status' => 2,'oa_status' => 1, 'update_at' => date('Y-m-d H:i:s')]);
                 if ($update) {
                     //最后一笔款或全款 开课
                     if ($order['pay_status'] == 3 || $order['pay_status'] == 4) {
@@ -284,7 +284,7 @@ class Order extends Model {
                         //计算用户购买课程到期时间
                         $validity = date('Y-m-d H:i:s', strtotime('+' . $lessons['ttl'] . ' day'));
                         //修改订单状态 课程有效期 oa状态
-                        $update = self::where(['id' => $order['id']])->update(['status' => 2, 'validity_time' => $validity, 'oa_status' => 1, 'update_at' => date('Y-m-d H:i:s')]);
+                        self::where(['id' => $order['id']])->update(['status' => 2, 'validity_time' => $validity, 'update_at' => date('Y-m-d H:i:s')]);
                         //修改用户报名状态
                         //判断此用户所有订单数量
                         $overorder = Order::where(['student_id'=>$order['student_id'],'status'=>2])->count(); //用户已完成订单
