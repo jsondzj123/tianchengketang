@@ -1462,6 +1462,7 @@ class BankController extends Controller {
                         'name'          =>  $name ,
                         'make_date'     =>  $make_date ,
                         'make_time'     =>  $make_time ,
+                        'answer_score'  =>  !empty($v['answer_score']) && $v['answer_score'] > 0 ? $v['answer_score'] : 0 ,
                         'collect_count' =>  $collect_count ,
                         'error_count'   =>  $error_count ,
                         'is_over'       =>  $is_over
