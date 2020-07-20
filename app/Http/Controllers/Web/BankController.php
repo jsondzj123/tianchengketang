@@ -15,6 +15,8 @@ use App\Models\StudentPapers;
 use App\Models\Coures;
 use App\Models\Order;
 use App\Models\School;
+use App\Models\Admin;
+use App\Models\CourseRefBank;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
@@ -43,32 +45,71 @@ class BankController extends Controller {
                 return response()->json(['code' => 203 , 'msg' => '此域名不合法']);
             }
             
-            //题库数组赋值
-            $bank_array = [];
+            //判断此学校是否是总校
+            $school_count = Admin::where('school_id' , $school_info['id'])->where('school_status' , 1)->where('is_forbid' , 1)->where('is_del' , 1)->count();
             
-            //获取全部题库的列表
-            $bank_list = Bank::select('id' , 'subject_id' , 'topic_name')->where('school_id' , $school_info['id'])->where('is_del' , 0)->where('is_open' , 0)->orderByDesc('id')->get();
-            if($bank_list && !empty($bank_list)){
-                foreach($bank_list as $k=>$v){
-                    //根据科目的id获取列表数据
-                    $subject_list = QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->id)->where('is_del' , 0)->get();
-                    /*if($v->subject_id && !empty($v->subject_id)){
-                        //科目id数据格式转化
-                        $subject_id   = explode(',' , $v->subject_id);
-                        
+            //判断是否是总校
+            if($school_count && $school_count > 0){
+                //题库数组赋值
+                $bank_array = [];
+            
+                //获取全部题库的列表
+                $bank_list = Bank::select('id' , 'subject_id' , 'topic_name')->where('school_id' , $school_info['id'])->where('is_del' , 0)->where('is_open' , 0)->orderByDesc('id')->get();
+                if($bank_list && !empty($bank_list)){
+                    foreach($bank_list as $k=>$v){
                         //根据科目的id获取列表数据
-                        $subject_list = QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->id)->whereIn('id' , $subject_id)->where('is_del' , 0)->get();
-                    } else {
-                        $subject_list = [];
-                    }*/
-                    
-                    //新数组赋值
-                    $bank_array[] = [
-                        'bank_id'     =>   $v->id ,
-                        'bank_name'   =>   $v->topic_name ,
-                        'subject_list'=>   $subject_list
-                    ];
+                        $subject_list = QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->id)->where('is_del' , 0)->get();
+
+                        //新数组赋值
+                        $bank_array[] = [
+                            'bank_id'     =>   $v->id ,
+                            'bank_name'   =>   $v->topic_name ,
+                            'subject_list'=>   $subject_list
+                        ];
+                    }
                 }
+            } else { //分校
+                //题库数组赋值
+                $bank_array1 = [];
+                $bank_array2 = [];
+                
+                //获取全部题库的列表
+                $bank_list = Bank::select('id' , 'subject_id' , 'topic_name')->where('school_id' , $school_info['id'])->where('is_del' , 0)->where('is_open' , 0)->orderByDesc('id')->get();
+                if($bank_list && !empty($bank_list)){
+                    foreach($bank_list as $k=>$v){
+                        //根据科目的id获取列表数据
+                        $subject_list = QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->id)->where('is_del' , 0)->get();
+
+                        //新数组赋值
+                        $bank_array1[] = [
+                            'bank_id'     =>   $v->id ,
+                            'bank_name'   =>   $v->topic_name ,
+                            'subject_list'=>   $subject_list
+                        ];
+                    }
+                }
+                
+                //授权的题库列表
+                $bank_list2 = CourseRefBank::where('to_school_id' , $school_info['id'])->where('is_del' , 0)->orderByDesc('create_at')->get();
+                if($bank_list2 && !empty($bank_list2)){
+                    foreach($bank_list2 as $k=>$v){
+                        //根据题库的id获取题库信息
+                        $bank_info = Bank::where('id' , $v->bank_id)->first();
+
+                        //根据科目的id获取列表数据
+                        $subject_list2 = QuestionSubject::select('id as subject_id' , 'subject_name')->where('bank_id' , $v->bank_id)->where('is_del' , 0)->get();
+
+                        //新数组赋值
+                        $bank_array2[] = [
+                            'bank_id'     =>   $v->bank_id ,
+                            'bank_name'   =>   $bank_info['topic_name'] ,
+                            'subject_list'=>   $subject_list2
+                        ];
+                    }
+                }
+                
+                //获取总条数
+                $bank_array = array_merge((array)$bank_array1 , (array)$bank_array2);
             }
             return response()->json(['code' => 200 , 'msg' => '获取全部题库列表成功' , 'data' => $bank_array]);
         } catch (Exception $ex) {
