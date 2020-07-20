@@ -71,10 +71,10 @@ class IndexController extends Controller {
     public function course(){
     	$course =  $zizengCourseData = $natureCourseData = $CouresData = [];
     	$subjectOne = CouresSubject::where(['school_id'=>$this->school['id'],'is_open'=>0,'is_del'=>0,'parent_id'=>0])->select('id')->get()->toArray();//自增学科大类
-        $natuerSubjectOne = CourseSchool::select('parent_id')->where(['to_school_id'=>$this->school['id'],'is_del'=>0,'status'=>1])->groupBy('parent_id')->get()->toArray();//授权学科大类
+        $natuerSubjectOne = CourseSchool::select('parent_id')->where(['to_school_id'=>$this->school['id'],'is_del'=>0,'status'=>1])->select('parent_id as id')->groupBy('parent_id')->get()->toArray();//授权学科大类
         if(!empty($natuerSubjectOne)){
             foreach($natuerSubjectOne as $key=>&$v){
-                $subject_name= Subject::where(['id'=>$v['parent_id'],'is_del'=>0])->select('subject_name')->first();
+                $subject_name= Subject::where(['id'=>$v['id'],'is_del'=>0])->select('subject_name')->first();
                 $v['subject_name'] =$subject_name['subject_name'];
             }
         }
@@ -91,6 +91,7 @@ class IndexController extends Controller {
             $subject = empty($subjectOne) ?$natuerSubjectOne:$subjectOne;
         }
         $newArr = [];
+
         foreach ($subject as $key => $val) {
             $natureCourseData = CourseSchool::where(['to_school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id']])->limit(8)->get()->toArray();//授权课程
             $count = count($natureCourseData);
