@@ -96,10 +96,10 @@ class CourseController extends Controller {
             $count1 = Coures::where(['school_id' => $school_id, 'is_del' => 0,'status'=>1])
                 ->where('title', 'like', '%' . $name . '%')
                 ->where(function ($query) use ($parent) {
-                    if (!empty($parent[0]) && $parent[0] != '') {
+                    if (!empty($parent[0]) && $parent[0] != ''&& $parent[0] != 0) {
                         $query->where('parent_id', $parent[0]);
                     }
-                    if (!empty($parent[1]) && $parent[1] != '') {
+                    if (!empty($parent[1]) && $parent[1] != ''&& $parent[1] != 0) {
                         $query->where('child_id', $parent[1]);
                     }
                 })->count();
@@ -107,10 +107,10 @@ class CourseController extends Controller {
             $count2 = CourseSchool::where(['to_school_id' => $school_id, 'is_del' => 0,'status'=>1])
                 ->where('title', 'like', '%' . $name . '%')
                 ->where(function ($query) use ($parent) {
-                    if (!empty($parent[0]) && $parent[0] != '') {
+                    if (!empty($parent[0]) && $parent[0] != ''&& $parent[0] != 0) {
                         $query->where('parent_id', $parent[0]);
                     }
-                    if (!empty($parent[1]) && $parent[1] != '') {
+                    if (!empty($parent[1]) && $parent[1] != ''&& $parent[1] != 0) {
                         $query->where('child_id', $parent[1]);
                     }
                 })->count();
@@ -164,7 +164,7 @@ class CourseController extends Controller {
                         if (!empty($parent[0]) && $parent[0] != ''&& $parent[0] != 0) {
                             $query->where('parent_id', $parent[0]);
                         }
-                        if (!empty($parent[1]) && $parent[1] != ''&& $parent[0] != 0) {
+                        if (!empty($parent[1]) && $parent[1] != ''&& $parent[1] != 0) {
                             $query->where('child_id', $parent[1]);
                         }
                     })
