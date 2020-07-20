@@ -677,7 +677,7 @@ class CourseController extends Controller {
         $ziyuan = [];
 //        if($is_pay > 0){
             //录播资料
-            $jie = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0])->where('parent_id','!=',0)->get();
+            $jie = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0])->where('parent_id','>',0)->get();
             if(!empty($jie)){
                 foreach ($jie as $k=>$v){
                     $ziliao = Couresmaterial::where(['parent_id'=>$v['id'],'is_del'=>0,'mold'=>1])
