@@ -70,6 +70,9 @@ class CourseController extends Controller {
                       }
                   }
               })->get()->toArray();
+          foreach ($list2 as $k=>&$v){
+              $v['nature'] = 1;
+          }
           if(!empty($list1) && !empty($list2)){
               $list = array_merge($list1,$list2);
           }else{
