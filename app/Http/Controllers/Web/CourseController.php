@@ -281,19 +281,28 @@ class CourseController extends Controller {
                 }
             }
             //是否购买
-            if ($course['sale_price'] > 0) {
-                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['course_id'], 'status' => 2,'nature'=>1])->count();
-                $course['is_pay'] = $order > 0 ? 1 : 0;
-            } else {
-                $course['is_pay'] = 1;
+            if($this->userid != 0){
+                if ($course['sale_price'] > 0) {
+                    $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['course_id'], 'status' => 2,'nature'=>1])->count();
+                    $course['is_pay'] = $order > 0 ? 1 : 0;
+                } else {
+                    $course['is_pay'] = 1;
+                }
+            }else{
+                $course['is_pay'] = 0;
             }
+
             //收藏数量
             $collect = Collection::where(['lesson_id'=>$course['course_id'],'is_del'=>0,'nature'=>1])->count();
             $course['collect'] = $collect;
             //判断用户是否收藏
-            $collects = Collection::where(['lesson_id'=>$course['course_id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
-            if($collects != 0){
-                $course['is_collect'] = 1;
+            if($this->userid != 0){
+                $collects = Collection::where(['lesson_id'=>$course['course_id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
+                if($collects != 0){
+                    $course['is_collect'] = 1;
+                }else{
+                    $course['is_collect'] = 0;
+                }
             }else{
                 $course['is_collect'] = 0;
             }
@@ -322,19 +331,27 @@ class CourseController extends Controller {
                 }
             }
             //是否购买
-            if ($course['sale_price'] > 0) {
-                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
-                $course['is_pay'] = $order > 0 ? 1 : 0;
-            } else {
-                $course['is_pay'] = 1;
+            if($this->userid != 0){
+                if ($course['sale_price'] > 0) {
+                    $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
+                    $course['is_pay'] = $order > 0 ? 1 : 0;
+                } else {
+                    $course['is_pay'] = 1;
+                }
+            }else{
+                $course['is_pay'] = 0;
             }
             //收藏数量
             $collect = Collection::where(['lesson_id'=>$this->data['id'],'is_del'=>0,'nature'=>0])->count();
             $course['collect'] = $collect;
             //判断用户是否收藏
-            $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->count();
-            if($collects != 0){
-                $course['is_collect'] = 1;
+            if($this->userid != 0){
+                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->count();
+                if($collects != 0){
+                    $course['is_collect'] = 1;
+                }else{
+                    $course['is_collect'] = 0;
+                }
             }else{
                 $course['is_collect'] = 0;
             }
@@ -466,31 +483,36 @@ class CourseController extends Controller {
                 'nature' =>0
             ];
         }
+        //判断用户是否登录
         //判断用户与课程的关系
         //判断课程是否免费
-        if($course['sale_price'] > 0){
-            $order = Order::where($orderwhere)->first();
-            //判断是否购买
-            if(!empty($order)){
-                //判断是否到期 0是无期限
-                if($course['expiry'] != 0){
-                    //看订单里面的到期时间 进行判断
-                    if(date('Y-m-d H:i:s') >= $order['validity_time']){
-                        //课程到期  只能观看
-                        $is_show = 0;
-                    }else{
+        if($this->userid != 0) {
+            if ($course['sale_price'] > 0) {
+                $order = Order::where($orderwhere)->first();
+                //判断是否购买
+                if (!empty($order)) {
+                    //判断是否到期 0是无期限
+                    if ($course['expiry'] != 0) {
+                        //看订单里面的到期时间 进行判断
+                        if (date('Y-m-d H:i:s') >= $order['validity_time']) {
+                            //课程到期  只能观看
+                            $is_show = 0;
+                        } else {
+                            $is_show = 1;
+                        }
+                    } else {
                         $is_show = 1;
                     }
-                }else{
-                    $is_show = 1;
+                } else {
+                    //未购买
+                    $is_show = 0;
                 }
-            }else{
-                //未购买
-                $is_show = 0;
+            } else {
+                //免费
+                $is_show = 1;
             }
         }else{
-            //免费
-            $is_show = 1;
+            $is_show = 0;
         }
         //章总数
         $count = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0,'parent_id'=>0])->count();
@@ -574,12 +596,22 @@ class CourseController extends Controller {
         if($nature == 1){
             $course = CourseSchool ::where(['to_school_id'=>$this->school['id'],'id'=>$this->data['id'],'is_del'=>0])->first();
             //课程是否免费或者用户是否购买，如果购买，显示全部班号课次
-            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+            if($this->userid != 0){
+                $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+            }else{
+                $order = 0;
+            }
             $this->data['id'] = $course['course_id'];
+
         }else{
             $course = Coures::where(['school_id'=>$this->school['id'],'id'=>$this->data['id'],'is_del'=>0])->first();
             //课程是否免费或者用户是否购买，如果购买，显示全部班号课次
-            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+            if($this->userid != 0){
+                $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+            }else{
+                $order = 0;
+            }
+
         }
         if(!$course){
             return response()->json(['code' => 201 , 'msg' => '无查看权限']);
