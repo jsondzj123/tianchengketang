@@ -704,7 +704,7 @@ class CourseController extends Controller {
 //            }
 //        }
         $res = array_slice($ziyuan, $offset, $pagesize);
-        return ['code' => 200 , 'msg' => '查询成功','data'=>$res,'page'=>$page];
+        return ['code' => 200 , 'msg' => '查询成功','data'=>$ziyuan,'page'=>$page];
     }
     /**
      * google api 二维码生成【QRcode可以存储最多4296个字母数字类型的任意文本，具体可以查看二维码数据格式】
