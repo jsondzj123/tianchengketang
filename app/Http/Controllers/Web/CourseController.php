@@ -533,8 +533,7 @@ class CourseController extends Controller {
 //                    'is_free' => 2
                 ];
             }
-
-            $key = "webCourse" . $this->data['id'] . $this->userid;
+            $key = "webCourseluboList" . $this->data['id'] . $this->userid;
             if (Redis::get($key)) {
                 $recorde = json_decode(Redis::get($key), true);
             } else {
@@ -574,7 +573,7 @@ class CourseController extends Controller {
                         }
                     }
                 }
-                Redis::set($key,json_encode($recorde),3600);
+                Redis::set($key,json_encode($recorde),300);
             }
         }
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde]);
