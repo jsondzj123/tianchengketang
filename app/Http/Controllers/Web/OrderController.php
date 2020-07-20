@@ -3,10 +3,26 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\School;
 use App\Tools\AlipayFactory;
 use App\Tools\WxpayFactory;
 
 class OrderController extends Controller {
+    protected $school;
+    protected $data;
+    protected $userid;
+    public function __construct(){
+        $this->data = $_REQUEST;
+        $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
+        $this->userid = isset($this->data['user_info']['user_id'])?$this->data['user_info']['user_id']:0;
+    }
+
+     public function userPay(){
+
+     }
+     public function userPaying(){
+
+     }
     //微信pc支付
     public function wxPcpay(){
         $wxpay = new WxpayFactory();
