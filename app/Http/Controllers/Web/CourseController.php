@@ -654,28 +654,29 @@ class CourseController extends Controller {
         $offset   = ($page - 1) * $pagesize;
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
         //订单判断是否购买
-        if($nature == 1){
-            $course = CourseSchool ::where(['id'=>$this->data['id'],'is_del'=>0])->first();
-            //课程是否免费或者用户是否购买
-            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
-            if($order > 0){
-                $is_pay = 1;
-            }else{
-                $is_pay = 0;
-            }
-            $this->data['id'] = $course['course_id'];
-        }else{
-            //课程是否免费或者用户是否购买
-            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
-            if($order > 0){
-                $is_pay = 1;
-            }else{
-                $is_pay = 0;
-            }
-        }
+//        if($nature == 1){
+//            $course = CourseSchool ::where(['id'=>$this->data['id'],'is_del'=>0])->first();
+//            //课程是否免费或者用户是否购买
+//            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+//            if($order > 0){
+//                $is_pay = 1;
+//            }else{
+//                $is_pay = 0;
+//            }
+//            $this->data['id'] = $course['course_id'];
+//        }else{
+//            //课程是否免费或者用户是否购买
+//            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+//            if($order > 0){
+//                $is_pay = 1;
+//            }else{
+//                $is_pay = 0;
+//            }
+//        }
         $type = isset($this->data['type'])?$this->data['type']:'';
+        echo $type;die;
         $ziyuan = [];
-        if($is_pay = 0){
+//        if($is_pay > 0){
             //录播资料
             $jie = Coureschapters::where(['course_id'=>$this->data['id'],'parent_id'=>0,'is_del'=>0])->get();
             if(!empty($jie)){
@@ -690,19 +691,19 @@ class CourseController extends Controller {
                 }
             }
             //直播资料
-            $ban = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
-            if(!empty($ban)){
-                foreach ($ban as $ks=>$vs){
-                    $ziliaos = Couresmaterial::where(['parent_id'=>$vs['id'],'is_del'=>0,'mold'=>2])
-                        ->where(function ($query) use ($type) {
-                            if (!empty($type) && $type != '' && $type != 0) {
-                                $query->where('type', $type);
-                            }
-                        })->first();
-                    $ziyuan[] = $ziliaos;
-                }
-            }
-        }
+//            $ban = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
+//            if(!empty($ban)){
+//                foreach ($ban as $ks=>$vs){
+//                    $ziliaos = Couresmaterial::where(['parent_id'=>$vs['id'],'is_del'=>0,'mold'=>2])
+//                        ->where(function ($query) use ($type) {
+//                            if (!empty($type) && $type != '' && $type != 0) {
+//                                $query->where('type', $type);
+//                            }
+//                        })->first();
+//                    $ziyuan[] = $ziliaos;
+//                }
+//            }
+//        }
         $res = array_slice($ziyuan, $offset, $pagesize);
         return ['code' => 200 , 'msg' => '查询成功','data'=>$res,'page'=>$page];
     }
