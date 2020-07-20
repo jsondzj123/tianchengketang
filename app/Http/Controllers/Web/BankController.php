@@ -1828,7 +1828,7 @@ class BankController extends Controller {
             $join->on('ld_course.parent_id', '=', 'ld_question_bank.parent_id');
         })->join("ld_order" , function($join){
             $join->on('ld_course.id', '=', 'ld_order.class_id');
-        })->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->get()->count();
+        })->where('ld_order.student_id' , self::$accept_data['user_info']['user_id'])->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->get()->count();
         
         //已做题库数量
         if($type == 1){
@@ -1859,7 +1859,7 @@ class BankController extends Controller {
                     $join->on('ld_course.parent_id', '=', 'ld_question_bank.parent_id');
                 })->join("ld_order" , function($join){
                     $join->on('ld_course.id', '=', 'ld_order.class_id');
-                })->select('ld_question_bank.id as bank_id')->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->offset($offset)->limit($pagesize)->get()->toArray();
+                })->select('ld_question_bank.id as bank_id')->where('ld_order.student_id' , self::$accept_data['user_info']['user_id'])->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->offset($offset)->limit($pagesize)->get()->toArray();
                foreach($bank_list as $k=>$v){
                    //题库名称
                    $bank_info = Bank::where('id' , $v->bank_id)->first();
