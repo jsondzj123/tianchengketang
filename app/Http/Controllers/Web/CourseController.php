@@ -447,7 +447,7 @@ class CourseController extends Controller {
                 return response()->json(['code' => 201 , 'msg' => '无查看权限']);
             }
         }
-        return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$course['introduce']]);
+        return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$course]);
     }
     /*
          * @param  课程录播列表
