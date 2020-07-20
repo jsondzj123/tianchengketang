@@ -440,7 +440,7 @@ class Order extends Model {
             return ['code' => 201 , 'msg' => '学员id为空'];
         }
        // DB::enableQueryLog();
-        $order = self::selectRaw("any_value(class_id),any_value(pay_type),any_value(nature),any_value(status),any_value(pay_status),any_value(create_at)")->where(['student_id'=>$data['student_id']])->orderByDesc('create_at')->groupBy('class_id')->get()->toArray();
+        $order = DB::table('ld_order')->selectRaw("any_value(class_id),any_value(pay_type),any_value(nature),any_value(status),any_value(pay_status),any_value(create_at)")->where(['student_id'=>$data['student_id']])->orderByDesc('create_at')->groupBy('class_id')->get()->toArray();
 
         //$a = DB::getQueryLog();
         //return ['code' => 201 , 'msg' => $a];
