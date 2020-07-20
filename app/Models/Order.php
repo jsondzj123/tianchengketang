@@ -184,24 +184,21 @@ class Order extends Model {
             if(!isset($arr['type']) || empty($arr['type'] || !in_array($arr['type'],[1,2,3]))){
                 return ['code' => 201 , 'msg' => '机型不匹配'];
             }
-            $course = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1])->first();
-
-
+            $nature = isset($arr['nature'])?$arr['nature']:0;
             //判断用户网校，根据网校查询课程信息
-//           if($student['school_id'] == 1){
-//               //根据课程id 查询价格
-//               $lesson = Lesson::select('id','title','cover','price','favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'is_forbid'=>0,'status'=>2,'is_public'=>0])->first();
-//           }else{
-//                //根据课程id 网校id 查询网校课程详情
-//               $lesson = LessonSchool::select('id','title','cover','price','favorable_price')->where(['lesson_id'=>$arr['class_id'],'school_id'=>$student['school_id'],'is_del'=>0,'is_forbid'=>0,'status'=>1,'is_public'=>0])->first();
-//           }
+           if($nature == 1){
+               //授权课程
+               $course = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
+           }else{
+                //自增课程
+               $course = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1])->first();
+           }
             if(!$course){
                 return ['code' => 204 , 'msg' => '此课程选择无效'];
             }
             if(empty($course['favorable_price']) || empty($course['price'])){
                 return ['code' => 204 , 'msg' => '此课程信息有误选择无效'];
             }
-
             //根据分校查询支付方式
             $payList = PaySet::where(['school_id'=>$student['school_id']])->first();
             if(empty($payList)) {

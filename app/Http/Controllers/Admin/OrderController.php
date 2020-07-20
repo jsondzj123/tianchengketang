@@ -84,7 +84,7 @@ class OrderController extends Controller {
         if(!$orderinfo){
             return ['code' => 201 , 'msg' => '订单参数不对'];
         }
-        if($orderinfo['order_type'] == 2 && in_array($orderinfo['status'],['1','2','3'])){
+        if($orderinfo['order_type'] == 2 && in_array($orderinfo['status'],[1,2])){
             //苹果内购 退回到余额
             if($orderinfo['pay_type'] == 5){
                 DB::beginTransaction();
