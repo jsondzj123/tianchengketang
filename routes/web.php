@@ -198,7 +198,6 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('urlcode','CourseController@urlcode');//二维码测试
     });
 });
-
 //后台端路由接口
 /*****************start**********************/
 //后端登录注册接口
