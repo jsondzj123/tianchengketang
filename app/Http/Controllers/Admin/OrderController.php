@@ -84,7 +84,7 @@ class OrderController extends Controller {
         if(!$orderinfo){
             return ['code' => 201 , 'msg' => '订单参数不对'];
         }
-        if($orderinfo['order_type'] == 2 && $orderinfo['status'] > 0 && $orderinfo['status'] < 3){
+        if($orderinfo['status'] > 0 && $orderinfo['status'] < 3){
             //苹果内购 退回到余额
             if($orderinfo['pay_type'] == 5){
                 DB::beginTransaction();
@@ -92,10 +92,10 @@ class OrderController extends Controller {
                 $endprice = $user['balance'] + $orderinfo['price'];
                 Student::where(['id'=>$orderinfo['student_id']])->update(['balance'=>$endprice]);
                 StudentAccountlog::insert(['user_id'=>$orderinfo['student_id'],'price'=>$orderinfo['price'],'end_price'=>$endprice,'status'=>1]);
-                $up = Order::where(['id'=>$data['order_id']])->update(['status'=>4,'validity_time'=>'']);
+                $up = Order::where(['id'=>$data['order_id']])->update(['status'=>4,'validity_time'=>null]);
             }else{
                 //其他修改状态
-                $up = Order::where(['id'=>$data['order_id']])->update(['status'=>4,'validity_time'=>'']);
+                $up = Order::where(['id'=>$data['order_id']])->update(['status'=>4,'validity_time'=>null]);
             }
             if($up){
                 DB::commit();
