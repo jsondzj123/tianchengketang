@@ -78,6 +78,7 @@ class TeacherController extends Controller {
 				 $sort = array_column($teacherData, 'buy_num');      
        			 array_multisort($sort, SORT_DESC, $teacherData);  
 			}
+			$teacherData = array_unique($teacherData, SORT_REGULAR);
 		}else{
 			$teacherData=[];
 		}
@@ -85,7 +86,6 @@ class TeacherController extends Controller {
         $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
      
 		$start=($page-1)*$pagesize;
-		
         $limit_s=$start+$pagesize;
         $info=[];
         for($i=$start;$i<$limit_s;$i++){
