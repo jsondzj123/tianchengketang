@@ -30,6 +30,7 @@ class IndexController extends Controller {
     	$limit = 8;
         $courseRefTeacher = CourseRefTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_ref_teacher.teacher_id')
             ->where(['to_school_id'=>$this->school['id'],'type'=>2])->limit($limit)->get()->toArray();
+        $courseRefTeacher = array_unique($courseRefTeacher, SORT_REGULAR);
         $count = count($courseRefTeacher);
     	if($count<$limit){
     		$teacherData = Teacher::where(['school_id'=>$this->school['id'],'is_del'=>0,'type'=>2])->orderBy('number','desc')->select('id','head_icon','real_name','describe','number','teacher_icon')->limit($limit-$count)->get()->toArray();
