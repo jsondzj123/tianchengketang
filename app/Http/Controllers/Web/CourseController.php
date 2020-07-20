@@ -520,7 +520,7 @@ class CourseController extends Controller {
                 //查询免费课程
                 $chapterswhere = [
                     'is_del' => 0,
-                    'is_free' => 2
+//                    'is_free' => 2
                 ];
             }
 
@@ -543,22 +543,22 @@ class CourseController extends Controller {
                                 if (empty($ziyuan)) {
                                     $val['study'] = 0;
                                 } else {
-                                    $val['study'] = 0;
-//                                    $MTCloud = new MTCloud();
-//                                    $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
-//                                    if (isset($use_duration['data']) || !empty($use_duration['data'])) {
-//                                        foreach ($use_duration['data'] as $kk => $vv) {
-//                                            if ($vv['uid'] == $this->userid) {
-//                                                if ($vv['use_duration'] == 0) {
-//                                                    $val['study'] = 0;
-//                                                } else {
-//                                                    $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
-//                                                }
-//                                            } else {
-//                                                $val['study'] = 0;
-//                                            }
-//                                        }
-//                                    }
+//                                    $val['study'] = 0;
+                                    $MTCloud = new MTCloud();
+                                    $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
+                                    if (isset($use_duration['data']) || !empty($use_duration['data'])) {
+                                        foreach ($use_duration['data'] as $kk => $vv) {
+                                            if ($vv['uid'] == $this->userid) {
+                                                if ($vv['use_duration'] == 0) {
+                                                    $val['study'] = 0;
+                                                } else {
+                                                    $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
+                                                }
+                                            } else {
+                                                $val['study'] = 0;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                             $v['chapters'] = $recordes;
