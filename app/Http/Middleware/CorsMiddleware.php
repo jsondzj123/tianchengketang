@@ -32,6 +32,22 @@ class CorsMiddleware
             'http://ketang.longde999.cn',
             'http://tiancheng.admin.longde999.cn',
             'http://tiancheng.longde999.cn',
+            'http://qc.qcedu101.com',
+            'http://yd.bijyangde.com',
+            'http://gl.tiancheng27.com',
+            'http://hs.hongsheng369.com',
+            'http://yl.tiancheng27.com',
+            'http://scld.shanchuangpeixun.com',
+            'http://lc.lczx99.com',
+            'http://xh.xianghangedu.com',
+            'http://zz.tiancheng27.com',
+            'http://jy.jingyi989.com',
+            'http://tc.tiancheng27.com',
+            'http://edu.hxsx99.com',
+            'http://jl.jinlong567.com',
+            'http://bk.tiancheng27.com',
+            'http://dc.tiancheng27.com',
+        
         ];
         $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 
