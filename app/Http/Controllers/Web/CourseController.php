@@ -63,7 +63,7 @@ class CourseController extends Controller {
                 foreach ($course as $ks=>$vs){
                     $ones = CouresSubject::where(['id'=>$vs['parent_id'],'parent_id'=>0,'is_open'=>0,'is_del'=>0])->first()->toArray();
                     if(!empty($ones)){
-                        $ones['son'] = CouresSubject::where(['parent_id'=>$v['parent_id'],'is_open'=>0,'is_del'=>0])->get()->toArray();
+                        $ones['son'] = CouresSubject::where(['parent_id'=>$vs['parent_id'],'is_open'=>0,'is_del'=>0])->get()->toArray();
                     }
                     array_push($subject,$ones);
                 }
