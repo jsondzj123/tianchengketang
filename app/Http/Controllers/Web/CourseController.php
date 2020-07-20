@@ -103,6 +103,7 @@ class CourseController extends Controller {
                         $query->where('child_id', $parent[1]);
                     }
                 })->count();
+
             $count2 = CourseSchool::where(['to_school_id' => $school_id, 'is_del' => 0,'status'=>1])
                 ->where('title', 'like', '%' . $name . '%')
                 ->where(function ($query) use ($parent) {
@@ -113,7 +114,7 @@ class CourseController extends Controller {
                         $query->where('child_id', $parent[1]);
                     }
                 })->count();
-            $count = $count1 + $count2;
+        $count = 0;
             //自增课程
             $course = [];
             if ($count1 != 0) {
@@ -137,6 +138,7 @@ class CourseController extends Controller {
                             }
                         })->get()->toArray();
                     if (!empty($method)) {
+                        $count = $count +1;
                         foreach ($method as $key => &$val) {
                             if ($val['method_id'] == 1) {
                                 $val['method_name'] = '直播';
@@ -189,6 +191,7 @@ class CourseController extends Controller {
                                         }
                                     })->get()->toArray();
                                 if (!empty($method)) {
+                                    $count = $count +1;
                                     foreach ($method as $key => &$val) {
                                         if ($val['method_id'] == 1) {
                                             $val['method_name'] = '直播';
