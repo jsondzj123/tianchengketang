@@ -549,7 +549,6 @@ class CourseController extends Controller {
                                 $val['study'] = 0;
                             } else {
                                 $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
-                                $aaaa[]=$use_duration;
                                 if (isset($use_duration['data']) || !empty($use_duration['data'])) {
                                     foreach ($use_duration['data'] as $kk => $vv) {
                                         if ($vv['uid'] == $this->userid) {
@@ -570,7 +569,6 @@ class CourseController extends Controller {
                 }
             }
         }
-        print_r($aaaa);die;
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde]);
     }
     /*
