@@ -85,8 +85,8 @@ class Order extends Model {
        * @param  $student_id  用户id
        * @param  $lession_id 学科id
        * @param  $lession_price 原价
-       * @param  $student_price 现价
-       * @param  $payment_fee 学员价格
+       * @param  $student_price 学员价格
+       * @param  $payment_fee 付款金额
        * @param  $payment_type 1定金2尾款3最后一笔尾款4全款
        * @param  $payment_method 1微信2支付宝3银行转账
        * @param  $payment_time 支付时间
@@ -130,8 +130,8 @@ class Order extends Model {
         $data['order_number'] = date('YmdHis', time()) . rand(1111, 9999); //订单号  随机生成
         $data['order_type'] = 1;        //1线下支付 2 线上支付
         $data['student_id'] = $arr['student_id'];
-        $data['price'] = $arr['student_price']; //应付价格
-        $data['student_price'] = $arr['payment_fee'];
+        $data['price'] = $arr['payment_fee']; //应付价格
+        $data['student_price'] = $arr['student_price'];
         $data['lession_price'] = $arr['lession_price'];
         $data['pay_status'] = $arr['payment_type'];
         $data['pay_type'] = $arr['payment_method'];
