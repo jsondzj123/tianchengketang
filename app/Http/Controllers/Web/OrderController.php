@@ -56,7 +56,7 @@ class OrderController extends Controller {
          $data['order_number'] = date('YmdHis', time()) . rand(1111, 9999);
          $data['admin_id'] = 0;  //操作员id
          $data['order_type'] = 2;        //1线下支付 2 线上支付
-         $data['student_id'] = $this->data['id'];
+         $data['student_id'] = $this->userid;
          $data['price'] = $course['sale_price'];
          $data['student_price'] = $course['pricing'];
          $data['lession_price'] = $course['pricing'];

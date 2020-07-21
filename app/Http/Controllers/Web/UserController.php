@@ -289,14 +289,13 @@ class UserController extends Controller {
         }
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$coursearr]);
     }
+
     //我的课程
     public function myCourse(){
-        echo $this->userid;
-        $order = Order::where(['status'=>2])
-//            ->where('validity_time','>',date('Y-m-d H:i:s'))
-//            ->whereIn('pay_status',[3,4])
+        $order = Order::where(['student_id'=>$this->userid,'status'=>2])
+            ->where('validity_time','>',date('Y-m-d H:i:s'))
+            ->whereIn('pay_status',[3,4])
             ->get()->toArray();
-        print_r($order);die;
         $courses = [];
         if(!empty($order)){
             foreach ($order as $k=>$v){
