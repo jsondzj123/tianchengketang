@@ -300,28 +300,28 @@ class UserController extends Controller {
                     $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
                     $courseid = $course['course_id'];
                     //查讲师
-                    $teacherlist = Couresteacher::where(['course_id'=>$courseid,'is_del'=>0])->get();
-                    $string=[];
-                    if(!empty($teacherlist)){
-                        foreach ($teacherlist as $ks=>$vs){
-                            $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
-                            $string[] = $teacher['real_name'];
-                        }
-                        $course['teachername'] = implode(',',$string);
-                    }
+//                    $teacherlist = Couresteacher::where(['course_id'=>$courseid,'is_del'=>0])->get();
+//                    $string=[];
+//                    if(!empty($teacherlist)){
+//                        foreach ($teacherlist as $ks=>$vs){
+//                            $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
+//                            $string[] = $teacher['real_name'];
+//                        }
+//                        $course['teachername'] = implode(',',$string);
+//                    }
                 }else{
                     $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
                     $courseid = $course['id'];
                     //查讲师
-                    $teacherlist = Couresteacher::where(['course_id'=>$courseid,'is_del'=>0])->get();
-                    $string=[];
-                    if(!empty($teacherlist)){
-                        foreach ($teacherlist as $ks=>$vs){
-                            $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
-                            $string[] = $teacher['real_name'];
-                        }
-                        $course['teachername'] = implode(',',$string);
-                    }
+//                    $teacherlist = Couresteacher::where(['course_id'=>$courseid,'is_del'=>0])->get();
+//                    $string=[];
+//                    if(!empty($teacherlist)){
+//                        foreach ($teacherlist as $ks=>$vs){
+//                            $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
+//                            $string[] = $teacher['real_name'];
+//                        }
+//                        $course['teachername'] = implode(',',$string);
+//                    }
                 }
                 $courses[] = $course;
             }
