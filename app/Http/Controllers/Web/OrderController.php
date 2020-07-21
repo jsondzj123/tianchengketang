@@ -106,7 +106,12 @@ class OrderController extends Controller {
         }
         $order = Order::where(['order_number'=>$this->data['order_number']])->first();
         if($order){
-            return ['code' => 200 , 'msg' => '查询成功','data'=>$order];
+            if($order['status'] == 2){
+                $fanb = 1;
+            }else{
+                $fanb = 0;
+            }
+            return ['code' => 200 , 'msg' => '查询成功','data'=>$fanb];
         }else{
             return ['code' => 201 , 'msg' => '订单号错误'];
         }
