@@ -573,11 +573,11 @@ class CourseController extends Controller {
                         }
                     }
                 }
-                if($order > 0){
-                    $recorde['is_pay'] = 1;
-                }else{
-                    $recorde['is_pay'] = 0;
-                }
+//                if($order > 0){
+//                    $recorde['is_pay'] = 1;
+//                }else{
+//                    $recorde['is_pay'] = 0;
+//                }
                 Redis::set($key,json_encode($recorde),300);
             }
         }
