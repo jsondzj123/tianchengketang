@@ -334,6 +334,7 @@ class CourseController extends Controller {
                     array_push($teacher, $oneteacher);
                 }
             }
+            echo $this->userid;die;
             //是否购买
             if($this->userid != 0){
                 if ($course['sale_price'] > 0) {
