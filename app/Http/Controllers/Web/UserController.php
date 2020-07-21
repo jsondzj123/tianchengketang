@@ -297,10 +297,10 @@ class UserController extends Controller {
         if(!empty($order)){
             foreach ($order as $k=>$v){
                 if($v['nature'] == 1){
-                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
                     $courseid = $course['course_id'];
                 }else{
-                    $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
+                    $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
                     $courseid = $course['id'];
                 }
                 //查讲师
