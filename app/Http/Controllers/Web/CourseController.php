@@ -549,24 +549,24 @@ class CourseController extends Controller {
                                 $ziyuan['video_url'] = '';
                                 $val['ziyuan'] = $ziyuan;
                             }
-                            if (empty($ziyuan)) {
-                                $val['study'] = 0;
-                            } else {
-                                $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
-                                if (isset($use_duration['data']) || !empty($use_duration['data'])) {
-                                    foreach ($use_duration['data'] as $kk => $vv) {
-                                        if ($vv['uid'] == $this->userid) {
-                                            if ($vv['use_duration'] == 0) {
-                                                $val['study'] = 0;
-                                            } else {
-                                                $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
-                                            }
-                                        } else {
-                                            $val['study'] = 0;
-                                        }
-                                    }
-                                }
-                            }
+//                            if (empty($ziyuan)) {
+//                                $val['study'] = 0;
+//                            } else {
+//                                $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
+//                                if (isset($use_duration['data']) || !empty($use_duration['data'])) {
+//                                    foreach ($use_duration['data'] as $kk => $vv) {
+//                                        if ($vv['uid'] == $this->userid) {
+//                                            if ($vv['use_duration'] == 0) {
+//                                                $val['study'] = 0;
+//                                            } else {
+//                                                $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
+//                                            }
+//                                        } else {
+//                                            $val['study'] = 0;
+//                                        }
+//                                    }
+//                                }
+//                            }
                         }
                         $v['chapters'] = $recordes;
                     }

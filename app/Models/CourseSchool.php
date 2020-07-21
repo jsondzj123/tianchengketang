@@ -702,5 +702,5 @@ class CourseSchool extends Model {
     //     }
 
     // }
-    
+
 }
