@@ -335,11 +335,16 @@ class CourseController extends Controller {
                 }
             }
             //是否购买
-            if ($course['sale_price'] > 0) {
-                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
-                $course['is_pay'] = $order > 0 ? 1 : 0;
-            } else {
-                $course['is_pay'] = 1;
+            if($this->userid != 0){
+                if ($course['sale_price'] > 0) {
+                    $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
+                    echo $order;
+                    $course['is_pay'] = $order > 0 ? 1 : 0;
+                } else {
+                    $course['is_pay'] = 1;
+                }
+            }else{
+                $course['is_pay'] = 0;
             }
             //收藏数量
             $collect = Collection::where(['lesson_id'=>$this->data['id'],'is_del'=>0,'nature'=>0])->count();
