@@ -326,7 +326,6 @@ class UserController extends Controller {
                         $course['teachername'] = implode(',',$string);
                     }
                 }
-                print_r($course);die;
                 $courses[] = $course;
             }
         }
