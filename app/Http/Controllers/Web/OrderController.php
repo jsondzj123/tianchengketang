@@ -69,6 +69,7 @@ class OrderController extends Controller {
          $add = Order::insertGetId($data);
          if($add){
              $course['order_id'] = $add;
+             $course['order_number'] = $data['order_number'];
              DB::commit();
              return ['code' => 200 , 'msg' => '生成预订单成功','data'=>$course];
          }else{
