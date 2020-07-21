@@ -543,11 +543,9 @@ class CourseController extends Controller {
                             $ziyuan = Video::where(['id' => $val['resource_id'], 'is_del' => 0, 'status' => 0])->first();
                             $video_url = $MTCloud->videoGet($ziyuan['mt_video_id'],'720d');
                             if($video_url['code'] ==  0){
-                                $ziyuan['video_url'] = $video_url['data']['videoUrl'];
-                                $val['ziyuan'] = $ziyuan;
+                                $val['video_url'] = $video_url['data']['videoUrl'];
                             }else{
-                                $ziyuan['video_url'] = '';
-                                $val['ziyuan'] = $ziyuan;
+                                $val['video_url'] = '';
                             }
 //                            if (empty($ziyuan)) {
 //                                $val['study'] = 0;
