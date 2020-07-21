@@ -307,4 +307,105 @@ class StudentController extends Controller {
         ];
         return response()->json(['code' => 200 , 'msg' => '返回数据成功' , 'data' => ['papers_type_list' => $papers_type_array , 'educational_list' => $educational_array , 'payment_method' => $payment_method , 'payment_type' => $payment_type]]);
     }
+    
+    /*
+     * @param  description   导入学员功能方法
+     * @param  author        dzj
+     * @param  ctime         2020-07-21
+    */
+    public function doImportUser(){
+        //获取提交的参数
+        try{
+            //判断分校id是否为空
+            if(empty(self::$accept_data['school_id']) || !is_numeric(self::$accept_data['school_id']) || self::$accept_data['school_id'] <= 0){
+                return response()->json(['code' => 202 , 'msg' => '分校id不合法']);
+            }
+            
+            //判断课程名称是否为空
+            if(empty(self::$accept_data['title'])){
+                return response()->json(['code' => 201 , 'msg' => '课程名称为空']);
+            }
+            
+            //返回校验的数据结果
+            $response_data = self::checkExamineExcelData();
+            if($response_data['code'] != 200){
+                return response()->json(['code' => $response_data['code'] , 'msg' => $response_data['msg']]);
+            }
+
+            //excel表格数据赋值
+            self::$accept_data['data'] = isset($response_data['data']['exam_list']['data']) && !empty($response_data['data']['exam_list']['data']) ? $response_data['data']['exam_list']['data'] : '';
+
+            //是否执行插入操作(1代表是,0代表否)主要用于查看打印的数据格式是否正确
+            $is_insert = isset(self::$accept_data['is_insert']) ? 0 : 1;
+
+            //执行导入excel表格操作
+            $exam_list = Student::doImportUser(self::$accept_data,$is_insert);
+
+            //判断是否导入成功
+            if($exam_list['code'] == 200){
+                unlink($response_data['data']['path']);
+                return response()->json(['code' => 200 , 'msg' => '导入学员列表成功' , 'data' => $exam_list['data']]);
+            } else {
+                return response()->json(['code' => $exam_list['code'] , 'msg' => $exam_list['msg']]);
+            }
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    
+    
+    /*
+     * @param  description   校验excel数据公共部分
+     * @param  author        dzj
+     * @param  ctime         2020-05-15
+    */
+    public static function checkExamineExcelData() {
+        //获取提交的参数
+        try{
+            //获取上传文件
+            $file = isset($_FILES['file']) && !empty($_FILES['file']) ? $_FILES['file'] : '';
+
+            //判断是否有文件上传
+            if(!isset($_FILES['file']) || empty($_FILES['file']['tmp_name'])){
+                return ['code' => 201 , 'msg' => '请上传excel文件'];
+            }
+
+            //获取上传文件的文件后缀
+            $is_correct_extensiton = self::detectUploadFileMIME($file);
+            $excel_extension       = substr($_FILES['file']['name'], strrpos($_FILES['file']['name'], '.')+1);   //获取excel后缀名
+            if($is_correct_extensiton <= 0 || !in_array($excel_extension , ['xlsx' , 'xls'])){
+                return ['code' => 202 , 'msg' => '上传文件格式非法'];
+            }
+
+            //存放文件路径
+            $file_path= app()->basePath() . "/public/upload/excel/";
+            //判断上传的文件夹是否建立
+            if(!file_exists($file_path)){
+                mkdir($file_path , 0777 , true);
+            }
+
+            //重置文件名
+            $filename = time() . rand(1,10000) . uniqid() . substr($file['name'], stripos($file['name'], '.'));
+            $path     = $file_path.$filename;
+
+            //判断文件是否是通过 HTTP POST 上传的
+            if(is_uploaded_file($_FILES['file']['tmp_name'])){
+                //上传文件方法
+                move_uploaded_file($_FILES['file']['tmp_name'], $path);
+            }
+
+            //获取excel表格中试题列表
+            $exam_list = self::doImportExcel2(new \App\Imports\UsersImport , $path , 1 , 1000);
+            
+            //判断是否超过最大导入量
+            if($exam_list['code'] != 200){
+                return ['code' => $exam_list['code'] , 'msg' => $exam_list['msg']];
+            }
+            
+            //返回正确合法的数据信息
+            return ['code' => 200 , 'msg' => '检验数据成功' , 'data' => ['exam_list' => $exam_list , 'path' => $path]];
+        } catch (Exception $ex) {
+            return ['code' => 500 , 'msg' => $ex->getMessage()];
+        }
+    }
 }

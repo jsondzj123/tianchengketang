@@ -372,6 +372,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getStudentInfoById', 'StudentController@getStudentInfoById');   //获取学员信息
         $router->post('getStudentList', 'StudentController@getStudentList');           //获取学员列表
         $router->post('getStudentCommonList', 'StudentController@getStudentCommonList');  //学员公共参数列表
+        $router->post('importUser', 'StudentController@doImportUser');                    //导入学员excel功能
     });
 
     //讲师教务相关模块(dzj)

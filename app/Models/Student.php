@@ -3,6 +3,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\AdminLog;
+use App\Models\Enrolment;
+use App\Models\CourseSchool;
+use App\Models\Coures;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\DB;
 
@@ -660,4 +663,228 @@ class Student extends Model {
             return ['code' => 203 , 'msg' => '操作失败'];
         }
     }
+    
+    
+    /*
+     * @param  description   导入学员功能方法
+     * @param  参数说明       $body导入数据参数[
+     *     is_insert         是否执行插入操作(1表示是,0表示否)
+     * ]
+     * @param  author        dzj
+     * @param  ctime         2020-07-21
+    */
+    public static function doImportUser($body=[] , $is_insert = 0){
+        //判断传过来的数组数据是否为空
+        if(!$body || !is_array($body)){
+            return ['code' => 201 , 'msg' => '暂无导入的数据信息'];
+        }
+        
+        //判断导入试题信息是否为空
+        if(!$body['data'] || empty($body['data'])){
+            return ['code' => 201 , 'msg' => '导入数据为空'];
+        }
+        
+        //证件类型数组
+        $papers_type_array = [1 => '身份证' , 2 => '护照' , 3 => '港澳通行证' , 4 => '台胞证' , 5 => '军官证' , 6 => '士官证' , 7 => '其他'];
+        
+        //最高学历数组
+        $educational_array = [1 => '小学' , 2 => '初中' , 3 => '高中' , 4 => '大专' , 5 => '本科' , 6 => '硕士' , 7 => '博士生' , 8 => '博士后及以上'];
+        
+        //支付类型数组
+        $payment_type_array = [1 => '定金' , 2 => '尾款' , 3 => '最后一次尾款' , 4 => '全款'];
+        
+        //支付方式数组
+        $payment_method_array = [1 => '微信' , 2 => '支付宝' , 3 => '银行转账'];
+        
+        //学员列表赋值
+        $student_list = $body['data'];
+
+        //空数组赋值
+        $arr = [];
+        foreach($student_list as $k=>$v){
+            $phone     = !empty($v[0]) ? $v[0] : '';    //手机号
+            $real_name = !empty($v[2]) ? $v[2] : '';    //姓名
+            if(!empty($v[3])){
+                $sex       = trim($v[3]) == '男' ? 1 : 2;    //性别
+            } else {
+                $sex       = 0;    //性别
+            }
+            
+            
+            //判断证件类型
+            if($v[4] && !empty($v[4])){
+                $papers_type = array_search(trim($v[4]) , $papers_type_array);
+            } else {
+                $papers_type = 0;
+            }
+            
+            //证件号码
+            $papers_num = !empty($v[5]) ? trim($v[5]) : '';
+            //生日
+            $birthday   = !empty($v[6]) ? trim($v[6]) : '';
+            //户口所在地
+            $address_locus = !empty($v[7]) ? trim($v[7]) : '';
+            //年龄
+            $age = !empty($v[8]) ? trim($v[8]) : 0;
+            
+            //判断学历
+            if($v[9] && !empty($v[9])){
+                $educational = array_search(trim($v[9]) , $educational_array);
+            } else {
+                $educational = 0;
+            }
+            
+            //家庭电话号
+            $family_phone = !empty($v[10]) ? trim($v[10]) : '';
+            //办公电话
+            $office_phone = !empty($v[11]) ? trim($v[11]) : '';
+            //紧急联系人
+            $contact_people = !empty($v[12]) ? trim($v[12]) : '';
+            //紧急联系电话
+            $contact_phone  = !empty($v[13]) ? trim($v[13]) : '';
+            //邮箱
+            $email          = !empty($v[14]) ? trim($v[14]) : '';
+            //邮箱
+            $qq             = !empty($v[15]) ? trim($v[15]) : '';
+            //微信
+            $wechat         = !empty($v[16]) ? trim($v[16]) : '';
+            //省
+            $province       = !empty($v[17]) ? trim($v[17]) : 0;
+            //市
+            $city           = !empty($v[18]) ? trim($v[18]) : 0;
+            //县
+            $county         = !empty($v[19]) ? trim($v[19]) : 0;
+            //详细地址
+            $address        = !empty($v[20]) ? trim($v[20]) : '';
+            //备注
+            $remark         = !empty($v[21]) ? trim($v[21]) : '';
+
+            //支付金额
+            $pay_fee = !empty($v[22]) ? trim($v[22]) : 0;
+            //支付类型
+            if($v[23] && !empty($v[23])){
+                $payment_type = array_search(trim($v[23]) , $payment_type_array);
+            } else {
+                $payment_type = 0;
+            }
+            
+            //支付方式
+            if($v[24] && !empty($v[24])){
+                $payment_method = array_search(trim($v[24]) , $payment_method_array);
+            } else {
+                $payment_method = 0;
+            }
+            
+            //手机号后八位用于密码
+            $password = substr($phone , -8);
+            
+            //判断此手机号是否注册过
+            $is_exists_phone = self::where('phone' , $phone)->count();
+            if($is_exists_phone <= 0){
+                //判断是否执行插入操作
+                if($is_insert > 0){
+                    //学员插入操作
+                    $user_id = self::insertGetId([
+                        'school_id'      =>  $body['school_id'] ,
+                        'phone'          =>  $phone ,            
+                        'password'       =>  password_hash($password , PASSWORD_DEFAULT) ,
+                        'real_name'      =>  $real_name ,                                     
+                        'sex'            =>  $sex ,                                              
+                        'papers_type'    =>  $papers_type ,                        
+                        'papers_num'     =>  $papers_num  ,   
+                        'address_locus'  =>  $address_locus ,                      
+                        'age'            =>  $age ,     
+                        'educational'    =>  $educational ,         
+                        'family_phone'   =>  $family_phone ,             
+                        'office_phone'   =>  $office_phone ,             
+                        'contact_people' =>  $contact_people ,                 
+                        'contact_phone'  =>  $contact_phone ,    
+                        'email'          =>  $email ,
+                        'qq'             =>  $qq ,
+                        'wechat'         =>  $wechat ,
+                        'province_id'    =>  $province ,
+                        'city_id'        =>  $city ,
+                        'address'        =>  $address ,
+                        'remark'         =>  $remark ,
+                        'reg_source'     =>  2 ,
+                        'create_at'      =>  date('Y-m-d H:i:s')                                      
+                    ]);
+                    
+                    //添加报名表数据
+                    if($user_id && $user_id > 0){
+                        //根据课程名称获取课程id
+                        $course_info = Coures::where('school_id' , $body['school_id'])->where('title' , $body['title'])->first();
+                        if($course_info && !empty($course_info)){
+                            $lession_id    = $course_info['id'] ? $course_info['id'] : 0;
+                            $lession_price = $course_info['sale_price'] ? $course_info['sale_price'] : 0;
+                            $nature        = 0;
+                        } else {
+                            //总校自增信息
+                            $course_info = Coures::where('school_id' , 1)->where('title' , $body['title'])->first();
+                            //通过课程的id和分校的id获取授权分校的详细信息
+                            $school_course = CourseSchool::where('to_school_id' , $body['school_id'])->where('course_id' , $course_info['id'])->first();
+                            $lession_id    = $school_course['id'] ? $school_course['id'] : 0;
+                            $lession_price = $school_course['sale_price'] ? $school_course['sale_price'] : 0;
+                            $nature        = 1;
+                        }
+                        
+                        //报名数据信息追加
+                        $enroll_array = [
+                            'school_id'      =>   $body['school_id'] ,
+                            'student_id'     =>   $user_id ,
+                            'parent_id'      =>   0 ,
+                            'child_id'       =>   0 ,
+                            'lession_id'     =>   $lession_id ,
+                            'lession_price'  =>   $lession_price ,
+                            'student_price'  =>   $pay_fee ,
+                            'payment_type'   =>   $payment_type ,
+                            'payment_method' =>   $payment_method ,
+                            'payment_fee'    =>   $pay_fee ,
+                            'payment_time'   =>   date('Y-m-d H:i:s') ,
+                            'admin_id'       =>   0 ,
+                            'status'         =>   1 ,
+                            'create_at'      =>   date('Y-m-d H:i:s')
+                        ];
+                        
+                        //添加报名信息
+                        $enroll_id = Enrolment::insertEnrolment($enroll_array);
+                        if($enroll_id && $enroll_id > 0){
+                            if($lession_id && $lession_id > 0){
+                                //订单表插入逻辑
+                                $enroll_array['nature']  =  $nature;
+                                Order::offlineStudentSignup($enroll_array);
+                            }
+                        }
+                    }
+                } else {
+                    //数组信息赋值
+                    $arr[] = [
+                        'phone'          =>  $phone ,                                        
+                        'real_name'      =>  $real_name ,                                     
+                        'sex'            =>  $sex ,                                              
+                        'papers_type'    =>  $papers_type ,                        
+                        'papers_num'     =>  $papers_num  ,   
+                        'address_locus'  =>  $address_locus ,                      
+                        'age'            =>  $age ,     
+                        'educational'    =>  $educational ,         
+                        'family_phone'   =>  $family_phone ,             
+                        'office_phone'   =>  $office_phone ,             
+                        'contact_people' =>  $contact_people ,                 
+                        'contact_phone'  =>  $contact_phone ,    
+                        'email'          =>  $email ,
+                        'qq'             =>  $qq ,
+                        'wechat'         =>  $wechat ,
+                        'province_id'    =>  $province ,
+                        'city_id'        =>  $city ,
+                        'address'        =>  $address ,
+                        'remark'         =>  $remark ,
+                        'reg_source'     =>  2 ,
+                        'create_at'      =>  date('Y-m-d H:i:s')                                      
+                    ];
+                }
+            }
+        }
+        //返回信息数据
+        return ['code' => 200 , 'msg' => '导入试题列表成功' , 'data' => $arr];
+    } 
 }

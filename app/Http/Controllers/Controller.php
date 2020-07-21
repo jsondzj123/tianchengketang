@@ -91,6 +91,54 @@ class Controller extends BaseController {
             return ['code' => 500 , 'msg' => $ex->getMessage()];
         }
     }
+    
+    /*
+     * @param  description   导入功能方法
+     * @param  参数说明[
+     *     $imxport      导入文件名称
+     *     $excelpath    excel文件路径
+     *     $is_limit     是否限制最大表格数量(1代表限制,0代表不限制)
+     *     $limit        限制数量
+     * ]
+     * @param  author        dzj
+     * @param  ctime         2020-04-30
+    */
+    public static function doImportExcel2($imxport , $excelpath , $is_limit = 0 , $limit = 0){
+        //获取提交的参数
+        try{
+            //导入数据方法
+            $exam_array = Excel::toArray($imxport , $excelpath);
+
+            //判断导入的excel文件中是否有信息
+            if(!$exam_array || empty($exam_array)){
+                return ['code' => 204 , 'msg' => '暂无信息导入'];
+            } else {
+                $array = [];
+                //循环excel表中数据信息
+                foreach($exam_array as $v){
+                    //去掉header头字段信息(不加入表中)【备注:去掉二维数组中第一个数组】
+                    unset($v[0]);
+                    foreach($v as $k1 => $v1){
+                        //去掉二维数组中最后一个空元素
+                        //unset($v1[count($v1)-1]);
+                        for($i=0;$i<count($v1);$i++){
+                            if($v1[$i] && !empty($v1[$i])){
+                                $array[$k1] = $v1;
+                            }
+                        }
+                    }
+                }
+            }
+            //判断excel表格中总数量是否超过最大限制
+            $max_count = count($array);
+            if($is_limit > 0 && $max_count > $limit){
+                return ['code' => 202 , 'msg' => '超过最大导入数量'];
+            }
+            return ['code' => 200 , 'msg' => '获取数据成功' , 'data' => $array];
+        } catch (Exception $ex) {
+            return ['code' => 500 , 'msg' => $ex->getMessage()];
+        }
+    }
 
     /*
      * @param  description   检测真实文件后缀格式的方法
