@@ -128,7 +128,7 @@ class OrderController extends Controller
                 if ($v['nature'] == 1) {
                     $course = CourseSchool::where(['id' => $v['class_id'], 'is_del' => 0, 'status' => 1])->first();
                     foreach ($course as $ks => &$vs) {
-                        $method = Couresmethod::select('method_id as id')->where(['course_id' => $v['class_id']])->get()->toArray();
+                        $method = Couresmethod::select('method_id as id')->where(['course_id' => $vs['class_id']])->get()->toArray();
                         foreach ($method as $key => &$val) {
                             if ($val['id'] == 1) {
                                 $val['name'] = '直播';
@@ -144,8 +144,8 @@ class OrderController extends Controller
                     }
                 } else {
                     $course = Coures::where(['id' => $v['class_id'], 'is_del' => 0, 'status' => 1])->first();
-                    foreach ($course as $ks => &$vs) {
-                        $method = Couresmethod::select('method_id as id')->where(['course_id' => $v['class_id']])->get()->toArray();
+                    foreach ($course as $kss => &$vss) {
+                        $method = Couresmethod::select('method_id as id')->where(['course_id' => $vss['class_id']])->get()->toArray();
                         foreach ($method as $key => &$val) {
                             if ($val['id'] == 1) {
                                 $val['name'] = '直播';
@@ -157,7 +157,7 @@ class OrderController extends Controller
                                 $val['name'] = '其他';
                             }
                         }
-                        $vs['methods'] = $method;
+                        $vss['methods'] = $method;
                     }
                 }
                 $courses[] = $course;
