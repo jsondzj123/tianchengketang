@@ -486,4 +486,43 @@ class CourseSchool extends Model {
         $subjectTwoArr = CouresSubject::where(['parent_id'=>$data['subjectOne'],'is_del'=>0,'is_open'=>0])->select('id','subject_name')->get();
         return ['code'=>200,'msg'=>'Success','data'=>$subjectTwoArr];
     }
+     /**
+     * @param  批量取消授权
+     * @param  school_id
+     * @param  author  李银生
+     * @param  ctime   2020/6/30
+     * @return  array
+     */   
+     // public static function courseCancel(){
+     //    $arr = $subjectArr = $bankids = $questionIds = $InsertTeacherRef = $InsertSubjectRef = $InsertRecordVideoArr = $InsertZhiboVideoArr = $InsertQuestionArr = $teacherIdArr = [];
+     //     //    $courseIds=$body['course_id'];
+     //    // $courseIds = explode(',',$body['course_id']);
+     //    $courseIds = json_decode($body['course_id'],1); //前端传值 
+     //    if(empty($courseIds)){
+     //        return ['code'=>205,'msg'=>'请选择取消授权课程'];
+     //    }
+     //    $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
+     //    $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0; //当前登录学校的状态
+     //    $user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0; //当前登录的用户id
+     //    $schoolArr =Admin::where(['school_id'=>$body['school_id'],'is_del'=>1])->first(); //前端传学校的id
+     //    if($body['is_public'] == 1){
+     //            //公开课
+     //    }
+     //    if($body['is_public'] == 0){
+     //        //课程
+     //        $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->get()->toArray(); //要取消的授权的课程
+     //        if(empty($nature)){
+     //            return return ['code'=>207,'msg'=>'课程已经取消授权'];
+     //        }
+         
+     //    }   
+
+
+
+
+
+
+     // }
+
+
 }

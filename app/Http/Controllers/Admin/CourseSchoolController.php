@@ -82,6 +82,33 @@ class CourseSchoolController extends Controller {
         $result = CourseSchool::store(self::$accept_data);
         return response()->json($result);
     }
+    /**
+     * @param  批量取消授权课程
+     * @param  school_id
+     * @param  author  李银生
+     * @param  ctime   2020/6/30
+     * @return  array 7.4调整
+     */
+    public function courseCancel()
+    { 
+        $validator = Validator::make(self::$accept_data, 
+        [
+            'course_id' => 'required',
+            'school_id' => 'required',
+            'is_public' => 'required',
+        ],
+        CourseSchool::message());
+        if($validator->fails()) {
+            return response()->json(json_decode($validator->errors()->first(),1));
+        }
+
+        $result = CourseSchool::courseCancel(self::$accept_data);
+        return response()->json($result);
+    }
+           
+
+
+
      /*
      * @param  description 授权课程列表学科大类
      * @param  参数说明       body包含以下参数[
