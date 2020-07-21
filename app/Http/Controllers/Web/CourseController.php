@@ -574,7 +574,6 @@ class CourseController extends Controller {
         }
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde]);
     }
-
     /*
          * @param  课程直播列表
          * @param  author  苏振文
