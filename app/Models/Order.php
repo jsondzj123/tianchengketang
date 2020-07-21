@@ -569,9 +569,9 @@ class Order extends Model {
         $data['lession_price'] = $arr['lession_price'];
         $data['pay_status'] = $arr['payment_type'];
         $data['pay_type'] = $arr['payment_method'];
-        $data['status'] = 1;                  //支付状态
+        $data['status'] = 2;                  //支付状态
         $data['pay_time'] = $arr['payment_time'];
-        $data['oa_status'] = 0;              //OA状态
+        $data['oa_status'] = 1;              //OA状态
         $data['class_id'] = $arr['lession_id'];
         $data['school_id'] = $school['school_id'];
         $data['nature'] = $arr['nature'];
