@@ -324,7 +324,7 @@ class UserController extends Controller {
                         $course['teachername'] = implode(',',$string);
                     }
                 }
-                $courses[] = array_push($course);
+                $courses[] = $course;
             }
         }
 
