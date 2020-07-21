@@ -540,15 +540,17 @@ class CourseController extends Controller {
                 foreach ($recorde as $k => &$v) {
                     $recordes = Coureschapters::where(['course_id' => $this->data['id'], 'parent_id' => $v['id']])->where($chapterswhere)->get()->toArray();
                     if (!empty($recordes)) {
+                        $MTCloud = new MTCloud();
                         //循环每个小节 查询小节的进度
                         foreach ($recordes as $key => &$val) {
                             //查询小节绑定的录播资源
                             $ziyuan = Video::where(['id' => $val['resource_id'], 'is_del' => 0, 'status' => 0])->first();
+                            $video_url = $MTCloud->videoGet($ziyuan['mt_video_id']);
+                            $ziyuan['video_url'] = $video_url['videoUrl'];
                             $val['ziyuan'] = $ziyuan;
                             if (empty($ziyuan)) {
                                 $val['study'] = 0;
                             } else {
-                                $MTCloud = new MTCloud();
                                 $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
                                 if (isset($use_duration['data']) || !empty($use_duration['data'])) {
                                     foreach ($use_duration['data'] as $kk => $vv) {
