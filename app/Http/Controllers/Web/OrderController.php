@@ -85,7 +85,7 @@ class OrderController extends Controller {
             $price = 0.01;
             $return = $wxpay->getPcPayOrder($number,$price);
         }
-        if($this->data['pay_type'] == 1){
+        if($this->data['pay_type'] == 2){
             $alipay = new AlipayFactory();
             $return = $alipay->createPcPay($order['order_number'],$order['price']);
             if($return['alipay_trade_precreate_response']['code'] == 10000){
