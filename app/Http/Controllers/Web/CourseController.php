@@ -255,6 +255,10 @@ class CourseController extends Controller {
          * return  array
          */
     public function courseDetail(){
+
+
+        echo $this->userid;die;
+
         if(!isset($this->data['id']) || empty($this->data['id'])){
             return response()->json(['code' => 201 , 'msg' => '课程id不能为空']);
         }
@@ -334,7 +338,6 @@ class CourseController extends Controller {
                     array_push($teacher, $oneteacher);
                 }
             }
-            echo $this->userid;die;
             //是否购买
             if($this->userid != 0){
                 if ($course['sale_price'] > 0) {
