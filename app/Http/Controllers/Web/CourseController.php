@@ -338,7 +338,6 @@ class CourseController extends Controller {
             if($this->userid != 0){
                 if ($course['sale_price'] > 0) {
                     $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
-                    echo $order;die;
                     $course['is_pay'] = $order > 0 ? 1 : 0;
                 } else {
                     $course['is_pay'] = 1;
@@ -368,12 +367,7 @@ class CourseController extends Controller {
         $course['child_name'] = $child['subject_name'];
         unset($course['parent_id']);
         unset($course['child_id']);
-//        Redis::set($keys,json_encode($course),60);
-        //根据课程id 课程属性 生成二维码
-//        $urlcode = $this->generateQRfromGoogle("www.baidu.com");
-//        $course['urlcode'] = $urlcode;
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
-//        }
     }
     //课程收藏
     public function collect(){
