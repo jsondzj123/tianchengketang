@@ -545,7 +545,7 @@ class CourseController extends Controller {
                         foreach ($recordes as $key => &$val) {
                             //查询小节绑定的录播资源
                             $ziyuan = Video::where(['id' => $val['resource_id'], 'is_del' => 0, 'status' => 0])->first();
-                            echo $ziyuan['mt_video_id'];
+                            echo $ziyuan['mt_video_id'];die;
                             $video_url = $MTCloud->videoGet($ziyuan['mt_video_id'],'720d');
                             print_r($video_url);die;
                             $ziyuan['video_url'] = $video_url['videoUrl'];
