@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Collection;
 use App\Models\Coures;
 use App\Models\Couresmethod;
+use App\Models\Couresteacher;
 use App\Models\CourseSchool;
 use App\Models\Lesson;
 use App\Models\LessonMethod;
@@ -16,6 +17,7 @@ use App\Models\Student;
 use App\Models\StudentAccounts;
 use App\Models\StudentAccountlog;
 use App\Models\Subject;
+use App\Models\Teacher;
 use App\Tools\AlipayFactory;
 use App\Tools\WxpayFactory;
 use Illuminate\Support\Facades\DB;
@@ -116,34 +118,62 @@ class OrderController extends Controller
         $pagesize = (int)isset($data['pageSize']) && $data['pageSize'] > 0 ? $data['pageSize'] : 10;
         $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
-        $student_id = $data['user_info']['user_id'];
-        $count = Order::where(['student_id'=>$data['user_info']['user_id'],'status'=>2,'oa_status'=>1])->count();
-        $orderlist = Order::select('ld_course.id','ld_course.admin_id','ld_course.title','ld_course.cover','ld_course.pricing as price','ld_course.sale_price as favorable_price','ld_course.buy_num','ld_course.status','ld_course.is_del','ld_order.id as orderid')
-            ->leftJoin('ld_course','ld_course.id','=','ld_order.class_id')
-            ->where(['ld_order.student_id'=>$student_id,'ld_order.status'=>2,'ld_order.oa_status'=>1,'ld_course.is_del'=>0,'ld_course.status'=>1])
-            ->orderByDesc('ld_order.id')
-            ->offset($offset)->limit($pagesize)->get()->toArray();
-        foreach ($orderlist as $k=>&$v){
-            $method = Couresmethod::select('method_id as id')->where(['course_id'=>$v['id']])->get()->toArray();
-            foreach ($method as $key=>&$val){
-                if($val['id'] == 1){
-                    $val['name'] = '直播';
+        $order = Order::where(['student_id'=>$data['user_info']['user_id'],'status'=>2])
+            ->where('validity_time','>',date('Y-m-d H:i:s'))
+            ->whereIn('pay_status',[3,4])
+            ->get()->toArray();
+        $courses = [];
+        if(!empty($order)) {
+            foreach ($order as $k => $v) {
+                if ($v['nature'] == 1) {
+                    $course = CourseSchool::where(['id' => $v['class_id'], 'is_del' => 0, 'status' => 1])->first();
+                    foreach ($course as $ks => &$vs) {
+                        $method = Couresmethod::select('method_id as id')->where(['course_id' => $v['class_id']])->get()->toArray();
+                        foreach ($method as $key => &$val) {
+                            if ($val['id'] == 1) {
+                                $val['name'] = '直播';
+                            }
+                            if ($val['id'] == 2) {
+                                $val['name'] = '录播';
+                            }
+                            if ($val['id'] == 3) {
+                                $val['name'] = '其他';
+                            }
+                        }
+                        $vs['methods'] = $method;
+                    }
+                    //查讲师
+                    $teacherlist = Couresteacher::where(['course_id' => $course['course_id'], 'is_del' => 0])->get();
+                    $string = [];
+                    if (!empty($teacherlist)) {
+                        foreach ($teacherlist as $ks => $vs) {
+                            $teacher = Teacher::where(['id' => $vs['teacher_id'], 'is_del' => 0, 'type' => 2])->first();
+                            $string[] = $teacher['real_name'];
+                        }
+                        $course['teachername'] = implode(',', $string);
+                    }
+                } else {
+                    $course = Coures::where(['id' => $v['class_id'], 'is_del' => 0, 'status' => 1])->first();
+                    foreach ($course as $ks => &$vs) {
+                        $method = Couresmethod::select('method_id as id')->where(['course_id' => $v['class_id']])->get()->toArray();
+                        foreach ($method as $key => &$val) {
+                            if ($val['id'] == 1) {
+                                $val['name'] = '直播';
+                            }
+                            if ($val['id'] == 2) {
+                                $val['name'] = '录播';
+                            }
+                            if ($val['id'] == 3) {
+                                $val['name'] = '其他';
+                            }
+                        }
+                        $vs['methods'] = $method;
+                    }
                 }
-                if($val['id'] == 2){
-                    $val['name'] = '录播';
-                }
-                if($val['id'] == 3){
-                    $val['name'] = '其他';
-                }
+                $courses[] = $course;
             }
-            $v['methods'] = $method;
         }
-        $page=[
-            'pageSize'=>$pagesize,
-            'page' =>$page,
-            'total'=>$count
-        ];
-        return ['code' => 200 , 'msg' => '获取成功','data'=>$orderlist,'page'=>$page];
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$courses,'page'=>$page];
     }
     /*
          * @param  ceshi
