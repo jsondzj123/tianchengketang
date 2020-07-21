@@ -20,8 +20,7 @@ use App\Tools\AlipayFactory;
 use App\Tools\WxpayFactory;
 use Illuminate\Support\Facades\DB;
 
-class OrderController extends Controller
-{
+class OrderController extends Controller{
     /*
          * @param  我的订单
          * @param  $type    参数
