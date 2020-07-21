@@ -105,7 +105,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('index','IndexController@index');//首页内容
         $router->post('course','IndexController@course');//精品课程
         $router->post('getCompany','IndexController@getCompany'); //对公信息扫码
-
+        $router->post('getPay','IndexController@getPay'); //对公信息扫码
     });
 
     $router->group(['prefix' => 'footer'], function () use ($router) {
@@ -194,6 +194,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->group(['prefix' => 'order', 'middleware'=> 'user'], function () use ($router) {
         $router->post('userPay','OrderController@userPay');//用户生成订单
         $router->post('userPaying','OrderController@userPaying');//用户进行支付
+        $router->post('webajax','OrderController@webajax');//前端轮询查询接口
+        $router->post('chargeOrder','OrderController@chargeOrder');//0元购买接口
     });
     //课程 无需token
     $router->group(['prefix' => 'course'], function () use ($router) {
@@ -372,6 +374,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getStudentInfoById', 'StudentController@getStudentInfoById');   //获取学员信息
         $router->post('getStudentList', 'StudentController@getStudentList');           //获取学员列表
         $router->post('getStudentCommonList', 'StudentController@getStudentCommonList');  //学员公共参数列表
+        $router->post('importUser', 'StudentController@doImportUser');                    //导入学员excel功能
     });
 
     //讲师教务相关模块(dzj)

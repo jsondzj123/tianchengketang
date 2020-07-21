@@ -8,6 +8,7 @@ use App\Models\Couresteacher;
 use App\Models\CourseSchool;
 use App\Models\Order;
 use App\Models\School;
+use App\Models\Student;
 use App\Models\Teacher;
 use App\Tools\AlipayFactory;
 use App\Tools\WxpayFactory;
@@ -97,6 +98,65 @@ class OrderController extends Controller {
             }
         }
      }
+
+     //前端轮询查订单是否支付完成
+    public function orderpoll(){
+        if(!isset($this->data['order_number']) || empty($this->data['order_number'])){
+            return ['code' => 201 , 'msg' => '订单号为空'];
+        }
+        $order = Order::where(['order_number'=>$this->data['order_number']])->first();
+        if($order){
+            return ['code' => 200 , 'msg' => '查询成功','data'=>$order];
+        }else{
+            return ['code' => 201 , 'msg' => '订单号错误'];
+        }
+    }
+
+    //0元购买接口
+    public function chargeOrder(){
+       $order = Order::where(['id'=>$this->data['order_id']])->first();
+       if($order['price'] == 0){
+           if($order['nature'] == 1){
+               $lesson = CourseSchool::where(['id'=>$order['class_id']])->first();
+           }else{
+               $lesson = Coures::where(['id'=>$order['class_id']])->first();
+           }
+           if($lesson['expiry'] ==0){
+               $validity = '3000-01-02 12:12:12';
+           }else{
+               $validity = date('Y-m-d H:i:s', strtotime('+' . $lesson['expiry'] . ' day'));
+           }
+           $arrs = array(
+               'third_party_number'=>'',
+               'validity_time'=>$validity,
+               'status'=>2,
+               'oa_status'=>1,
+               'pay_time'=>date('Y-m-d H:i:s'),
+               'update_at'=>date('Y-m-d H:i:s')
+           );
+           Order::where(['id'=>$order['id']])->update($arrs);
+           $overorder = Order::where(['student_id'=>$order['student_id'],'status'=>2])->count(); //用户已完成订单
+           $userorder = Order::where(['student_id'=>$order['student_id']])->count(); //用户所有订单
+           if($overorder == $userorder){
+               $state_status = 2;
+           }else{
+               if($overorder > 0 ){
+                   $state_status = 1;
+               }else{
+                   $state_status = 0;
+               }
+           }
+           Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1,'state_status'=>$state_status,'update_at'=>date('Y-m-d H:i:s')]);
+           return ['code' => 200 , 'msg' => '购买成功'];
+       }else{
+           return ['code' => 201 , 'msg' => '订单不合法'];
+       }
+    }
+
+
+
+
+
     //汇聚支付宝支付
     public function hjaliPcpay(){
 //        if($pay_type == 1){

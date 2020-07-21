@@ -379,10 +379,6 @@ class CourseController extends Controller {
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
 //        }
     }
-    public function urlcode(){
-        $urlcode = $this->generateQRfromGoogle("www.baidu.com");
-        echo $urlcode;
-    }
     //课程收藏
     public function collect(){
         if(!isset($this->data['id'])||empty($this->data['id'])){
@@ -530,7 +526,7 @@ class CourseController extends Controller {
                 //查询免费课程
                 $chapterswhere = [
                     'is_del' => 0,
-//                    'is_free' => 2
+                    'is_free' => 2
                 ];
             }
             //获取章
@@ -546,26 +542,29 @@ class CourseController extends Controller {
                             //查询小节绑定的录播资源
                             $ziyuan = Video::where(['id' => $val['resource_id'], 'is_del' => 0, 'status' => 0])->first();
                             $video_url = $MTCloud->videoGet($ziyuan['mt_video_id'],'720d');
-                            $ziyuan['video_url'] = $video_url['videoUrl'];
-                            $val['ziyuan'] = $ziyuan;
-                            if (empty($ziyuan)) {
-                                $val['study'] = 0;
-                            } else {
-                                $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
-                                if (isset($use_duration['data']) || !empty($use_duration['data'])) {
-                                    foreach ($use_duration['data'] as $kk => $vv) {
-                                        if ($vv['uid'] == $this->userid) {
-                                            if ($vv['use_duration'] == 0) {
-                                                $val['study'] = 0;
-                                            } else {
-                                                $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
-                                            }
-                                        } else {
-                                            $val['study'] = 0;
-                                        }
-                                    }
-                                }
+                            if($video_url['code'] ==  0){
+                                $val['video_url'] = $video_url['data']['videoUrl'];
+                            }else{
+                                $val['video_url'] = '';
                             }
+//                            if (empty($ziyuan)) {
+//                                $val['study'] = 0;
+//                            } else {
+//                                $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
+//                                if (isset($use_duration['data']) || !empty($use_duration['data'])) {
+//                                    foreach ($use_duration['data'] as $kk => $vv) {
+//                                        if ($vv['uid'] == $this->userid) {
+//                                            if ($vv['use_duration'] == 0) {
+//                                                $val['study'] = 0;
+//                                            } else {
+//                                                $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
+//                                            }
+//                                        } else {
+//                                            $val['study'] = 0;
+//                                        }
+//                                    }
+//                                }
+//                            }
                         }
                         $v['chapters'] = $recordes;
                     }
@@ -717,23 +716,6 @@ class CourseController extends Controller {
         $ziyuan['is_pay'] = $is_pay;
         $res = array_slice($ziyuan, $offset, $pagesize);
         return ['code' => 200 , 'msg' => '查询成功','data'=>$res,'page'=>$page];
-    }
-    /**
-     * google api 二维码生成【QRcode可以存储最多4296个字母数字类型的任意文本，具体可以查看二维码数据格式】
-     * @param string $chl 二维码包含的信息，可以是数字、字符、二进制信息、汉字。
-    不能混合数据类型，数据必须经过UTF-8 URL-encoded
-     * @param int $widhtHeight 生成二维码的尺寸设置
-     * @param string $EC_level 可选纠错级别，QR码支持四个等级纠错，用来恢复丢失的、读错的、模糊的、数据。
-     *                            L-默认：可以识别已损失的7%的数据
-     *                            M-可以识别已损失15%的数据
-     *                            Q-可以识别已损失25%的数据
-     *                            H-可以识别已损失30%的数据
-     * @param int $margin 生成的二维码离图片边框的距离
-     */
-    function generateQRfromGoogle($chl,$widhtHeight ='150',$EC_level='L',$margin='0'){
-        $chl = urlencode($chl);
-        echo '<img src="http://chart.apis.google.com/chart?chs='.$widhtHeight.'x'.$widhtHeight.'&cht=qr&chld='.$EC_level.'|'.$margin.'&chl='.$chl.'" alt="QR code" widthHeight="'.$widhtHeight.'" widhtHeight="'.$widhtHeight.'"/>';
-//        echo 'http://chart.apis.google.com/chart?chs='.$widhtHeight.'x'.$widhtHeight.'&cht=qr&chld='.$EC_level.'|'.$margin.'&chl='.$chl;
     }
 }
 
