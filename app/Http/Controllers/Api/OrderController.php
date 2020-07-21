@@ -122,7 +122,7 @@ class OrderController extends Controller
             ->whereIn('pay_status',[3,4])
             ->count();
         $courses=[];
-        $orderlist = Order::select('id as orderid','class_id')
+        $orderlist = Order::select('id as orderid','class_id','nature')
             ->where(['student_id'=>$student_id,'status'=>2,'oa_status'=>1])
             ->where('validity_time','>',date('Y-m-d H:i:s'))
             ->whereIn('pay_status',[3,4])
