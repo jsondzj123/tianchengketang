@@ -3,9 +3,15 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Coures;
+use App\Models\Couresteacher;
+use App\Models\CourseSchool;
+use App\Models\Order;
 use App\Models\School;
+use App\Models\Teacher;
 use App\Tools\AlipayFactory;
 use App\Tools\WxpayFactory;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller {
     protected $school;
@@ -16,32 +22,80 @@ class OrderController extends Controller {
         $this->school = School::where(['dns'=>$this->data['school_dns']])->first();
         $this->userid = isset($this->data['user_info']['user_id'])?$this->data['user_info']['user_id']:0;
     }
-
+    //用户生成订单
      public function userPay(){
-
-     }
-     public function userPaying(){
-
-     }
-    //微信pc支付
-    public function wxPcpay(){
-        $wxpay = new WxpayFactory();
-        $number = date('YmdHis', time()) . rand(1111, 9999);
-        $price = 0.01;
-        $return = $wxpay->getPcPayOrder($number,$price);
-    }
-    //支付宝支付pc
-    public function aliPcpay(){
-        //redis 缓存 有效期1天
-        $alipay = new AlipayFactory();
-        $return = $alipay->createPcPay();
-        if($return['alipay_trade_precreate_response']['code'] == 10000){
-          $img = $this->generateQRfromGoogle($return['alipay_trade_precreate_response']['qr_code']);
-          echo $img;
+        DB::beginTransaction();
+        $nature = isset($this->data['nature'])?$this->data['nature']:0;
+        if($nature == 0){
+            $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
+            //查讲师
+            $teacherlist = Couresteacher::where(['course_id'=>$v['class_id'],'is_del'=>0])->get();
+            $string=[];
+            if(!empty($teacherlist)){
+                foreach ($teacherlist as $ks=>$vs){
+                    $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
+                    $string[] = $teacher['real_name'];
+                }
+            $course['teachername'] = implode(',',$string);
+            }
         }else{
-            echo 11111;die;
+            $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
+            //查讲师
+            $teacherlist = Couresteacher::where(['course_id'=>$v['class_id'],'is_del'=>0])->get();
+            $string=[];
+            if(!empty($teacherlist)){
+                foreach ($teacherlist as $ks=>$vs){
+                    $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
+                    $string[] = $teacher['real_name'];
+                }
+             $course['teachername'] = implode(',',$string);
+            }
         }
-    }
+        //生成订单
+         $data['order_number'] = date('YmdHis', time()) . rand(1111, 9999);
+         $data['admin_id'] = 0;  //操作员id
+         $data['order_type'] = 2;        //1线下支付 2 线上支付
+         $data['student_id'] = $this->data['id'];
+         $data['price'] = $course['sale_price'];
+         $data['student_price'] = $course['pricing'];
+         $data['lession_price'] = $course['pricing'];
+         $data['pay_status'] = 4;
+         $data['pay_type'] = 0;
+         $data['status'] = 0;
+         $data['oa_status'] = 0;              //OA状态
+         $data['class_id'] = $this->data['id'];
+         $data['school_id'] = $this->school['id'];
+         $add = self::insertGetId($data);
+         if($add){
+             $course['order_id'] = $add;
+             DB::commit();
+             return ['code' => 200 , 'msg' => '生成预订单成功','data'=>$course];
+         }else{
+             DB::rollback();
+             return ['code' => 203 , 'msg' => '生成订单失败'];
+         }
+     }
+     //用户进行支付
+    //订单id   支付方式 1微信2支付宝
+     public function userPaying(){
+        $order = Order::where(['id'=>$this->data['order_id']])->first();
+        if($this->data['pay_type'] == 1){
+            $wxpay = new WxpayFactory();
+            $number = date('YmdHis', time()) . rand(1111, 9999);
+            $price = 0.01;
+            $return = $wxpay->getPcPayOrder($number,$price);
+        }
+        if($this->data['pay_type'] == 1){
+            $alipay = new AlipayFactory();
+            $return = $alipay->createPcPay();
+            if($return['alipay_trade_precreate_response']['code'] == 10000){
+                $img = $this->generateQRfromGoogle($return['alipay_trade_precreate_response']['qr_code']);
+                return ['code' => 200 , 'msg' => '支付','data'=>$img];
+            }else{
+                return ['code' => 202 , 'msg' => '生成二维码失败'];
+            }
+        }
+     }
     //汇聚支付宝支付
     public function hjaliPcpay(){
 //        if($pay_type == 1){
