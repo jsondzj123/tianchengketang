@@ -259,10 +259,6 @@ class CourseController extends Controller {
             return response()->json(['code' => 201 , 'msg' => '课程id不能为空']);
         }
         $this->data['nature'] = isset($this->data['nature'])?$this->data['nature']:0;
-//        $keys = json_encode($this->data).$this->userid;
-//        if(Redis::get($keys)){
-//            return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>json_decode(Redis::get($keys),true)]);
-//        }else {
         //课程基本信息
         //授权
         if($this->data['nature'] == 1){
@@ -300,7 +296,6 @@ class CourseController extends Controller {
             }else{
                 $course['is_pay'] = 0;
             }
-
             //收藏数量
             $collect = Collection::where(['lesson_id'=>$course['course_id'],'is_del'=>0,'nature'=>1])->count();
             $course['collect'] = $collect;
@@ -343,6 +338,7 @@ class CourseController extends Controller {
             if($this->userid != 0){
                 if ($course['sale_price'] > 0) {
                     $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
+                    echo $order;die;
                     $course['is_pay'] = $order > 0 ? 1 : 0;
                 } else {
                     $course['is_pay'] = 1;
@@ -526,7 +522,7 @@ class CourseController extends Controller {
                 //查询免费课程
                 $chapterswhere = [
                     'is_del' => 0,
-//                    'is_free' => 2
+                    'is_free' => 2
                 ];
             }
             //获取章
