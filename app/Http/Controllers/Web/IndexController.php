@@ -139,4 +139,11 @@ class IndexController extends Controller {
         $company['open_bank'] =  isset($this->school['open_bank']) ?$this->school['open_bank']:'';
         return response()->json(['code'=>200,'msg'=>'Success','data'=>$company]);
     }
+    public function getPay(){
+        if(!isset($this->data['id']) || $this->data['id'] <=0){
+            return response()->json(['code'=>201,'msg'=>'id为空或类型不合法']);
+        }
+        $FootConfigArr =FootConfig::where(['id'=>$this->data['id'],'is_del'=>0,'is_show'=>0])->select('text')->first();         
+        return response()->json(['code'=>200,'msg'=>'Success','data'=>$FootConfigArr]);
+    }
 }

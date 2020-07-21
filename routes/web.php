@@ -105,7 +105,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('index','IndexController@index');//首页内容
         $router->post('course','IndexController@course');//精品课程
         $router->post('getCompany','IndexController@getCompany'); //对公信息扫码
-
+        $router->post('getPay','IndexController@getPay'); //对公信息扫码
     });
 
     $router->group(['prefix' => 'footer'], function () use ($router) {
