@@ -533,10 +533,10 @@ class CourseController extends Controller {
 //                    'is_free' => 2
                 ];
             }
-            $key = "webCourseluboList" . $this->data['id'] . $this->userid;
-            if (Redis::get($key)) {
-                $recorde = json_decode(Redis::get($key), true);
-            } else {
+//            $key = "webCourseluboList" . $this->data['id'] . $this->userid;
+//            if (Redis::get($key)) {
+//                $recorde = json_decode(Redis::get($key), true);
+//            } else {
                 //获取章
                 $recorde = Coureschapters::where(['course_id' => $this->data['id'], 'is_del' => 0, 'parent_id' => 0])->get()->toArray();
                 if (!empty($recorde)) {
@@ -573,13 +573,8 @@ class CourseController extends Controller {
                         }
                     }
                 }
-//                if($order > 0){
-//                    $recorde['is_pay'] = 1;
-//                }else{
-//                    $recorde['is_pay'] = 0;
-//                }
-                Redis::set($key,json_encode($recorde),300);
-            }
+//                Redis::set($key,json_encode($recorde),300);
+//            }
         }
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde]);
     }
