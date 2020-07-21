@@ -232,9 +232,9 @@ class Order extends Model {
             $data['admin_id'] = 0;  //操作员id
             $data['order_type'] = 2;        //1线下支付 2 线上支付
             $data['student_id'] = $arr['student_id'];
-            $data['price'] = $course['sale_price'];
-            $data['student_price'] = $course['pricing'];
-            $data['lession_price'] = $course['pricing'];
+            $data['price'] = $course['favorable_price'];
+            $data['student_price'] = $course['price'];
+            $data['lession_price'] = $course['price'];
             $data['pay_status'] = 4;
             $data['pay_type'] = 0;
             $data['status'] = 0;

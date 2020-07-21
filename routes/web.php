@@ -164,6 +164,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('doHandInPapers','BankController@doHandInPapers');              //做题交卷接口
         $router->post('getMyBankList','BankController@getMyBankList');                //我的题库
     });
+
+
     //szw    我的
     $router->group(['prefix' => 'user' , 'middleware'=> 'user'], function () use ($router) {
         //个人设置模块

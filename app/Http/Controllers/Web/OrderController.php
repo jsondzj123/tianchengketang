@@ -69,6 +69,7 @@ class OrderController extends Controller {
          $add = Order::insertGetId($data);
          if($add){
              $course['order_id'] = $add;
+             $course['order_number'] = $data['order_number'];
              DB::commit();
              return ['code' => 200 , 'msg' => '生成预订单成功','data'=>$course];
          }else{
@@ -100,7 +101,7 @@ class OrderController extends Controller {
      }
 
      //前端轮询查订单是否支付完成
-    public function orderpoll(){
+    public function webajax(){
         if(!isset($this->data['order_number']) || empty($this->data['order_number'])){
             return ['code' => 201 , 'msg' => '订单号为空'];
         }

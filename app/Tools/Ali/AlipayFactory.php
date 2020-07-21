@@ -67,7 +67,7 @@ class AlipayFactory{
         ];
         $request->setBizContent(json_encode($bizcontent));
 
-        $request->setNotifyUrl("http://".$_SERVER['HTTP_HOST'].'/Web/notify/Alinotify');
+        $request->setNotifyUrl("http://".$_SERVER['HTTP_HOST'].'/Api/notify/Alinotify');
         $result =  $this->aop->execute($request);
         return $result;
     }
