@@ -128,6 +128,7 @@ class OrderController extends Controller
             ->whereIn('pay_status',[3,4])
             ->orderByDesc('id')
             ->offset($offset)->limit($pagesize)->get()->toArray();
+        print_r($orderlist);die;
         foreach ($orderlist as $k=>&$v) {
             //查询课程
             if ($v['nature'] == 1) {
