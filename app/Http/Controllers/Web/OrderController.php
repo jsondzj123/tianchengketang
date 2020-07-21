@@ -89,9 +89,9 @@ class OrderController extends Controller {
             $alipay = new AlipayFactory();
             $return = $alipay->createPcPay($order['order_number'],$order['price']);
             if($return['alipay_trade_precreate_response']['code'] == 10000){
-                $img = $this->generateQRfromGoogle($return['alipay_trade_precreate_response']['qr_code']);
-                echo $img;
-//                return ['code' => 200 , 'msg' => '支付','data'=>$img];
+//                $img = $this->generateQRfromGoogle($return['alipay_trade_precreate_response']['qr_code']);
+//                echo $img;
+                return ['code' => 200 , 'msg' => '支付','data'=>$return['alipay_trade_precreate_response']['qr_code']];
             }else{
                 return ['code' => 202 , 'msg' => '生成二维码失败'];
             }
