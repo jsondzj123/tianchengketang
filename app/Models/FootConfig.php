@@ -71,7 +71,12 @@ class FootConfig extends Model {
     		if(!isset($body['url']) || empty($body['url'])){
     			return ['code'=>201,'msg'=>'header_url为空'];
     		}
-    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'url'=>$body['url'],'is_open'=>$body['open'],'update_at'=>date('Y-m-d H:i:s')]);
+            if(!isset($body['text']) || empty($body['text']) ){
+                $update['text'] =  '';
+            }else{
+                $update['text'] = $body['text'];
+            }
+    		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'url'=>$body['url'],'is_open'=>$body['open'],'update_at'=>date('Y-m-d H:i:s'),'text'=>$update['text']]);
     	}
     	if($body['type'] == 2){ //尾部 
     		if(!isset($body['name']) || empty($body['name'])){
@@ -80,10 +85,12 @@ class FootConfig extends Model {
     		if(!isset($body['url']) || empty($body['url'])){
     			return ['code'=>201,'msg'=>'foot_url为空'];
     		}
-    		if(isset($body['text'])){
-    			$update['text'] = $body['text'];
-    		}
-    		$update['name'] = $body['name'];
+    		if(!isset($body['text']) || empty($body['text']) ){
+                $update['text'] =  '';
+            }else{
+                $update['text'] = $body['text'];
+            }    		
+            $update['name'] = $body['name'];
     		$update['url'] = $body['url'];
     		$update['is_open'] = $body['open'];
     		$update['update_at'] = date('Y-m-d H:i:s');

@@ -10,11 +10,11 @@ class AlipayFactory{
     protected $aop;
     //protected $schoolid;
     //公共参数
-    public function __construct($schoolid){
+    public function __construct(){
         require_once 'aop/AopClient.php';
         require_once 'aop/request/AlipayTradeAppPayRequest.php';
         //根据学校查询支付信息
-        $payinfo = PaySet::select('zfb_app_id','zfb_app_public_key','zfb_public_key')->where(['school_id'=>$schoolid])->first();
+//        $payinfo = PaySet::select('zfb_app_id','zfb_app_public_key','zfb_public_key')->where(['school_id'=>$schoolid])->first();
         $this->aop    =    new AopClient();
         $this->aop->gatewayUrl             = "https://openapi.alipay.com/gateway.do";
         $this->aop->appId                 =  "2021001105658113";
@@ -27,12 +27,6 @@ class AlipayFactory{
         $this->aop->apiVersion = '1.0';
         $this->aop->alipayPublicKey ="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlTAdFGs8uzPYG3akYT1qs3gEFtjkuRIjP2i7FHUiF52/FVTSzOiYwy9n4qQYovyP/lKxtFWTlKMZfjy1G8EYJBbcb/5dIdDbgm40yaactPaeGkAvykzw5az0PhYTUFJ7PSewZyTJeqETT8ROpuIY5rxgNVHciASiNvrSOMudHfUtqvS7mUPX/Kcpl9q0ryW6BJUIb5SnFouVmh0x6ZAyb+cXVqPXrBTLlQucT3RKuvR+zMkT9IeFFn9fIsCBGhVg8eHfacKUjOWT00CILyoLk6rIZF+PRDX32kvxLKAlfq1puupT2BZxDpH3+LvcMj0Cpl0jmXylEqAxM6qh5+sdjwIDAQAB";//商户公钥（步骤二中生成的商户公钥）
 //        $this->aop->alipayPublicKey = $payinfo['zfb_public_key'];
-//        if($payinfo['zfb_app_public_key'] === $rsaPrivateKey){
-//            echo "1111-"."<br>".$payinfo['zfb_app_public_key'];
-//        }else{
-//            echo 222222;
-//        }
-//        exit;
     }
     public function createAppPay($title,$order_number, $total_amount,$pay_type){
         require_once 'aop/request/AlipayTradeAppPayRequest.php';
@@ -60,12 +54,12 @@ class AlipayFactory{
     }
 
     //支付宝扫码支付
-    public function createPcPay(){
+    public function createPcPay($order_number,$price){
         require_once 'aop/request/AlipayTradePrecreateRequest.php';
         $request = new AlipayTradePrecreateRequest();
         //SDK已经封装掉了公共参数，这里只需要传入业务参数
         $bizcontent    =    [
-            'out_trade_no'        =>    '20200528180614753620',
+            'out_trade_no'        =>    $order_number,
             'total_amount'        =>    0.01,//价格
             'subject'                =>    "商品购买",
             'timeout_express'    =>    '1d',//失效时间为 1天

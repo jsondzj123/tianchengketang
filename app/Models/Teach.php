@@ -160,22 +160,25 @@ class Teach extends Model {
 						$newcourseArr[$k]['time'] = timetodate($time);
 						$newcourseArr[$k]['start_time'] = date('Y-m-d H:i',$v['start_at']);
 						if(time()<$v['start_at']){
+							$newcourseArr[$k]['sort'] = 2;
 							$newcourseArr[$k]['state'] = 1;
 							$newcourseArr[$k]['status'] = '预开始';
 						}
 						if(time()>$v['end_at']){
+							$newcourseArr[$k]['sort'] = 2;
 							$newcourseArr[$k]['state'] = 3;
 							$newcourseArr[$k]['status'] = '直播已结束';
 						}
 						if(time()>$v['start_at'] && time()<$v['end_at']){
+							$newcourseArr[$k]['sort'] = 1;
 							$newcourseArr[$k]['state'] = 2;
 							$newcourseArr[$k]['status'] = '直播中';
 						}
-					} 
-					
+					}
+					array_multisort(array_column($newcourseArr,'sort'),SORT_ASC,$newcourseArr); 
 				}
-
-
+				
+			
 			return ['code'=>200,'msg'=>'Success','data'=>$newcourseArr,'where'=>$body];
 	}
 	//教学详情

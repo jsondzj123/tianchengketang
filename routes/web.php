@@ -105,7 +105,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('index','IndexController@index');//首页内容
         $router->post('course','IndexController@course');//精品课程
         $router->post('getCompany','IndexController@getCompany'); //对公信息扫码
-
+        $router->post('getPay','IndexController@getPay'); //对公信息扫码
     });
 
     $router->group(['prefix' => 'footer'], function () use ($router) {
@@ -595,7 +595,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getOpenLessonList', 'SchoolController@getOpenLessonList');      //获取分校公开课列表
         $router->post('getSubjectList', 'SchoolController@getSubjectList');      //获取课程/公开课学科大类小类
         $router->post('details','SchoolController@details'); //获取网校详情
-
     });
 
     $router->group(['prefix' => 'courschool'], function () use ($router) {
@@ -603,6 +602,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseIdList', 'CourseSchoolController@courseIdList');  //授权分校课程ID
         $router->post('courseList', 'CourseSchoolController@courseList');  //授权课程列表
         $router->post('courseStore', 'CourseSchoolController@store');  //批量添加
+        $router->post('courseCancel', 'CourseSchoolController@courseCancel');  //批量取消授权
         $router->post('getNatureSubjectList', 'CourseSchoolController@getNatureSubjectOneByid');  //授权课程列表大类
         $router->post('getNatureSubjectByid', 'CourseSchoolController@getNatureSubjectTwoByid');  //授权课程列表小类
     });
