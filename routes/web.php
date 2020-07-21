@@ -207,6 +207,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('courseIntroduce','CourseController@courseIntroduce');//课程简介
         $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
         $router->post('urlcode','CourseController@urlcode');//二维码测试
+        $router->post('alinotify', 'NotifyController@alinotify');//支付宝 购买回调
     });
 });
 //后台端路由接口
