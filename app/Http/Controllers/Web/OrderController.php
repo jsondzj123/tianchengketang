@@ -29,7 +29,7 @@ class OrderController extends Controller {
         if($nature == 0){
             $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
             //查讲师
-            $teacherlist = Couresteacher::where(['course_id'=>$v['class_id'],'is_del'=>0])->get();
+            $teacherlist = Couresteacher::where(['course_id'=>$course['class_id'],'is_del'=>0])->get();
             $string=[];
             if(!empty($teacherlist)){
                 foreach ($teacherlist as $ks=>$vs){
@@ -41,7 +41,7 @@ class OrderController extends Controller {
         }else{
             $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
             //查讲师
-            $teacherlist = Couresteacher::where(['course_id'=>$v['class_id'],'is_del'=>0])->get();
+            $teacherlist = Couresteacher::where(['course_id'=>$course['id'],'is_del'=>0])->get();
             $string=[];
             if(!empty($teacherlist)){
                 foreach ($teacherlist as $ks=>$vs){
