@@ -41,8 +41,7 @@ class OrderController extends Controller
         $fily = Order::where(['student_id'=>$data['user_info']['user_id'],'status'=>'< 2'])->count(); //未完成
         $orderlist = [];
         if($count >0){
-            $orderlist =Order::select('ld_order.id','ld_order.order_number','ld_order.create_at','ld_order.price','ld_order.status','ld_order.pay_time','ld_course.title')
-                ->leftJoin('ld_course','ld_order.class_id','=','ld_course.id')
+            $orderlist =Order::select('ld_order.id','ld_order.order_number','ld_order.create_at','ld_order.price','ld_order.status','ld_order.pay_time','ld_order.class_id','ld_order.nature')
                 ->where(['ld_order.student_id'=>$data['user_info']['user_id']])
                 ->where(function($query) use ($type) {
                     if($type == 1){
@@ -57,6 +56,13 @@ class OrderController extends Controller
                 ->offset($offset)->limit($pagesize)
                 ->get()->toArray();
             foreach ($orderlist as $k=>&$v){
+                if($v['nature'] == 1){
+                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    $v['title'] = $course['title'];
+                }else{
+                    $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    $v['title'] = $course['title'];
+                }
                 if($v['status'] == 2){
                     $orderlist[$k]['status'] = 1;
                 }else if($v['status'] == 3 || $v['status'] == 4){
