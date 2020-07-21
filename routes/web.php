@@ -164,6 +164,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('doHandInPapers','BankController@doHandInPapers');              //做题交卷接口
         $router->post('getMyBankList','BankController@getMyBankList');                //我的题库
     });
+
+
     //szw    我的
     $router->group(['prefix' => 'user' , 'middleware'=> 'user'], function () use ($router) {
         //个人设置模块
@@ -194,7 +196,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     $router->group(['prefix' => 'order', 'middleware'=> 'user'], function () use ($router) {
         $router->post('userPay','OrderController@userPay');//用户生成订单
         $router->post('userPaying','OrderController@userPaying');//用户进行支付
-        $router->post('webajaxs','OrderController@webajaxs');//前端轮询查询接口
+        $router->post('webajax','OrderController@webajax');//前端轮询查询接口
         $router->post('chargeOrder','OrderController@chargeOrder');//0元购买接口
     });
     //课程 无需token

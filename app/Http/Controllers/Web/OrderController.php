@@ -100,7 +100,7 @@ class OrderController extends Controller {
      }
 
      //前端轮询查订单是否支付完成
-    public function orderpoll(){
+    public function webajax(){
         if(!isset($this->data['order_number']) || empty($this->data['order_number'])){
             return ['code' => 201 , 'msg' => '订单号为空'];
         }
