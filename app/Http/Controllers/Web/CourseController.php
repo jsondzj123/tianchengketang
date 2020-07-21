@@ -264,7 +264,7 @@ class CourseController extends Controller {
         if($this->data['nature'] == 1){
             $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
             if(!$course){
-                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+                return response()->json(['code' => 201 , 'msg' => '无此课程']);
             }
             //修改观看数
             CourseSchool::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
@@ -313,7 +313,7 @@ class CourseController extends Controller {
         }else{
             $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
             if(!$course){
-                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+                return response()->json(['code' => 201 , 'msg' => '无此课程']);
             }
             //修改观看数
             Coures::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
@@ -338,6 +338,7 @@ class CourseController extends Controller {
             if($this->userid != 0){
                 if ($course['sale_price'] > 0) {
                     $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
+                    echo $order;die;
                     $course['is_pay'] = $order > 0 ? 1 : 0;
                 } else {
                     $course['is_pay'] = 1;
