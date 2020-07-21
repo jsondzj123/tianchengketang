@@ -310,7 +310,8 @@ class UserController extends Controller {
                         $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
                         $string[] = $teacher['real_name'];
                     }
-                    $course['teachername'] = implode(',',$string);
+                    $course['teachername'] = $teacher['real_name'];
+//                    $course['teachername'] = implode(',',$string);
                 }
                 $courses[] = $course;
             }
