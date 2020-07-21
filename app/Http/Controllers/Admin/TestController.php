@@ -296,4 +296,12 @@ class TestController extends Controller
         // }
         // return $this->response('success');
 
+
+
+        public function test(){
+            $school_id = 17;
+            $course_id = 12;
+
+        }
+
     }

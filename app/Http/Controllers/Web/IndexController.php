@@ -58,7 +58,8 @@ class IndexController extends Controller {
     }
     //首页信息
     public function index(){
-    	$arr = [];
+    	$arr = []; 
+
         $arr['logo'] = empty($this->school['logo_url'])?'':$this->school['logo_url'];
 
         $arr['header'] = $arr['footer'] = $arr['icp'] = [];
@@ -71,6 +72,7 @@ class IndexController extends Controller {
         $arr['icp'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>3])->select('id','parent_id','name','url','text','create_at')->first();
         $arr['header'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>1])->select('id','parent_id','name','url','create_at')->orderBy('sort')->get();
         $arr['index_logo'] =  FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>4])->select('logo')->orderBy('sort')->first();
+        $arr['status'] = $admin['school_status'];
     	return response()->json(['code'=>200,'msg'=>'Success','data'=>$arr]);
     }
     //精品课程
