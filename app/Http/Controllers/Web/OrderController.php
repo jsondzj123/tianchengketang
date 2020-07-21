@@ -90,7 +90,8 @@ class OrderController extends Controller {
             $return = $alipay->createPcPay();
             if($return['alipay_trade_precreate_response']['code'] == 10000){
                 $img = $this->generateQRfromGoogle($return['alipay_trade_precreate_response']['qr_code']);
-                return ['code' => 200 , 'msg' => '支付','data'=>$img];
+                echo $img;
+//                return ['code' => 200 , 'msg' => '支付','data'=>$img];
             }else{
                 return ['code' => 202 , 'msg' => '生成二维码失败'];
             }
