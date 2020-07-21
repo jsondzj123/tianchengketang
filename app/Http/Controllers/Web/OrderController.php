@@ -65,7 +65,7 @@ class OrderController extends Controller {
          $data['oa_status'] = 0;              //OA状态
          $data['class_id'] = $this->data['id'];
          $data['school_id'] = $this->school['id'];
-         $add = self::insertGetId($data);
+         $add = Order::insertGetId($data);
          if($add){
              $course['order_id'] = $add;
              DB::commit();
