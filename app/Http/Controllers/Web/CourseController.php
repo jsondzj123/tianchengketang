@@ -539,7 +539,6 @@ class CourseController extends Controller {
                 //循环章  查询每个章下的节
                 foreach ($recorde as $k => &$v) {
                     $recordes = Coureschapters::where(['course_id' => $this->data['id'], 'parent_id' => $v['id']])->where($chapterswhere)->get()->toArray();
-                    print_r($recordes);die;
                     if (!empty($recordes)) {
                         $MTCloud = new MTCloud();
                         //循环每个小节 查询小节的进度
