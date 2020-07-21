@@ -293,7 +293,6 @@ class UserController extends Controller {
     //我的课程
     public function myCourse(){
         $order = Order::where(['student_id'=>$this->userid,'status'=>2])->where('validity_time','>',date('Y-m-d H:i:s'))->get()->toArray();
-        print_r($order);
         $courses = [];
         if(!empty($order)){
             foreach ($order as $k=>$v){
@@ -314,7 +313,6 @@ class UserController extends Controller {
                     $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
                     //查讲师
                     $teacherlist = Couresteacher::where(['course_id'=>$v['class_id'],'is_del'=>0])->get();
-                    print_r($teacherlist);
                     $string=[];
                     if(!empty($teacherlist)){
                         foreach ($teacherlist as $ks=>$vs){
