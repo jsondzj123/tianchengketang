@@ -6,6 +6,7 @@ use App\Models\AdminLog;
 use App\Models\Enrolment;
 use App\Models\CourseSchool;
 use App\Models\Coures;
+use App\Models\Order;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\DB;
 
@@ -852,7 +853,7 @@ class Student extends Model {
                             if($lession_id && $lession_id > 0){
                                 //订单表插入逻辑
                                 $enroll_array['nature']  =  $nature;
-                                Order::offlineStudentSignup($enroll_array);
+                                Order::offlineStudentSignupNotaudit($enroll_array);
                             }
                         }
                     }
