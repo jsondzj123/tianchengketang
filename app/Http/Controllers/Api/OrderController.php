@@ -127,38 +127,38 @@ class OrderController extends Controller
             foreach ($order as $k => $v) {
                 if ($v['nature'] == 1) {
                     $course = CourseSchool::where(['id' => $v['class_id'], 'is_del' => 0, 'status' => 1])->first();
-                    foreach ($course as $ks => &$vs) {
-                        $method = Couresmethod::select('method_id as id')->where(['course_id' => $vs['class_id']])->get()->toArray();
-                        foreach ($method as $key => &$val) {
-                            if ($val['id'] == 1) {
-                                $val['name'] = '直播';
-                            }
-                            if ($val['id'] == 2) {
-                                $val['name'] = '录播';
-                            }
-                            if ($val['id'] == 3) {
-                                $val['name'] = '其他';
-                            }
-                        }
-                        $vs['methods'] = $method;
-                    }
+//                    foreach ($course as $ks => &$vs) {
+//                        $method = Couresmethod::select('method_id as id')->where(['course_id' => $vs['class_id']])->get()->toArray();
+//                        foreach ($method as $key => &$val) {
+//                            if ($val['id'] == 1) {
+//                                $val['name'] = '直播';
+//                            }
+//                            if ($val['id'] == 2) {
+//                                $val['name'] = '录播';
+//                            }
+//                            if ($val['id'] == 3) {
+//                                $val['name'] = '其他';
+//                            }
+//                        }
+//                        $vs['methods'] = $method;
+//                    }
                 } else {
                     $course = Coures::where(['id' => $v['class_id'], 'is_del' => 0, 'status' => 1])->first();
-                    foreach ($course as $kss => &$vss) {
-                        $method = Couresmethod::select('method_id as id')->where(['course_id' => $vss['class_id']])->get()->toArray();
-                        foreach ($method as $key => &$val) {
-                            if ($val['id'] == 1) {
-                                $val['name'] = '直播';
-                            }
-                            if ($val['id'] == 2) {
-                                $val['name'] = '录播';
-                            }
-                            if ($val['id'] == 3) {
-                                $val['name'] = '其他';
-                            }
-                        }
-                        $vss['methods'] = $method;
-                    }
+//                    foreach ($course as $kss => &$vss) {
+//                        $method = Couresmethod::select('method_id as id')->where(['course_id' => $vss['class_id']])->get()->toArray();
+//                        foreach ($method as $key => &$val) {
+//                            if ($val['id'] == 1) {
+//                                $val['name'] = '直播';
+//                            }
+//                            if ($val['id'] == 2) {
+//                                $val['name'] = '录播';
+//                            }
+//                            if ($val['id'] == 3) {
+//                                $val['name'] = '其他';
+//                            }
+//                        }
+//                        $vss['methods'] = $method;
+//                    }
                 }
                 $courses[] = $course;
             }
