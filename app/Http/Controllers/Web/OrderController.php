@@ -26,7 +26,7 @@ class OrderController extends Controller {
      public function userPay(){
         DB::beginTransaction();
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
-        if($nature == 0){
+        if($nature == 1){
             $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
             //查讲师
             $teacherlist = Couresteacher::where(['course_id'=>$course['class_id'],'is_del'=>0])->get();
