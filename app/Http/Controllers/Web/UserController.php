@@ -296,13 +296,11 @@ class UserController extends Controller {
             ->where('validity_time','>',date('Y-m-d H:i:s'))
             ->whereIn('pay_status',[3,4])
             ->get()->toArray();
-        print_r($order);die;
         $courses = [];
         if(!empty($order)){
             foreach ($order as $k=>$v){
                 if($v['nature'] == 1){
                     $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
-//                    $courseid = $course['course_id'];
                     //查讲师
                     $teacherlist = Couresteacher::where(['course_id'=>$course['course_id'],'is_del'=>0])->get();
                     $string=[];
@@ -311,7 +309,7 @@ class UserController extends Controller {
                             $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
                             $string[] = $teacher['real_name'];
                         }
-                        $course['teachername'] = implode(',',$string);
+                      $course['teachername'] = implode(',',$string);
                     }
                 }else{
                     $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
@@ -326,7 +324,7 @@ class UserController extends Controller {
                         $course['teachername'] = implode(',',$string);
                     }
                 }
-                $courses[] = $course;
+                $courses[] = array_push($course);
             }
         }
 
