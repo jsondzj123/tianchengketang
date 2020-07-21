@@ -316,6 +316,7 @@ class UserController extends Controller {
                 $courses[] = $course;
             }
         }
+
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$courses]);
     }
     //我的订单  status 1已完成2未完成3已失效
