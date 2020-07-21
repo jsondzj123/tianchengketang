@@ -514,4 +514,106 @@ class Order extends Model {
         }
         return ['code' => 200 , 'msg' => '完成' , 'data'=>$order];
     }
+
+    /*
+       * @param  线下学生报名 添加订单  不需要审核 直接开课
+       * @param  $student_id  用户id
+       * @param  $lession_id 学科id
+       * @param  $lession_price 原价
+       * @param  $student_price 学员价格
+       * @param  $payment_fee 付款金额
+       * @param  $payment_type 1定金2尾款3最后一笔尾款4全款
+       * @param  $payment_method 1微信2支付宝3银行转账
+       * @param  $payment_time 支付时间
+       * @param  author  苏振文
+       * @param  ctime   2020/5/6 9:57
+       * return  array
+       */
+    public static function offlineStudentSignupNotaudit($arr){
+        //判断传过来的数组数据是否为空
+        if(!$arr || !is_array($arr)){
+            return ['code' => 201 , 'msg' => '传递数据不合法'];
+        }
+        //判断学生id
+        if(!isset($arr['student_id']) || empty($arr['student_id'])){
+            return ['code' => 201 , 'msg' => '报名学生为空或格式不对'];
+        }
+        //判断学科id
+        if(!isset($arr['lession_id']) || empty($arr['lession_id'])){
+            return ['code' => 201 , 'msg' => '学科为空或格式不对'];
+        }
+        //判断原价
+        if(!isset($arr['lession_price']) || empty($arr['lession_price'])){
+            return ['code' => 201 , 'msg' => '原价为空或格式不对'];
+        }
+        //判断付款类型
+        if(!isset($arr['payment_type']) || empty($arr['payment_type']) || !in_array(  $arr['payment_type'],[1,2,3,4])){
+            return ['code' => 201 , 'msg' => '付款类型为空或格式不对'];
+        }
+        //判断原价
+        if(!isset($arr['payment_method']) || empty($arr['payment_method'])|| !in_array($arr['payment_method'],[1,2,3])){
+            return ['code' => 201 , 'msg' => '付款方式为空或格式不对'];
+        }
+        //判断支付时间
+        if(!isset($arr['payment_time'])|| empty($arr['payment_time'])){
+            return ['code' => 201 , 'msg' => '支付时间不能为空'];
+        }
+        //获取后端的操作员id
+        $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;  //操作员id
+        //根据用户id获得分校id
+        $school = Student::select('school_id')->where('id',$arr['student_id'])->first();
+        $data['order_number'] = date('YmdHis', time()) . rand(1111, 9999); //订单号  随机生成
+        $data['order_type'] = 1;        //1线下支付 2 线上支付
+        $data['student_id'] = $arr['student_id'];
+        $data['price'] = $arr['payment_fee']; //应付价格
+        $data['student_price'] = $arr['student_price'];
+        $data['lession_price'] = $arr['lession_price'];
+        $data['pay_status'] = $arr['payment_type'];
+        $data['pay_type'] = $arr['payment_method'];
+        $data['status'] = 1;                  //支付状态
+        $data['pay_time'] = $arr['payment_time'];
+        $data['oa_status'] = 0;              //OA状态
+        $data['class_id'] = $arr['lession_id'];
+        $data['school_id'] = $school['school_id'];
+        $data['nature'] = $arr['nature'];
+        if($arr['nature'] == 1){
+            $lesson = CourseSchool::where(['id'=>$arr['lession_id']])->first();
+        }else{
+            $lesson = Coures::where(['id'=>$arr['lession_id']])->first();
+        }
+        if($lesson['expiry'] ==0){
+            $validity = '3000-01-02 12:12:12';
+        }else{
+            $validity = date('Y-m-d H:i:s', strtotime('+' . $lesson['expiry'] . ' day'));
+        }
+        $data['validity_time'] = $validity;
+        $overorder = Order::where(['student_id'=>$arr['student_id'],'status'=>2])->count(); //用户已完成订单
+        $userorder = Order::where(['student_id'=>$arr['student_id']])->count(); //用户所有订单
+        if($overorder == $userorder){
+            $state_status = 2;
+        }else{
+            if($overorder > 0 ){
+                $state_status = 1;
+            }else{
+                $state_status = 0;
+            }
+        }
+        $add = self::insert($data);
+        if($add){
+            Student::where(['id'=>$arr['student_id']])->update(['enroll_status'=>1,'state_status'=>$state_status,'update_at'=>date('Y-m-d H:i:s')]);
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $data['admin_id']  ,
+                'module_name'    =>  'Order' ,
+                'route_url'      =>  'admin/Order/offlineStudentSignup' ,
+                'operate_method' =>  'insert' ,
+                'content'        =>  '添加订单的内容,'.json_encode($data),
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
+            return true;
+        }else{
+            return false;
+        }
+    }
 }
