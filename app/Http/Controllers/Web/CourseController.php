@@ -311,6 +311,7 @@ class CourseController extends Controller {
                 $course['is_collect'] = 0;
             }
         }else{
+            echo 12346598;
             $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
             if(!$course){
                 return response()->json(['code' => 201 , 'msg' => '无此课程']);
