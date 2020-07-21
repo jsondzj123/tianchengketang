@@ -255,10 +255,6 @@ class CourseController extends Controller {
          * return  array
          */
     public function courseDetail(){
-
-
-        echo $this->userid;die;
-
         if(!isset($this->data['id']) || empty($this->data['id'])){
             return response()->json(['code' => 201 , 'msg' => '课程id不能为空']);
         }
@@ -289,31 +285,6 @@ class CourseController extends Controller {
                     array_push($teacher, $oneteacher);
                 }
             }
-            //是否购买
-            if($this->userid != 0){
-                if ($course['sale_price'] > 0) {
-                    $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['course_id'], 'status' => 2,'nature'=>1])->count();
-                    $course['is_pay'] = $order > 0 ? 1 : 0;
-                } else {
-                    $course['is_pay'] = 1;
-                }
-            }else{
-                $course['is_pay'] = 0;
-            }
-            //收藏数量
-            $collect = Collection::where(['lesson_id'=>$course['course_id'],'is_del'=>0,'nature'=>1])->count();
-            $course['collect'] = $collect;
-            //判断用户是否收藏
-            if($this->userid != 0){
-                $collects = Collection::where(['lesson_id'=>$course['course_id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
-                if($collects != 0){
-                    $course['is_collect'] = 1;
-                }else{
-                    $course['is_collect'] = 0;
-                }
-            }else{
-                $course['is_collect'] = 0;
-            }
         }else{
             $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
             if(!$course){
@@ -338,32 +309,9 @@ class CourseController extends Controller {
                     array_push($teacher, $oneteacher);
                 }
             }
-            //是否购买
-            if($this->userid != 0){
-                if ($course['sale_price'] > 0) {
-                    $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
-                    echo $order;
-                    $course['is_pay'] = $order > 0 ? 1 : 0;
-                } else {
-                    $course['is_pay'] = 1;
-                }
-            }else{
-                $course['is_pay'] = 0;
-            }
             //收藏数量
             $collect = Collection::where(['lesson_id'=>$this->data['id'],'is_del'=>0,'nature'=>0])->count();
             $course['collect'] = $collect;
-            //判断用户是否收藏
-            if($this->userid != 0){
-                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->count();
-                if($collects != 0){
-                    $course['is_collect'] = 1;
-                }else{
-                    $course['is_collect'] = 0;
-                }
-            }else{
-                $course['is_collect'] = 0;
-            }
         }
         //分类信息
         $parent = CouresSubject::select('id', 'subject_name')->where(['id' => $course['parent_id'], 'parent_id' => 0, 'is_del' => 0, 'is_open' => 0])->first();
@@ -373,6 +321,42 @@ class CourseController extends Controller {
         unset($course['parent_id']);
         unset($course['child_id']);
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
+    }
+    //用户与课程关系
+    public function courseToUser(){
+        $nature = isset($this->data['nature'])?$this->data['nature']:0;
+        if($nature == 1){
+            $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+        }else{
+            $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+        }
+        $data=[];
+        //是否购买
+        if($this->userid != 0){
+            if ($course['sale_price'] > 0) {
+                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['course_id'], 'status' => 2,'nature'=>1])->count();
+                $data['is_pay'] = $order > 0 ? 1 : 0;
+            } else {
+                $data['is_pay'] = 1;
+            }
+        }else{
+            $data['is_pay'] = 0;
+        }
+        //收藏数量
+        $collect = Collection::where(['lesson_id'=>$course['course_id'],'is_del'=>0,'nature'=>1])->count();
+        $course['collect'] = $collect;
+        //判断用户是否收藏
+        if($this->userid != 0){
+            $collects = Collection::where(['lesson_id'=>$course['course_id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
+            if($collects != 0){
+                $data['is_collect'] = 1;
+            }else{
+                $data['is_collect'] = 0;
+            }
+        }else{
+            $data['is_collect'] = 0;
+        }
+        return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $data]);
     }
     //课程收藏
     public function collect(){
