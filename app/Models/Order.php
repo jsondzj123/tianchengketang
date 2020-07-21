@@ -514,7 +514,6 @@ class Order extends Model {
         }
         return ['code' => 200 , 'msg' => '完成' , 'data'=>$order];
     }
-
     /*
        * @param  线下学生报名 添加订单  不需要审核 直接开课
        * @param  $student_id  用户id
