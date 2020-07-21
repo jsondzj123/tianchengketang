@@ -545,24 +545,24 @@ class CourseController extends Controller {
                             }else{
                                 $val['video_url'] = '';
                             }
-//                            if (empty($ziyuan)) {
-//                                $val['study'] = 0;
-//                            } else {
-//                                $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
-//                                if (isset($use_duration['data']) || !empty($use_duration['data'])) {
-//                                    foreach ($use_duration['data'] as $kk => $vv) {
-//                                        if ($vv['uid'] == $this->userid) {
-//                                            if ($vv['use_duration'] == 0) {
-//                                                $val['study'] = 0;
-//                                            } else {
-//                                                $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
-//                                            }
-//                                        } else {
-//                                            $val['study'] = 0;
-//                                        }
-//                                    }
-//                                }
-//                            }
+                            if (empty($ziyuan)) {
+                                $val['study'] = 0;
+                            } else {
+                                $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
+                                if (isset($use_duration['data']) || !empty($use_duration['data'])) {
+                                    foreach ($use_duration['data'] as $kk => $vv) {
+                                        if ($vv['uid'] == $this->userid) {
+                                            if ($vv['use_duration'] == 0) {
+                                                $val['study'] = 0;
+                                            } else {
+                                                $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
+                                            }
+                                        } else {
+                                            $val['study'] = 0;
+                                        }
+                                    }
+                                }
+                            }
                         }
                         $v['chapters'] = $recordes;
                     }
@@ -602,7 +602,6 @@ class CourseController extends Controller {
         }
         $courseArr=[];
         if($order == 0 || $course['sale_price'] == 0){
-            $courseArr['is_pay'] = 1;
             //获取所有的班号
             $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get()->toArray();
             if($courseArr != 0){
@@ -640,8 +639,6 @@ class CourseController extends Controller {
                     }
                 }
             }
-        }else{
-            $courseArr['is_pay'] = 0;
         }
         return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$courseArr]);
     }
@@ -661,7 +658,7 @@ class CourseController extends Controller {
         if($nature == 1){
             $course = CourseSchool ::where(['id'=>$this->data['id'],'is_del'=>0])->first();
             //课程是否免费或者用户是否购买
-            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2,'nature'=>1])->count();
             if($order > 0){
                 $is_pay = 1;
             }else{
@@ -670,7 +667,7 @@ class CourseController extends Controller {
             $this->data['id'] = $course['course_id'];
         }else{
             //课程是否免费或者用户是否购买
-            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2,'nature'=>0])->count();
             if($order > 0){
                 $is_pay = 1;
             }else{
@@ -679,7 +676,7 @@ class CourseController extends Controller {
         }
         $type = isset($this->data['type'])?$this->data['type']:'';
         $ziyuan=[];
-//        if($is_pay > 0){
+        if($is_pay > 0){
             //录播资料
             $jie = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0])->where('parent_id','>',0)->get();
             if(!empty($jie)){
@@ -710,8 +707,7 @@ class CourseController extends Controller {
                     $ziyuan[] = $ziliaos;
                 }
             }
-//        }
-        $ziyuan['is_pay'] = $is_pay;
+        }
         $res = array_slice($ziyuan, $offset, $pagesize);
         return ['code' => 200 , 'msg' => '查询成功','data'=>$res,'page'=>$page];
     }
