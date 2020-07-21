@@ -289,7 +289,6 @@ class UserController extends Controller {
         }
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$coursearr]);
     }
-
     //我的课程
     public function myCourse(){
         $order = Order::where(['status'=>2])
