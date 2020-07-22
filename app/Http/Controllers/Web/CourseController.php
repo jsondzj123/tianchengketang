@@ -728,7 +728,7 @@ class CourseController extends Controller {
                     $classzl = Couresmaterial::where(['mold'=>2,'is_del'=>0,'parent_id'=>$vs['shift_id']])->get()->toArray();
                     if(!empty($classzl)){
                         foreach ($classzl as $classk => $classv){
-                            $jie[] = $classv;
+                            $ziyuan[] = $classv;
                         }
                     }
                     //每个班号获取所有的课次
@@ -738,7 +738,7 @@ class CourseController extends Controller {
                             $number = Couresmaterial::where(['mold'=>3,'is_del'=>0,'parent_id'=>$shirtv['id']])->get();
                             if(!empty($number)){
                                 foreach ($number as $numberk => $numberv){
-                                    $jie[] = $numberv;
+                                    $ziyuan[] = $numberv;
                                 }
                             }
                         }
@@ -747,7 +747,7 @@ class CourseController extends Controller {
             }
         }
 //        $res = array_slice($ziyuan, $offset, $pagesize);
-        return ['code' => 200 , 'msg' => '查询成功','data'=>$jie,'page'=>$page];
+        return ['code' => 200 , 'msg' => '查询成功','data'=>$ziyuan,'page'=>$page];
     }
 
 }
