@@ -725,7 +725,11 @@ class CourseController extends Controller {
             if(!empty($ban)){
                 foreach ($ban as $ks=>$vs){
                     //获取班号资料
-                    $classzl = Couresmaterial::where(['mold'=>2,'is_del'=>0,'parent_id'=>$vs['shift_id']])->get()->toArray();
+                    $classzl = Couresmaterial::where(['mold'=>2,'is_del'=>0,'parent_id'=>$vs['shift_id']])->where(function ($query) use ($type) {
+                        if (!empty($type) && $type != '' && $type != 0) {
+                            $query->where('type', $type);
+                        }
+                    })->get();
                     if(!empty($classzl)){
                         foreach ($classzl as $classk => $classv){
                             $ziyuan[] = $classv;
@@ -735,7 +739,11 @@ class CourseController extends Controller {
                     $shirt = LiveChild::where(['shift_no_id'=>$vs['shift_id'],'is_del'=>0,'status'=>1])->get();
                     if(!empty($shirt)){
                         foreach ($shirt as $shirtk => $shirtv){
-                            $number = Couresmaterial::where(['mold'=>3,'is_del'=>0,'parent_id'=>$shirtv['id']])->get();
+                            $number = Couresmaterial::where(['mold'=>3,'is_del'=>0,'parent_id'=>$shirtv['id']])->where(function ($query) use ($type) {
+                                if (!empty($type) && $type != '' && $type != 0) {
+                                    $query->where('type', $type);
+                                }
+                            })->get();
                             if(!empty($number)){
                                 foreach ($number as $numberk => $numberv){
                                     $ziyuan[] = $numberv;
