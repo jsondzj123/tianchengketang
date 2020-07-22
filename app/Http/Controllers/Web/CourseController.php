@@ -323,7 +323,7 @@ class CourseController extends Controller {
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
     }
     //用户与课程关系
-    public function courseToUser(){
+        public function courseToUser(){
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
         $data=[];
         if($nature == 1){
@@ -357,11 +357,12 @@ class CourseController extends Controller {
             //是否购买
             if($this->userid != 0){
                 $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['id'], 'status' => 2,'nature'=>1])->orderByDesc('id')->first();
+                print_r($order);die;
                 //看订单里面的到期时间 进行判断
                 if (date('Y-m-d H:i:s') >= $order['validity_time']) {
                     //课程到期  只能观看
                     $data['is_pay'] = 0;
-                } else {
+                }else {
                     $data['is_pay'] = 1;
                 }
             }else{
