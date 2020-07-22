@@ -390,7 +390,7 @@ class CourseController extends Controller {
         $list = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'nature'=>$this->data['nature']])->first();
         if($list){
             $status = $list['is_del'] == 1?0:1;
-            $add = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid])->update(['is_del'=>$status]);
+            $add = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'nature'=>$this->data['nature']])->update(['is_del'=>$status]);
         }else{
             $add = Collection::insert([
                 'lesson_id' => $this->data['id'],
