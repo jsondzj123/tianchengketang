@@ -269,7 +269,7 @@ class CourseController extends Controller {
             //修改观看数
             CourseSchool::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
             //授课方式
-            $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id']])->get()->toArray();
+            $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id'],'is_del'=>0])->get()->toArray();
             if (!empty($method)) {
                 $course['method'] = array_column($method, 'method_id');
             }
@@ -293,7 +293,7 @@ class CourseController extends Controller {
             //修改观看数
             Coures::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
             //授课方式
-            $method = Couresmethod::select('method_id')->where(['course_id' =>$this->data['id']])->get()->toArray();
+            $method = Couresmethod::select('method_id')->where(['course_id' =>$this->data['id'],'is_del'=>0])->get()->toArray();
             if (!empty($method)) {
                 $course['method'] = array_column($method, 'method_id');
             }
