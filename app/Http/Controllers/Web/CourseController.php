@@ -356,7 +356,7 @@ class CourseController extends Controller {
             $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
             //是否购买
             if($this->userid != 0){
-                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['id'], 'status' => 2,'nature'=>1])->orderByDesc('id')->first();
+                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['id'], 'status' => 2,'nature'=>1])->orderByDesc('id')->first()->toArray();
                 print_r($order);die;
                 //看订单里面的到期时间 进行判断
                 if (date('Y-m-d H:i:s') >= $order['validity_time']) {
