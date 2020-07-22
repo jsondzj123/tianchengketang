@@ -613,7 +613,7 @@ class CourseController extends Controller {
         if($count > 0 && $is_show == 1){
             //获取所有的班号
             $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
-            if($courseArr != 0){
+            if(!empty($courseArr)){
                 foreach ($courseArr as $k=>&$v){
                     //获取班级信息
                     $class = LiveClass::where(['id'=>$v['shift_id'],'is_del'=>0])->first();
