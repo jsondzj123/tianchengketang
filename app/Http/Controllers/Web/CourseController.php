@@ -704,22 +704,22 @@ class CourseController extends Controller {
         }
         if($is_show > 0){
             //录播资料
-//            $jie = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0])->where('parent_id','>',0)->get();
-//            if(!empty($jie)){
-//                foreach ($jie as $k=>$v){
-//                    $ziliao = Couresmaterial::where(['parent_id'=>$v['id'],'is_del'=>0,'mold'=>1])
-//                        ->where(function ($query) use ($type) {
-//                            if (!empty($type) && $type != '' && $type != 0) {
-//                                $query->where('type', $type);
-//                            }
-//                        })->get();
-//                    if(!empty($ziliao)){
-//                        foreach ($ziliao as $kss=>$vss){
-//                            $ziyuan[] = $vss;
-//                        }
-//                    }
-//                }
-//            }
+            $jie = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0])->where('parent_id','>',0)->get();
+            if(!empty($jie)){
+                foreach ($jie as $k=>$v){
+                    $ziliao = Couresmaterial::where(['parent_id'=>$v['id'],'is_del'=>0,'mold'=>1])
+                        ->where(function ($query) use ($type) {
+                            if (!empty($type) && $type != '' && $type != 0) {
+                                $query->where('type', $type);
+                            }
+                        })->get();
+                    if(!empty($ziliao)){
+                        foreach ($ziliao as $kss=>$vss){
+                            $ziyuan[] = $vss;
+                        }
+                    }
+                }
+            }
             //直播资料  获取所有的班号
             $jie=[];
             $ban = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
@@ -747,7 +747,6 @@ class CourseController extends Controller {
                 }
             }
         }
-//        $res = array_slice($ziyuan, $offset, $pagesize);
         return ['code' => 200 , 'msg' => '查询成功','data'=>$jie,'page'=>$page];
     }
 
