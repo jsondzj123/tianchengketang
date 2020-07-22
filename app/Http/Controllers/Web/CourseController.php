@@ -660,7 +660,7 @@ class CourseController extends Controller {
         $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
-        //订单判断是否购买
+        //查询订单信息
         if($nature == 1){
             $course = CourseSchool ::where(['id'=>$this->data['id'],'is_del'=>0])->first();
             if(!$course){
@@ -704,22 +704,22 @@ class CourseController extends Controller {
         }
         if($is_show > 0){
             //录播资料
-            $jie = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0])->where('parent_id','>',0)->get();
-            if(!empty($jie)){
-                foreach ($jie as $k=>$v){
-                    $ziliao = Couresmaterial::where(['parent_id'=>$v['id'],'is_del'=>0,'mold'=>1])
-                        ->where(function ($query) use ($type) {
-                            if (!empty($type) && $type != '' && $type != 0) {
-                                $query->where('type', $type);
-                            }
-                        })->get();
-                    if(!empty($ziliao)){
-                        foreach ($ziliao as $kss=>$vss){
-                            $ziyuan[] = $vss;
-                        }
-                    }
-                }
-            }
+//            $jie = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0])->where('parent_id','>',0)->get();
+//            if(!empty($jie)){
+//                foreach ($jie as $k=>$v){
+//                    $ziliao = Couresmaterial::where(['parent_id'=>$v['id'],'is_del'=>0,'mold'=>1])
+//                        ->where(function ($query) use ($type) {
+//                            if (!empty($type) && $type != '' && $type != 0) {
+//                                $query->where('type', $type);
+//                            }
+//                        })->get();
+//                    if(!empty($ziliao)){
+//                        foreach ($ziliao as $kss=>$vss){
+//                            $ziyuan[] = $vss;
+//                        }
+//                    }
+//                }
+//            }
             //直播资料
             $ban = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
             if(!empty($ban)){
@@ -734,8 +734,8 @@ class CourseController extends Controller {
                 }
             }
         }
-        $res = array_slice($ziyuan, $offset, $pagesize);
-        return ['code' => 200 , 'msg' => '查询成功','data'=>$res,'page'=>$page];
+//        $res = array_slice($ziyuan, $offset, $pagesize);
+        return ['code' => 200 , 'msg' => '查询成功','data'=>$ban,'page'=>$page];
     }
 }
 
