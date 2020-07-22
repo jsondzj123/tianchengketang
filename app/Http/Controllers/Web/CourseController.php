@@ -266,6 +266,7 @@ class CourseController extends Controller {
             if(!$course){
                 return response()->json(['code' => 201 , 'msg' => '无此课程']);
             }
+            $course['nature'] = 1;
             //修改观看数
             CourseSchool::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
             //授课方式
@@ -290,6 +291,7 @@ class CourseController extends Controller {
             if(!$course){
                 return response()->json(['code' => 201 , 'msg' => '无此课程']);
             }
+            $course['nature'] = 0;
             //修改观看数
             Coures::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
             //授课方式
