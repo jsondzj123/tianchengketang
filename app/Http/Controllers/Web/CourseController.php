@@ -272,7 +272,7 @@ class CourseController extends Controller {
             //授课方式
             $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id'],'is_del'=>0])->get();
             if (!empty($method)) {
-                $course['method'] = array_column($method, 'method_id');
+                $course['method'] = array_column((array)$method, 'method_id');
             }
             //学习人数   基数+订单数
             $ordernum = Order::where(['class_id' => $course['course_id'], 'status' => 2, 'oa_status' => 1,'nature'=>1])->count();
@@ -283,7 +283,7 @@ class CourseController extends Controller {
             if (!empty($teacherlist)) {
                 foreach ($teacherlist as $k => $v) {
                     $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first();
-                    array_push($teacher, $oneteacher);
+                    array_push($teacher, (array)$oneteacher);
                 }
             }
             //收藏数量
@@ -300,7 +300,7 @@ class CourseController extends Controller {
             //授课方式
             $method = Couresmethod::select('method_id')->where(['course_id' =>$this->data['id'],'is_del'=>0])->get();
             if (!empty($method)) {
-                $course['method'] = array_column($method, 'method_id');
+                $course['method'] = array_column((array)$method, 'method_id');
             }
             //学习人数   基数+订单数
             $ordernum = Order::where(['class_id' => $this->data['id'], 'status' => 2, 'oa_status' => 1,'nature'=>0])->count();
@@ -311,7 +311,7 @@ class CourseController extends Controller {
             if (!empty($teacherlist)) {
                 foreach ($teacherlist as $k => $v) {
                     $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first();
-                    array_push($teacher, $oneteacher);
+                    array_push($teacher, (array)$oneteacher);
                 }
             }
             //收藏数量
