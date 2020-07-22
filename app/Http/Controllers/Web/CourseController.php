@@ -755,6 +755,9 @@ class CourseController extends Controller {
             }
         }
         $res = array_slice($ziyuan, $offset, $pagesize);
+        if(empty($res)){
+            $res = array_slice($res, 1, $pagesize);
+        }
         return ['code' => 200 , 'msg' => '查询成功','data'=>$res,'page'=>$page];
     }
 
