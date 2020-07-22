@@ -884,7 +884,9 @@ class Student extends Model {
                         'create_at'      =>  date('Y-m-d H:i:s')                                      
                     ];
                 }
-            } else {
+            } 
+            
+            /*else {
                 $user_info = self::where('phone' , $phone)->first();
                 $user_id   = $user_info['id'];
                 //添加报名表数据
@@ -933,7 +935,7 @@ class Student extends Model {
                         }
                     }
                 }
-            }
+            }*/
         }
         //返回信息数据
         return ['code' => 200 , 'msg' => '导入试题列表成功' , 'data' => $arr];
