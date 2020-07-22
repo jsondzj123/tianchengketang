@@ -60,7 +60,7 @@ class AlipayFactory{
         //SDK已经封装掉了公共参数，这里只需要传入业务参数
         $bizcontent    =    [
             'out_trade_no'        =>    $order_number,
-            'total_amount'        =>    0.01,//价格
+            'total_amount'        =>    $price,//价格
             'subject'                =>    "商品购买",
             'timeout_express'    =>    '1d',//失效时间为 1天
             'product_code'        =>    'FACE_TO_FACE_PAYMENT',
