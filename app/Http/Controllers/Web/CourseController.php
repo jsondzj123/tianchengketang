@@ -47,10 +47,10 @@ class CourseController extends Controller {
 //            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>json_decode(Redis::get($key),true)]);
 //        }else{
             //自增学科
-            $subject = CouresSubject::where(['school_id'=>$this->school['id'],'parent_id'=>0,'is_open'=>0,'is_del'=>0])->get()->toArray();
+            $subject = CouresSubject::where(['school_id'=>$this->school['id'],'parent_id'=>0,'is_open'=>0,'is_del'=>0])->get();
             if(!empty($subject)){
                 foreach ($subject as $k=>&$v){
-                    $subjects = CouresSubject::where(['parent_id'=>$v['id'],'is_open'=>0,'is_del'=>0])->get()->toArray();
+                    $subjects = CouresSubject::where(['parent_id'=>$v['id'],'is_open'=>0,'is_del'=>0])->get();
                     if(!empty($subjects)){
                         $v['son'] = $subjects;
                     }
@@ -58,12 +58,12 @@ class CourseController extends Controller {
             }
             //授权学科
             $course = CourseSchool::select('ld_course.parent_id')->leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
-                ->where(['ld_course_school.to_school_id'=>$this->school['id'],'ld_course_school.is_del'=>0,'ld_course.is_del'=>0])->groupBy('ld_course.parent_id')->get()->toArray();
+                ->where(['ld_course_school.to_school_id'=>$this->school['id'],'ld_course_school.is_del'=>0,'ld_course.is_del'=>0])->groupBy('ld_course.parent_id')->get();
             if(!empty($course)){
                 foreach ($course as $ks=>$vs){
-                    $ones = CouresSubject::where(['id'=>$vs['parent_id'],'parent_id'=>0,'is_open'=>0,'is_del'=>0])->first()->toArray();
+                    $ones = CouresSubject::where(['id'=>$vs['parent_id'],'parent_id'=>0,'is_open'=>0,'is_del'=>0])->first();
                     if(!empty($ones)){
-                        $ones['son'] = CouresSubject::where(['parent_id'=>$vs['parent_id'],'is_open'=>0,'is_del'=>0])->get()->toArray();
+                        $ones['son'] = CouresSubject::where(['parent_id'=>$vs['parent_id'],'is_open'=>0,'is_del'=>0])->get();
                     }
                     array_push($subject,$ones);
                 }
@@ -132,14 +132,14 @@ class CourseController extends Controller {
                     })
                     ->where(['school_id' => $school_id, 'is_del' => 0, 'status' => 1])
                     ->where('title', 'like', '%' . $name . '%')
-                    ->get()->toArray();
+                    ->get();
                 foreach ($course as $k => &$v) {
                     $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])
                         ->where(function ($query) use ($methodwhere) {
                             if($methodwhere != ''){
                                 $query->where('method_id', $methodwhere);
                             }
-                        })->get()->toArray();
+                        })->get();
                     if (!empty($method)) {
                         $count = $count +1;
                         foreach ($method as $key => &$val) {
@@ -173,10 +173,10 @@ class CourseController extends Controller {
                     })
                     ->where(['to_school_id' => $school_id, 'is_del' => 0, 'status' => 1])
                     ->where('title', 'like', '%' . $name . '%')
-                    ->get()->toArray();
+                    ->get();
                 foreach ($ref_course as $ks => &$vs) {
                     //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
-                    $add_number = CourseStocks::where(['course_id' => $vs['course_id'], 'school_id' => $school_id, 'is_del' => 0])->get()->toArray();
+                    $add_number = CourseStocks::where(['course_id' => $vs['course_id'], 'school_id' => $school_id, 'is_del' => 0])->get();
                     if (!empty($add_number)) {
                         //库存总数
                         $stocknum = 0;
@@ -192,7 +192,7 @@ class CourseController extends Controller {
                                         if ($methodwhere != '') {
                                             $query->where('method_id', $methodwhere);
                                         }
-                                    })->get()->toArray();
+                                    })->get();
                                 if (!empty($method)) {
                                     $count = $count +1;
                                     foreach ($method as $key => &$val) {
@@ -262,7 +262,7 @@ class CourseController extends Controller {
         //课程基本信息
         //授权
         if($this->data['nature'] == 1){
-            $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+            $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first();
             if(!$course){
                 return response()->json(['code' => 201 , 'msg' => '无此课程']);
             }
@@ -270,7 +270,7 @@ class CourseController extends Controller {
             //修改观看数
             CourseSchool::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
             //授课方式
-            $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id'],'is_del'=>0])->get()->toArray();
+            $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id'],'is_del'=>0])->get();
             if (!empty($method)) {
                 $course['method'] = array_column($method, 'method_id');
             }
@@ -279,7 +279,7 @@ class CourseController extends Controller {
             $course['buy_num'] = $course['buy_num'] + $ordernum;
             //讲师信息
             $teacher = [];
-            $teacherlist = Couresteacher::where(['course_id' => $course['course_id'], 'is_del' => 0])->get()->toArray();
+            $teacherlist = Couresteacher::where(['course_id' => $course['course_id'], 'is_del' => 0])->get();
             if (!empty($teacherlist)) {
                 foreach ($teacherlist as $k => $v) {
                     $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first();
@@ -287,7 +287,7 @@ class CourseController extends Controller {
                 }
             }
         }else{
-            $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+            $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first();
             if(!$course){
                 return response()->json(['code' => 201 , 'msg' => '无此课程']);
             }
@@ -295,7 +295,7 @@ class CourseController extends Controller {
             //修改观看数
             Coures::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
             //授课方式
-            $method = Couresmethod::select('method_id')->where(['course_id' =>$this->data['id'],'is_del'=>0])->get()->toArray();
+            $method = Couresmethod::select('method_id')->where(['course_id' =>$this->data['id'],'is_del'=>0])->get();
             if (!empty($method)) {
                 $course['method'] = array_column($method, 'method_id');
             }
@@ -304,7 +304,7 @@ class CourseController extends Controller {
             $course['buy_num'] = $course['buy_num'] + $ordernum;
             //讲师信息
             $teacher = [];
-            $teacherlist = Couresteacher::where(['course_id' => $this->data['id'], 'is_del' => 0])->get()->toArray();
+            $teacherlist = Couresteacher::where(['course_id' => $this->data['id'], 'is_del' => 0])->get();
             if (!empty($teacherlist)) {
                 foreach ($teacherlist as $k => $v) {
                     $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first();
@@ -523,11 +523,11 @@ class CourseController extends Controller {
                 ];
             }
             //获取章
-            $recorde = Coureschapters::where(['course_id' => $this->data['id'], 'is_del' => 0, 'parent_id' => 0])->get()->toArray();
+            $recorde = Coureschapters::where(['course_id' => $this->data['id'], 'is_del' => 0, 'parent_id' => 0])->get();
             if (!empty($recorde)) {
                 //循环章  查询每个章下的节
                 foreach ($recorde as $k => &$v) {
-                    $recordes = Coureschapters::where(['course_id' => $this->data['id'], 'parent_id' => $v['id']])->where($chapterswhere)->get()->toArray();
+                    $recordes = Coureschapters::where(['course_id' => $this->data['id'], 'parent_id' => $v['id']])->where($chapterswhere)->get();
                     if (!empty($recordes)) {
                         $MTCloud = new MTCloud();
                         //循环每个小节 获取url
@@ -609,7 +609,7 @@ class CourseController extends Controller {
         $count = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->count();
         if($count > 0 && $is_show == 1){
             //获取所有的班号
-            $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get()->toArray();
+            $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
             if($courseArr != 0){
                 foreach ($courseArr as $k=>&$v){
                     //获取班级信息
@@ -631,12 +631,12 @@ class CourseController extends Controller {
                             //查询讲师
                             $teacher = LiveClassChildTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_class_teacher.teacher_id')
                                 ->where(['ld_course_class_teacher.is_del'=>0,'ld_lecturer_educationa.is_del'=>0,'ld_lecturer_educationa.type'=>2,'ld_lecturer_educationa.is_forbid'=>0])
-                                ->first()->toArray();
+                                ->first();
                             if(!empty($teacher)){
                                 $vs['teacher_name'] = $teacher['real_name'];
                             }
                             //查询资料
-                            $material = Couresmaterial::where(['mold'=>3,'is_del'=>0,'parent_id'=>$vs['id']])->get()->toArray();
+                            $material = Couresmaterial::where(['mold'=>3,'is_del'=>0,'parent_id'=>$vs['id']])->get();
                             if(!empty($material)){
                                 $vs['material'] = $material;
                             }else{
