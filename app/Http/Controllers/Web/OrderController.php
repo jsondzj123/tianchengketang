@@ -56,7 +56,7 @@ class OrderController extends Controller {
          $data['order_number'] = date('YmdHis', time()) . rand(1111, 9999);
          $data['admin_id'] = 0;  //操作员id
          $data['order_type'] = 2;        //1线下支付 2 线上支付
-         $data['student_id'] = $this->data['id'];
+         $data['student_id'] = $this->userid;
          $data['price'] = $course['sale_price'];
          $data['student_price'] = $course['pricing'];
          $data['lession_price'] = $course['pricing'];
@@ -69,6 +69,7 @@ class OrderController extends Controller {
          $add = Order::insertGetId($data);
          if($add){
              $course['order_id'] = $add;
+             $course['order_number'] = $data['order_number'];
              DB::commit();
              return ['code' => 200 , 'msg' => '生成预订单成功','data'=>$course];
          }else{
@@ -100,7 +101,7 @@ class OrderController extends Controller {
      }
 
      //前端轮询查订单是否支付完成
-    public function orderpoll(){
+    public function webajax(){
         if(!isset($this->data['order_number']) || empty($this->data['order_number'])){
             return ['code' => 201 , 'msg' => '订单号为空'];
         }

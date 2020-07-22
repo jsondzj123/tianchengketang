@@ -78,7 +78,7 @@ class IndexController extends Controller {
     //精品课程
     public function course(){
     	$course =  $zizengCourseData = $natureCourseData = $CouresData = [];
-    	$subjectOne = CouresSubject::where(['school_id'=>$this->school['id'],'is_open'=>0,'is_del'=>0,'parent_id'=>0])->select('id')->get()->toArray();//自增学科大类
+    	$subjectOne = CouresSubject::where(['school_id'=>$this->school['id'],'is_open'=>0,'is_del'=>0,'parent_id'=>0])->orderBy('id','DESC')->select('id')->get()->toArray();//自增学科大类
         $natuerSubjectOne = CourseSchool::select('parent_id')->where(['to_school_id'=>$this->school['id'],'is_del'=>0,'status'=>1])->select('parent_id as id')->groupBy('parent_id')->get()->toArray();//授权学科大类
         if(!empty($natuerSubjectOne)){
             foreach($natuerSubjectOne as $key=>&$v){
@@ -94,7 +94,10 @@ class IndexController extends Controller {
         }
         
         if(!empty($subjectOne)&& !empty($natuerSubjectOne)){
+
              $subject=array_merge($subjectOne,$natuerSubjectOne);
+             $last_names = array_column($subject,'id');
+             array_multisort($last_names,SORT_ASC,$subject);
         }else{
             $subject = empty($subjectOne) ?$natuerSubjectOne:$subjectOne;
         }
