@@ -164,6 +164,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('doHandInPapers','BankController@doHandInPapers');              //做题交卷接口
         $router->post('getMyBankList','BankController@getMyBankList');                //我的题库
     });
+
+
     //szw    我的
     $router->group(['prefix' => 'user' , 'middleware'=> 'user'], function () use ($router) {
         //个人设置模块
@@ -189,6 +191,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('material','CourseController@material');//课程资料列表
         $router->post('userPay','CourseController@userPay');//用户生成订单
         $router->post('userPaying','CourseController@userPaying');//用户进行支付
+        $router->post('courseToUser','CourseController@courseToUser');//用户与课程关系
     });
     //站内支付
     $router->group(['prefix' => 'order', 'middleware'=> 'user'], function () use ($router) {
@@ -205,6 +208,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('courseIntroduce','CourseController@courseIntroduce');//课程简介
         $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
         $router->post('urlcode','CourseController@urlcode');//二维码测试
+        $router->post('alinotify', 'NotifyController@alinotify');//支付宝 购买回调
     });
 });
 //后台端路由接口

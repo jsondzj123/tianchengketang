@@ -259,21 +259,17 @@ class CourseController extends Controller {
             return response()->json(['code' => 201 , 'msg' => '课程id不能为空']);
         }
         $this->data['nature'] = isset($this->data['nature'])?$this->data['nature']:0;
-//        $keys = json_encode($this->data).$this->userid;
-//        if(Redis::get($keys)){
-//            return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>json_decode(Redis::get($keys),true)]);
-//        }else {
         //课程基本信息
         //授权
         if($this->data['nature'] == 1){
             $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
             if(!$course){
-                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+                return response()->json(['code' => 201 , 'msg' => '无此课程']);
             }
             //修改观看数
             CourseSchool::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
             //授课方式
-            $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id']])->get()->toArray();
+            $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id'],'is_del'=>0])->get()->toArray();
             if (!empty($method)) {
                 $course['method'] = array_column($method, 'method_id');
             }
@@ -289,41 +285,15 @@ class CourseController extends Controller {
                     array_push($teacher, $oneteacher);
                 }
             }
-            //是否购买
-            if($this->userid != 0){
-                if ($course['sale_price'] > 0) {
-                    $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['course_id'], 'status' => 2,'nature'=>1])->count();
-                    $course['is_pay'] = $order > 0 ? 1 : 0;
-                } else {
-                    $course['is_pay'] = 1;
-                }
-            }else{
-                $course['is_pay'] = 0;
-            }
-
-            //收藏数量
-            $collect = Collection::where(['lesson_id'=>$course['course_id'],'is_del'=>0,'nature'=>1])->count();
-            $course['collect'] = $collect;
-            //判断用户是否收藏
-            if($this->userid != 0){
-                $collects = Collection::where(['lesson_id'=>$course['course_id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
-                if($collects != 0){
-                    $course['is_collect'] = 1;
-                }else{
-                    $course['is_collect'] = 0;
-                }
-            }else{
-                $course['is_collect'] = 0;
-            }
         }else{
             $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
             if(!$course){
-                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+                return response()->json(['code' => 201 , 'msg' => '无此课程']);
             }
             //修改观看数
             Coures::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
             //授课方式
-            $method = Couresmethod::select('method_id')->where(['course_id' =>$this->data['id']])->get()->toArray();
+            $method = Couresmethod::select('method_id')->where(['course_id' =>$this->data['id'],'is_del'=>0])->get()->toArray();
             if (!empty($method)) {
                 $course['method'] = array_column($method, 'method_id');
             }
@@ -339,31 +309,9 @@ class CourseController extends Controller {
                     array_push($teacher, $oneteacher);
                 }
             }
-            //是否购买
-            if($this->userid != 0){
-                if ($course['sale_price'] > 0) {
-                    $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->count();
-                    $course['is_pay'] = $order > 0 ? 1 : 0;
-                } else {
-                    $course['is_pay'] = 1;
-                }
-            }else{
-                $course['is_pay'] = 0;
-            }
             //收藏数量
             $collect = Collection::where(['lesson_id'=>$this->data['id'],'is_del'=>0,'nature'=>0])->count();
             $course['collect'] = $collect;
-            //判断用户是否收藏
-            if($this->userid != 0){
-                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->count();
-                if($collects != 0){
-                    $course['is_collect'] = 1;
-                }else{
-                    $course['is_collect'] = 0;
-                }
-            }else{
-                $course['is_collect'] = 0;
-            }
         }
         //分类信息
         $parent = CouresSubject::select('id', 'subject_name')->where(['id' => $course['parent_id'], 'parent_id' => 0, 'is_del' => 0, 'is_open' => 0])->first();
@@ -372,12 +320,62 @@ class CourseController extends Controller {
         $course['child_name'] = $child['subject_name'];
         unset($course['parent_id']);
         unset($course['child_id']);
-//        Redis::set($keys,json_encode($course),60);
-        //根据课程id 课程属性 生成二维码
-//        $urlcode = $this->generateQRfromGoogle("www.baidu.com");
-//        $course['urlcode'] = $urlcode;
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
-//        }
+    }
+    //用户与课程关系
+    public function courseToUser(){
+        $nature = isset($this->data['nature'])?$this->data['nature']:0;
+        $data=[];
+        if($nature == 1){
+            $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+            //是否购买
+            if($this->userid != 0){
+                if ($course['sale_price'] > 0) {
+                    $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['id'], 'status' => 2,'nature'=>1])->count();
+                    $data['is_pay'] = $order > 0 ? 1 : 0;
+                } else {
+                    $data['is_pay'] = 1;
+                }
+            }else{
+                $data['is_pay'] = 0;
+            }
+            //判断用户是否收藏
+            if($this->userid != 0){
+                $collects = Collection::where(['lesson_id'=>$course['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
+                if($collects != 0){
+                    $data['is_collect'] = 1;
+                }else{
+                    $data['is_collect'] = 0;
+                }
+            }else{
+                $data['is_collect'] = 0;
+            }
+        }else{
+            $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
+            //是否购买
+            if($this->userid != 0){
+                if ($course['sale_price'] > 0) {
+                    $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['id'], 'status' => 2,'nature'=>0])->count();
+                    $data['is_pay'] = $order > 0 ? 1 : 0;
+                } else {
+                    $data['is_pay'] = 1;
+                }
+            }else{
+                $data['is_pay'] = 0;
+            }
+            //判断用户是否收藏
+            if($this->userid != 0){
+                $collects = Collection::where(['lesson_id'=>$course['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->count();
+                if($collects != 0){
+                    $data['is_collect'] = 1;
+                }else{
+                    $data['is_collect'] = 0;
+                }
+            }else{
+                $data['is_collect'] = 0;
+            }
+        }
+        return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $data]);
     }
     //课程收藏
     public function collect(){
@@ -547,30 +545,32 @@ class CourseController extends Controller {
                             }else{
                                 $val['video_url'] = '';
                             }
-//                            if (empty($ziyuan)) {
-//                                $val['study'] = 0;
-//                            } else {
-//                                $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
-//                                if (isset($use_duration['data']) || !empty($use_duration['data'])) {
-//                                    foreach ($use_duration['data'] as $kk => $vv) {
-//                                        if ($vv['uid'] == $this->userid) {
-//                                            if ($vv['use_duration'] == 0) {
-//                                                $val['study'] = 0;
-//                                            } else {
-//                                                $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
-//                                            }
-//                                        } else {
-//                                            $val['study'] = 0;
-//                                        }
-//                                    }
-//                                }
-//                            }
+                            if (empty($ziyuan)) {
+                                $val['study'] = 0;
+                            } else {
+                                $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
+                                $aaa[] = $use_duration;
+                                if (isset($use_duration['data']) || !empty($use_duration['data'])) {
+                                    foreach ($use_duration['data'] as $kk => $vv) {
+                                        if ($vv['uid'] == $this->userid) {
+                                            if ($vv['use_duration'] == 0) {
+                                                $val['study'] = 0;
+                                            } else {
+                                                $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
+                                            }
+                                        } else {
+                                            $val['study'] = 0;
+                                        }
+                                    }
+                                }
+                            }
                         }
                         $v['chapters'] = $recordes;
                     }
                 }
             }
         }
+        print_r($aaa);die;
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde]);
     }
     /*
@@ -604,7 +604,6 @@ class CourseController extends Controller {
         }
         $courseArr=[];
         if($order == 0 || $course['sale_price'] == 0){
-            $courseArr['is_pay'] = 1;
             //获取所有的班号
             $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get()->toArray();
             if($courseArr != 0){
@@ -642,8 +641,6 @@ class CourseController extends Controller {
                     }
                 }
             }
-        }else{
-            $courseArr['is_pay'] = 0;
         }
         return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$courseArr]);
     }
@@ -663,7 +660,7 @@ class CourseController extends Controller {
         if($nature == 1){
             $course = CourseSchool ::where(['id'=>$this->data['id'],'is_del'=>0])->first();
             //课程是否免费或者用户是否购买
-            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2,'nature'=>1])->count();
             if($order > 0){
                 $is_pay = 1;
             }else{
@@ -672,7 +669,7 @@ class CourseController extends Controller {
             $this->data['id'] = $course['course_id'];
         }else{
             //课程是否免费或者用户是否购买
-            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2,'nature'=>0])->count();
             if($order > 0){
                 $is_pay = 1;
             }else{
@@ -681,7 +678,7 @@ class CourseController extends Controller {
         }
         $type = isset($this->data['type'])?$this->data['type']:'';
         $ziyuan=[];
-//        if($is_pay > 0){
+        if($is_pay > 0){
             //录播资料
             $jie = Coureschapters::where(['course_id'=>$this->data['id'],'is_del'=>0])->where('parent_id','>',0)->get();
             if(!empty($jie)){
@@ -712,8 +709,7 @@ class CourseController extends Controller {
                     $ziyuan[] = $ziliaos;
                 }
             }
-//        }
-        $ziyuan['is_pay'] = $is_pay;
+        }
         $res = array_slice($ziyuan, $offset, $pagesize);
         return ['code' => 200 , 'msg' => '查询成功','data'=>$res,'page'=>$page];
     }

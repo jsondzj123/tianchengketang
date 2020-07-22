@@ -301,6 +301,7 @@ class UserController extends Controller {
             foreach ($order as $k=>$v){
                 if($v['nature'] == 1){
                     $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    $course['nature'] = 1;
                     //查讲师
                     $teacherlist = Couresteacher::where(['course_id'=>$course['course_id'],'is_del'=>0])->get();
                     $string=[];
@@ -313,6 +314,7 @@ class UserController extends Controller {
                     }
                 }else{
                     $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    $course['nature'] = 0;
                     //查讲师
                     $teacherlist = Couresteacher::where(['course_id'=>$v['class_id'],'is_del'=>0])->get();
                     $string=[];
