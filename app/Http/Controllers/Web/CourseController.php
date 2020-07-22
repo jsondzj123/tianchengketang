@@ -616,6 +616,8 @@ class CourseController extends Controller {
                             $material = Couresmaterial::where(['mold'=>3,'is_del'=>0,'course_id'=>$this->data['id'],'parent_id'=>$vs['id']])->get()->toArray();
                             if(!empty($material)){
                                 $vs['material'] = $material;
+                            }else{
+                                $vs['material'] = '';
                             }
                         }
                         $v['keci'] = $classci;
