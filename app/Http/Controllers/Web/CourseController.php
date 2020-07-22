@@ -553,10 +553,10 @@ class CourseController extends Controller {
                                 if (isset($use_duration['data']) || !empty($use_duration['data'])) {
                                     foreach ($use_duration['data'] as $kk => $vv) {
                                         if ($vv['uid'] == $this->userid) {
-                                            if ($vv['use_duration'] == 0) {
+                                            if ($vv['duration'] == 0) {
                                                 $val['study'] = 0;
                                             } else {
-                                                $val['study'] = sprintf("%01.2f", $vv['use_duration'] / $vv['mt_duration'] * 100) . '%';
+                                                $val['study'] = sprintf("%01.2f", $vv['duration'] / $ziyuan['mt_duration'] * 100) . '%';
                                             }
                                         } else {
                                             $val['study'] = 0;
@@ -570,7 +570,6 @@ class CourseController extends Controller {
                 }
             }
         }
-        print_r($aaa);die;
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde]);
     }
     /*
