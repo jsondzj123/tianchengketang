@@ -720,22 +720,35 @@ class CourseController extends Controller {
 //                    }
 //                }
 //            }
-            //直播资料
+            //直播资料  获取所有的班号
+            $jie=[];
             $ban = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->get();
             if(!empty($ban)){
                 foreach ($ban as $ks=>$vs){
-                    $ziliaos = Couresmaterial::where(['parent_id'=>$vs['id'],'is_del'=>0,'mold'=>2])
-                        ->where(function ($query) use ($type) {
-                            if (!empty($type) && $type != '' && $type != 0) {
-                                $query->where('type', $type);
+                    //获取班号资料
+                    $classzl = Couresmaterial::where(['mold'=>2,'is_del'=>0,'parent_id'=>$vs['shift_id']])->get()->toArray();
+                    if(!empty($classzl)){
+                        foreach ($classzl as $classk => $classv){
+                            $jie[] = $classv;
+                        }
+                    }
+                    //每个班号获取所有的课次
+                    $shirt = LiveChild::where(['shift_no_id'=>$vs['shift_id'],'is_del'=>0,'status'=>1])->get();
+                    if(!empty($shirt)){
+                        foreach ($shirt as $shirtk => $shirtv){
+                            $number = Couresmaterial::where(['mold'=>3,'is_del'=>0,'parent_id'=>$shirtv['id']])->get();
+                            if(!empty($number)){
+                                foreach ($number as $numberk => $numberv){
+                                    $jie[] = $numberv;
+                                }
                             }
-                        })->first();
-                    $ziyuan[] = $ziliaos;
+                        }
+                    }
                 }
             }
         }
 //        $res = array_slice($ziyuan, $offset, $pagesize);
-        return ['code' => 200 , 'msg' => '查询成功','data'=>$ban,'page'=>$page];
+        return ['code' => 200 , 'msg' => '查询成功','data'=>$jie,'page'=>$page];
     }
 
 }
