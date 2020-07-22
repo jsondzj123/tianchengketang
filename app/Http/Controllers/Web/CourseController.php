@@ -286,6 +286,9 @@ class CourseController extends Controller {
                     array_push($teacher, $oneteacher);
                 }
             }
+            //收藏数量
+            $collect = Collection::where(['lesson_id'=>$this->data['id'],'is_del'=>0,'nature'=>1])->count();
+            $course['collect'] = $collect;
         }else{
             $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first();
             if(!$course){
