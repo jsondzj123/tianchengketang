@@ -805,6 +805,7 @@ class Student extends Model {
                         'wechat'         =>  $wechat ,
                         'province_id'    =>  $province ,
                         'city_id'        =>  $city ,
+                        'birthday'       =>  $birthday ,
                         'address'        =>  $address ,
                         'remark'         =>  $remark ,
                         'reg_source'     =>  2 ,
@@ -883,7 +884,58 @@ class Student extends Model {
                         'create_at'      =>  date('Y-m-d H:i:s')                                      
                     ];
                 }
-            }
+            } 
+            
+            /*else {
+                $user_info = self::where('phone' , $phone)->first();
+                $user_id   = $user_info['id'];
+                //添加报名表数据
+                if($user_id && $user_id > 0){
+                    //根据课程名称获取课程id
+                    $course_info = Coures::where('school_id' , $body['school_id'])->where('title' , $body['title'])->first();
+                    if($course_info && !empty($course_info)){
+                        $lession_id    = $course_info['id'] ? $course_info['id'] : 0;
+                        $lession_price = $course_info['sale_price'] ? $course_info['sale_price'] : 0;
+                        $nature        = 0;
+                    } else {
+                        //总校自增信息
+                        $course_info = Coures::where('school_id' , 1)->where('title' , $body['title'])->first();
+                        //通过课程的id和分校的id获取授权分校的详细信息
+                        $school_course = CourseSchool::where('to_school_id' , $body['school_id'])->where('course_id' , $course_info['id'])->first();
+                        $lession_id    = $school_course['id'] ? $school_course['id'] : 0;
+                        $lession_price = $school_course['sale_price'] ? $school_course['sale_price'] : 0;
+                        $nature        = 1;
+                    }
+
+                    //报名数据信息追加
+                    $enroll_array = [
+                        'school_id'      =>   $body['school_id'] ,
+                        'student_id'     =>   $user_id ,
+                        'parent_id'      =>   0 ,
+                        'child_id'       =>   0 ,
+                        'lession_id'     =>   $lession_id ,
+                        'lession_price'  =>   $lession_price ,
+                        'student_price'  =>   $pay_fee ,
+                        'payment_type'   =>   $payment_type ,
+                        'payment_method' =>   $payment_method ,
+                        'payment_fee'    =>   $pay_fee ,
+                        'payment_time'   =>   date('Y-m-d H:i:s') ,
+                        'admin_id'       =>   0 ,
+                        'status'         =>   1 ,
+                        'create_at'      =>   date('Y-m-d H:i:s')
+                    ];
+
+                    //添加报名信息
+                    $enroll_id = Enrolment::insertEnrolment($enroll_array);
+                    if($enroll_id && $enroll_id > 0){
+                        if($lession_id && $lession_id > 0){
+                            //订单表插入逻辑
+                            $enroll_array['nature']  =  $nature;
+                            Order::offlineStudentSignupNotaudit($enroll_array);
+                        }
+                    }
+                }
+            }*/
         }
         //返回信息数据
         return ['code' => 200 , 'msg' => '导入试题列表成功' , 'data' => $arr];
