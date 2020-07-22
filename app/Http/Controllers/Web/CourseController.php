@@ -572,19 +572,58 @@ class CourseController extends Controller {
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
         if($nature == 1){
             $course = CourseSchool ::where(['to_school_id'=>$this->school['id'],'id'=>$this->data['id'],'is_del'=>0])->first();
-            //课程是否免费或者用户是否购买，如果购买，显示全部班号课次
-            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
+            if(!$course){
+                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+            }
             $this->data['id'] = $course['course_id'];
+            $orderwhere=[
+                'student_id'=>$this->userid,
+                'class_id' => $course['id'],
+                'status' => 2,
+                'nature' =>1
+            ];
         }else{
             $course = Coures::where(['school_id'=>$this->school['id'],'id'=>$this->data['id'],'is_del'=>0])->first();
-            //课程是否免费或者用户是否购买，如果购买，显示全部班号课次
-            $order = Order::where(['student_id'=>$this->userid,'class_id'=>$this->data['id'],'status'=>2])->count();
-        }
-        if(!$course){
-            return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+            if(!$course){
+                return response()->json(['code' => 201 , 'msg' => '无查看权限']);
+            }
+            $orderwhere=[
+                'student_id'=>$this->userid,
+                'class_id' => $course['id'],
+                'status' => 2,
+                'nature' =>0
+            ];
         }
         $courseArr=[];
-        if($order == 0 || $course['sale_price'] == 0){
+        //判断用户与课程的关系
+        //判断课程是否免费
+        if ($course['sale_price'] > 0) {
+            $order = Order::where($orderwhere)->first();
+            //判断是否购买
+            if (!empty($order)) {
+                //判断是否到期 0是无期限
+                if ($course['expiry'] != 0) {
+                    //看订单里面的到期时间 进行判断
+                    if (date('Y-m-d H:i:s') >= $order['validity_time']) {
+                        //课程到期  只能观看
+                        $is_show = 0;
+                    } else {
+                        $is_show = 1;
+                    }
+                } else {
+                    $is_show = 1;
+                }
+            } else {
+                //未购买
+                $is_show = 0;
+            }
+        } else {
+            //免费
+            $is_show = 1;
+        }
+        //章总数
+        $count = CourseLiveResource::where(['course_id'=>$this->data['id'],'is_del'=>0])->count();
+        if($count > 0 && $is_show == 1){
             //获取所有的班号
             $courseArr = CourseLiveResource::select('shift_id')->where(['course_id'=>$this->data['id'],'is_del'=>0])->get()->toArray();
             if($courseArr != 0){
