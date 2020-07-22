@@ -41,7 +41,7 @@ class ArticleController extends Controller {
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$typelist,'school'=>$school]);
     }
     public function schoolLists(){
-        $role_id = isset(AdminLog::getAdminInfo()->admin_user->role_id) ? AdminLog::getAdminInfo()->admin_user->role_id : 0;
+        $role_id = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
         //获取分校列表
         if($role_id == 1){
