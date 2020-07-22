@@ -535,7 +535,7 @@ class CourseController extends Controller {
                     $recordes = Coureschapters::where(['course_id' => $this->data['id'], 'parent_id' => $v['id']])->where($chapterswhere)->get()->toArray();
                     if (!empty($recordes)) {
                         $MTCloud = new MTCloud();
-                        //循环每个小节 查询小节的进度
+                        //循环每个小节 获取url
                         foreach ($recordes as $key => &$val) {
                             //查询小节绑定的录播资源
                             $ziyuan = Video::where(['id' => $val['resource_id'], 'is_del' => 0, 'status' => 0])->first();
@@ -544,25 +544,6 @@ class CourseController extends Controller {
                                 $val['video_url'] = $video_url['data']['videoUrl'];
                             }else{
                                 $val['video_url'] = '';
-                            }
-                            if (empty($ziyuan)) {
-                                $val['study'] = 0;
-                            } else {
-                                $use_duration = $MTCloud->coursePlaybackVisitorList($ziyuan['course_id'], 1, 50);
-                                $aaa[] = $use_duration;
-                                if (isset($use_duration['data']) || !empty($use_duration['data'])) {
-                                    foreach ($use_duration['data'] as $kk => $vv) {
-                                        if ($vv['uid'] == $this->userid) {
-                                            if ($vv['duration'] == 0) {
-                                                $val['study'] = 0;
-                                            } else {
-                                                $val['study'] = sprintf("%01.2f", $vv['duration'] / $ziyuan['mt_duration'] * 100) . '%';
-                                            }
-                                        } else {
-                                            $val['study'] = 0;
-                                        }
-                                    }
-                                }
                             }
                         }
                         $v['chapters'] = $recordes;
