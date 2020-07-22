@@ -132,7 +132,7 @@ class CourseController extends Controller {
                     })
                     ->where(['school_id' => $school_id, 'is_del' => 0, 'status' => 1])
                     ->where('title', 'like', '%' . $name . '%')
-                    ->get();
+                    ->get()->toArray();
                 foreach ($course as $k => &$v) {
                     $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])
                         ->where(function ($query) use ($methodwhere) {
@@ -173,7 +173,7 @@ class CourseController extends Controller {
                     })
                     ->where(['to_school_id' => $school_id, 'is_del' => 0, 'status' => 1])
                     ->where('title', 'like', '%' . $name . '%')
-                    ->get();
+                    ->get()->toArray();
                 foreach ($ref_course as $ks => &$vs) {
                     //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
                     $add_number = CourseStocks::where(['course_id' => $vs['course_id'], 'school_id' => $school_id, 'is_del' => 0])->get();
