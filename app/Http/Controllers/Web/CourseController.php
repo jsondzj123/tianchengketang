@@ -326,11 +326,11 @@ class CourseController extends Controller {
         public function courseToUser(){
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
         $data=[];
+
         if($nature == 1){
-            $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
             //是否购买
             if($this->userid != 0){
-                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['id'], 'status' => 2,'nature'=>1])->orderByDesc('id')->first();
+                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>1])->orderByDesc('id')->first();
                 //看订单里面的到期时间 进行判断
                 if (date('Y-m-d H:i:s') >= $order['validity_time']) {
                     //课程到期  只能观看
@@ -343,7 +343,7 @@ class CourseController extends Controller {
             }
             //判断用户是否收藏
             if($this->userid != 0){
-                $collects = Collection::where(['lesson_id'=>$course['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
+                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
                 if($collects != 0){
                     $data['is_collect'] = 1;
                 }else{
@@ -353,11 +353,9 @@ class CourseController extends Controller {
                 $data['is_collect'] = 0;
             }
         }else{
-            $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0])->first()->toArray();
             //是否购买
             if($this->userid != 0){
-                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$course['id'], 'status' => 2,'nature'=>1])->orderByDesc('id')->first()->toArray();
-                print_r($order);die;
+                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->orderByDesc('id')->first();
                 //看订单里面的到期时间 进行判断
                 if (date('Y-m-d H:i:s') >= $order['validity_time']) {
                     //课程到期  只能观看
@@ -370,7 +368,7 @@ class CourseController extends Controller {
             }
             //判断用户是否收藏
             if($this->userid != 0){
-                $collects = Collection::where(['lesson_id'=>$course['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->count();
+                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->count();
                 if($collects != 0){
                     $data['is_collect'] = 1;
                 }else{
