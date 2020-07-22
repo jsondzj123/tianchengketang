@@ -78,6 +78,8 @@ class LiveListener
                     'role'=> MTCloud::ROLE_ADMIN
                 ],
             ];
+        }else if($cmd === 'video.convert'){
+            Log::info('转码结束:'.json_encode($params));
         }
 
 

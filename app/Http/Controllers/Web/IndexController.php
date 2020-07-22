@@ -69,9 +69,19 @@ class IndexController extends Controller {
     	if(!empty($footer)){
     		$arr['footer'] = getParentsList($footer);
     	}
-        $arr['icp'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>3])->select('id','parent_id','name','url','text','create_at')->first();
+        $icp = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>3])->select('name')->first();
+        if(empty($icp)){
+            $arr['icp'] = '';
+        }else{
+            $arr['icp'] = $icp['name'];
+        }
         $arr['header'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>1])->select('id','parent_id','name','url','create_at')->orderBy('sort')->get();
-        $arr['index_logo'] =  FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>4])->select('logo')->orderBy('sort')->first();
+        $logo =  FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>4])->select('logo')->orderBy('sort')->first();
+        if(empty($logo)){
+            $arr['index_logo'] = '';
+        }else{
+            $arr['index_logo'] = $logo['logo'];
+        }
         $arr['status'] = $admin['school_status'];
     	return response()->json(['code'=>200,'msg'=>'Success','data'=>$arr]);
     }
