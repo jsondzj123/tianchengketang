@@ -613,7 +613,7 @@ class CourseController extends Controller {
                                 $vs['teacher_name'] = $teacher['real_name'];
                             }
                             //查询资料
-                            $material = Couresmaterial::where(['mold'=>3,'is_del'=>0,'course_id'=>$this->data['id'],'parent_id'=>$vs['id']])->get()->toArray();
+                            $material = Couresmaterial::where(['mold'=>3,'is_del'=>0,'parent_id'=>$vs['id']])->get()->toArray();
                             if(!empty($material)){
                                 $vs['material'] = $material;
                             }else{
