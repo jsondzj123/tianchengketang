@@ -105,30 +105,33 @@ class CourseController extends Controller {
                 })
                 ->where(['school_id' => $school_id, 'is_del' => 0, 'status' => 1])
                 ->where('title', 'like', '%' . $name . '%')
-                ->get()->toArray();
-            foreach ($course as $k => &$v) {
-                $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])
-                    ->where(function ($query) use ($methodwhere) {
-                        if($methodwhere != ''){
-                            $query->where('method_id', $methodwhere);
+                ->get();
+            if(!empty($course)) {
+                $course->toArray();
+                foreach ($course as $k => &$v) {
+                    $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])
+                        ->where(function ($query) use ($methodwhere) {
+                            if ($methodwhere != '') {
+                                $query->where('method_id', $methodwhere);
+                            }
+                        })->get()->toArray();
+                    if (!empty($method)) {
+                        $count = $count + 1;
+                        foreach ($method as $key => &$val) {
+                            if ($val['method_id'] == 1) {
+                                $val['method_name'] = '直播';
+                            }
+                            if ($val['method_id'] == 2) {
+                                $val['method_name'] = '录播';
+                            }
+                            if ($val['method_id'] == 3) {
+                                $val['method_name'] = '其他';
+                            }
                         }
-                    })->get()->toArray();
-                if (!empty($method)) {
-                    $count = $count +1;
-                    foreach ($method as $key => &$val) {
-                        if ($val['method_id'] == 1) {
-                            $val['method_name'] = '直播';
-                        }
-                        if ($val['method_id'] == 2) {
-                            $val['method_name'] = '录播';
-                        }
-                        if ($val['method_id'] == 3) {
-                            $val['method_name'] = '其他';
-                        }
+                        $v['method'] = $method;
+                    } else {
+                        unset($course[$k]);
                     }
-                    $v['method'] = $method;
-                } else {
-                    unset($course[$k]);
                 }
             }
             //授权课程
