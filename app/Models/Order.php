@@ -476,14 +476,8 @@ class Order extends Model {
                 }
                 if($v['nature'] == 1){
                     $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0])->first();
-                    if(!$course){
-                        unset($order[$k]);
-                    }
                 }else{
                     $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0])->first();
-                    if(!$course){
-                        unset($order[$k]);
-                    }
                 }
                 $v['course_cover'] = $course['cover'];
                 $v['course_title'] = $course['title'];
