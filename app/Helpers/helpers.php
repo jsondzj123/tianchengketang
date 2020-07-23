@@ -116,10 +116,10 @@ function getAuthArr($arr){
                             if ($vv['parent_id'] == $v['id']) {
                                 $arr_3 = $vv;
                                 $arr_3['parent_id'] = $arr_1['id'].','.$arr_2['id'];
-                                $arr_2['child_arr'][] = $arr_3;
+                                $arr_2['children'][] = $arr_3;
                             }
                         }
-                        $arr_1['child_arr'][] = $arr_2;
+                        $arr_1['children'][] = $arr_2;
                     }
                 }
                 $new_arr[] = $arr_1;
