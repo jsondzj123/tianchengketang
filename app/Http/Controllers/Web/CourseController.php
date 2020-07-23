@@ -514,6 +514,7 @@ class CourseController extends Controller {
     public function recordeurl(){
         if($this->data['resource_id'] == 0){
             $video_url = '';
+            return response()->json(['code' => 201 , 'msg' => '暂无资源']);
         }else{
             $MTCloud = new MTCloud();
             //查询小节绑定的录播资源
@@ -521,13 +522,13 @@ class CourseController extends Controller {
             $video_url = $MTCloud->videoGet($ziyuan['mt_video_id'],'720d');
             if($video_url['code'] ==  0){
                 $video_url = $video_url['data']['videoUrl'];
+                return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$video_url]);
             }else{
                 $video_url = '';
+                return response()->json(['code' => 201 , 'msg' => '暂无资源']);
             }
         }
-        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$video_url]);
     }
-
     /*
          * @param  课程直播列表
          * @param  author  苏振文
