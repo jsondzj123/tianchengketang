@@ -640,7 +640,7 @@ class CourseController extends Controller {
     //直播播放url
     public function liveurl(){
         //根据课次id 查询关联欢拓表
-        $livechilds = CourseLiveClassChild::where(['class_id'=>$this->data['class_id'],'is_del'=>0,'is_forbid'=>0])->first();
+        $livechilds = CourseLiveClassChild::where(['class_id'=>$this->data['id'],'is_del'=>0,'is_forbid'=>0])->first();
         $datas['course_id'] = $livechilds['course_id'];
         $datas['uid'] = $this->userid;
         $datas['nickname'] = $this->data['user_info']['phone'];
