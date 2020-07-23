@@ -43,8 +43,7 @@ class CourseController extends Controller {
        */
       public function courseType(){
         $parent = self::$accept_data;
-//        $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
-          $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        $school_id = isset($parent['school_id']) && $parent['school_id'] != 0?$parent['school_id']:AdminLog::getAdminInfo()->admin_user->school_id;
         //自增
         $list1 = Coures::where(['is_del'=>0,'status'=>1,'school_id'=>$school_id])
              ->where(function ($query) use ($parent) {
