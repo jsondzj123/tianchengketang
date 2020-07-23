@@ -169,9 +169,9 @@ class CouresSubject extends Model {
         }
     }
     //课程模块 条件显示
-    public static function couresWhere(){
+    public static function couresWhere($data){
         //获取用户学校
-        $school_id = AdminLog::getAdminInfo()->admin_user->school_id;
+        $school_id = isset($data['school_id'])?$data['school_id']:AdminLog::getAdminInfo()->admin_user->school_id;
         $one = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')
             ->where(['is_del'=>0,'is_open'=>0,'school_id'=>$school_id])
             ->get()->toArray();
