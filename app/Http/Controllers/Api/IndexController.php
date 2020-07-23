@@ -339,7 +339,6 @@ class IndexController extends Controller {
                         ->groupBy('ld_course_open.start_at')
                         ->offset($offset)->limit($pagesize)->get()->toArray();
                 }
-
             //判读公开课列表是否为空
             if($lession_list && !empty($lession_list)){
                 foreach($lession_list as $k=>$v){
