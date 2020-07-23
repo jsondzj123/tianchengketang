@@ -475,9 +475,9 @@ class Order extends Model {
                     $v['pay_name'] = "余额";
                 }
                 if($v['nature'] == 1){
-                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0])->first();
+                    $course = CourseSchool::where(['id'=>$v['class_id']])->first();
                 }else{
-                    $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0])->first();
+                    $course = Coures::where(['id'=>$v['class_id']])->first();
                 }
                 $v['course_cover'] = $course['cover'];
                 $v['course_title'] = $course['title'];
