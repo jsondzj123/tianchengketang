@@ -115,7 +115,7 @@ class RoleController extends Controller {
         unset($data['/admin/role/doRoleAuthInsert']);
         $data['admin_id'] = CurrentAdmin::user()['id'];
         $data['school_id'] = CurrentAdmin::user()['school_id'];
-        $role = Roleauth::where(['role_name'=>$data['role_name'],'school_id'=>$data['school_id'],'is_del'=>1])->first();
+        $role = Roleauth::where(['role_name'=>$data['role_name'],'school_id'=>$data['school_id']])->first();
         if($role){
              return response()->json(['code'=>205,'msg'=>'角色已存在']);
         }
