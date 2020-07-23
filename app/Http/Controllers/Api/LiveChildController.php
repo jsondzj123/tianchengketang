@@ -97,7 +97,7 @@ class LiveChildController extends Controller {
         }
         $course_id = $request->input('course_id');
         $student_id = self::$accept_data['user_info']['user_id'];
-        $nickname = self::$accept_data['user_info']['nickname'];
+        $nickname = self::$accept_data['user_info']['real_name'];
         $MTCloud = new MTCloud();
         $liveChild = CourseLiveClassChild::where('course_id', $course_id)->first();
         $video = Video::where('course_id', $course_id)->first();
