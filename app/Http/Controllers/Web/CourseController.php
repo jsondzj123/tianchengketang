@@ -513,7 +513,6 @@ class CourseController extends Controller {
     //录播小节播放url
     public function recordeurl(){
         if($this->data['resource_id'] == 0){
-            $video_url = '';
             return response()->json(['code' => 201 , 'msg' => '暂无资源']);
         }else{
             $MTCloud = new MTCloud();
@@ -524,7 +523,6 @@ class CourseController extends Controller {
                 $video_url = $video_url['data']['videoUrl'];
                 return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$video_url]);
             }else{
-                $video_url = '';
                 return response()->json(['code' => 201 , 'msg' => '暂无资源']);
             }
         }
