@@ -201,7 +201,8 @@ class RoleController extends Controller {
                 //      $auth_id_arr = [$auth_id];
                 // }
                 $mapAuthIds = \App\Models\Roleauth::where(['school_id'=>$adminUserSchoolId,'is_super'=>1])->select('map_auth_id')->first();
-                $authArr = \App\Models\AuthMap::whereIn('id',$mapAuthIds['map_auth_id'])->get()->toArray();
+                $mapAuthId= explode(',',$mapAuthIds['map_auth_id']);
+                $authArr = \App\Models\AuthMap::whereIn('id',$mapAuthId)->get()->toArray();
                 // $authArr = \App\Models\Authrules::getAuthAlls(['id'=>$auth_id_arr],['id','name','title','parent_id']);
         }   
         $authArr  = getAuthArr($authArr);
