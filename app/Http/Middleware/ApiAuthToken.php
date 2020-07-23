@@ -43,7 +43,8 @@ class ApiAuthToken {
                 return response()->json(['code'=>403,'msg'=>'此用户没有权限,请联系管理员']);
                 
             }else{
-                if(!strpos($role['data']['auth_id'],(string)$authid['id'])){
+                $arr = explode(',',$role['data']['auth_id']);
+                if(!in_array((string)$authid['id'],$arr)){
                     return response()->json(['code'=>403,'msg'=>'此用户没有权限！']);
                 }else{
                     return $next($request);
