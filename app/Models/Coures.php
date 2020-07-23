@@ -635,11 +635,11 @@ class Coures extends Model {
         $nature = isset($data['nature'])?$data['nature']:0;
         if($nature == 1){
             $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
-            $find = CourseSchool::where(['to_school_id'=>$school_id,'course_id'=>$data['id']])->first()->toArray();
+            $find = CourseSchool::where(['to_school_id'=>$school_id,'course_id'=>$data['id']])->first();
             $recommend = $find['is_recommend'] == 1 ? 0:1;
             $up = CourseSchool::where(['id'=>$find['id']])->update(['is_recommend'=>$recommend,'update_at'=>date('Y-m-d H:i:s')]);
         }else{
-            $find = self::where(['id'=>$data['id']])->first()->toArray();
+            $find = self::where(['id'=>$data['id']])->first();
             $recommend = $find['is_recommend'] == 1 ? 0:1;
             $up = self::where(['id'=>$data['id']])->update(['is_recommend'=>$recommend,'update_at'=>date('Y-m-d H:i:s')]);
         }
