@@ -125,8 +125,12 @@ class RoleController extends Controller {
         else{       $data['is_super'] = 1; }
         DB::beginTransaction();
         try{
-            $auth_map_id = $data['auth_id'];
-            $map_auth_ids = explode(',',$data['auth_id']);
+            $auth_id = explode(',',$data['auth_id']);
+            $auth_id = array_unique($auth_id);
+            $data['auth_id'] = array_diff($auth_id,['0']);
+
+            $auth_map_id = implode(',',$data['auth_id']);
+            $map_auth_ids =  $data['auth_id'];
 
             $roleAuthData  = AuthMap::whereIn('id',$map_auth_ids)->where(['is_del'=>0,'is_forbid'=>0,'is_show'=>0])->select('auth_id')->get()->toArray();
             $arr = [];
@@ -259,9 +263,12 @@ class RoleController extends Controller {
         if($count>=1){
             return response()->json(['code'=>205,'msg'=>'角色名称已存在']); 
         }
+        $auth_id = explode(',',$data['auth_id']);
+        $auth_id = array_unique($auth_id);
+        $data['auth_id'] = array_diff($auth_id,['0']);
 
-        $auth_map_id = $data['auth_id'];
-        $map_auth_ids = explode(',',$data['auth_id']);
+        $auth_map_id = implode(',',$data['auth_id']);
+        $map_auth_ids =  $data['auth_id'];
 
         $roleAuthData  = AuthMap::whereIn('id',$map_auth_ids)->where(['is_del'=>0,'is_forbid'=>0,'is_show'=>0])->select('auth_id')->get()->toArray();
         $arr = [];
