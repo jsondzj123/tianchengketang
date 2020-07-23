@@ -634,7 +634,7 @@ class Coures extends Model {
         }
         $nature = isset($data['nature'])?$data['nature']:0;
         if($nature == 1){
-            $find = CourseSchool::where(['course_id'=>$data['id'],'is_del'=>0])->first();
+            $find = CourseSchool::where(['id'=>$data['id'],'is_del'=>0])->first();
             if($find){
                 $recommend = $find['is_recommend'] == 1 ? 0:1;
                 $up = CourseSchool::where(['id'=>$find['id']])->update(['is_recommend'=>$recommend,'update_at'=>date('Y-m-d H:i:s')]);
