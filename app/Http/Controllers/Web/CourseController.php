@@ -645,8 +645,8 @@ class CourseController extends Controller {
         $datas['uid'] = $this->userid;
         $datas['nickname'] = $this->data['user_info']['phone'];
         $datas['role'] = 'user';
+        $MTCloud = new MTCloud();
         if($this->data['livestatus'] == 1 || $this->data['livestatus'] == 2){
-            $MTCloud = new MTCloud();
             $res = $MTCloud->courseAccess($datas['course_id'],$datas['uid'],$datas['nickname'],$datas['role']);
             if(!array_key_exists('code', $res) && !$res["code"] == 0){
                 return response()->json(['code' => 201 , 'msg' => '暂无直播，请重试']);
@@ -654,7 +654,6 @@ class CourseController extends Controller {
             return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res]);
         }
         if($this->data['livestatus'] == 3){
-            $MTCloud = new MTCloud();
             $res = $MTCloud->courseAccessPlayback($datas['course_id'],$datas['uid'],$datas['nickname'],$datas['role']);
             if(!array_key_exists('code', $res) && !$res["code"] == 0){
                 return response()->json(['code' => 201 , 'msg' => '暂无回访，请重试']);
