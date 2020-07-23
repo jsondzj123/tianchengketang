@@ -528,12 +528,7 @@ class CourseController extends Controller {
             }
         }
     }
-    /*
-         * @param  课程直播列表
-         * @param  author  苏振文
-         * @param  ctime   2020/7/7 14:39
-         * return  array
-         */
+    //课程直播列表
     public function livearr(){
         //每页显示的条数
         $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 2;
