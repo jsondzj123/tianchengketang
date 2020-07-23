@@ -12,8 +12,7 @@ use App\Models\CourseSchool;
 class CourseController extends Controller {
     //获取学科列表
     public function subject(){
-        $data = Coures::courseList(self::$accept_data);
-        $list = CouresSubject::couresWhere($data);
+        $list = CouresSubject::couresWhere(self::$accept_data);
         return response()->json($list);
     }
     //资源模块学科
