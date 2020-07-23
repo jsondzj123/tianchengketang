@@ -241,9 +241,9 @@ class CourseController extends Controller {
             //修改观看数
             CourseSchool::where(['id'=>$this->data['id']])->update(['watch_num'=>$course['watch_num']+1]);
             //授课方式
-            $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id'],'is_del'=>0])->get();
+            $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id'],'is_del'=>0])->get()->toArray();
             if (!empty($method)) {
-                $course['method'] = array_column((array)$method, 'method_id');
+                $course['method'] = array_column($method, 'method_id');
             }
             //学习人数   基数+订单数
             $ordernum = Order::where(['class_id' => $course['course_id'], 'status' => 2, 'oa_status' => 1,'nature'=>1])->count();
