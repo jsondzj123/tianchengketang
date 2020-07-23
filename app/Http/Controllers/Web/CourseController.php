@@ -646,14 +646,14 @@ class CourseController extends Controller {
             if(!array_key_exists('code', $res) && !$res["code"] == 0){
                 return response()->json(['code' => 201 , 'msg' => '暂无直播，请重试']);
             }
-            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res]);
+            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res['data']['playbackUrl']]);
         }
         if($this->data['livestatus'] == 3){
             $res = $MTCloud->courseAccessPlayback($datas['course_id'],$datas['uid'],$datas['nickname'],$datas['role']);
             if(!array_key_exists('code', $res) && !$res["code"] == 0){
                 return response()->json(['code' => 201 , 'msg' => '暂无回访，请重试']);
             }
-            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res]);
+            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res['data']['playbackUrl']]);
         }
     }
     /*
