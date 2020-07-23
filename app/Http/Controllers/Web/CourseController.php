@@ -774,6 +774,5 @@ class CourseController extends Controller {
         }
         return ['code' => 200 , 'msg' => '查询成功','data'=>$res,'page'=>$page];
     }
-
 }
 
