@@ -11,6 +11,7 @@ use App\Models\Couresmaterial;
 use App\Models\Couresmethod;
 use App\Models\CouresSubject;
 use App\Models\Couresteacher;
+use App\Models\CourseLiveClassChild;
 use App\Models\CourseLiveResource;
 use App\Models\CourseSchool;
 use App\Models\CourseStocks;
@@ -635,6 +636,31 @@ class CourseController extends Controller {
             }
         }
         return response()->json(['code' => 200 , 'msg' => '查询成功','data'=>$courseArr]);
+    }
+    //直播播放url
+    public function liveurl(){
+        //根据课次id 查询关联欢拓表
+        $livechilds = CourseLiveClassChild::where(['class_id'=>$this->data['class_id'],'is_del'=>0,'is_forbid'=>0])->first();
+        $datas['course_id'] = $livechilds['course_id'];
+        $datas['uid'] = $this->userid;
+        $datas['nickname'] = $this->data['user_info']['phone'];
+        $datas['role'] = 'user';
+        if($this->data['livestatus'] == 1 || $this->data['livestatus'] == 2){
+            $MTCloud = new MTCloud();
+            $res = $MTCloud->courseAccess($datas['course_id'],$datas['uid'],$datas['nickname'],$datas['role']);
+            if(!array_key_exists('code', $res) && !$res["code"] == 0){
+                return response()->json(['code' => 201 , 'msg' => '课程查看回放失败，请重试']);
+            }
+            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res]);
+        }
+        if($this->data['livestatus'] == 3){
+            $MTCloud = new MTCloud();
+            $res = $MTCloud->courseAccessPlayback($datas['course_id'],$datas['uid'],$datas['nickname'],$datas['role']);
+            if(!array_key_exists('code', $res) && !$res["code"] == 0){
+                return response()->json(['code' => 201 , 'msg' => '课程查看回放失败，请重试']);
+            }
+            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res]);
+        }
     }
     /*
          * @param  课程资料表   录播  直播班号 课程小节
