@@ -503,24 +503,29 @@ class CourseController extends Controller {
                 foreach ($recorde as $k => &$v) {
                     $recordes = Coureschapters::where(['course_id' => $this->data['id'], 'parent_id' => $v['id']])->where($chapterswhere)->get();
                     if (!empty($recordes)) {
-//                        $MTCloud = new MTCloud();
-                        //循环每个小节 获取url
-//                        foreach ($recordes as $key => &$val) {
-//                            //查询小节绑定的录播资源
-//                            $ziyuan = Video::where(['id' => $val['resource_id'], 'is_del' => 0, 'status' => 0])->first();
-//                            $video_url = $MTCloud->videoGet($ziyuan['mt_video_id'],'720d');
-//                            if($video_url['code'] ==  0){
-//                                $val['video_url'] = $video_url['data']['videoUrl'];
-//                            }else{
-//                                $val['video_url'] = '';
-//                            }
-//                        }
                         $v['chapters'] = $recordes;
                     }
                 }
             }
         }
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$recorde]);
+    }
+    //录播小节播放url
+    public function recordeurl(){
+        if($this->data['resource_id'] == 0){
+            $video_url = '';
+        }else{
+            $MTCloud = new MTCloud();
+            //查询小节绑定的录播资源
+            $ziyuan = Video::where(['id' => $this->data['resource_id'], 'is_del' => 0, 'status' => 0])->first();
+            $video_url = $MTCloud->videoGet($ziyuan['mt_video_id'],'720d');
+            if($video_url['code'] ==  0){
+                $video_url = $video_url['data']['videoUrl'];
+            }else{
+                $video_url = '';
+            }
+        }
+        return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$video_url]);
     }
 
     /*

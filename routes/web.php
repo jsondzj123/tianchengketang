@@ -192,6 +192,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('userPay','CourseController@userPay');//用户生成订单
         $router->post('userPaying','CourseController@userPaying');//用户进行支付
         $router->post('courseToUser','CourseController@courseToUser');//用户与课程关系
+        $router->post('recordeurl','CourseController@recordeurl');//课程录播url
     });
     //站内支付
     $router->group(['prefix' => 'order', 'middleware'=> 'user'], function () use ($router) {
