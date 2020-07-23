@@ -634,10 +634,13 @@ class Coures extends Model {
         }
         $nature = isset($data['nature'])?$data['nature']:0;
         if($nature == 1){
-            $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
-            $find = CourseSchool::where(['to_school_id'=>$school_id,'course_id'=>$data['id']])->first();
-            $recommend = $find['is_recommend'] == 1 ? 0:1;
-            $up = CourseSchool::where(['id'=>$find['id']])->update(['is_recommend'=>$recommend,'update_at'=>date('Y-m-d H:i:s')]);
+            $find = CourseSchool::where(['course_id'=>$data['id'],'is_del'=>0])->first();
+            if($find){
+                $recommend = $find['is_recommend'] == 1 ? 0:1;
+                $up = CourseSchool::where(['id'=>$find['id']])->update(['is_recommend'=>$recommend,'update_at'=>date('Y-m-d H:i:s')]);
+            }else{
+                return ['code' => 201 , 'msg' => '课程未找到'];
+            }
         }else{
             $find = self::where(['id'=>$data['id']])->first();
             $recommend = $find['is_recommend'] == 1 ? 0:1;
