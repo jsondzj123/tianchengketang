@@ -638,7 +638,7 @@ class CourseController extends Controller {
         $livechilds = CourseLiveClassChild::where(['class_id'=>$this->data['id'],'is_del'=>0,'is_forbid'=>0])->first();
         $datas['course_id'] = $livechilds['course_id'];
         $datas['uid'] = $this->userid;
-        $datas['nickname'] = $this->data['user_info']['phone'];
+        $datas['nickname'] = $this->data['user_info']['nickname'] != ''?$this->data['user_info']['nickname']:$this->data['user_info']['real_name'];
         $datas['role'] = 'user';
         $MTCloud = new MTCloud();
         if($this->data['livestatus'] == 1 || $this->data['livestatus'] == 2){
