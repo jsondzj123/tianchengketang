@@ -649,7 +649,7 @@ class CourseController extends Controller {
             $MTCloud = new MTCloud();
             $res = $MTCloud->courseAccess($datas['course_id'],$datas['uid'],$datas['nickname'],$datas['role']);
             if(!array_key_exists('code', $res) && !$res["code"] == 0){
-                return response()->json(['code' => 201 , 'msg' => '课程查看回放失败，请重试']);
+                return response()->json(['code' => 201 , 'msg' => '暂无直播，请重试']);
             }
             return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res]);
         }
@@ -657,7 +657,7 @@ class CourseController extends Controller {
             $MTCloud = new MTCloud();
             $res = $MTCloud->courseAccessPlayback($datas['course_id'],$datas['uid'],$datas['nickname'],$datas['role']);
             if(!array_key_exists('code', $res) && !$res["code"] == 0){
-                return response()->json(['code' => 201 , 'msg' => '课程查看回放失败，请重试']);
+                return response()->json(['code' => 201 , 'msg' => '暂无回访，请重试']);
             }
             return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res]);
         }
