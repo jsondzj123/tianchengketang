@@ -102,7 +102,6 @@ class LiveChildController extends Controller {
         }else{
             $nickname = self::$accept_data['user_info']['nickname'];
         }
-        dd($nickname);
         $MTCloud = new MTCloud();
         $liveChild = CourseLiveClassChild::where('course_id', $course_id)->first();
         $video = Video::where('course_id', $course_id)->first();
