@@ -448,11 +448,7 @@ class Order extends Model {
         if(empty($data['student_id'])){
             return ['code' => 201 , 'msg' => '学员id为空'];
         }
-       // DB::enableQueryLog();
         $order = DB::table('ld_order')->selectRaw("any_value(pay_time) as pay_time,any_value(order_number) as order_number,any_value(lession_price) as lession_price,any_value(price) as price,any_value(class_id) as class_id ,any_value(pay_type) as pay_type,any_value(nature) as nature,any_value(status) as status,any_value(pay_status) as pay_status,any_value(create_at) as create_at")->where(['student_id'=>$data['student_id']])->orderByDesc('create_at')->groupBy('class_id')->get()->toArray();
-        //$a = DB::getQueryLog();
-        //return ['code' => 201 , 'msg' => $a];
-//        $order = self::where(['student_id'=>$data['student_id']])->get()->toArray();
         if(!empty($order)){
             foreach ($order as $k=>&$v){
                 $v = (array)$v;
@@ -475,9 +471,9 @@ class Order extends Model {
                     $v['pay_name'] = "余额";
                 }
                 if($v['nature'] == 1){
-                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    $course = CourseSchool::where(['id'=>$v['class_id']])->first();
                 }else{
-                    $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    $course = Coures::where(['id'=>$v['class_id']])->first();
                 }
                 $v['course_cover'] = $course['cover'];
                 $v['course_title'] = $course['title'];

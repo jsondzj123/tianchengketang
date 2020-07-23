@@ -115,7 +115,7 @@ class RoleController extends Controller {
         unset($data['/admin/role/doRoleAuthInsert']);
         $data['admin_id'] = CurrentAdmin::user()['id'];
         $data['school_id'] = CurrentAdmin::user()['school_id'];
-        $role = Roleauth::where(['role_name'=>$data['role_name'],'school_id'=>$data['school_id'],'is_del'=>1])->first();
+        $role = Roleauth::where(['role_name'=>$data['role_name'],'school_id'=>$data['school_id']])->first();
         if($role){
              return response()->json(['code'=>205,'msg'=>'角色已存在']);
         }
@@ -184,7 +184,7 @@ class RoleController extends Controller {
         }
         $roleAuthArr = Roleauth::getRoleAuthAlls(['school_id'=>$roleAuthData['data']['school_id'],'is_del'=>1],['id','role_name','auth_desc','auth_id','map_auth_id']); 
         $data['school_status'] = CurrentAdmin::user()['school_status'];
-
+        $school_id =  CurrentAdmin::user()['school_id'];
         if($data['school_status'] == 1){
             // echo '总校';
             //总校
@@ -200,8 +200,9 @@ class RoleController extends Controller {
                 // if(!$auth_id_arr){
                 //      $auth_id_arr = [$auth_id];
                 // }
-                $mapAuthIds = \App\Models\Roleauth::where(['school_id'=>$adminUserSchoolId,'is_super'=>1])->select('map_auth_id')->first();
-                $authArr = \App\Models\AuthMap::whereIn('id',$mapAuthIds['map_auth_id'])->get()->toArray();
+                $mapAuthIds = \App\Models\Roleauth::where(['school_id'=>$school_id,'is_super'=>1])->select('map_auth_id')->first();
+                $mapAuthId= explode(',',$mapAuthIds['map_auth_id']);
+                $authArr = \App\Models\AuthMap::whereIn('id',$mapAuthId)->get()->toArray();
                 // $authArr = \App\Models\Authrules::getAuthAlls(['id'=>$auth_id_arr],['id','name','title','parent_id']);
         }   
         $authArr  = getAuthArr($authArr);

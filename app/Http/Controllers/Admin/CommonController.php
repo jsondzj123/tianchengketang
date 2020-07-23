@@ -70,8 +70,11 @@ class CommonController extends BaseController {
                 //      $auth_id_arr = [$auth_id];
                 // }
                 $mapAuthIds = \App\Models\Roleauth::where(['school_id'=>$adminUserSchoolId,'is_super'=>1])->select('map_auth_id')->first();
-                $roleAuthArr = \App\Models\AuthMap::whereIn('id',$mapAuthIds['map_auth_id'])->get()->toArray();
+                $mapAuthId=explode(',',$mapAuthIds['map_auth_id']);
+                $roleAuthArr = \App\Models\AuthMap::whereIn('id',$mapAuthId)->get()->toArray();
+
             }
+          
             // $roleAuthData = \App\Models\Roleauth::getRoleAuthAlls(['school_id'=>$adminUserSchoolId,'is_del'=>1],['id','role_name','auth_desc','auth_id']);
             $roleAuthArr  = getAuthArr($roleAuthArr);
             $arr = [

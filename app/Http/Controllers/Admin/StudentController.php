@@ -321,9 +321,14 @@ class StudentController extends Controller {
                 return response()->json(['code' => 202 , 'msg' => '分校id不合法']);
             }
             
-            //判断课程名称是否为空
-            if(empty(self::$accept_data['title'])){
-                return response()->json(['code' => 201 , 'msg' => '课程名称为空']);
+            //判断课程分类是否传递
+            if(empty(self::$accept_data['course_type'])){
+                return response()->json(['code' => 201 , 'msg' => '请选择课程分类']);
+            }
+            
+            //判断课程id是否为空或是否合法
+            if(empty(self::$accept_data['course_id']) || self::$accept_data['course_id'] <= 0){
+                return response()->json(['code' => 201 , 'msg' => '课程id是否合法']);
             }
             
             //返回校验的数据结果

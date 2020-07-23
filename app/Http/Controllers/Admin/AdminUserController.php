@@ -184,7 +184,7 @@ class AdminUserController extends Controller {
         if(isset($data['pwd'])){
             unset($data['pwd']);
         }
-        $count  = Adminuser::where('username',$data['username'])->where('is_del',1)->count();
+        $count  = Adminuser::where('username',$data['username'])->count();
         if($count>0){
             return response()->json(['code'=>205,'msg'=>'用户名已存在']);
         }
@@ -335,7 +335,6 @@ class AdminUserController extends Controller {
             unset($data['/admin/adminuser/doAdminUserUpdate']);
         }
         $where['username']   = $data['username'];
-        $where['is_del'] = 1;
         $count = Adminuser::where($where)->where('id','!=',$data['id'])->count();
         if($count >=1 ){
              return response()->json(['code'=>205,'msg'=>'用户名已存在']);

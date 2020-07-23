@@ -64,6 +64,7 @@ class OrderController extends Controller {
          $data['pay_type'] = 0;
          $data['status'] = 0;
          $data['oa_status'] = 0;              //OA状态
+         $data['nature'] = $nature;
          $data['class_id'] = $this->data['id'];
          $data['school_id'] = $this->school['id'];
          $add = Order::insertGetId($data);
