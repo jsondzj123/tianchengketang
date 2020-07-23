@@ -274,14 +274,14 @@ class LessonController extends Controller {
                         return $this->response('课程不存在', 404);
                     }
                     //is_collection   是否收藏
-                    $is_collection = Collection::where(['student_id'=>$json_info['user_id'],'is_del'=>0,'lesson_id'=>$lesson['course_id']])->first();
+                    $is_collection = Collection::where(['student_id'=>$json_info['user_id'],'is_del'=>0,'lesson_id'=>$lesson['id']])->first();
                     if($is_collection){
                         $lesson['is_collection'] = 1;
                     }else{
                         $lesson['is_collection'] = 0;
                     }
                     //is_buy  是否购买
-                    $is_buy = Order::where(['student_id'=>$json_info['user_id'],'status'=>2,'oa_status'=>1,'class_id'=>$lesson['course_id']])->first();
+                    $is_buy = Order::where(['student_id'=>$json_info['user_id'],'status'=>2,'oa_status'=>1,'class_id'=>$lesson['id']])->first();
                     if($is_buy){
                         $lesson['is_buy'] = 1;
                     }else{
