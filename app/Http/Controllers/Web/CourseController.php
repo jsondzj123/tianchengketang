@@ -83,10 +83,7 @@ class CourseController extends Controller {
             //每页显示的条数
             $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 20;
             $page = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
-//            if(isset($this->data['name']) && !empty($this->data['name'])){
-//                $page = 1;
-//            }
-           $offset = ($page - 1) * $pagesize;
+            $offset = ($page - 1) * $pagesize;
             //学科大类小类条件
             $parent = [];
             if (!empty($this->data['parent'])) {
@@ -95,122 +92,92 @@ class CourseController extends Controller {
             //授课类型条件
             $methodwhere = isset($this->data['method'])?$this->data['method']:'';
             $name = isset($this->data['name']) ? $this->data['name'] : '';
-            //总条数
-            $count1 = Coures::where(['school_id' => $school_id, 'is_del' => 0,'status'=>1])
-                ->where('title', 'like', '%' . $name . '%')
-                ->where(function ($query) use ($parent) {
-                    if (!empty($parent[0]) && $parent[0] != ''&& $parent[0] != 0) {
-                        $query->where('parent_id', $parent[0]);
-                    }
-                    if (!empty($parent[1]) && $parent[1] != ''&& $parent[1] != 0) {
-                        $query->where('child_id', $parent[1]);
-                    }
-                })->count();
-
-            $count2 = CourseSchool::where(['to_school_id' => $school_id, 'is_del' => 0,'status'=>1])
-                ->where('title', 'like', '%' . $name . '%')
-                ->where(function ($query) use ($parent) {
-                    if (!empty($parent[0]) && $parent[0] != ''&& $parent[0] != 0) {
-                        $query->where('parent_id', $parent[0]);
-                    }
-                    if (!empty($parent[1]) && $parent[1] != ''&& $parent[1] != 0) {
-                        $query->where('child_id', $parent[1]);
-                    }
-                })->count();
             $count = 0;
             //自增课程
-            $course = [];
-            if ($count1 != 0) {
-                $course = Coures::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'nature', 'watch_num', 'create_at')
-                    ->where(function ($query) use ($parent) {
-                        if (!empty($parent[0]) && $parent[0] != ''&& $parent[0] != 0) {
-                            $query->where('parent_id', $parent[0]);
-                        }
-                        if (!empty($parent[1]) && $parent[1] != ''&& $parent[1] != 0) {
-                            $query->where('child_id', $parent[1]);
-                        }
-                    })
-                    ->where(['school_id' => $school_id, 'is_del' => 0, 'status' => 1])
-                    ->where('title', 'like', '%' . $name . '%')
-                    ->get()->toArray();
-                foreach ($course as $k => &$v) {
-                    $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])
-                        ->where(function ($query) use ($methodwhere) {
-                            if($methodwhere != ''){
-                                $query->where('method_id', $methodwhere);
-                            }
-                        })->get();
-                    if (!empty($method)) {
-                        $count = $count +1;
-                        foreach ($method as $key => &$val) {
-                            if ($val['method_id'] == 1) {
-                                $val['method_name'] = '直播';
-                            }
-                            if ($val['method_id'] == 2) {
-                                $val['method_name'] = '录播';
-                            }
-                            if ($val['method_id'] == 3) {
-                                $val['method_name'] = '其他';
-                            }
-                        }
-                        $v['method'] = $method;
-                    } else {
-                        unset($course[$k]);
+            $course = Coures::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'nature', 'watch_num', 'create_at')
+                ->where(function ($query) use ($parent) {
+                    if (!empty($parent[0]) && $parent[0] != ''&& $parent[0] != 0) {
+                        $query->where('parent_id', $parent[0]);
                     }
+                    if (!empty($parent[1]) && $parent[1] != ''&& $parent[1] != 0) {
+                        $query->where('child_id', $parent[1]);
+                    }
+                })
+                ->where(['school_id' => $school_id, 'is_del' => 0, 'status' => 1])
+                ->where('title', 'like', '%' . $name . '%')
+                ->get()->toArray();
+            foreach ($course as $k => &$v) {
+                $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])
+                    ->where(function ($query) use ($methodwhere) {
+                        if($methodwhere != ''){
+                            $query->where('method_id', $methodwhere);
+                        }
+                    })->get()->toArray();
+                if (!empty($method)) {
+                    $count = $count +1;
+                    foreach ($method as $key => &$val) {
+                        if ($val['method_id'] == 1) {
+                            $val['method_name'] = '直播';
+                        }
+                        if ($val['method_id'] == 2) {
+                            $val['method_name'] = '录播';
+                        }
+                        if ($val['method_id'] == 3) {
+                            $val['method_name'] = '其他';
+                        }
+                    }
+                    $v['method'] = $method;
+                } else {
+                    unset($course[$k]);
                 }
             }
-            $ref_course = [];
             //授权课程
-            if ($count2 != 0) {
-                $ref_course = CourseSchool::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'watch_num', 'create_at', 'course_id')
-                    ->where(function ($query) use ($parent) {
-                        if (!empty($parent[0]) && $parent[0] != ''&& $parent[0] != 0) {
-                            $query->where('parent_id', $parent[0]);
-                        }
-                        if (!empty($parent[1]) && $parent[1] != ''&& $parent[1] != 0) {
-                            $query->where('child_id', $parent[1]);
-                        }
-                    })
-                    ->where(['to_school_id' => $school_id, 'is_del' => 0, 'status' => 1])
-                    ->where('title', 'like', '%' . $name . '%')
-                    ->get()->toArray();
-                foreach ($ref_course as $ks => &$vs) {
-                    //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
-                    $add_number = CourseStocks::where(['course_id' => $vs['course_id'], 'school_id' => $school_id, 'is_del' => 0])->get();
-                    if (!empty($add_number)) {
-                        //库存总数
-                        $stocknum = 0;
-                        foreach ($add_number as $kstock => $vstock) {
-                            $stocknum = $stocknum + $vstock['add_number'];
-                        }
-                        if ($stocknum != 0) {
-                            //查订单表
-                            $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'student_id' => $school_id, 'class_id' => $vs['id'], 'nature' => 1])->count();
-                            if ($ordercount < $stocknum) {
-                                $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])
-                                    ->where(function ($query) use ($methodwhere) {
-                                        if ($methodwhere != '') {
-                                            $query->where('method_id', $methodwhere);
-                                        }
-                                    })->get();
-                                if (!empty($method)) {
-                                    $count = $count +1;
-                                    foreach ($method as $key => &$val) {
-                                        if ($val['method_id'] == 1) {
-                                            $val['method_name'] = '直播';
-                                        }
-                                        if ($val['method_id'] == 2) {
-                                            $val['method_name'] = '录播';
-                                        }
-                                        if ($val['method_id'] == 3) {
-                                            $val['method_name'] = '其他';
-                                        }
+            $ref_course = CourseSchool::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'watch_num', 'create_at', 'course_id')
+                ->where(function ($query) use ($parent) {
+                    if (!empty($parent[0]) && $parent[0] != ''&& $parent[0] != 0) {
+                        $query->where('parent_id', $parent[0]);
+                    }
+                    if (!empty($parent[1]) && $parent[1] != ''&& $parent[1] != 0) {
+                        $query->where('child_id', $parent[1]);
+                    }
+                })
+                ->where(['to_school_id' => $school_id, 'is_del' => 0, 'status' => 1])
+                ->where('title', 'like', '%' . $name . '%')
+                ->get()->toArray();
+            foreach ($ref_course as $ks => &$vs) {
+                //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
+                $add_number = CourseStocks::where(['course_id' => $vs['course_id'], 'school_id' => $school_id, 'is_del' => 0])->get();
+                if (!empty($add_number)) {
+                    //库存总数
+                    $stocknum = 0;
+                    foreach ($add_number as $kstock => $vstock) {
+                        $stocknum = $stocknum + $vstock['add_number'];
+                    }
+                    if ($stocknum != 0) {
+                        //查订单表
+                        $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'student_id' => $school_id, 'class_id' => $vs['id'], 'nature' => 1])->count();
+                        if ($ordercount < $stocknum) {
+                            $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])
+                                ->where(function ($query) use ($methodwhere) {
+                                    if ($methodwhere != '') {
+                                        $query->where('method_id', $methodwhere);
                                     }
-                                    $vs['method'] = $method;
-                                    $vs['nature'] = 1;
-                                } else {
-                                    unset($ref_course[$ks]);
+                                })->get()->toArray();
+                            if (!empty($method)) {
+                                $count = $count +1;
+                                foreach ($method as $key => &$val) {
+                                    if ($val['method_id'] == 1) {
+                                        $val['method_name'] = '直播';
+                                    }
+                                    if ($val['method_id'] == 2) {
+                                        $val['method_name'] = '录播';
+                                    }
+                                    if ($val['method_id'] == 3) {
+                                        $val['method_name'] = '其他';
+                                    }
                                 }
+                                $vs['method'] = $method;
+                                $vs['nature'] = 1;
                             } else {
                                 unset($ref_course[$ks]);
                             }
@@ -220,6 +187,8 @@ class CourseController extends Controller {
                     } else {
                         unset($ref_course[$ks]);
                     }
+                } else {
+                    unset($ref_course[$ks]);
                 }
             }
             //两数组合并 排序
