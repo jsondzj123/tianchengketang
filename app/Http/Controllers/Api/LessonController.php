@@ -301,14 +301,22 @@ class LessonController extends Controller {
                     ->select("ld_course_shift_no.id as shift_no_id","ld_course_class_number.id as class_id")
                     ->where(["ld_course_live_resource.course_id"=>$lesson['course_id'],"ld_course_class_number.status"=>1,"ld_course_class_number.is_del"=>0])->sum("ld_course_class_number.class_hour");
                     //课程资料
-                    $arrclass = [];
-                    $childclass = [];
                     $arr = [];
                     $newhello = [];
+                    $ziyuan = [];
                     //录播小节
-                    $knobble = Couresmaterial::where(["course_id"=>$lesson['course_id'],"mold"=>1])->get();
-                    if(!empty($knobble)){
-                        array_push($arr,$knobble);
+                    //获取该课程下所有录播的资料   小节
+                    //录播资料
+                    $jie = Coureschapters::where(['course_id'=>$lesson['id'],'is_del'=>0])->where('parent_id','>',0)->get();
+                    if(!empty($jie)){
+                        foreach ($jie as $k=>$v){
+                            $ziliao = Couresmaterial::select('material_name as name','material_url  as url','material_size as size','type')->where(['parent_id'=>$v['id'],'is_del'=>0,'mold'=>1])->get();
+                            if(!empty($ziliao)){
+                                foreach ($ziliao as $kss=>$vss){
+                                    $ziyuan[] = $vss;
+                                }
+                            }
+                        }
                     }
                     foreach($lesson['url'] as $k => $v){
                         $class = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['shift_no_id'],"mold"=>2])->get()->toArray();
@@ -332,7 +340,13 @@ class LessonController extends Controller {
                             $k++;
                         }
                     }
-                    $lesson['url'] = $newhello;
+                    if(empty($ziyuan)){
+                        $ziyuan = [];
+                    }
+                    if(empty($newhello)){
+                        $newhello = [];
+                    }
+                    $lesson['url'] = array_merge($newhello,$ziyuan);
                     //授权课程
                     CourseSchool::where('course_id', $request->input('id'))->update(['watch_num' => DB::raw('watch_num + 1'),'update_at'=>date('Y-m-d H:i:s')]);
                 }else{
@@ -364,8 +378,6 @@ class LessonController extends Controller {
                     ->select("ld_course_shift_no.id as shift_no_id","ld_course_class_number.id as class_id")
                     ->where(["ld_course_live_resource.course_id"=>$lesson['id'],"ld_course_class_number.status"=>1,"ld_course_class_number.is_del"=>0])->sum("ld_course_class_number.class_hour");
                     //课程资料
-                    $arrclass = [];
-                    $childclass = [];
                     $arr = [];
                     $newhello = [];
                     $ziyuan = [];
@@ -383,9 +395,36 @@ class LessonController extends Controller {
                             }
                         }
                     }
-                    if(!empty($ziyuan)){
-                        $lesson['url'] = $ziyuan;
+                    //直播资料
+                    foreach($lesson['url'] as $k => $v){
+                        $class = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['shift_no_id'],"mold"=>2])->get()->toArray();
+                        if(!empty($class)){
+                            array_push($arr,$class);
+                        }
+                        $child = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['class_id'],"mold"=>3])->get()->toArray();
+                        if(!empty($child)){
+                            array_push($arr,$child);
+                        }
                     }
+                    $k = 0;
+                    foreach ($arr as $key => $val) {
+                        foreach ($val as $key2 => $val2) {
+                            $newhello[$k]['name'] = $val2['name'];
+                            $newhello[$k]['size'] = $val2['size'];
+                            $newhello[$k]['url'] = $val2['url'];
+                            $newhello[$k]['type'] = $val2['type'];
+                            $newhello[$k]['parent_id'] = $val2['parent_id'];
+                            $newhello[$k]['mold'] = $val2['mold'];
+                            $k++;
+                        }
+                    }
+                    if(empty($ziyuan)){
+                        $ziyuan = [];
+                    }
+                    if(empty($newhello)){
+                        $newhello = [];
+                    }
+                    $lesson['url'] = array_merge($newhello,$ziyuan);
                 }
         }else{
             $lesson = Lesson::select("*","pricing as price","sale_price as favorable_price","expiry as ttl","introduce as introduction","describe as description")->where("school_id",1)->find($request->input('id'));
@@ -404,6 +443,9 @@ class LessonController extends Controller {
             ->join("ld_course_class_number","ld_course_shift_no.id","=","ld_course_class_number.shift_no_id")
             ->select("ld_course_shift_no.id as shift_no_id","ld_course_class_number.id as class_id")
             ->where(["ld_course_live_resource.course_id"=>$lesson['id'],"ld_course_class_number.status"=>1,"ld_course_class_number.is_del"=>0])->sum("ld_course_class_number.class_hour");
+            $arr = [];
+            $newhello = [];
+            $ziyuan = [];
             //录播小节
             //获取该课程下所有录播的资料   小节
             //录播资料
@@ -418,9 +460,35 @@ class LessonController extends Controller {
                     }
                 }
             }
-            if(!empty($ziyuan)){
-                $lesson['url'] = $ziyuan;
+            foreach($lesson['url'] as $k => $v){
+                $class = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['shift_no_id'],"mold"=>2])->get()->toArray();
+                if(!empty($class)){
+                    array_push($arr,$class);
+                }
+                $child = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['class_id'],"mold"=>3])->get()->toArray();
+                if(!empty($child)){
+                    array_push($arr,$child);
+                }
             }
+            $k = 0;
+            foreach ($arr as $key => $val) {
+                foreach ($val as $key2 => $val2) {
+                    $newhello[$k]['name'] = $val2['name'];
+                    $newhello[$k]['size'] = $val2['size'];
+                    $newhello[$k]['url'] = $val2['url'];
+                    $newhello[$k]['type'] = $val2['type'];
+                    $newhello[$k]['parent_id'] = $val2['parent_id'];
+                    $newhello[$k]['mold'] = $val2['mold'];
+                    $k++;
+                }
+            }
+            if(empty($ziyuan)){
+                $ziyuan = [];
+            }
+            if(empty($newhello)){
+                $newhello = [];
+            }
+            $lesson['url'] = array_merge($newhello,$ziyuan);
             $lesson['is_collection'] = 0;
             $lesson['is_buy'] = 0;
         }
