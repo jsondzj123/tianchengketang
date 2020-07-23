@@ -230,8 +230,7 @@ class SchoolController extends Controller {
         if($count>0){
             return response()->json(['code'=>205,'msg'=>'网校名称已存在']);
         }
-
-        $count  = Adminuser::where('username',$data['username'])->where('is_del',1)->count();
+        $count  = Adminuser::where('username',$data['username'])->count();
         if($count>0){
             return response()->json(['code'=>205,'msg'=>'用户名已存在']);
         }
