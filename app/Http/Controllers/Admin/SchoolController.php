@@ -392,7 +392,8 @@ class SchoolController extends Controller {
         }
 
         $adminUser['role_id'] = $roleAuthId['id'] > 0 ? $roleAuthId['id']  : 0;
-        $adminUser['map_auth_id'] = $roleAuthId['map_auth_id'] ? $roleAuthId['map_auth_id']:null;
+        // $adminUser['auth_id'] = $roleAuthId['map_auth_id'] ? $roleAuthId['map_auth_id']:null;  
+        $adminUser['map_auth_id'] = $roleAuthId['map_auth_id'] ? $roleAuthId['map_auth_id']:null;  // 
         $adminUser['school_name'] =  !empty($schoolData['name']) ? $schoolData['name']  : '';
         $authRules = AuthMap::getAuthAlls(['is_del'=>0,'is_forbid'=>0],['id','title','parent_id']);
         $authRules = getAuthArr($authRules);
@@ -437,20 +438,21 @@ class SchoolController extends Controller {
             }
         }
         $arr = [];
+
         if(!empty($data['auth_id'])){
+            
             $auths_id = AuthMap::where(['is_del'=>0,'is_show'=>0,'is_forbid'=>0])->pluck('id')->toArray();
             $auth_id = explode(',', $data['auth_id']);
+            $auth_id = array_unique($auth_id);
+            $auth_id = array_diff($auth_id,['0']);
             foreach ($auth_id as $v) {
                 if(in_array($v,$auths_id)){
                     $arr[]= $v;
                 }
             }
         }
-
-
         //map 表里边的数据
         $mapAuthIds  = AuthMap::whereIn('id',$arr)->pluck('auth_id')->toArray();
-       
         $publicAuth = Authrules::where(['is_del'=>1,'is_show'=>1,'is_forbid'=>1,'parent_id'=>-1])->pluck('id')->toArray();//公共权限
         $auth = array_merge($mapAuthIds,$publicAuth);
         $auth = implode(',', $auth);
