@@ -224,8 +224,8 @@ class Coureschapters extends Model {
         $data['update_at'] = date('Y-m-d H:i:s');
         $up = self::where(['id'=>$data['id']])->update($data);
         if($up){
+            Couresmaterial::where(['parent_id'=>$data['id'],'mold'=>1])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
             if(!empty($filearr)){
-                Couresmaterial::where(['parent_id'=>$data['id'],'mold'=>1])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
                 foreach ($filearr as $k=>$v){
                     $materialones = Couresmaterial::where(['material_url'=>$v['url'],'mold'=>1])->first();
                     if($materialones){
