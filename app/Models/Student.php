@@ -411,7 +411,8 @@ class Student extends Model {
             'wechat'        =>   isset($body['wechat']) && !empty($body['wechat']) ? $body['wechat'] : '' ,
             'address'       =>   isset($body['address']) && !empty($body['address']) ? $body['address'] : '' ,
             'remark'        =>   isset($body['remark']) && !empty($body['remark']) ? $body['remark'] : '' ,
-            'school_id'     =>   $school_status > 0 && $school_status == 1 ? $body['school_id'] : $school_id ,
+            //'school_id'     =>   $school_status > 0 && $school_status == 1 ? $body['school_id'] : $school_id ,
+            'school_id'     =>   $body['school_id'] ,
             'update_at'     =>   date('Y-m-d H:i:s')
         ];
         
@@ -555,7 +556,8 @@ class Student extends Model {
             'address'       =>   isset($body['address']) && !empty($body['address']) ? $body['address'] : '' ,
             'remark'        =>   isset($body['remark']) && !empty($body['remark']) ? $body['remark'] : '' ,
             'admin_id'      =>   $admin_id ,
-            'school_id'     =>   $school_status > 0 && $school_status == 1 ? $body['school_id'] : $school_id ,
+            //'school_id'     =>   $school_status > 0 && $school_status == 1 ? $body['school_id'] : $school_id ,
+            'school_id'     =>   $body['school_id'] ,
             'reg_source'    =>   2 ,
             'create_at'     =>   date('Y-m-d H:i:s')
         ];
