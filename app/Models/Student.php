@@ -723,8 +723,8 @@ class Student extends Model {
         //空数组赋值
         $arr = [];
         foreach($student_list as $k=>$v){
-            $phone     = !empty($v[0]) ? $v[0] : '';    //手机号
-            $real_name = !empty($v[2]) ? $v[2] : '';    //姓名
+            $phone     = !empty($v[0]) ? trim($v[0]) : '';    //手机号
+            $real_name = !empty($v[2]) ? trim($v[2]) : '';    //姓名
             if(!empty($v[3])){
                 $sex       = trim($v[3]) == '男' ? 1 : 2;    //性别
             } else {
