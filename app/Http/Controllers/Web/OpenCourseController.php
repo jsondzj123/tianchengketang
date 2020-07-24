@@ -192,6 +192,7 @@ class OpenCourseController extends Controller {
             ->orderBy('ld_course_open.id','desc')
             ->get()->toArray();
         $openCourseArr = array_merge($openCourse,$natureOpenCourse);
+        $openCourseArr = array_unique($openCourseArr,SORT_REGULAR);
         if(!empty($openCourseArr)){
             foreach($openCourseArr as $key=>&$v){
                 $v['start_at'] = date('Y-m-d H:i:s',$v['start_at']);
