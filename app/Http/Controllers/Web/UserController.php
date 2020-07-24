@@ -127,7 +127,6 @@ class UserController extends Controller {
             $res['papers_type'] = $this->data['papers_type'];
         }
         if(isset($this->data['educational'])){
-            $res['educational'] = $this->data['educational'];
         }
         if(isset($this->data['papers_num'])){
             $res['papers_num'] = $this->data['papers_num'];
