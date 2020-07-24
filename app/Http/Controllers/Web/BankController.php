@@ -31,22 +31,50 @@ class BankController extends Controller {
     public function getBankList() {
         //获取提交的参数
         try{
-            //分校域名
-            $school_dns        = isset(self::$accept_data['school_dns']) && !empty(self::$accept_data['school_dns']) ? self::$accept_data['school_dns'] : '';           //获取学校域名
-           
-            //判断学校域名是否传递
-            if(!$school_dns || empty($school_dns)){
-                return response()->json(['code' => 201 , 'msg' => '分校域名为空']);
+            //获取请求的平台端
+            $platform = verifyPlat() ? verifyPlat() : 'pc';
+            if($platform == 'pc'){
+                //分校域名
+                $school_dns        = isset(self::$accept_data['school_dns']) && !empty(self::$accept_data['school_dns']) ? self::$accept_data['school_dns'] : '';           //获取学校域名
+
+                //判断学校域名是否传递
+                if(!$school_dns || empty($school_dns)){
+                    return response()->json(['code' => 201 , 'msg' => '分校域名为空']);
+                }
+
+                //根据学校域名获取学校的id
+                $school_info = School::where('dns' , $school_dns)->where('is_del' , 1)->where('is_forbid' , 1)->first();
+                if(!$school_info || empty($school_info)){
+                    return response()->json(['code' => 203 , 'msg' => '此域名不合法']);
+                }
+                
+                //学校id赋值
+                $school_id = $school_info['id'];
+            } else {
+                //判断用户token是否为空
+                if(!isset(self::$accept_data['user_token']) || empty(self::$accept_data['user_token'])){
+                    return response()->json(['code' => 201 , 'msg' => '用户token为空']);
+                }
+                
+                //hash中token赋值
+                $token_key   = "user:regtoken:".$platform.":".self::$accept_data['user_token'];
+                
+                //判断token值是否合法
+                $redis_token = Redis::hLen($token_key);
+                if($redis_token <= 0){
+                    return response()->json(['code' => 201 , 'msg' => '用户token为空']);
+                }
+                
+                //解析json获取用户详情信息
+                $json_info = Redis::hGetAll($token_key);
+                
+                //学校id赋值
+                $school_id = $json_info['school_id'];
             }
             
-            //根据学校域名获取学校的id
-            $school_info = School::where('dns' , $school_dns)->where('is_del' , 1)->where('is_forbid' , 1)->first();
-            if(!$school_info || empty($school_info)){
-                return response()->json(['code' => 203 , 'msg' => '此域名不合法']);
-            }
             
             //判断此学校是否是总校
-            $school_count = Admin::where('school_id' , $school_info['id'])->where('school_status' , 1)->where('is_forbid' , 1)->where('is_del' , 1)->count();
+            $school_count = Admin::where('school_id' , $school_id)->where('school_status' , 1)->where('is_forbid' , 1)->where('is_del' , 1)->count();
             
             //判断是否是总校
             if($school_count && $school_count > 0){
@@ -54,7 +82,7 @@ class BankController extends Controller {
                 $bank_array = [];
             
                 //获取全部题库的列表
-                $bank_list = Bank::select('id' , 'subject_id' , 'topic_name')->where('school_id' , $school_info['id'])->where('is_del' , 0)->where('is_open' , 0)->orderByDesc('id')->get();
+                $bank_list = Bank::select('id' , 'subject_id' , 'topic_name')->where('school_id' , $school_id)->where('is_del' , 0)->where('is_open' , 0)->orderByDesc('id')->get();
                 if($bank_list && !empty($bank_list)){
                     foreach($bank_list as $k=>$v){
                         //根据科目的id获取列表数据
@@ -74,7 +102,7 @@ class BankController extends Controller {
                 $bank_array2 = [];
                 
                 //获取全部题库的列表
-                $bank_list = Bank::select('id' , 'subject_id' , 'topic_name')->where('school_id' , $school_info['id'])->where('is_del' , 0)->where('is_open' , 0)->orderByDesc('id')->get();
+                $bank_list = Bank::select('id' , 'subject_id' , 'topic_name')->where('school_id' , $school_id)->where('is_del' , 0)->where('is_open' , 0)->orderByDesc('id')->get();
                 if($bank_list && !empty($bank_list)){
                     foreach($bank_list as $k=>$v){
                         //根据科目的id获取列表数据
@@ -90,7 +118,7 @@ class BankController extends Controller {
                 }
                 
                 //授权的题库列表
-                $bank_list2 = CourseRefBank::where('to_school_id' , $school_info['id'])->where('is_del' , 0)->orderByDesc('create_at')->get();
+                $bank_list2 = CourseRefBank::where('to_school_id' , $school_id)->where('is_del' , 0)->orderByDesc('create_at')->get();
                 if($bank_list2 && !empty($bank_list2)){
                     foreach($bank_list2 as $k=>$v){
                         //根据题库的id获取题库信息
