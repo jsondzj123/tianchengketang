@@ -47,7 +47,7 @@ class IndexController extends Controller {
     }
     //新闻资讯
     public function newInformation(){
-      
+
     	$limit = !isset($this->data['limit']) || empty($this->data['limit']) || $this->data['limit']<=0 ? 4 : $this->data['limit'];
     	$where = ['ld_article_type.school_id'=>$this->school['id'],'ld_article_type.status'=>1,'ld_article_type.is_del'=>1];
     	$news = Articletype::leftJoin('ld_article','ld_article.article_type_id','=','ld_article_type.id')
@@ -58,7 +58,7 @@ class IndexController extends Controller {
     }
     //首页信息
     public function index(){
-    	$arr = []; 
+    	$arr = [];
 
         $arr['logo'] = empty($this->school['logo_url'])?'':$this->school['logo_url'];
 
@@ -102,7 +102,7 @@ class IndexController extends Controller {
                  $va['subject_name'] =$subject_name['subject_name'];
             }
         }
-        
+
         if(!empty($subjectOne)&& !empty($natuerSubjectOne)){
 
              $subject=array_merge($subjectOne,$natuerSubjectOne);
@@ -114,12 +114,12 @@ class IndexController extends Controller {
         $newArr = [];
 
         foreach ($subject as $key => $val) {
-            $natureCourseData = CourseSchool::where(['to_school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id']])->limit(8)->get()->toArray();//授权课程
+            $natureCourseData = CourseSchool::where(['to_school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id'],'status'=>1])->limit(8)->get()->toArray();//授权课程
             $count = count($natureCourseData);
             if($count<8){
-                $CouresData =Coures::where(['school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id']])->limit(8-$count)->get()->toArray(); //自增
+                $CouresData =Coures::where(['school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id'],'status'=>1])->limit(8-$count)->get()->toArray(); //自增
             }
-          
+
             if(!empty($CouresData)){
                     foreach($CouresData as $key=>&$zizeng){
                         $zizeng['nature'] = 1;
@@ -137,13 +137,13 @@ class IndexController extends Controller {
             }
            $newArr[$val['id']] = $courseArr;
         }
-        
+
     	$arr = [
             'course'=>$newArr,
             'subjectOne'=>$subject,
         ];
         return response()->json(['code'=>200,'msg'=>'Success','data'=>$arr]);
-    }	
+    }
     //获取公司信息
     public function getCompany(){
         $company['name'] = isset($this->school['name']) ?$this->school['name']:'';
@@ -156,7 +156,7 @@ class IndexController extends Controller {
         if(!isset($this->data['id']) || $this->data['id'] <=0){
             return response()->json(['code'=>201,'msg'=>'id为空或类型不合法']);
         }
-        $FootConfigArr =FootConfig::where(['id'=>$this->data['id'],'is_del'=>0,'is_show'=>0])->select('text')->first();         
+        $FootConfigArr =FootConfig::where(['id'=>$this->data['id'],'is_del'=>0,'is_show'=>0])->select('text')->first();
         return response()->json(['code'=>200,'msg'=>'Success','data'=>$FootConfigArr]);
     }
 }
