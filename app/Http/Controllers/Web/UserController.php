@@ -113,6 +113,7 @@ class UserController extends Controller {
             return response()->json(['code' => 201 , 'msg' => '姓名不能为空']);
         }
         $res['real_name'] = $this->data['real_name'];
+        $res['update_at'] = date('Y-m-d H:i:s');
         if(isset($this->data['sex'])){
             $res['sex'] = $this->data['sex'];
         }
@@ -149,6 +150,7 @@ class UserController extends Controller {
     }
     //用户修改联系方式
     public function userUpRelation(){
+        $res['update_at'] = date('Y-m-d H:i:s');
         if(isset($this->data['family_phone']) || !empty($this->data['family_phone'])){
             $res['family_phone'] = $this->data['family_phone'];
         }
