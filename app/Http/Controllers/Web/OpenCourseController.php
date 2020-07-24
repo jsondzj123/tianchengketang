@@ -169,7 +169,7 @@ class OpenCourseController extends Controller {
                 $query->where('ld_course_open.school_id',$school['id']);
                 $query->where('ld_course_open.is_del',0);
                 $query->where('ld_course_open.status',1);
-                $query->where('ld_course_open_live_childs.status',3);//已结束
+                // $query->where('ld_course_open_live_childs.status',3);//已结束
                 $query->where('ld_course_open.end_at','<',time());
                 $query->where('ld_lecturer_educationa.type',2);
             })->select('ld_course_open.id','ld_course_open.title','ld_course_open.cover','ld_lecturer_educationa.real_name','ld_course_open.start_at','ld_course_open.end_at')
