@@ -52,24 +52,24 @@ class BankController extends Controller {
                 $school_id = $school_info['id'];
             } else {
                 //判断用户token是否为空
-                if(!isset(self::$accept_data['user_token']) || empty(self::$accept_data['user_token'])){
-                    return response()->json(['code' => 201 , 'msg' => '用户token为空']);
+                if(isset(self::$accept_data['user_token']) && !empty(self::$accept_data['user_token'])){
+                    //hash中token赋值
+                    $token_key   = "user:regtoken:".$platform.":".self::$accept_data['user_token'];
+
+                    //判断token值是否合法
+                    $redis_token = Redis::hLen($token_key);
+                    if($redis_token <= 0){
+                        return response()->json(['code' => 201 , 'msg' => '用户token为空']);
+                    }
+
+                    //解析json获取用户详情信息
+                    $json_info = Redis::hGetAll($token_key);
+
+                    //学校id赋值
+                    $school_id = $json_info['school_id'];
+                } else {
+                    $school_id = 1;
                 }
-                
-                //hash中token赋值
-                $token_key   = "user:regtoken:".$platform.":".self::$accept_data['user_token'];
-                
-                //判断token值是否合法
-                $redis_token = Redis::hLen($token_key);
-                if($redis_token <= 0){
-                    return response()->json(['code' => 201 , 'msg' => '用户token为空']);
-                }
-                
-                //解析json获取用户详情信息
-                $json_info = Redis::hGetAll($token_key);
-                
-                //学校id赋值
-                $school_id = $json_info['school_id'];
             }
             
             
