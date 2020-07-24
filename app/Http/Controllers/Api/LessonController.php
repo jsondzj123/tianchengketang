@@ -319,11 +319,11 @@ class LessonController extends Controller {
                         }
                     }
                     foreach($lesson['url'] as $k => $v){
-                        $class = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['shift_no_id'],"mold"=>2])->get()->toArray();
+                        $class = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['shift_no_id'],"mold"=>2,'is_del'=>0])->get()->toArray();
                         if(!empty($class)){
                             array_push($arr,$class);
                         }
-                        $child = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['class_id'],"mold"=>3])->get()->toArray();
+                        $child = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['class_id'],"mold"=>3,'is_del'=>0])->get()->toArray();
                         if(!empty($child)){
                             array_push($arr,$child);
                         }
@@ -397,11 +397,11 @@ class LessonController extends Controller {
                     }
                     //直播资料
                     foreach($lesson['url'] as $k => $v){
-                        $class = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['shift_no_id'],"mold"=>2])->get()->toArray();
+                        $class = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['shift_no_id'],"mold"=>2,'is_del'=>0])->get()->toArray();
                         if(!empty($class)){
                             array_push($arr,$class);
                         }
-                        $child = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['class_id'],"mold"=>3])->get()->toArray();
+                        $child = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['class_id'],"mold"=>3,'is_del'=>0])->get()->toArray();
                         if(!empty($child)){
                             array_push($arr,$child);
                         }
@@ -461,11 +461,11 @@ class LessonController extends Controller {
                 }
             }
             foreach($lesson['url'] as $k => $v){
-                $class = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['shift_no_id'],"mold"=>2])->get()->toArray();
+                $class = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['shift_no_id'],"mold"=>2,'is_del'=>0])->get()->toArray();
                 if(!empty($class)){
                     array_push($arr,$class);
                 }
-                $child = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['class_id'],"mold"=>3])->get()->toArray();
+                $child = Couresmaterial::select("material_name as name","material_size as size","material_url as url","type","parent_id","mold")->where(["parent_id"=>$v['class_id'],"mold"=>3,'is_del'=>0])->get()->toArray();
                 if(!empty($child)){
                     array_push($arr,$child);
                 }
