@@ -491,6 +491,7 @@ class LessonController extends Controller {
             $lesson['url'] = array_merge($newhello,$ziyuan);
             $lesson['is_collection'] = 0;
             $lesson['is_buy'] = 0;
+            $lesson['class_num'] = "".round($lesson['class_num'])."";
         }
         //自增课程
         Lesson::where('id', $request->input('id'))->update(['watch_num' => DB::raw('watch_num + 1'),'update_at'=>date('Y-m-d H:i:s')]);
