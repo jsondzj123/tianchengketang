@@ -37,24 +37,34 @@ class Authrules extends Model {
         if(!$auth_id_arr){
              $auth_id_arr = [$auth_id];
         }
-        $authArr = self::whereIn('id',$auth_id_arr)->where(['is_del'=>1,'is_show'=>1,'is_forbid'=>1])->select('id','name','title','parent_id')->get()->toArray();
-       
+        $authData = self::where(['is_show'=>1,'is_del'=>1,'is_forbid'=>1])->select('id','name')->get()->toArray(); //全部路由数据
+        $authData = array_column($authData,'name','id');
+
+        $authArr = AuthMap::whereIn('id',$auth_id_arr)->where(['is_del'=>0,'is_show'=>0,'is_forbid'=>0])->select('id','title','parent_id','auth_id')->get()->toArray();
         $arr = [];
         foreach($authArr as $k=>$v){
-      
             if($v['parent_id'] == 0){
                 $arr[] = $v;    
             }else{
                 foreach ($arr as $key => $value) {
                     if($v['parent_id'] == $value['id']){
                         unset($v['id']);
-                        
                         $arr[$key]['child_array'][] = $v;
                     }
                 }
             }
         }
-        
+
+        if(!empty($arr)){
+            foreach($arr as $kk=>&$vv){
+                $vv['name']  = !isset($authData[$vv['auth_id']]) ?'':substr(substr($authData[$vv['auth_id']],5),0,-8);
+
+                foreach ($vv['child_array'] as $kkk => &$vvv) {
+                     $vvv['name']  = !isset($authData[$vvv['auth_id']]) ?'':substr($authData[$vvv['auth_id']],5);
+                }
+            }
+        }
+        print_r($arr);die;
         if($arr){
             return ['code'=>200,'msg'=>'获取权限信息成功','data'=>$arr];
         }else{
