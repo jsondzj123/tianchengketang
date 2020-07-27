@@ -851,12 +851,15 @@ class Student extends Model {
                         'create_at'      =>   date('Y-m-d H:i:s')
                     ];
 
-                    //添加报名信息
-                    $enroll_id = Enrolment::insertEnrolment($enroll_array);
-                    if($enroll_id && $enroll_id > 0){
-                        //订单表插入逻辑
-                        $enroll_array['nature']  =  $nature;
-                        Order::offlineStudentSignupNotaudit($enroll_array);
+                    //判断支付类型和支付方式是否合法
+                    if(in_array($payment_type , [1,2,3,4]) && in_array($payment_method , [1,2,3])){
+                        //添加报名信息
+                        $enroll_id = Enrolment::insertEnrolment($enroll_array);
+                        if($enroll_id && $enroll_id > 0){
+                            //订单表插入逻辑
+                            $enroll_array['nature']  =  $nature;
+                            Order::offlineStudentSignupNotaudit($enroll_array);
+                        }
                     }
                 }
             } else {
@@ -887,12 +890,15 @@ class Student extends Model {
                             'create_at'      =>   date('Y-m-d H:i:s')
                         ];
 
-                        //添加报名信息
-                        $enroll_id = Enrolment::insertEnrolment($enroll_array);
-                        if($enroll_id && $enroll_id > 0){
-                            //订单表插入逻辑
-                            $enroll_array['nature']  =  $nature;
-                            Order::offlineStudentSignupNotaudit($enroll_array);
+                        //判断支付类型和支付方式是否合法
+                        if(in_array($payment_type , [1,2,3,4]) && in_array($payment_method , [1,2,3])){
+                            //添加报名信息
+                            $enroll_id = Enrolment::insertEnrolment($enroll_array);
+                            if($enroll_id && $enroll_id > 0){
+                                //订单表插入逻辑
+                                $enroll_array['nature']  =  $nature;
+                                Order::offlineStudentSignupNotaudit($enroll_array);
+                            }
                         }
                     }
                 }
