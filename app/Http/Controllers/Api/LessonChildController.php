@@ -105,19 +105,19 @@ class LessonChildController extends Controller {
         //         }
         //     }
         // }
-        // foreach($chapters as $k => &$v){
-        //         foreach($v['childs'] as $k1 => &$vv){
-        //             if($vv['use_duration'] == 0){
-        //                 $vv['use_duration'] = "未学习";
-        //             }else{
-        //                 $vv['use_duration'] =  "已学习".  sprintf("%01.2f", $vv['use_duration']/$vv['mt_duration']*100).'%';;
-        //             }
-        //             $seconds = $vv['mt_duration'];
-        //             $hours = intval($seconds/3600);
-        //             $vv['mt_duration'] = $hours.":".gmdate('i:s', $seconds);
-        //         }
+        foreach($chapters as $k => &$v){
+                foreach($v['childs'] as $k1 => &$vv){
+                    //if($vv['use_duration'] == 0){
+                        $vv['use_duration'] = "开始学习";
+                    // }else{
+                    //     $vv['use_duration'] =  "已学习".  sprintf("%01.2f", $vv['use_duration']/$vv['mt_duration']*100).'%';;
+                    // }
+                    // $seconds = $vv['mt_duration'];
+                    // $hours = intval($seconds/3600);
+                    // $vv['mt_duration'] = $hours.":".gmdate('i:s', $seconds);
+                }
 
-        //     }
+            }
 
         return $this->response($chapters);
     }
