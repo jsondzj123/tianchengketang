@@ -71,9 +71,11 @@ class LessonChildController extends Controller {
                         $MTCloud = new MTCloud();
                         $VisitorList =  $MTCloud->coursePlaybackVisitorList($course_id,1,50);
                         Redis::set('VisitorList', json_encode($VisitorList));
-                        Redis::expire('VisitorList',3600);
+                        Redis::expire('VisitorList',600);
                         $data  = Redis::get('VisitorList');
                     }
+                    // $MTCloud = new MTCloud();
+                    // $res  =  $MTCloud->coursePlaybackVisitorList($course_id,1,50);
                     $res = json_decode($data,1);
                     if(!empty($res['data'])){
                         $vv['use_duration']  = $res['data'];
@@ -85,6 +87,7 @@ class LessonChildController extends Controller {
                 }
             }
         }
+
         foreach($chapters as $k => &$v){
             foreach($v['childs'] as $kk => &$vv){
                 if(count($vv['use_duration']) > 0){
@@ -102,7 +105,6 @@ class LessonChildController extends Controller {
                 }
             }
         }
-
         foreach($chapters as $k => &$v){
                 foreach($v['childs'] as $k1 => &$vv){
                     if($vv['use_duration'] == 0){
