@@ -833,26 +833,26 @@ class Student extends Model {
 
                 //添加报名表数据
                 if($user_id && $user_id > 0){
-                    //报名数据信息追加
-                    $enroll_array = [
-                        'school_id'      =>   $school_id ,
-                        'student_id'     =>   $user_id ,
-                        'parent_id'      =>   $course_parent_id ,
-                        'child_id'       =>   $course_child_id ,
-                        'lession_id'     =>   $lession_id ,
-                        'lession_price'  =>   $lession_price ,
-                        'student_price'  =>   $pay_fee ,
-                        'payment_type'   =>   $payment_type ,
-                        'payment_method' =>   $payment_method ,
-                        'payment_fee'    =>   $pay_fee ,
-                        'payment_time'   =>   date('Y-m-d H:i:s') ,
-                        'admin_id'       =>   $admin_id ,
-                        'status'         =>   1 ,
-                        'create_at'      =>   date('Y-m-d H:i:s')
-                    ];
-
                     //判断支付类型和支付方式是否合法
                     if(in_array($payment_type , [1,2,3,4]) && in_array($payment_method , [1,2,3])){
+                        //报名数据信息追加
+                        $enroll_array = [
+                            'school_id'      =>   $school_id ,
+                            'student_id'     =>   $user_id ,
+                            'parent_id'      =>   $course_parent_id ,
+                            'child_id'       =>   $course_child_id ,
+                            'lession_id'     =>   $lession_id ,
+                            'lession_price'  =>   $lession_price ,
+                            'student_price'  =>   $pay_fee ,
+                            'payment_type'   =>   $payment_type ,
+                            'payment_method' =>   $payment_method ,
+                            'payment_fee'    =>   $pay_fee ,
+                            'payment_time'   =>   date('Y-m-d H:i:s') ,
+                            'admin_id'       =>   $admin_id ,
+                            'status'         =>   1 ,
+                            'create_at'      =>   date('Y-m-d H:i:s')
+                        ];
+                    
                         //添加报名信息
                         $enroll_id = Enrolment::insertEnrolment($enroll_array);
                         if($enroll_id && $enroll_id > 0){
@@ -872,26 +872,26 @@ class Student extends Model {
                 if($is_exists <= 0){
                     //添加报名表数据
                     if($user_id && $user_id > 0){
-                        //报名数据信息追加
-                        $enroll_array = [
-                            'school_id'      =>   $school_id ,
-                            'student_id'     =>   $user_id ,
-                            'parent_id'      =>   $course_parent_id ,
-                            'child_id'       =>   $course_child_id ,
-                            'lession_id'     =>   $lession_id ,
-                            'lession_price'  =>   $lession_price ,
-                            'student_price'  =>   $pay_fee ,
-                            'payment_type'   =>   $payment_type ,
-                            'payment_method' =>   $payment_method ,
-                            'payment_fee'    =>   $pay_fee ,
-                            'payment_time'   =>   date('Y-m-d H:i:s') ,
-                            'admin_id'       =>   $admin_id ,
-                            'status'         =>   1 ,
-                            'create_at'      =>   date('Y-m-d H:i:s')
-                        ];
-
                         //判断支付类型和支付方式是否合法
                         if(in_array($payment_type , [1,2,3,4]) && in_array($payment_method , [1,2,3])){
+                            //报名数据信息追加
+                            $enroll_array = [
+                                'school_id'      =>   $school_id ,
+                                'student_id'     =>   $user_id ,
+                                'parent_id'      =>   $course_parent_id ,
+                                'child_id'       =>   $course_child_id ,
+                                'lession_id'     =>   $lession_id ,
+                                'lession_price'  =>   $lession_price ,
+                                'student_price'  =>   $pay_fee ,
+                                'payment_type'   =>   $payment_type ,
+                                'payment_method' =>   $payment_method ,
+                                'payment_fee'    =>   $pay_fee ,
+                                'payment_time'   =>   date('Y-m-d H:i:s') ,
+                                'admin_id'       =>   $admin_id ,
+                                'status'         =>   1 ,
+                                'create_at'      =>   date('Y-m-d H:i:s')
+                            ];
+                        
                             //添加报名信息
                             $enroll_id = Enrolment::insertEnrolment($enroll_array);
                             if($enroll_id && $enroll_id > 0){
