@@ -122,12 +122,12 @@ class IndexController extends Controller {
 
             if(!empty($CouresData)){
                     foreach($CouresData as $key=>&$zizeng){
-                        $zizeng['nature'] = 1;
+                        $zizeng['nature'] = 0;
                     }
                 }
             if(!empty($natureCourseData)){
                 foreach($natureCourseData as $key=>&$nature){
-                    $nature['nature'] = 2;
+                    $nature['nature'] = 1;
                 }
             }
             if(!empty($natureCourseData)&& !empty($CouresData)){
