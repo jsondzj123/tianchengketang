@@ -504,6 +504,12 @@ class ExamController extends Controller {
             if($is_correct_extensiton <= 0 || !in_array($excel_extension , ['xlsx' , 'xls'])){
                 return ['code' => 202 , 'msg' => '上传文件格式非法'];
             }
+            
+            //判断excel上传大小是否大于3M
+            $excel_size = filesize($_FILES['file']['tmp_name']);
+            if($excel_size > 3145728){
+                return ['code' => 202 , 'msg' => '上传excel不能大于3M'];
+            }
 
             //存放文件路径
             $file_path= app()->basePath() . "/public/upload/excel/";
