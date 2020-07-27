@@ -28,7 +28,7 @@ class LiveChildController extends Controller {
         $lives = Lesson::join("ld_course_live_resource","ld_course.id","=","ld_course_live_resource.course_id")
         ->join("ld_course_livecast_resource","ld_course_live_resource.resource_id","=","ld_course_livecast_resource.id")
         ->join("ld_course_shift_no","ld_course_livecast_resource.id","=","ld_course_shift_no.resource_id")
-        ->select(['ld_course_livecast_resource.id as resource_id','ld_course_shift_no.id as shift_no_id'])
+        ->select(['ld_course_shift_no.id as shift_no_id'])
         ->where(["ld_course.status"=>1,"ld_course.is_del"=>0,'ld_course.id'=>$request->input('lesson_id')])->get();
         //获取班号
         //获取班号下所有课次'
@@ -39,19 +39,19 @@ class LiveChildController extends Controller {
                 $live = LiveChild::join("ld_course_live_childs","ld_course_class_number.id","=","ld_course_live_childs.class_id")
                 ->join("ld_course_shift_no","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
                 ->select('ld_course_class_number.id', 'ld_course_class_number.name as course_name', 'ld_course_class_number.start_at as start_time', 'ld_course_class_number.end_at as end_time', 'ld_course_live_childs.course_id', 'ld_course_live_childs.status','ld_course_shift_no.name as class_name')->where([
-                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 2
+                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 2,'shift_no_id'=>$value['shift_no_id']
                 ])->get();
                 //预告
                 $advance = LiveChild::join("ld_course_live_childs","ld_course_class_number.id","=","ld_course_live_childs.class_id")
                 ->join("ld_course_shift_no","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
                 ->select('ld_course_class_number.id', 'ld_course_class_number.name as course_name', 'ld_course_class_number.start_at as start_time', 'ld_course_class_number.end_at as end_time', 'ld_course_live_childs.course_id', 'ld_course_live_childs.status','ld_course_shift_no.name as class_name')->where([
-                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 1
+                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 1,'shift_no_id'=>$value['shift_no_id']
                 ])->get();
                 //回放
                 $playback = LiveChild::join("ld_course_live_childs","ld_course_class_number.id","=","ld_course_live_childs.class_id")
                 ->join("ld_course_shift_no","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
                 ->select('ld_course_class_number.id', 'ld_course_class_number.name as course_name', 'ld_course_class_number.start_at as start_time', 'ld_course_class_number.end_at as end_time', 'ld_course_live_childs.course_id', 'ld_course_live_childs.status','ld_course_shift_no.name as class_name')->where([
-                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 3
+                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 3,'shift_no_id'=>$value['shift_no_id']
                 ])->get();
             }
             if(!empty($live->toArray())){
