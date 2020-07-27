@@ -64,7 +64,7 @@ class Authrules extends Model {
                 }
             }
         }
-        print_r($arr);die;
+       
         if($arr){
             return ['code'=>200,'msg'=>'获取权限信息成功','data'=>$arr];
         }else{
