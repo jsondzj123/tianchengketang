@@ -277,23 +277,28 @@ class UserController extends Controller {
             ->where('validity_time','>',date('Y-m-d H:i:s'))
             ->whereIn('pay_status',[3,4])
             ->get()->toArray();
+        print_r($order);die;
         $courses = [];
         if(!empty($order)){
             foreach ($order as $k=>$v){
                 if($v['nature'] == 1){
-                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
-                    $course['nature'] = 1;
-                    //查讲师
-                    $teacherlist = Couresteacher::where(['course_id'=>$course['course_id'],'is_del'=>0])->get();
-                    $string=[];
-                    if(!empty($teacherlist)){
-                        foreach ($teacherlist as $ks=>$vs){
-                            $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
-                            $string[] = $teacher['real_name'];
+                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    if(!empty($course)){
+                        $course['nature'] = 1;
+                        //查讲师
+                        $teacherlist = Couresteacher::where(['course_id'=>$course['course_id'],'is_del'=>0])->get();
+                        $string=[];
+                        if(!empty($teacherlist)){
+                            foreach ($teacherlist as $ks=>$vs){
+                                $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
+                                $string[] = $teacher['real_name'];
+                            }
+                            $course['teachername'] = implode(',',$string);
+                        }else{
+                            $course['teachername']='';
                         }
-                      $course['teachername'] = implode(',',$string);
                     }else{
-                        $course['teachername']='';
+                        unset($order[$k]);
                     }
                 }else{
                     $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
