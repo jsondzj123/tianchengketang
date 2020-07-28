@@ -613,6 +613,7 @@ class CourseController extends Controller {
                             //查询讲师
                             $teacher = LiveClassChildTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_class_teacher.teacher_id')
                                 ->where(['ld_course_class_teacher.is_del'=>0,'ld_lecturer_educationa.is_del'=>0,'ld_lecturer_educationa.type'=>2,'ld_lecturer_educationa.is_forbid'=>0])
+                                ->where(['ld_course_class_teacher.class_id'=>$vs['id']])
                                 ->first();
                             if(!empty($teacher)){
                                 $vs['teacher_name'] = $teacher['real_name'];
