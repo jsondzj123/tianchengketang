@@ -85,9 +85,9 @@ class Teach extends Model {
 
 			//课程
 		$courseArr = CourseShiftNo::rightJoin('ld_course_class_number','ld_course_class_number.shift_no_id','=','ld_course_shift_no.id')
+					->rightJoin('ld_course_live_childs','ld_course_live_childs.class_id','=','ld_course_class_number.id')
 					->rightJoin('ld_course_class_teacher','ld_course_class_number.id','=','ld_course_class_teacher.class_id')
 					->rightJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_class_teacher.teacher_id')
-					->rightJoin('ld_course_live_childs','ld_course_live_childs.class_id','=','ld_course_class_number.id')
 					->where(function($query) use ($body,$school_id) {
 						if(isset($body['time']) && !empty($body['time'])){
 							switch ($body['time']) {
@@ -135,13 +135,16 @@ class Teach extends Model {
 						if(isset($body['classNoSearch']) && !empty($body['classNoSearch'])){ //
 							$query->where('ld_course_shift_no.name','like','%'.$body['classNoSearch'].'%');
 						}
+						$query->where('ld_course_class_number.status',1);
 						$query->where('ld_course_shift_no.is_del',0);
 						$query->where('ld_course_class_number.is_del',0);
-						$query->where('ld_course_class_number.status',1);
+			
 						$query->where('ld_course_shift_no.school_id',$school_id);
 						$query->where('ld_lecturer_educationa.type',2);
-				})->select('ld_course_shift_no.name as classno_name','ld_course_class_number.name as class_name','ld_course_class_number.start_at','ld_course_class_number.end_at','ld_lecturer_educationa.real_name as teacher_name','ld_course_live_childs.watch_num','ld_course_class_number.id as class_id','ld_course_class_number.shift_no_id as classno_id')
+				})
+					->select('ld_course_shift_no.name as classno_name','ld_course_class_number.name as class_name','ld_course_class_number.start_at','ld_course_class_number.end_at','ld_lecturer_educationa.real_name as teacher_name','ld_course_live_childs.watch_num','ld_course_class_number.id as class_id','ld_course_class_number.shift_no_id as classno_id')
 				->get()->toArray();
+
 				$newcourseArr = [];
 				if(!empty($openCourseArr)){
 					foreach($openCourseArr as $k=>$v){
@@ -155,27 +158,28 @@ class Teach extends Model {
 				}
 				$newcourseArr = array_merge($openCourseArr,$courseArr);
 				if(!empty($newcourseArr) ){
+
 					foreach($newcourseArr as $k=>$v){
 						$time = (int)$v['end_at']-(int)$v['start_at'];
 						$newcourseArr[$k]['time'] = timetodate($time);
 						$newcourseArr[$k]['start_time'] = date('Y-m-d H:i',$v['start_at']);
 						if(time()<$v['start_at']){
-							$newcourseArr[$k]['sort'] = 2;
+							$newcourseArr[$k]['sorts'] = 2;
 							$newcourseArr[$k]['state'] = 1;
 							$newcourseArr[$k]['status'] = '预开始';
 						}
 						if(time()>$v['end_at']){
-							$newcourseArr[$k]['sort'] = 2;
+							$newcourseArr[$k]['sorts'] = 3;
 							$newcourseArr[$k]['state'] = 3;
 							$newcourseArr[$k]['status'] = '直播已结束';
 						}
 						if(time()>$v['start_at'] && time()<$v['end_at']){
-							$newcourseArr[$k]['sort'] = 1;
+							$newcourseArr[$k]['sorts'] = 1;
 							$newcourseArr[$k]['state'] = 2;
 							$newcourseArr[$k]['status'] = '直播中';
 						}
 					}
-					array_multisort(array_column($newcourseArr,'sort'),SORT_ASC,$newcourseArr); 
+					array_multisort(array_column($newcourseArr,'sorts'),SORT_ASC,$newcourseArr); 
 				}
 				
 			
