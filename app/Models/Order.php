@@ -190,15 +190,22 @@ class Order extends Model {
             if(!isset($arr['type']) || empty($arr['type'] || !in_array($arr['type'],[1,2,3]))){
                 return ['code' => 201 , 'msg' => '机型不匹配'];
             }
-            $nature = isset($arr['nature'])?$arr['nature']:0;
+           // $nature = isset($arr['nature'])?$arr['nature']:0;
             //判断用户网校，根据网校查询课程信息
-           if($nature == 1){
+          // if($nature == 1){
                //授权课程
-               $course = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
-           }else{
+               //$course = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
+          // }else{
                 //自增课程
-               $course = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1])->first();
-           }
+              //$course = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1])->first();
+          // }
+            $course = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1])->first();
+            if(empty($course)){
+                $course = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
+                $nature = 1;
+            }else{
+                $nature = 0;
+            }
             if(!$course){
                 return ['code' => 204 , 'msg' => '此课程选择无效'];
             }
@@ -242,6 +249,7 @@ class Order extends Model {
             $data['pay_status'] = 4;
             $data['pay_type'] = 0;
             $data['status'] = 0;
+            $data['nature'] = $nature;
             $data['oa_status'] = 0;              //OA状态
             $data['class_id'] = $arr['class_id'];
             $data['school_id'] = $student['school_id'];
