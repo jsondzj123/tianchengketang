@@ -50,8 +50,10 @@ class Order extends Model {
                 if(isset($data['status']) && $data['status'] != -1){
                     $query->where('ld_order.status',$data['status']);
                 }
-                if(isset($data['order_number'])&& !empty($data['order_number'])){
-                    $query->where('ld_order.order_number',$data['order_number']);
+                if(isset($data['order_number']) && !empty($data['order_number'] != '')){
+                    $query->where('ld_order.order_number','like','%'.$data['order_number'].'%')
+                        ->orwhere('ld_student.phone','like',$data['order_number'])
+                        ->orwhere('ld_student.real_name','like',$data['real_name']);
                 }
             })
             ->whereBetween('ld_order.create_at', [$state_time, $end_time])
@@ -65,8 +67,10 @@ class Order extends Model {
                 if(isset($data['status'])&& $data['status'] != -1){
                     $query->where('ld_order.status',$data['status']);
                 }
-                if(isset($data['order_number'])&& !empty($data['order_number'])){
-                    $query->where('ld_order.order_number',$data['order_number']);
+                if(isset($data['order_number']) && !empty($data['order_number'] != '')){
+                    $query->where('ld_order.order_number','like','%'.$data['order_number'].'%')
+                        ->orwhere('ld_student.phone','like',$data['order_number'])
+                        ->orwhere('ld_student.real_name','like',$data['real_name']);
                 }
             })
             ->whereBetween('ld_order.create_at', [$state_time, $end_time])
