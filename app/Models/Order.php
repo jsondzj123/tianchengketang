@@ -251,7 +251,7 @@ class Order extends Model {
             $data['status'] = 0;
             $data['nature'] = $nature;
             $data['oa_status'] = 0;              //OA状态
-            $data['class_id'] = $arr['class_id'];
+            $data['class_id'] = $course['id'];
             $data['school_id'] = $student['school_id'];
             $add = self::insertGetId($data);
             if($add){
