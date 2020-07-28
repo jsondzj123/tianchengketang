@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Redis;
 use App\Models\AdminLog;
 use App\Tools\MTCloud;
+use Illuminate\Support\Facades\DB;
 //教学模块Model
 class Teach extends Model {
 
