@@ -277,7 +277,6 @@ class UserController extends Controller {
             ->where('validity_time','>',date('Y-m-d H:i:s'))
             ->whereIn('pay_status',[3,4])
             ->get()->toArray();
-        print_r($order);die;
         $courses = [];
         if(!empty($order)){
             foreach ($order as $k=>$v){
