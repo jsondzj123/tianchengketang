@@ -10,6 +10,7 @@ use App\Models\Lesson;
 use App\Models\LessonLive;
 use App\Models\LiveChild;
 use App\Models\CourseLiveClassChild;
+use App\Models\CourseLiveResource;
 use App\Models\Video;
 
 class LiveChildController extends Controller {
@@ -25,16 +26,13 @@ class LiveChildController extends Controller {
         if ($validator->fails()) {
             return $this->response($validator->errors()->first(), 202);
         }
-        $lives = Lesson::join("ld_course_live_resource","ld_course.id","=","ld_course_live_resource.course_id")
-        ->join("ld_course_livecast_resource","ld_course_live_resource.resource_id","=","ld_course_livecast_resource.id")
-        ->join("ld_course_shift_no","ld_course_livecast_resource.id","=","ld_course_shift_no.resource_id")
-        ->select(['ld_course_shift_no.id as shift_no_id'])
-        ->where(["ld_course.status"=>1,"ld_course.is_del"=>0,'ld_course.id'=>$request->input('lesson_id')])->get();
+
+        $courseArr = CourseLiveResource::select('shift_id as shift_no_id')->where(['course_id'=>$request->input('lesson_id'),'is_del'=>0])->get();
         //获取班号
         //获取班号下所有课次'
         $childs = [];
-        if(!empty($lives) && count($lives) > 0){
-            foreach ($lives as $key => $value) {
+        if(!empty($courseArr) && count($courseArr) > 0){
+            foreach ($courseArr as $key => $value) {
                 //直播中
                 $live = LiveChild::join("ld_course_live_childs","ld_course_class_number.id","=","ld_course_live_childs.class_id")
                 ->join("ld_course_shift_no","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
