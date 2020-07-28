@@ -595,7 +595,7 @@ class CourseController extends Controller {
                         //课次关联讲师  时间戳转换   查询所有资料
                         foreach ($classci as $ks=>&$vs){
                             //开课时间戳 start_at 结束时间戳转化 end_at
-                            $ymd = date('Y-m-s',$vs['start_at']);//年月日
+                            $ymd = date('Y-m-d',$vs['start_at']);//年月日
                             $start = date('H:i',$vs['start_at']);//开始时分
                             $end = date('H:i',$vs['end_at']);//结束时分
                             $weekarray = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
