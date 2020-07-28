@@ -281,7 +281,7 @@ class UserController extends Controller {
         if(!empty($order)){
             foreach ($order as $k=>$v){
                 if($v['nature'] == 1){
-                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    $course = CourseSchool::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first()->toArray();
                     $course['nature'] = 1;
                     //查讲师
                     $teacherlist = Couresteacher::where(['course_id'=>$course['course_id'],'is_del'=>0])->get();
