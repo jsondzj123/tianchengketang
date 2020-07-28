@@ -57,59 +57,61 @@ class LessonChildController extends Controller {
 
         //进行缓存
 
-        foreach ($chapters as $k => &$v) {
-            //获取用户使用课程时长
-            foreach($v['childs'] as $kk => &$vv){
-                if(isset(self::$accept_data['user_token']) && !empty(self::$accept_data['user_token'])){
-                    $course_id = $vv['course_id'];
-                    //获取缓存  判断是否存在
-                    if(Redis::get('VisitorList')){
-                        //存在
-                        $data  = Redis::get('VisitorList');
-                    }else{
-                        //不存在
-                        $MTCloud = new MTCloud();
-                        $VisitorList =  $MTCloud->coursePlaybackVisitorList($course_id,1,50);
-                        Redis::set('VisitorList', json_encode($VisitorList));
-                        Redis::expire('VisitorList',3600);
-                        $data  = Redis::get('VisitorList');
-                    }
-                    $res = json_decode($data,1);
-                    if(!empty($res['data'])){
-                        $vv['use_duration']  = $res['data'];
-                    }else{
-                        $vv['use_duration']  = array();
-                    }
-                }else{
-                    $vv['use_duration']  = array();
-                }
-            }
-        }
-        foreach($chapters as $k => &$v){
-            foreach($v['childs'] as $kk => &$vv){
-                if(count($vv['use_duration']) > 0){
-                    foreach($vv['use_duration'] as $kkk => $vvv){
-                        if($vvv['uid'] == $uid){
-                            $vv['use_duration'] = $vvv['duration'];
-                        }else{
-                            if(is_array($vv['use_duration'])){
-                                $vv['use_duration'] = 0;
-                            }
-                        }
-                    }
-                }else{
-                    $vv['use_duration'] = 0;
-                }
-            }
-        }
+        // foreach ($chapters as $k => &$v) {
+        //     //获取用户使用课程时长
+        //     foreach($v['childs'] as $kk => &$vv){
+        //         if(isset(self::$accept_data['user_token']) && !empty(self::$accept_data['user_token'])){
+        //             $course_id = $vv['course_id'];
+        //             //获取缓存  判断是否存在
+        //             if(Redis::get('VisitorList')){
+        //                 //存在
+        //                 $data  = Redis::get('VisitorList');
+        //             }else{
+        //                 //不存在
+        //                 $MTCloud = new MTCloud();
+        //                 $VisitorList =  $MTCloud->coursePlaybackVisitorList($course_id,1,50);
+        //                 Redis::set('VisitorList', json_encode($VisitorList));
+        //                 Redis::expire('VisitorList',600);
+        //                 $data  = Redis::get('VisitorList');
+        //             }
+        //             // $MTCloud = new MTCloud();
+        //             // $res  =  $MTCloud->coursePlaybackVisitorList($course_id,1,50);
+        //             $res = json_decode($data,1);
+        //             if(!empty($res['data'])){
+        //                 $vv['use_duration']  = $res['data'];
+        //             }else{
+        //                 $vv['use_duration']  = array();
+        //             }
+        //         }else{
+        //             $vv['use_duration']  = array();
+        //         }
+        //     }
+        // }
 
+        // foreach($chapters as $k => &$v){
+        //     foreach($v['childs'] as $kk => &$vv){
+        //         if(count($vv['use_duration']) > 0){
+        //             foreach($vv['use_duration'] as $kkk => $vvv){
+        //                 if($vvv['uid'] == $uid){
+        //                     $vv['use_duration'] = $vvv['duration'];
+        //                 }else{
+        //                     if(is_array($vv['use_duration'])){
+        //                         $vv['use_duration'] = 0;
+        //                     }
+        //                 }
+        //             }
+        //         }else{
+        //             $vv['use_duration'] = 0;
+        //         }
+        //     }
+        // }
         foreach($chapters as $k => &$v){
                 foreach($v['childs'] as $k1 => &$vv){
-                    if($vv['use_duration'] == 0){
-                        $vv['use_duration'] = "未学习";
-                    }else{
-                        $vv['use_duration'] =  "已学习".  sprintf("%01.2f", $vv['use_duration']/$vv['mt_duration']*100).'%';;
-                    }
+                    //if($vv['use_duration'] == 0){
+                        $vv['use_duration'] = "开始学习";
+                    // }else{
+                    //     $vv['use_duration'] =  "已学习".  sprintf("%01.2f", $vv['use_duration']/$vv['mt_duration']*100).'%';;
+                    // }
                     $seconds = $vv['mt_duration'];
                     $hours = intval($seconds/3600);
                     $vv['mt_duration'] = $hours.":".gmdate('i:s', $seconds);

@@ -218,7 +218,7 @@ class CourseSchool extends Model {
                         $InsertTeacherRef[$key]['from_school_id'] =$school_id;
                         $InsertTeacherRef[$key]['to_school_id'] =$body['school_id'];
                         $InsertTeacherRef[$key]['teacher_id'] =$id;
-                        $InsertTeacherRef[$key]['is_public'] =0;
+                        $InsertTeacherRef[$key]['is_public'] =1;
                         $InsertTeacherRef[$key]['admin_id'] = $user_id;
                         $InsertTeacherRef[$key]['create_at'] = date('Y-m-d H:i:s');
                     }
@@ -228,7 +228,6 @@ class CourseSchool extends Model {
                                     $query->where('school_id',$school_id);
                                     $query->where('is_del',0);
                             })->select('parent_id','child_id')->get()->toArray(); //要授权的学科信息
-
                 $subjectArr = CourseRefSubject::where(['to_school_id'=>$body['school_id'],'from_school_id'=>$school_id,'is_del'=>0])->select('parent_id','child_id')->get();//已经授权的学科信息
                 if(!empty($subjectArr)){
                      foreach($natureSubject as $k=>$v){
@@ -240,6 +239,7 @@ class CourseSchool extends Model {
                     }
                 }
                 foreach($natureSubject as $key=>&$vs){
+                    $vs['is_public'] = 1;
                     $vs['from_school_id'] =$school_id;
                     $vs['to_school_id'] =$body['school_id'];
                     $vs['admin_id'] =$user_id;
@@ -259,7 +259,7 @@ class CourseSchool extends Model {
                         DB::rollback();
                         return ['code'=>203,'msg'=>'公开课授权未成功'];
                     }
-                    $subjectRes = CourseRefSubject::insert($arr);
+                    $subjectRes = CourseRefSubject::insert($natureSubject);
                     if(!$subjectRes){
                         DB::rollback();
                         return ['code'=>203,'msg'=>'公开课授权未成功！'];
@@ -332,6 +332,7 @@ class CourseSchool extends Model {
                 }
 
                 foreach($courseSubjectArr as $key=>$v){
+                        $InsertSubjectRef[$key]['is_public'] = 0;
                         $InsertSubjectRef[$key]['parent_id'] = $v['parent_id'];
                         $InsertSubjectRef[$key]['child_id'] = $v['child_id'];
                         $InsertSubjectRef[$key]['from_school_id'] = $school_id;

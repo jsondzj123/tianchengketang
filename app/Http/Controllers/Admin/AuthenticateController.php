@@ -85,7 +85,6 @@ class AuthenticateController extends Controller {
         if($teacher['type'] == 2 ){
             $user['teacher_type'] =2;
         }
-       
         if($user['role_id']>0){
 
              $admin_user =  $AdminUser->getAdminUserLoginAuth($user['role_id']);  //获取后台用户菜单栏（lys 5.5）

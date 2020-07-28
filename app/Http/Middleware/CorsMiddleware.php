@@ -58,7 +58,8 @@ class CorsMiddleware
             'http://www.glteach.com',
             'http://mengshu.zhima989.com',
             'http://frontdeskresources.longde999.cn/',
-            'http://www.wanglongzaixian.com'
+            'http://www.wanglongzaixian.com',
+            'http://www.yilong119.com'
         
         ];
         $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
