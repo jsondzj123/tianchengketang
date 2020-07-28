@@ -644,6 +644,7 @@ class CourseController extends Controller {
         $MTCloud = new MTCloud();
         if($this->data['livestatus'] == 1 || $this->data['livestatus'] == 2){
             $res = $MTCloud->courseAccess($datas['course_id'],$datas['uid'],$datas['nickname'],$datas['role']);
+            print_r($res);die;
             if(!array_key_exists('code', $res) && !$res["code"] == 0){
                 return response()->json(['code' => 201 , 'msg' => '暂无直播，请重试']);
             }
