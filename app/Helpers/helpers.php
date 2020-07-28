@@ -237,22 +237,4 @@ function unique($str){
     return $data;//返回值，返回到函数外部  
 }  
 
-/*
- * @param   description     手机号合法验证方法
- * @param   $phone          手机号
- * @param   author          duzhijian
- * @param   ctime           2020-07-28  10:22
- */
-function checkPhone($phone){
-    //判断手机号是否为空
-    if(!$phone || empty($phone)){
-        return ['code' => 201 , 'msg' => '请输入手机号'];
-    } 
-    
-    //验证手机号是否合法
-    if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}|^19[\d]{9}$#', $phone)){
-        return ['code' => 202 , 'msg' => '手机号不合法'];
-    }
-}
-
 ?>
