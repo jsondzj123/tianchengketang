@@ -296,26 +296,27 @@ class UserController extends Controller {
                         }else{
                             $course['teachername']='';
                         }
-                    }else{
-                        unset($order[$k]);
+                        $courses[] = $course;
                     }
-                }else{
-                    $course = Coures::where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
-                    $course['nature'] = 0;
-                    //查讲师
-                    $teacherlist = Couresteacher::where(['course_id'=>$v['class_id'],'is_del'=>0])->get();
-                    $string=[];
-                    if(!empty($teacherlist)){
-                        foreach ($teacherlist as $ks=>$vs){
-                            $teacher = Teacher::where(['id'=>$vs['teacher_id'],'is_del'=>0,'type'=>2])->first();
-                            $string[] = $teacher['real_name'];
+                }else {
+                    $course = Coures::where(['id' => $v['class_id'], 'is_del' => 0, 'status' => 1])->first();
+                    if (!empty($course)) {
+                        $course['nature'] = 0;
+                        //查讲师
+                        $teacherlist = Couresteacher::where(['course_id' => $v['class_id'], 'is_del' => 0])->get();
+                        $string = [];
+                        if (!empty($teacherlist)) {
+                            foreach ($teacherlist as $ks => $vs) {
+                                $teacher = Teacher::where(['id' => $vs['teacher_id'], 'is_del' => 0, 'type' => 2])->first();
+                                $string[] = $teacher['real_name'];
+                            }
+                            $course['teachername'] = implode(',', $string);
+                        } else {
+                            $course['teachername'] = '';
                         }
-                        $course['teachername'] = implode(',',$string);
-                    }else{
-                        $course['teachername'] = '';
+                        $courses[] = $course;
                     }
                 }
-                $courses[] = $course;
             }
         }
 
