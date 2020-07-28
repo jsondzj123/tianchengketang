@@ -658,6 +658,7 @@ class CourseController extends Controller {
             return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res['data']['playbackUrl']]);
         }
     }
+
     /*
          * @param  课程资料表   录播  直播班号 课程小节
          * @param  author  苏振文
