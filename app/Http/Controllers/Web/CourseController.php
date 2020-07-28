@@ -599,7 +599,7 @@ class CourseController extends Controller {
                             $start = date('H:i',$vs['start_at']);//开始时分
                             $end = date('H:i',$vs['end_at']);//结束时分
                             $weekarray = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-                            $xingqi = date("w", 1593414566);
+                            $xingqi = date("w", $vs['start_at']);
                             $week = $weekarray[$xingqi];
                             $vs['times'] = $ymd.'&nbsp;&nbsp;'.$week.'&nbsp;&nbsp;'.$start.'-'.$end;
                             //判断课程直播状态  1未直播2直播中3回访
