@@ -611,6 +611,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseList', 'CourseSchoolController@courseList');  //授权课程列表
         $router->post('courseStore', 'CourseSchoolController@store');  //批量添加
         $router->post('courseCancel', 'CourseSchoolController@courseCancel');  //批量取消授权
+        $router->post('authorUpdate', 'CourseSchoolController@authorUpdate');  //授权更新
         $router->post('getNatureSubjectList', 'CourseSchoolController@getNatureSubjectOneByid');  //授权课程列表大类
         $router->post('getNatureSubjectByid', 'CourseSchoolController@getNatureSubjectTwoByid');  //授权课程列表小类
     });
