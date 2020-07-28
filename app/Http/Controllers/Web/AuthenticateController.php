@@ -36,7 +36,7 @@ class AuthenticateController extends Controller {
             //判断手机号是否为空
             if(!isset($body['phone']) || empty($body['phone'])){
                 return response()->json(['code' => 201 , 'msg' => '请输入手机号']);
-            } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}$#', $body['phone'])) {
+            } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}|^19[\d]{9}$#', $body['phone'])) {
                 return response()->json(['code' => 202 , 'msg' => '手机号不合法']);
             }
 
@@ -149,7 +149,7 @@ class AuthenticateController extends Controller {
             //判断手机号是否为空
             if(!isset($body['phone']) || empty($body['phone'])){
                 return response()->json(['code' => 201 , 'msg' => '请输入手机号']);
-            } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}$#', $body['phone'])) {
+            } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}|^19[\d]{9}$#', $body['phone'])) {
                 return response()->json(['code' => 202 , 'msg' => '手机号不合法']);
             }
 
@@ -277,7 +277,7 @@ class AuthenticateController extends Controller {
             //判断手机号是否为空
             if(!isset($body['phone']) || empty($body['phone'])){
                 return response()->json(['code' => 201 , 'msg' => '请输入手机号']);
-            } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}$#', $body['phone'])) {
+            } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}|^19[\d]{9}$#', $body['phone'])) {
                 return response()->json(['code' => 202 , 'msg' => '手机号不合法']);
             }
 
@@ -359,7 +359,7 @@ class AuthenticateController extends Controller {
             //判断手机号是否为空
             if(!isset($body['phone']) || empty($body['phone'])){
                 return response()->json(['code' => 201 , 'msg' => '请输入手机号']);
-            } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}$#', $body['phone'])) {
+            } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}|^19[\d]{9}$#', $body['phone'])) {
                 return response()->json(['code' => 202 , 'msg' => '手机号不合法']);
             }
             
@@ -444,7 +444,7 @@ class AuthenticateController extends Controller {
         //判断手机号是否为空
         if(!isset($body['phone']) || empty($body['phone'])){
             return response()->json(['code' => 201 , 'msg' => '请输入手机号']);
-        } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}$#', $body['phone'])) {
+        } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}|^19[\d]{9}$#', $body['phone'])) {
             return response()->json(['code' => 202 , 'msg' => '手机号不合法']);
         }
         
