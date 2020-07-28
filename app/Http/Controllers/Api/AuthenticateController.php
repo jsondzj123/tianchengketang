@@ -26,6 +26,7 @@ class AuthenticateController extends Controller {
      * return string
      */
     public function doUserRegister() {
+        return response()->json(['code' => 202 , 'msg' => '禁止注册']);
         try {
             $body = self::$accept_data;
             //判断传过来的数组数据是否为空
@@ -76,13 +77,13 @@ class AuthenticateController extends Controller {
                     return response()->json(['code' => 205 , 'msg' => '此手机号已被注册']);
                 }
             }
-            
+
             //生成随机唯一的token
             $token = self::setAppLoginToken($body['phone']);
-            
+
             //正常用户昵称
             $nickname = randstr(8);
-            
+
             //获取请求的平台端
             $platform = verifyPlat() ? verifyPlat() : 'pc';
 
@@ -108,7 +109,7 @@ class AuthenticateController extends Controller {
                 //redis存储信息
                 Redis::hMset("user:regtoken:".$platform.":".$token , $user_info);
                 Redis::hMset("user:regtoken:".$platform.":".$body['phone'] , $user_info);
-                
+
                 //事务提交
                 DB::commit();
                 return response()->json(['code' => 200 , 'msg' => '注册成功' , 'data' => ['user_info' => $user_info]]);
@@ -121,7 +122,7 @@ class AuthenticateController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
-    
+
     /*
      * @param  description   登录方法
      * @param  参数说明       body包含以下参数[
@@ -167,17 +168,17 @@ class AuthenticateController extends Controller {
                     return response()->json(['code' => 204 , 'msg' => '此手机号未注册']);
                 }
             }
-            
+
             //生成随机唯一的token
             $token = self::setAppLoginToken($body['phone']);
-            
+
             //获取请求的平台端
             $platform = verifyPlat() ? verifyPlat() : 'pc';
-            
+
             //hash中的token的key值
             $token_key   = "user:regtoken:".$platform.":".$token;
             $token_phone = "user:regtoken:".$platform.":".$body['phone'];
-            
+
             //开启事务
             DB::beginTransaction();
 
@@ -186,7 +187,7 @@ class AuthenticateController extends Controller {
             if(!$user_login || empty($user_login)){
                 return response()->json(['code' => 204 , 'msg' => '此手机号未注册']);
             }
-            
+
             //验证密码是否合法
             if(password_verify($body['password']  , $user_login->password) === false){
                 return response()->json(['code' => 203 , 'msg' => '密码错误']);
@@ -200,14 +201,14 @@ class AuthenticateController extends Controller {
             //用户详细信息赋值
             $user_info = [
                 'user_id'    => $user_login->id ,
-                'user_token' => $token , 
+                'user_token' => $token ,
                 'user_type'  => 1 ,
-                'head_icon'  => $user_login->head_icon , 
-                'real_name'  => $user_login->real_name , 
-                'phone'      => $user_login->phone , 
-                'nickname'   => $user_login->nickname , 
-                'sign'       => $user_login->sign , 
-                'papers_type'=> $user_login->papers_type , 
+                'head_icon'  => $user_login->head_icon ,
+                'real_name'  => $user_login->real_name ,
+                'phone'      => $user_login->phone ,
+                'nickname'   => $user_login->nickname ,
+                'sign'       => $user_login->sign ,
+                'papers_type'=> $user_login->papers_type ,
                 'papers_name'=> $user_login->papers_type > 0 ? parent::getPapersNameByType($user_login->papers_type) : '',
                 'papers_num' => $user_login->papers_num ,
                 'balance'    => $user_login->balance > 0 ? floatval($user_login->balance) : 0 ,
@@ -219,7 +220,7 @@ class AuthenticateController extends Controller {
             if($rs && !empty($rs)){
                 //事务提交
                 DB::commit();
-                
+
                 //判断redis中值是否存在
                 $hash_len = Redis::hLen($token_phone);
                 if($hash_len && $hash_len > 0){
@@ -228,7 +229,7 @@ class AuthenticateController extends Controller {
                     Redis::del("user:regtoken:".$platform.":".$key_info[0]);
                     Redis::del($token_phone);
                 }
-                
+
                 //redis存储信息
                 Redis::hMset($token_key , $user_info);
                 Redis::hMset($token_phone , $user_info);
@@ -241,7 +242,7 @@ class AuthenticateController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
-    
+
     /*
      * @param  description   游客登录方法
      * @param  参数说明       body包含以下参数[
@@ -263,54 +264,54 @@ class AuthenticateController extends Controller {
             if(!isset($body['device']) || empty($body['device'])){
                 return response()->json(['code' => 201 , 'msg' => '设备唯一标识为空']);
             }
-            
+
             //生成随机唯一的token
             $token = self::setAppLoginToken($body['device']);
-            
+
             //获取请求的平台端
             $platform = verifyPlat() ? verifyPlat() : 'pc';
-            
+
             //hash中的token的key值
             $token_key    = "user:regtoken:".$platform.":".$token;
             $token_device = "user:regtoken:".$platform.":".$body['device'];
-            
+
             //通过设备唯一标识判断是否注册过
             $student_info = User::where("device" , $body['device'])->first();
-            
+
             //开启事务
             DB::beginTransaction();
-            
+
             //判断是否是存在用户信息
             if($student_info && !empty($student_info)){
                 //判断此手机号是否被禁用了
                 if($student_info->is_forbid == 2){
                     return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
                 }
-                
+
                 //用户详细信息赋值
                 $user_info = [
                     'user_id'    => $student_info->id ,
-                    'user_token' => $token , 
+                    'user_token' => $token ,
                     'user_type'  => 2 ,
-                    'head_icon'  => $student_info->head_icon , 
-                    'real_name'  => $student_info->real_name , 
-                    'phone'      => $student_info->phone , 
-                    'nickname'   => $student_info->nickname , 
-                    'sign'       => $student_info->sign , 
-                    'papers_type'=> $student_info->papers_type , 
+                    'head_icon'  => $student_info->head_icon ,
+                    'real_name'  => $student_info->real_name ,
+                    'phone'      => $student_info->phone ,
+                    'nickname'   => $student_info->nickname ,
+                    'sign'       => $student_info->sign ,
+                    'papers_type'=> $student_info->papers_type ,
                     'papers_name'=> $student_info->papers_type > 0 ? parent::getPapersNameByType($student_info->papers_type) : '',
                     'papers_num' => $student_info->papers_num ,
                     'balance'    => $student_info->balance > 0 ? floatval($student_info->balance) : 0 ,
                     'school_id'  => $student_info->school_id ,
                     'device'     => isset($body['device']) && !empty($body['device']) ? $body['device'] : ''
                 ];
-                
+
                 //更新token
                 $rs = User::where("device" , $body['device'])->update(["update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
                 if($rs && !empty($rs)){
                     //事务提交
                     DB::commit();
-                    
+
                     //判断redis中值是否存在
                     $hash_len = Redis::hLen($token_device);
                     if($hash_len && $hash_len > 0){
@@ -332,7 +333,7 @@ class AuthenticateController extends Controller {
             } else {
                 //游客昵称
                 $nickname = '游客'.randstr(8);
-                
+
                 //封装成数组
                 $user_data = [
                     'device'    =>    isset($body['device']) && !empty($body['device']) ? $body['device'] : '' ,
@@ -348,14 +349,14 @@ class AuthenticateController extends Controller {
                     //用户详细信息赋值
                     $user_info = [
                         'user_id'    => $user_id ,
-                        'user_token' => $token , 
+                        'user_token' => $token ,
                         'user_type'  => 2 ,
-                        'head_icon'  => '' , 
-                        'real_name'  => '' , 
-                        'phone'      => '' , 
-                        'nickname'   => $nickname , 
-                        'sign'       => '' , 
-                        'papers_type'=> '' , 
+                        'head_icon'  => '' ,
+                        'real_name'  => '' ,
+                        'phone'      => '' ,
+                        'nickname'   => $nickname ,
+                        'sign'       => '' ,
+                        'papers_type'=> '' ,
                         'papers_name'=> '' ,
                         'papers_num' => '' ,
                         'balance'    => 0  ,
@@ -365,7 +366,7 @@ class AuthenticateController extends Controller {
 
                     //事务提交
                     DB::commit();
-                    
+
                     //redis存储信息
                     Redis::hMset($token_key , $user_info);
                     Redis::hMset($token_device , $user_info);
@@ -380,7 +381,7 @@ class AuthenticateController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
-    
+
     /*
      * @param  description   找回密码方法
      * @param  参数说明       body包含以下参数[
@@ -411,7 +412,7 @@ class AuthenticateController extends Controller {
             if(!isset($body['password']) || empty($body['password'])){
                 return response()->json(['code' => 201 , 'msg' => '请输入新密码']);
             }
-            
+
             //判断验证码是否为空
             if(!isset($body['verifycode']) || empty($body['verifycode'])){
                 return response()->json(['code' => 201 , 'msg' => '请输入验证码']);
@@ -427,7 +428,7 @@ class AuthenticateController extends Controller {
             if($verify_code != $body['verifycode']){
                 return ['code' => 202 , 'msg' => '验证码错误'];
             }
-            
+
             //key赋值
             $key = 'user:login:'.$body['phone'];
 
@@ -443,12 +444,12 @@ class AuthenticateController extends Controller {
                     return response()->json(['code' => 204 , 'msg' => '此手机号未注册']);
                 }
             }
-            
+
             //判断此手机号是否被禁用了
             if($student_info->is_forbid == 2){
                 return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
             }
-            
+
             //开启事务
             DB::beginTransaction();
 
@@ -467,7 +468,7 @@ class AuthenticateController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
-    
+
     /*
      * @param  description   获取验证码方法
      * @param  参数说明       body包含以下参数[
@@ -483,19 +484,19 @@ class AuthenticateController extends Controller {
         if(!$body || !is_array($body)){
             return response()->json(['code' => 202 , 'msg' => '传递数据不合法']);
         }
-        
+
         //判断验证码类型是否合法
         if(!isset($body['verify_type']) || !in_array($body['verify_type'] , [1,2])){
             return response()->json(['code' => 202 , 'msg' => '验证码类型不合法']);
         }
-        
+
         //判断手机号是否为空
         if(!isset($body['phone']) || empty($body['phone'])){
             return response()->json(['code' => 201 , 'msg' => '请输入手机号']);
         } else if(!preg_match('#^13[\d]{9}$|^14[\d]{9}$|^15[\d]{9}$|^17[\d]{9}$|^18[\d]{9}|^16[\d]{9}$#', $body['phone'])) {
             return response()->json(['code' => 202 , 'msg' => '手机号不合法']);
         }
-        
+
         //判断是注册还是忘记密码
         if($body['verify_type'] == 1){
             //设置key值
@@ -504,7 +505,7 @@ class AuthenticateController extends Controller {
             $time= 300;
             //短信模板code码
             $template_code = 'SMS_180053367';
-            
+
             //判断用户手机号是否注册过
             $student_info = User::where("phone" , $body['phone'])->first();
             if($student_info && !empty($student_info)){
@@ -517,30 +518,30 @@ class AuthenticateController extends Controller {
             $time= 1800;
             //短信模板code码
             $template_code = 'SMS_190727799';
-            
+
             //判断用户手机号是否注册过
             $student_info = User::where("phone" , $body['phone'])->first();
             if(!$student_info || empty($student_info)){
                 return response()->json(['code' => 204 , 'msg' => '此手机号未注册']);
             }
-            
+
             //判断此手机号是否被禁用了
             if($student_info->is_forbid == 2){
                 return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
             }
         }
-        
+
         //判断验证码是否过期
         $code = Redis::get($key);
         if(!$code || empty($code)){
             //随机生成验证码数字,默认为6位数字
             $code = rand(100000,999999);
         }
-        
+
         //发送验证信息流
         $data = ['mobile' => $body['phone'] , 'TemplateParam' => ['code' => $code] , 'template_code' => $template_code];
         $send_data = SmsFacade::send($data);
-        
+
         //判断发送验证码是否成功
         if($send_data->Code == 'OK'){
             //存储学员的id值
@@ -550,7 +551,7 @@ class AuthenticateController extends Controller {
             return response()->json(['code' => 203 , 'msg' => '发送短信失败' , 'data' => $send_data->Message]);
         }
     }
-    
+
     //删除redis指定key的所有键值信息
     public function doDelRedisKeys(){
         //获取所有的指定的前缀的信息列表
@@ -558,7 +559,7 @@ class AuthenticateController extends Controller {
         Redis::del($key_list);
         return response()->json(['code' => 200 , 'msg' => '删除成功']);
     }
-    
+
     //删除redis指定key的所有键值信息
     public function getRedisKeys(){
         //获取所有的指定的前缀的信息列表
