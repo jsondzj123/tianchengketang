@@ -266,7 +266,7 @@ class LessonController extends Controller {
         if($redis_token && $redis_token > 0) {
              //解析json获取用户详情信息
                 $json_info = Redis::hGetAll($token_key);
-                $lesson = Lesson::select("*","pricing as price","sale_price as favorable_price","expiry as ttl","introduce as introduction","describe as description")->where(["school_id",$json_info['school_id'],'is_del'=>0])->find($request->input('id'));
+                $lesson = Lesson::select("*","pricing as price","sale_price as favorable_price","expiry as ttl","introduce as introduction","describe as description")->where(["school_id"=>$json_info['school_id'],'is_del'=>0])->find($request->input('id'));
                 if(empty($lesson)){
                     //查询授权课程id
                     $lesson = CourseSchool::select("*","pricing as price","sale_price as favorable_price","expiry as ttl","introduce as introduction","describe as description")->where(["to_school_id"=>$json_info['school_id'],'is_del'=>0])->where("course_id",$request->input('id'))->first();
