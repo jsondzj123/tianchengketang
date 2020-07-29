@@ -123,7 +123,7 @@ class CourseSchoolController extends Controller {
         if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-        $result = CourseSchool::authorUpdate();
+        $result = CourseSchool::authorUpdate(self::$accept_data);
         return response()->json($result);
     }
 
