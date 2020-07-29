@@ -198,6 +198,58 @@ class StudentController extends Controller {
     }
     
     /*
+     * @param  descriptsion    获取学员转校列表
+     * @param  参数说明         body包含以下参数[
+     *     search    姓名/手机号
+     *     page      当前页数
+     *     pagesize  每页显示条数
+     * ]
+     * @param  author          dzj
+     * @param  ctime           2020-07-29
+     * return  array
+     */
+    public function getStudentTransferSchoolList(){
+        //获取提交的参数
+        try{
+            //获取全部学员列表
+            $data = Student::getStudentTransferSchoolList(self::$accept_data);
+            if($data['code'] == 200){
+                return response()->json(['code' => 200 , 'msg' => '获取列表成功' , 'data' => $data['data']]);
+            } else {
+                return response()->json(['code' => $data['code'] , 'msg' => $data['msg']]);
+            }
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    
+    /*
+     * @param  descriptsion    学员转校功能
+     * @param  参数说明         body包含以下参数[
+     *     student_id   学员id
+     *     school_id    分校id
+     * ]
+     * @param  author          dzj
+     * @param  ctime           2020-07-29
+     * return  array
+     */
+    public function doTransferSchool(){
+        //获取提交的参数
+        try{
+            //学员转校功能
+            $data = Student::doTransferSchool(self::$accept_data);
+            if($data['code'] == 200){
+                return response()->json(['code' => 200 , 'msg' => '转校成功']);
+            } else {
+                return response()->json(['code' => $data['code'] , 'msg' => $data['msg']]);
+            }
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    
+    
+    /*
      * @param  description   学员公共参数列表
      * @param  author        dzj
      * @param  ctime         2020-04-30
