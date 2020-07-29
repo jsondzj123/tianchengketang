@@ -275,7 +275,8 @@ class LessonController extends Controller {
                     }
                     //is_collection   是否收藏
                     $is_collection = Collection::where(['student_id'=>$json_info['user_id'],'is_del'=>0,'lesson_id'=>$lesson['id']])->first();
-                    if($is_collection){
+                    $is_collection1 = Collection::where(['student_id'=>$json_info['user_id'],'is_del'=>0,'lesson_id'=>$lesson['course_id']])->first();
+                    if($is_collection || $is_collection1){
                         $lesson['is_collection'] = 1;
                     }else{
                         $lesson['is_collection'] = 0;
@@ -287,6 +288,9 @@ class LessonController extends Controller {
                     }else{
                         $lesson['is_buy'] = 0;
                     }
+                    //学习人数   基数+订单数
+                    $ordernum = Order::where(['class_id' => $lesson['id'], 'status' => 2, 'oa_status' => 1,'nature'=>1])->count();
+                    $lesson['buy_num'] = $lesson['buy_num'] + $ordernum;
                     //课程资料
                     //获取该课程下所有的资料   直播班号 课次
                     $lesson['url'] = CourseLivesResource::join("ld_course_livecast_resource","ld_course_live_resource.resource_id","=","ld_course_livecast_resource.id")
@@ -364,6 +368,9 @@ class LessonController extends Controller {
                     }else{
                         $lesson['is_buy'] = 0;
                     }
+                    //学习人数   基数+订单数
+                    $ordernum = Order::where(['class_id' => $lesson['id'], 'status' => 2, 'oa_status' => 1,'nature'=>1])->count();
+                    $lesson['buy_num'] = $lesson['buy_num'] + $ordernum;
                     //课程资料
                     //获取该课程下所有直播的资料   直播班号 课次
                     $lesson['url'] = CourseLivesResource::join("ld_course_livecast_resource","ld_course_live_resource.resource_id","=","ld_course_livecast_resource.id")
@@ -492,6 +499,9 @@ class LessonController extends Controller {
             $lesson['is_collection'] = 0;
             $lesson['is_buy'] = 0;
             $lesson['class_num'] = "".round($lesson['class_num'])."";
+            //学习人数   基数+订单数
+            $ordernum = Order::where(['class_id' => $lesson['class_id'], 'status' => 2, 'oa_status' => 1,'nature'=>1])->count();
+            $lesson['buy_num'] = $lesson['buy_num'] + $ordernum;
         }
         //自增课程
         Lesson::where('id', $request->input('id'))->update(['watch_num' => DB::raw('watch_num + 1'),'update_at'=>date('Y-m-d H:i:s')]);
