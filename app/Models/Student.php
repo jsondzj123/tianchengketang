@@ -292,6 +292,132 @@ class Student extends Model {
             return ['code' => 200 , 'msg' => '获取学员列表成功' , 'data' => ['student_list' => [] , 'total' => 0 , 'pagesize' => $pagesize , 'page' => $page]];
         }
     }
+    
+    
+    /*
+     * @param  descriptsion    获取学员转校列表
+     * @param  参数说明         body包含以下参数[
+     *     search    姓名/手机号
+     * ]
+     * @param  author          dzj
+     * @param  ctime           2020-07-29
+     * return  array
+     */
+    public static function getStudentTransferSchoolList($body=[]) {
+        //操作员id
+        $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        
+        //判断搜索得姓名/手机号是否为空
+        if(isset($body['search']) && !empty($body['search'])){
+            //学员列表
+            $student_list = self::where(function($query) use ($body){
+                //判断搜索内容是否为空
+                if(isset($body['search']) && !empty($body['search'])){
+                    $query->where('real_name','like','%'.$body['search'].'%')->orWhere('phone','like','%'.$body['search'].'%');
+                }
+            })->select('id as student_id','real_name','phone','create_at','enroll_status','state_status','is_forbid','school_id')->orderByDesc('create_at')->get()->toArray();
+            
+            //判断学员列表是否为空
+            if($student_list && !empty($student_list)){
+                foreach($student_list as $k=>$v){
+                    //根据学校id获取学校名称
+                    $school_name = \App\Models\School::where('id',$v['school_id'])->value('name');
+                    $student_list[$k]['school_name']  = $school_name && !empty($school_name) ? $school_name : '';
+                }
+                return ['code' => 200 , 'msg' => '获取列表成功' , 'data' => $student_list];
+            } else {
+                return ['code' => 200 , 'msg' => '获取列表成功' , 'data' => []];
+            }
+        } else {
+            return ['code' => 200 , 'msg' => '获取列表成功' , 'data' => []];
+        }
+    }
+    
+    /*
+     * @param  descriptsion    学员转校功能
+     * @param  参数说明         body包含以下参数[
+     *     student_id   学员id
+     *     school_id    分校id
+     * ]
+     * @param  author          dzj
+     * @param  ctime           2020-07-29
+     * return  array
+     */
+    public static function doTransferSchool($body=[]){
+        //判断传过来的数组数据是否为空
+        if(!$body || !is_array($body)){
+            return ['code' => 202 , 'msg' => '传递数据不合法'];
+        }
+        
+        //判断学员id是否合法
+        if(!isset($body['student_id']) || empty($body['student_id']) || $body['student_id'] <= 0){
+            return ['code' => 202 , 'msg' => '学员id不合法'];
+        }
+        
+        //判断学员的学校id是否为空
+        if(!isset($body['school_id']) || $body['school_id'] <= 0){
+            return ['code' => 201 , 'msg' => '请选择学校id'];
+        }
+        
+        //获取分校的状态和id
+        $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
+        $admin_id      = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+        
+        //判断是分校还是总校
+        if($school_status > 0 && $school_status == 1){
+            //学员id赋值
+            $student_id = $body['student_id'];
+            
+            //根据学员id获取学员详情
+            $student_info = self::where('id',$student_id)->first();
+            
+            //学校id赋值
+            $school_id  = $body['school_id'];
+            //判断此学校是否存在
+            $is_exists_school = \App\Models\School::where('id' , $school_id)->count();
+            if($is_exists_school <= 0){
+                return ['code' => 202 , 'msg' => '此分校不存在'];
+            }
+            
+            //操作时间赋值
+            $time = date('Y-m-d H:i:s');
+            
+            //组装数组信息
+            $transfer_array = [
+                'admin_id'         =>   $admin_id ,
+                'student_id'       =>   $student_id ,
+                'from_school_id'   =>   $student_info['school_id'] ,
+                'to_school_id'     =>   $school_id ,
+                'create_at'        =>   $time
+            ];
+            
+            //开启事务
+            DB::beginTransaction();
+            
+            //根据学员id更新信息
+            if(false !== self::where('id',$student_id)->update(['school_id' => $school_id , 'update_at' => $time])){
+                //添加日志操作
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $admin_id  ,
+                    'module_name'    =>  'Student' ,
+                    'route_url'      =>  'admin/student/doTransferSchool' , 
+                    'operate_method' =>  'insert' ,
+                    'content'        =>  '转校详情'.json_encode($transfer_array) ,
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                //事务提交
+                DB::commit();
+                return ['code' => 200 , 'msg' => '操作成功'];
+            } else {
+                //事务回滚
+                DB::rollBack();
+                return ['code' => 203 , 'msg' => '操作失败'];
+            }
+        } else {
+            return ['code' => 202 , 'msg' => '分校没有转校权限'];
+        }
+    }
 
     /*
      * @param  description   修改学员的方法

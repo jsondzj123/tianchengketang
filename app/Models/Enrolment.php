@@ -95,6 +95,17 @@ class Enrolment extends Model {
             return ['code' => 201 , 'msg' => '请输入付款时间'];
         }
         
+        //判断是否是自增还是授权
+        if(!isset($body['nature']) || !in_array($body['nature'],[0,1])){
+            return ['code' => 201 , 'msg' => '课程类型不合法'];
+        }
+        
+        //判断此学员是否购买过此课程
+        $count = Order::where('student_id' , $body['student_id'])->where('class_id' , $body['lession_id'])->where('nature' ,  $body['nature'])->where('status' , 2)->where('oa_status' , 1)->whereIn('pay_status' , [3,4])->where('validity_time' , '>' , date('Y-m-d H:i:s'))->count();
+        if($count && $count > 0){
+            return ['code' => 202 , 'msg' => '该课程已经开课成功，请不要重复添加'];
+        }
+        
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         
