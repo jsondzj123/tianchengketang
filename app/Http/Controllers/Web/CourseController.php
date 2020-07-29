@@ -595,11 +595,11 @@ class CourseController extends Controller {
                         //课次关联讲师  时间戳转换   查询所有资料
                         foreach ($classci as $ks=>&$vs){
                             //开课时间戳 start_at 结束时间戳转化 end_at
-                            $ymd = date('Y-m-s',$vs['start_at']);//年月日
+                            $ymd = date('Y-m-d',$vs['start_at']);//年月日
                             $start = date('H:i',$vs['start_at']);//开始时分
                             $end = date('H:i',$vs['end_at']);//结束时分
                             $weekarray = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-                            $xingqi = date("w", 1593414566);
+                            $xingqi = date("w", $vs['start_at']);
                             $week = $weekarray[$xingqi];
                             $vs['times'] = $ymd.'&nbsp;&nbsp;'.$week.'&nbsp;&nbsp;'.$start.'-'.$end;
                             //判断课程直播状态  1未直播2直播中3回访
@@ -613,6 +613,7 @@ class CourseController extends Controller {
                             //查询讲师
                             $teacher = LiveClassChildTeacher::leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_class_teacher.teacher_id')
                                 ->where(['ld_course_class_teacher.is_del'=>0,'ld_lecturer_educationa.is_del'=>0,'ld_lecturer_educationa.type'=>2,'ld_lecturer_educationa.is_forbid'=>0])
+                                ->where(['ld_course_class_teacher.class_id'=>$vs['id']])
                                 ->first();
                             if(!empty($teacher)){
                                 $vs['teacher_name'] = $teacher['real_name'];
@@ -646,7 +647,7 @@ class CourseController extends Controller {
             if(!array_key_exists('code', $res) && !$res["code"] == 0){
                 return response()->json(['code' => 201 , 'msg' => '暂无直播，请重试']);
             }
-            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res['data']['playbackUrl']]);
+            return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res['data']['liveUrl']]);
         }
         if($this->data['livestatus'] == 3){
             $res = $MTCloud->courseAccessPlayback($datas['course_id'],$datas['uid'],$datas['nickname'],$datas['role']);
@@ -656,6 +657,7 @@ class CourseController extends Controller {
             return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res['data']['playbackUrl']]);
         }
     }
+
     /*
          * @param  课程资料表   录播  直播班号 课程小节
          * @param  author  苏振文

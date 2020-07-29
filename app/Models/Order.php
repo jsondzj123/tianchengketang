@@ -50,8 +50,10 @@ class Order extends Model {
                 if(isset($data['status']) && $data['status'] != -1){
                     $query->where('ld_order.status',$data['status']);
                 }
-                if(isset($data['order_number'])&& !empty($data['order_number'])){
-                    $query->where('ld_order.order_number',$data['order_number']);
+                if(isset($data['order_number']) && !empty($data['order_number'] != '')){
+                    $query->where('ld_order.order_number','like','%'.$data['order_number'].'%')
+                        ->orwhere('ld_student.phone','like',$data['order_number'])
+                        ->orwhere('ld_student.real_name','like',$data['order_number']);
                 }
             })
             ->whereBetween('ld_order.create_at', [$state_time, $end_time])
@@ -65,8 +67,10 @@ class Order extends Model {
                 if(isset($data['status'])&& $data['status'] != -1){
                     $query->where('ld_order.status',$data['status']);
                 }
-                if(isset($data['order_number'])&& !empty($data['order_number'])){
-                    $query->where('ld_order.order_number',$data['order_number']);
+                if(isset($data['order_number']) && !empty($data['order_number'] != '')){
+                    $query->where('ld_order.order_number','like','%'.$data['order_number'].'%')
+                        ->orwhere('ld_student.phone','like',$data['order_number'])
+                        ->orwhere('ld_student.real_name','like',$data['order_number']);
                 }
             })
             ->whereBetween('ld_order.create_at', [$state_time, $end_time])
@@ -186,15 +190,22 @@ class Order extends Model {
             if(!isset($arr['type']) || empty($arr['type'] || !in_array($arr['type'],[1,2,3]))){
                 return ['code' => 201 , 'msg' => '机型不匹配'];
             }
-            $nature = isset($arr['nature'])?$arr['nature']:0;
+           // $nature = isset($arr['nature'])?$arr['nature']:0;
             //判断用户网校，根据网校查询课程信息
-           if($nature == 1){
+          // if($nature == 1){
                //授权课程
-               $course = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
-           }else{
+               //$course = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
+          // }else{
                 //自增课程
-               $course = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1])->first();
-           }
+              //$course = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1])->first();
+          // }
+            $course = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1])->first();
+            if(empty($course)){
+                $course = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['course_id'=>$arr['class_id'],'to_school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
+                $nature = 1;
+            }else{
+                $nature = 0;
+            }
             if(!$course){
                 return ['code' => 204 , 'msg' => '此课程选择无效'];
             }
@@ -238,8 +249,9 @@ class Order extends Model {
             $data['pay_status'] = 4;
             $data['pay_type'] = 0;
             $data['status'] = 0;
+            $data['nature'] = $nature;
             $data['oa_status'] = 0;              //OA状态
-            $data['class_id'] = $arr['class_id'];
+            $data['class_id'] = $course['id'];
             $data['school_id'] = $student['school_id'];
             $add = self::insertGetId($data);
             if($add){
@@ -448,7 +460,8 @@ class Order extends Model {
         if(empty($data['student_id'])){
             return ['code' => 201 , 'msg' => '学员id为空'];
         }
-        $order = DB::table('ld_order')->selectRaw("any_value(pay_time) as pay_time,any_value(order_number) as order_number,any_value(lession_price) as lession_price,any_value(price) as price,any_value(class_id) as class_id ,any_value(pay_type) as pay_type,any_value(nature) as nature,any_value(status) as status,any_value(pay_status) as pay_status,any_value(create_at) as create_at")->where(['student_id'=>$data['student_id']])->orderByDesc('create_at')->groupBy('class_id')->get()->toArray();
+        $query= "select * from ld_order where id in(SELECT max(id) FROM ld_order where student_id = ".$data['student_id']." GROUP BY class_id)";
+        $order = DB::select($query);
         if(!empty($order)){
             foreach ($order as $k=>&$v){
                 $v = (array)$v;

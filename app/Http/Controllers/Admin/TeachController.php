@@ -184,7 +184,7 @@ class TeachController extends Controller {
       if($res['code'] == 1203){ //该课程没有回放记录!
           return response()->json($res);
       }
-     	return ['code'=>200,'msg'=>'Success','data'=>$res];
+     	return ['code'=>200,'msg'=>'Success','data'=>$res['data']];
    	}
 
  	/**

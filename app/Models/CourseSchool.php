@@ -859,5 +859,6 @@ class CourseSchool extends Model {
         }
 
     }
+    //aaa
 
 }
