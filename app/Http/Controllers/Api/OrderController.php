@@ -136,7 +136,7 @@ class OrderController extends Controller{
         foreach ($orderlist as $k=>&$v) {
             //查询课程
             if ($v['nature'] == 1) {
-                $course = CourseSchool::select('admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'is_del', 'course_id as id')->where(['id' => $v['class_id'], 'is_del' => 0, 'status' => 1])->first();
+                $course = CourseSchool::select('id as course_id','admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'is_del', 'course_id as id')->where(['id' => $v['class_id'], 'is_del' => 0, 'status' => 1])->first();
                 $method = Couresmethod::select('method_id as id')->where(['course_id' => $course['id'],"ld_course_method.is_del"=>0])->get()->toArray();
                 foreach ($method as $key => &$val) {
                     if ($val['id'] == 1) {
@@ -149,6 +149,9 @@ class OrderController extends Controller{
                         $val['name'] = '其他';
                     }
                 }
+                //学习人数   基数+订单数
+                $ordernum = Order::where(['class_id' => $course['course_id'], 'status' => 2, 'oa_status' => 1,'nature'=>1])->count();
+                $course['buy_num'] = $course['buy_num'] + $ordernum;
                 $course['methods'] = $method;
             } else {
                 $course = Coures::select('id', 'admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'is_del')->where(['id' => $v['class_id'], 'is_del' => 0, 'status' => 1])->first();
@@ -164,6 +167,9 @@ class OrderController extends Controller{
                         $val['name'] = '其他';
                     }
                 }
+                //学习人数   基数+订单数
+                $ordernum = Order::where(['class_id' => $course['id'], 'status' => 2, 'oa_status' => 1,'nature'=>1])->count();
+                $course['buy_num'] = $course['buy_num'] + $ordernum;
                 $course['methods'] = $method;
             }
             $courses[] = $course;
