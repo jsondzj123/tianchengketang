@@ -175,7 +175,9 @@ class School extends Model {
                     $vv['school_status'] ='授权讲师';
                 }
             }
+
             $teacher = array_merge($teacher,$natureTeacher);
+            $teacher = array_unique($teacher,SORT_REGULAR);
             $arr = [
                     'code'=>200,
                     'msg'=>'Success',
