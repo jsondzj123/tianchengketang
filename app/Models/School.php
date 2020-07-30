@@ -229,7 +229,7 @@ class School extends Model {
                             $query->where('ld_course_school.to_school_id',$data['school_id']);
                             $query->where('ld_course_school.from_school_id',$school_id);
                             $query->where('ld_course_school.is_del',0);
-                })->select('ld_course_school.course_id as id','ld_course_school.title','ld_course_school.cover','ld_course_school.pricing','ld_course.status')
+                })->select('ld_course_school.course_id as id','ld_course_school.title','ld_course_school.cover','ld_course_school.pricing','ld_course_school.status')
                 ->get()->toArray(); //授权课程信息（分校）
            
             if(!empty($course)){
@@ -325,7 +325,7 @@ class School extends Model {
                     $query->where('child_id',$data['subjectTwo']);
                 }
                 $query->where('is_del',0);
-            })->select('id','title','cover','nature','status','school_id','start_at','end_at')
+            })->select('id','title','cover','status','school_id','start_at','end_at')
             ->orderBy('id','desc')
             ->get()->toArray();
 
@@ -340,7 +340,7 @@ class School extends Model {
                                 $query->where('ld_course_ref_open.to_school_id',$data['school_id']);
                                 $query->where('ld_course_ref_open.from_school_id',$school_id);
                                 $query->where('ld_course_ref_open.is_del',0);
-                    })->select('ld_course_ref_open.course_id as id','ld_course_open.title','ld_course_open.cover','ld_course_open.status','ld_course_open.start_at','ld_course_open.end_at')->get()->toArray(); //授权公开课信息（分校）
+                    })->select('ld_course_ref_open.course_id as id','ld_course_open.title','ld_course_open.cover','ld_course_ref_open.status','ld_course_open.start_at','ld_course_open.end_at')->get()->toArray(); //授权公开课信息（分校）
         if(!empty($openCourse)){
             foreach($openCourse as $key =>$v){
                 $openCourse[$key]['nature'] = '自增课程';
