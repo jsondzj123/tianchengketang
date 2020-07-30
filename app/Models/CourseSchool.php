@@ -288,7 +288,6 @@ class CourseSchool extends Model {
                 return ['code'=>207,'msg'=>'课程已经授权'];
             }
             $course = Coures::whereIn('id',$courseIds)->where(['is_del'=>0])->select('parent_id','child_id','title','keywords','cover','pricing','sale_price','buy_num','expiry','describe','introduce','status','watch_num','is_recommend','id as course_id','school_id as from_school_id')->get()->toArray();//要授权课程 所有信息
-
             if(!empty($course)){
                 foreach($course as $key=>&$vv){
                     $vv['from_school_id'] = $school_id;
@@ -318,7 +317,6 @@ class CourseSchool extends Model {
                         }
                     }
                 }
-
                 //学科
                 $subjectArr = CourseRefSubject::where(['to_school_id'=>$body['school_id'],'from_school_id'=>$school_id,'is_del'=>0])->select('parent_id','child_id')->get()->toArray();  //已经授权过的学科
                 if(!empty($subjectArr)){
@@ -331,7 +329,7 @@ class CourseSchool extends Model {
                     }
                 }
 
-                foreach($courseSubjectArr as $key=>$v){
+                foreach($courseSubjectArr  as $key=>$v){
                         $InsertSubjectRef[$key]['is_public'] = 0;
                         $InsertSubjectRef[$key]['parent_id'] = $v['parent_id'];
                         $InsertSubjectRef[$key]['child_id'] = $v['child_id'];
@@ -978,11 +976,78 @@ class CourseSchool extends Model {
                         $courseSubjectArr[$k]['child_id'] = $vc['child_id'];
                     }
                     $courseSubjectArr = array_unique($courseSubjectArr,SORT_REGULAR);
-                    $teacherIds = Couresteacher::whereIn('course_id',$courseIds)->where('is_del',0)->pluck('teacher_id')->toArray(); //授权课程的教师信息
-                    $recordVideoIds = Coureschapters::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('resource_id as id')->toArray(); //要授权的录播资源 
+                    $ids = Couresteacher::whereIn('course_id',$courseIds)->where('is_del',0)->pluck('teacher_id')->toArray(); //要授权的教师信息
+                    if(!empty($ids)){
+                        $ids = array_unique($ids);
+                        $teacherIds = CourseRefTeacher::where(['from_school_id'=>$from_school_id,'to_school_id'=>$to_school_id,'is_del'=>0])->pluck('teacher_id')->toArray();//已经授权过的讲师信息
+                        if(!empty($teacherIds)){
+                            $teacherIdArr = array_diff($ids,$teacherIds);//不在授权讲师表里的数据
+                        }else{
+                            $teacherIdArr = $ids;
+                        }
+                        if(!empty($teacherIdArr)){
+                            foreach($teacherIdArr as $key => $id){
+                                $InsertTeacherRef[$key]['from_school_id'] =$school_id;
+                                $InsertTeacherRef[$key]['to_school_id'] =$body['school_id'];
+                                $InsertTeacherRef[$key]['teacher_id'] =$id;
+                                $InsertTeacherRef[$key]['is_public'] =0;
+                                $InsertTeacherRef[$key]['admin_id'] = $user_id;
+                                $InsertTeacherRef[$key]['create_at'] = date('Y-m-d H:i:s');
+                            }
+                        }
+                    }
+                    //学科
+                    $subjectArr = CourseRefSubject::where(['to_school_id'=>$to_school_id,'from_school_id'=>$from_school_id,'is_del'=>0])->select('parent_id','child_id')->get()->toArray();  //已经授权过的学科
+                    if(!empty($subjectArr)){
+                        foreach($courseSubjectArr as $k=>$v){
+                            foreach($subjectArr as $kk=>$bv){
+                                if($v == $bv){
+                                    unset($courseSubjectArr[$k]);
+                                }
+                            }
+                        }
+                    }
+
+                    foreach($courseSubjectArr as $key=>$v){
+                            $InsertSubjectRef[$key]['is_public'] = 0;
+                            $InsertSubjectRef[$key]['parent_id'] = $v['parent_id'];
+                            $InsertSubjectRef[$key]['child_id'] = $v['child_id'];
+                            $InsertSubjectRef[$key]['from_school_id'] = $from_school_id;
+                            $InsertSubjectRef[$key]['to_school_id'] = $to_school_id;
+                            $InsertSubjectRef[$key]['admin_id'] = $user_id;
+                            $InsertSubjectRef[$key]['create_at'] = date('Y-m-d H:i:s');
+                    }
+
+                    //录播资源
+                    $recordVideoIds = Coureschapters::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('resource_id as id')->toArray(); //要授权的录播资源
+                    if(!empty($recordVideoIds)){
+                        $narturecordVideoIds = CourseRefResource::where(['from_school_id'=>$from_school_id,'to_school_id'=>$to_school_id,'type'=>0,'is_del'=>0])->pluck('resource_id as id ')->toArray(); //已经授权过的录播资源
+                        $recordVideoIds = array_diff($recordVideoIds,$narturecordVideoIds);
+                        foreach ($recordVideoIds as $key => $v) {
+                            $InsertRecordVideoArr[$key]['resource_id']=$v;
+                            $InsertRecordVideoArr[$key]['from_school_id'] = $from_school_id;
+                            $InsertRecordVideoArr[$key]['to_school_id'] = $to_school_id;
+                            $InsertRecordVideoArr[$key]['admin_id'] = $user_id;
+                            $InsertRecordVideoArr[$key]['type'] = 0;
+                            $InsertRecordVideoArr[$key]['create_at'] = date('Y-m-d H:i:s');
+                        }
+                    }
 
                     //直播资源
-                    $zhiboVideoIds = CourseLivesResource::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('id')->toArray();//要授权的直播资源 
+                    $zhiboVideoIds = CourseLivesResource::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('id')->toArray();//要授权的直播资源
+                    if(!empty($zhiboVideoIds)){
+                        $narturezhiboVideoIds = CourseRefResource::where(['from_school_id'=>$from_school_id,'to_school_id'=>$to_school_id,'type'=>1,'is_del'=>0])->pluck('resource_id as id ')->toArray();
+                        $zhiboVideoIds = array_diff($zhiboVideoIds,$narturezhiboVideoIds);
+                        foreach ($zhiboVideoIds as $key => $v) {
+                            $InsertZhiboVideoArr[$key]['resource_id']=$v;
+                            $InsertZhiboVideoArr[$key]['from_school_id'] = $from_school_id;
+                            $InsertZhiboVideoArr[$key]['to_school_id'] = $to_school_id;
+                            $InsertZhiboVideoArr[$key]['admin_id'] = $user_id;
+                            $InsertZhiboVideoArr[$key]['type'] = 1;
+                            $InsertZhiboVideoArr[$key]['create_at'] = date('Y-m-d H:i:s');
+                        }
+                    }
+
                     //题库
                     foreach($courseSubjectArr as $key=>&$vs){
                         $bankIdArr = QuestionBank::where(['parent_id'=>$vs['parent_id'],'child_id'=>$vs['child_id'],'is_del'=>0])->pluck('id')->toArray();
@@ -993,55 +1058,10 @@ class CourseSchool extends Model {
                         }
                     }
 
-                    //学科
-                    foreach($courseSubjectArr as $key=>$v){
-                        $InsertSubjectRef[$key]['is_public'] = 0;
-                        $InsertSubjectRef[$key]['parent_id'] = $v['parent_id'];
-                        $InsertSubjectRef[$key]['child_id'] = $v['child_id'];
-                        $InsertSubjectRef[$key]['from_school_id'] = $from_school_id;
-                        $InsertSubjectRef[$key]['to_school_id'] = $to_school_id;
-                        $InsertSubjectRef[$key]['admin_id'] = $user_id;
-                        $InsertSubjectRef[$key]['create_at'] = date('Y-m-d H:i:s');
-                    }
-                    //教师信息
-                    if(!empty($teacherIds)){
-                        $teacherIds = array_unique($teacherIds);
-                        foreach($teacherIds as $key => $id){
-                            $InsertTeacherRef[$key]['from_school_id'] =$from_school_id;
-                            $InsertTeacherRef[$key]['to_school_id'] = $to_school_id;
-                            $InsertTeacherRef[$key]['teacher_id'] =$id;
-                            $InsertTeacherRef[$key]['is_public'] =0;
-                            $InsertTeacherRef[$key]['admin_id'] = $user_id;
-                            $InsertTeacherRef[$key]['create_at'] = date('Y-m-d H:i:s');
-                        }
-                    }
-                    //录播资源
-                    if(!empty($recordVideoIds)){
-                        $recordVideoIds = array_unique($recordVideoIds);
-                        foreach ($recordVideoIds as $key => $record) {
-                            $InsertRecordVideoArr[$key]['resource_id']=$record;
-                            $InsertRecordVideoArr[$key]['from_school_id'] = $from_school_id;
-                            $InsertRecordVideoArr[$key]['to_school_id'] = $to_school_id;
-                            $InsertRecordVideoArr[$key]['admin_id'] = $user_id;
-                            $InsertRecordVideoArr[$key]['type'] = 0;
-                            $InsertRecordVideoArr[$key]['create_at'] = date('Y-m-d H:i:s');
-                        }
-                    }                                                       
-                    //直播资源              
-                    if(!empty($zhiboVideoIds)){
-                        $zhiboVideoIds = array_unique($zhiboVideoIds);
-                        foreach ($zhiboVideoIds as $key => $zhibo) {
-                            $InsertZhiboVideoArr[$key]['resource_id']=$zhibo;
-                            $InsertZhiboVideoArr[$key]['from_school_id'] = $from_school_id;
-                            $InsertZhiboVideoArr[$key]['to_school_id'] = $to_school_id;
-                            $InsertZhiboVideoArr[$key]['admin_id'] = $user_id;
-                            $InsertZhiboVideoArr[$key]['type'] = 1;
-                            $InsertZhiboVideoArr[$key]['create_at'] = date('Y-m-d H:i:s');
-                        }
-                    }                           
-                    //题库
                     if(!empty($bankids)){
-                        $bankids = array_unique($bankids);
+                        $bankids=array_unique($bankids);
+                        $natureQuestionBank = CourseRefBank::where(['from_school_id'=>$from_school_id,'to_school_id'=>$to_school_id,'is_del'=>0])->pluck('bank_id')->toArray();
+                        $bankids = array_diff($bankids,$natureQuestionBank);
                         foreach($bankids as $key=>$bankid){
                             $InsertQuestionArr[$key]['bank_id'] =$bankid;
                             $InsertQuestionArr[$key]['from_school_id'] = $from_school_id;
@@ -1049,119 +1069,60 @@ class CourseSchool extends Model {
                             $InsertQuestionArr[$key]['admin_id'] = $user_id;
                             $InsertQuestionArr[$key]['create_at'] = date('Y-m-d H:i:s');
                         }
-                    } 
-                
-                    if(!empty($updateSchoolCourseSubjectArr)){
-                        $updateSchoolCourseSubjectArr = array_unique($updateSchoolCourseSubjectArr,SORT_REGULAR);
-                        foreach ($updateSchoolCourseSubjectArr as $k => $subject) {
-                            $whereArr = ['course_id'=>$subject['course_id'],'to_school_id'=>$to_school_id,'from_school_id'=>$from_school_id];
-                            $updateArr = ['parent_id'=>$subject['parent_id'],'child_id'=>$subject['child_id'],'update_at'=>date('Y-m-d H:i:s')];
-                            $updateSubjectRes = self::where($whereArr)->update($updateArr); 
-                            if(!$updateSubjectRes){
-                               DB::rollback();
-                               return ['code'=>203,'msg'=>'学科授权更新未成功!!!!!!!'];
-                               exit;
-                            }
-                        }
                     }
-                    $where['from_school_id'] = $from_school_id;
-                    $where['to_school_id'] = $to_school_id;
-                    $update['is_del'] = 1;
-                    $update['admin_id'] = $user_id;
-                    $update['update_at'] = date('Y-m-d H:i:s');
+                    
+                    $teacherRes = CourseRefTeacher::insert($InsertTeacherRef);//教师
+                    if(!$teacherRes){
+                        DB::rollback();
+                        return ['code'=>203,'msg'=>'教师授权更新未成功'];
+                        exit;
+                    }
+                    $subjectRes = CourseRefSubject::insert($InsertSubjectRef);//学科
+                    if(!$subjectRes){
+                        DB::rollback();
+                        return ['code'=>203,'msg'=>'学科授权更新未成功！'];
+                        exit;
+                    }
 
-                    $teacherIdArr = CourseRefTeacher::where($where)->where(['is_public'=>1,'is_del'=>0])->pluck('teacher_id')->toArray();
-                    if(!empty($teacherIdArr)){
-                        $delTecherRes = CourseRefTeacher::where($where)->where('is_public',0)->update($update); //教师
-                        if(!$delTecherRes){
-                            DB::rollback();
-                            return ['code'=>203,'msg'=>'教师授权更新未成功！'];
-                            exit;    
-                        }
-                    } 
-                    $subjectPidArr = CourseRefSubject::where($where)->where(['is_public'=>1,'is_del'=>0])->pluck('parent_id')->toArray();
-                    if(!empty($subjectPidArr)){
-                        $delSubjectRes = CourseRefSubject::where($where)->where('is_public',0)->update($update); //学科
-                        if(!$delSubjectRes){
-                            DB::rollback();
-                            return ['code'=>203,'msg'=>'学科授权更新未成功！！'];
-                            exit;   
-                        }
-                    }
-                    $bankIdsArr = CourseRefBank::where($where)->where('is_del',0)->pluck('id')->toArray();
-                    if(!empty($bankIdsArr)){
-                        $delBankRes = CourseRefBank::where($where)->update($update); //题库
-                        if(!$delBankRes){
-                            DB::rollback();
-                            return ['code'=>203,'msg'=>'题库授权更新未成功！'];
-                            exit;   
-                        }
-                    }
-                    $zhiboVideoIdsArr = CourseRefResource::where($where)->where(['type'=>1,'is_del'=>0])->pluck('resource_id')->toArray();
-                    if(!empty($zhiboVideoIdsArr)){
-                        $delzhiboRes = CourseRefResource::where($where)->where('type',1)->update($update);//直播
-                        if(!$delzhiboRes){
-                            DB::rollback();
-                            return ['code'=>203,'msg'=>'直播授权更新未成功！'];
-                            exit;   
-                        }
-                    }
-                    $lvboVideoIdsArr = CourseRefResource::where($where)->where(['type'=>0,'is_del'=>0])->pluck('resource_id')->toArray();
-                    if(!empty($lvboVideoIdsArr)){
-                        $dellvboRes = CourseRefResource::where($where)->where('type',0)->update($update); //录播
-                        if(!$dellvboRes){
-                            DB::rollback();
-                            return ['code'=>203,'msg'=>'录播授权更新未成功！'];
-                            exit;   
-                        }
-                    }  
-                    if(!empty($InsertTeacherRef)){
-                        $teacherRes = CourseRefTeacher::insert($InsertTeacherRef);//教师
-                        if(!$teacherRes){
-                            DB::rollback();
-                            return ['code'=>203,'msg'=>'教师授权更新未成功'];
-                            exit;   
-                        }
-                    }
-                    if(!empty($InsertSubjectRef)){
-                        $subjectRes = CourseRefSubject::insert($InsertSubjectRef);//学科
-                        if(!$subjectRes){
-                            DB::rollback();
-                            return ['code'=>203,'msg'=>'学科授权更新未成功！'];
-                            exit;   
-                        }
-                    }                                                               
-                    if(!empty($InsertRecordVideoArr)){     
+                    if(!empty($InsertRecordVideoArr)){
                         $InsertRecordVideoArr = array_chunk($InsertRecordVideoArr,500);
-                        foreach($InsertRecordVideoArr as $key=>$lvbos){
-                         
-                            $recordRes = CourseRefResource::insert($lvbos); //录播资源授权更新未成功！
+                        foreach($InsertRecordVideoArr as $key=>$lvbo){
+                            $recordRes = CourseRefResource::insert($lvbo); //录播
                             if(!$recordRes){
                                 DB::rollback();
                                 return ['code'=>203,'msg'=>'录播资源授权更新未成功！'];
-                                exit;   
-                            }
-                        }    
-                    }
-                    if(!empty($InsertZhiboVideoArr)){
-                        $InsertZhiboVideoArr = array_chunk($InsertZhiboVideoArr,500);
-                        foreach($InsertZhiboVideoArr as $key=>$zhibos){
-                            $zhiboRes = CourseRefResource::insert($zhibos); //直播
-                            if(!$zhiboRes){
-                                DB::rollback();
-                                return ['code'=>203,'msg'=>'直播资源授权更新未成功！'];
-                                exit;   
+                                exit;
                             }
                         }
                     }
-                    if(!empty($InsertQuestionArr)){
-                        $bankRes = CourseRefBank::insert($InsertQuestionArr); //题库
-                        if(!$bankRes){
+
+                    if(!empty($InsertZhiboVideoArr)){
+                        $InsertZhiboVideoArr = array_chunk($InsertZhiboVideoArr,500);
+                        foreach($InsertZhiboVideoArr as $key=>$zhibo){
+                            $zhiboRes = CourseRefResource::insert($zhibo); //直播
+                            if(!$zhiboRes){
+                                DB::rollback();
+                                return ['code'=>203,'msg'=>'直播资源授权更新未成功！'];
+                                exit;
+                            }
+                        }
+                    }
+                    $bankRes = CourseRefBank::insert($InsertQuestionArr); //题库
+                    if(!$bankRes){
+                        DB::rollback();
+                        return ['code'=>203,'msg'=>'题库授权更新未成功！'];
+                        exit;
+                    }
+                    foreach($updateSchoolCourseSubjectArr as $key=>$course){
+                        $where = ['from_school_id'=>$from_school_id,'to_school_id'=>$to_school_id,'course_id'=>$course['course_id']];
+                        $update = ['parent_id'=>$course['parent_id'],'child_id'=>$course['child_id'],'update_at'=>date('Y-m-d H:i:s'),'admin_id'=>$user_id];
+                        $courseRes = self::where($where)->update($update);
+                        if(!$courseRes){
                             DB::rollback();
-                            return ['code'=>203,'msg'=>'题库授权未成功！'];
-                            exit;   
-                        }   
-                    }   
+                            return ['code'=>203,'msg'=>'课程授权更新未成功！'];
+                            exit;
+                        }
+                    }
                 }
             }
             DB::commit();
