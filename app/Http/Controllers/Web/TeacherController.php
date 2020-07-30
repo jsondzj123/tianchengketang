@@ -75,7 +75,7 @@ class TeacherController extends Controller {
 		if(!empty($natureTeacherArr) || !empty($teacherArr)){
 			$teacherData = array_merge($natureTeacherArr,$teacherArr);
 			if( $type==1 ){
-				 $sort = array_column($teacherData, 'buy_num');      
+				 $sort = array_column($teacherData, 'student_number');      
        			 array_multisort($sort, SORT_DESC, $teacherData);  
 			}
 			$teacherData = array_unique($teacherData, SORT_REGULAR);
