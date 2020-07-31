@@ -291,6 +291,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     */
     $router->post('subject', 'CourseController@subject');//课程学科列表(szw改)
 
+
 //    $router->post('subject', 'SubjectController@searchList');
     $router->post('subjectList', 'SubjectController@index');
     $router->post('subject/add', 'SubjectController@store');
@@ -631,7 +632,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
     //课程模块（重构）【公开课】（lys）
     $router->group(['prefix' => 'opencourse'], function () use ($router) {
-
+        $router->post('subject', 'OpenCourseController@subject');//公开课程学科列表(lys改)
         $router->post('getList', 'OpenCourseController@getList');//公开课列表
         $router->post('doInsertOpenCourse', 'OpenCourseController@doInsertOpenCourse');//公开课添加
         $router->post('doUpdateRecomend', 'OpenCourseController@doUpdateRecomend');//是否推荐

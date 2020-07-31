@@ -44,6 +44,53 @@ class OpenCourse extends Model {
         ];
     }
 
+    public static function subject(){
+
+        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
+        $zizengSubject = CouresSubject::where(['school_id'=>$school_id,'is_del'=>0,'is_open'=>0])->select('id','parent_id','subject_name as name')->get()->toArray();
+        $natureSubeject = CourseRefSubject::where(['to_school_id'=>$school_id,'is_del'=>0,'is_public'=>1])->select('parent_id','child_id')->get()->toArray();
+        $subject = $subjectArr =  $subjectData = $newdata = [];
+        if(!empty($natureSubeject)){
+            $natureSubeject = array_unique($natureSubeject,SORT_REGULAR);
+            foreach($natureSubeject as $key=>$v){
+                if(!isset($newdata[$v['parent_id']])){
+                    $newdata[$v['parent_id']] = $v;
+                }
+                $newdata[$v['parent_id']]['childs'][] =$v['child_id'];
+            }
+            foreach($newdata as $k=>$v){
+                $twos = CouresSubject::select('id','subject_name as name')->where(['id'=>$v['parent_id'],'is_del'=>0,'is_open'=>0])->first();
+                $twsss = CouresSubject::select('id','admin_id','subject_name as name')->whereIn('id',$v['childs'])->where(['is_del'=>0,'is_open'=>0])->get()->toArray();
+                $twos['childs'] = $twsss;
+                $subjectArr[] =$twos;
+            }
+        }
+        if(!empty($zizengSubject)){
+            $zizengSubject = self::demo($zizengSubject,0,0);
+        }
+        if(!empty($zizengSubject) && !empty($subjectArr)){
+            $subjectData = array_merge($zizengSubject,$subjectArr);
+        }else{
+            $subjectData = !empty($zizengSubject)?$zizengSubject:$subjectArr;
+        }
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$subjectData];
+    } 
+     //递归
+    public static function demo($arr,$id,$level){
+        $list =array();
+        foreach ($arr as $k=>$v){
+            if ($v['parent_id'] == $id){
+                $aa = self::demo($arr,$v['id'],$level+1);
+                if(!empty($aa)){
+                    $v['level']=$level;
+                    $v['childs'] = $aa;
+                }
+                $list[] = $v;
+            }
+        }
+        return $list;
+    } 
+
     /*
          * @param  descriptsion 获取公开课信息
          * @param  $school_id  公开课id
@@ -82,7 +129,7 @@ class OpenCourse extends Model {
             $where['start_at'] =  substr($where['time'][0],0,10);
             $where['end_at']  = substr($where['time'][1],0,10);
         } 
-
+               
         //自增公开课
         $open_less_arr = self::where(function($query) use ($where,$school_id){
             if(!empty($where['parent_id']) && $where['parent_id'] != '' && $where['parent_id'] > 0){
