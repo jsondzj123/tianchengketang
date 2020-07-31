@@ -819,29 +819,29 @@ class Coures extends Model {
         }
         //课程授课方式
         $coursemethod = Couresmethod::where(['course_id'=>$course_id,'is_del'=>0])->get()->toArray();
-        $course['methods']='1234654464646';
+        $course['methods']='';
         if(!empty($coursemethod)){
             foreach ($coursemethod as $methodk=>$methodv){
                 if($methodv['method_id'] == 1){
                     $course['methods'] = $course['method'].'直播';
                     //课程关联的班号
-//                    $livearr = CourseLiveResource::where(['course_id'=>$course_id,'is_del'=>0])->get();
-//                    if(!empty($livearr)){
-//                        $livearr=[];
-//                        foreach ($livearr as $livek=>$livev){
-//                            if($livev['shift_id'] != '' && $livev['shift_id'] != null){
-//                                $shiftno = LiveClass::where(['id'=>$livev['shift_id'],'is_del'=>0,'is_forbid'=>0])->first();
-//                                //查询课次
-//                                $class_num = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->count();
-//                                //课时
-//                                $class_time = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->sum('class_hour');
-//                                $shiftno['class_num'] = $class_num;
-//                                $shiftno['class_time'] = $class_time;
-//                                $livearr[] = $shiftno;
-//                            }
-//                        }
-//                        $course['livearr'] = $livearr;
-//                    }
+                    $livearr = CourseLiveResource::where(['course_id'=>$course_id,'is_del'=>0])->get();
+                    if(!empty($livearr)){
+                        $livearr=[];
+                        foreach ($livearr as $livek=>$livev){
+                            if($livev['shift_id'] != '' && $livev['shift_id'] != null){
+                                $shiftno = LiveClass::where(['id'=>$livev['shift_id'],'is_del'=>0,'is_forbid'=>0])->first();
+                                //查询课次
+                                $class_num = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->count();
+                                //课时
+                                $class_time = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->sum('class_hour');
+                                $shiftno['class_num'] = $class_num;
+                                $shiftno['class_time'] = $class_time;
+                                $livearr[] = $shiftno;
+                            }
+                        }
+                        $course['livearr'] = $livearr;
+                    }
                 }
                 if($methodv['method_id'] == 2){
                     $course['methods'] = $course['method'].'录播';
@@ -851,7 +851,7 @@ class Coures extends Model {
                 }
             }
         }
-        return ['code' => 200 , 'msg' => '获取成功','data'=>$order];
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$order,'course'=>$course];
     }
     //课程详情
     public static function courseDetail($data){
