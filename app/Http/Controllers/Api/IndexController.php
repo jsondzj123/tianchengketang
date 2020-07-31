@@ -181,12 +181,12 @@ class IndexController extends Controller {
                 //登录显示属于分校的课程
                 if($json_info['school_id'] == 1){
                     //判断讲师列表是否为空
-                        $teacher_count = Teacher::where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->count();
+                        $teacher_count = Teacher::where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->where("school_id" , $json_info['school_id'])->count();
                         if($teacher_count && $teacher_count > 0){
                             //新数组赋值
                             $teacher_array = [];
                             //获取讲师列表
-                            $teacher_list  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->offset(0)->limit(6)->get()->toArray();
+                            $teacher_list  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->where("school_id" , $json_info['school_id'])->offset(0)->limit(6)->get()->toArray();
                             foreach($teacher_list as $k=>$v){
                                 //根据大分类的id获取大分类的名称
                                 if($v['parent_id'] && $v['parent_id'] > 0){
@@ -257,13 +257,12 @@ class IndexController extends Controller {
                 }
             }else{
                 //判断讲师列表是否为空
-                $teacher_count = Teacher::where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->count();
+                $teacher_count = Teacher::where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->where("school_id" , 1)->count();
                 if($teacher_count && $teacher_count > 0){
                     //新数组赋值
                     $teacher_array = [];
-
                     //获取讲师列表
-                    $teacher_list  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->offset(0)->limit(6)->get()->toArray();
+                    $teacher_list  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->where("school_id" , 1)->offset(0)->limit(6)->get()->toArray();
                     foreach($teacher_list as $k=>$v){
                         //根据大分类的id获取大分类的名称
                         if($v['parent_id'] && $v['parent_id'] > 0){
