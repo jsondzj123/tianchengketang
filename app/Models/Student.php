@@ -349,15 +349,13 @@ class Student extends Model {
             return ['code' => 202 , 'msg' => '传递数据不合法'];
         }
         
-        //判断学员id是否合法
-        if(!isset($body['student_id']) || empty($body['student_id']) || $body['student_id'] <= 0){
-            return ['code' => 202 , 'msg' => '学员id不合法'];
+        //判断转校得参数是否为空
+        if(!isset($body['transfer_school']) || empty($body['transfer_school'])){
+            return ['code' => 201 , 'msg' => '转校参数为空'];
         }
         
-        //判断学员的学校id是否为空
-        if(!isset($body['school_id']) || $body['school_id'] <= 0){
-            return ['code' => 201 , 'msg' => '请选择学校id'];
-        }
+        //转校参数赋值
+        $transfer_school = json_decode($body['transfer_school'] , true);
         
         //获取分校的状态和id
         $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
@@ -365,55 +363,46 @@ class Student extends Model {
         
         //判断是分校还是总校
         if($school_status > 0 && $school_status == 1){
-            //学员id赋值
-            $student_id = $body['student_id'];
-            
-            //根据学员id获取学员详情
-            $student_info = self::where('id',$student_id)->first();
-            
-            //学校id赋值
-            $school_id  = $body['school_id'];
-            //判断此学校是否存在
-            $is_exists_school = \App\Models\School::where('id' , $school_id)->count();
-            if($is_exists_school <= 0){
-                return ['code' => 202 , 'msg' => '此分校不存在'];
-            }
-            
             //操作时间赋值
             $time = date('Y-m-d H:i:s');
             
-            //组装数组信息
-            $transfer_array = [
-                'admin_id'         =>   $admin_id ,
-                'student_id'       =>   $student_id ,
-                'from_school_id'   =>   $student_info['school_id'] ,
-                'to_school_id'     =>   $school_id ,
-                'create_at'        =>   $time
-            ];
-            
-            //开启事务
-            DB::beginTransaction();
-            
-            //根据学员id更新信息
-            if(false !== self::where('id',$student_id)->update(['school_id' => $school_id , 'update_at' => $time])){
-                //添加日志操作
-                AdminLog::insertAdminLog([
-                    'admin_id'       =>   $admin_id  ,
-                    'module_name'    =>  'Student' ,
-                    'route_url'      =>  'admin/student/doTransferSchool' , 
-                    'operate_method' =>  'insert' ,
-                    'content'        =>  '转校详情'.json_encode($transfer_array) ,
-                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
-                    'create_at'      =>  date('Y-m-d H:i:s')
-                ]);
-                //事务提交
-                DB::commit();
-                return ['code' => 200 , 'msg' => '操作成功'];
-            } else {
-                //事务回滚
-                DB::rollBack();
-                return ['code' => 203 , 'msg' => '操作失败'];
+            //循环获取学员和指定分校
+            foreach($transfer_school as $k=>$v){
+                //学员id赋值
+                $student_id = $v['student_id'];
+
+                //根据学员id获取学员详情
+                $student_info = self::where('id',$student_id)->first();
+
+                //学校id赋值
+                $school_id  = $v['school_id'];
+                
+                //组装数组信息
+                $transfer_array = [
+                    'admin_id'         =>   $admin_id ,
+                    'student_id'       =>   $student_id ,
+                    'from_school_id'   =>   $student_info['school_id'] ,
+                    'to_school_id'     =>   $school_id ,
+                    'create_at'        =>   $time
+                ];
+                
+                //根据学员id更新信息
+                if(false !== self::where('id',$student_id)->update(['school_id' => $school_id , 'update_at' => $time])){
+                    //添加日志操作
+                    AdminLog::insertAdminLog([
+                        'admin_id'       =>   $admin_id  ,
+                        'module_name'    =>  'Student' ,
+                        'route_url'      =>  'admin/student/doTransferSchool' , 
+                        'operate_method' =>  'insert' ,
+                        'content'        =>  '转校详情'.json_encode($transfer_array) ,
+                        'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                        'create_at'      =>  date('Y-m-d H:i:s')
+                    ]);
+                }
             }
+            
+            //返回值信息
+            return ['code' => 200 , 'msg' => '操作成功'];
         } else {
             return ['code' => 202 , 'msg' => '分校没有转校权限'];
         }

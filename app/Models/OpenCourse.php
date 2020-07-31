@@ -133,7 +133,7 @@ class OpenCourse extends Model {
                 }
                 $query->where('to_school_id',$school_id);
                 $query->where('ld_course_ref_open.is_del',0);
-            })->select('ld_course_open.id','title','cover','start_at','end_at','ld_course_ref_open.is_recommend','ld_course_ref_open.status')
+            })->select('ld_course_open.id','ld_course_open.title','ld_course_open.cover','ld_course_open.start_at','ld_course_open.end_at','ld_course_ref_open.is_recommend','ld_course_ref_open.status')
                 ->orderBy('ld_course_ref_open.create_at','desc')->get()->toArray();
             if(!empty($ref_open_less_arr)){
                 foreach($ref_open_less_arr as $kb=>&$vb){
@@ -157,8 +157,6 @@ class OpenCourse extends Model {
                $openCourseArr = array_merge($open_less_arr,$ref_open_less_arr);
                 break;
         }
-    
-        
         if(!empty($openCourseArr)){
             foreach ($openCourseArr as $k => &$v) {          
                 $v['time'] = [date('Y-m-d H:i:s',$v['start_at']),date('Y-m-d H:i:s',$v['end_at'])];
