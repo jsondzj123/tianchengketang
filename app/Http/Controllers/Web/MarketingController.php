@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class MarketingController extends Controller {
     public function addMarketing(Request $request){
         $data = $request->all();
-        unset($data['web/marketing/addMarketing']);
+        unset($data['/web/marketing/addMarketing']);
         unset($data['school_dns']);
         unset($data['dns']);
         $data['create_at'] = date('Y-m-d H:i:s');
