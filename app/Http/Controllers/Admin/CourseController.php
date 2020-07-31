@@ -168,6 +168,7 @@ class CourseController extends Controller {
         }
     }
     /******************************用户转班操作************************/
+
     /*
          * @param  转班 - 用户&订单基本信息
          * @param  author  苏振文
