@@ -184,7 +184,7 @@ class OpenCourse extends Model {
                 ->orderBy('ld_course_ref_open.create_at','desc')->get()->toArray();
             if(!empty($ref_open_less_arr)){
                 foreach($ref_open_less_arr as $kb=>&$vb){
-                    $va['nature'] = 2; //授权
+                    $vb['nature'] = 2; //授权
                 }
             }
         }
