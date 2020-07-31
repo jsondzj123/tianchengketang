@@ -1921,7 +1921,9 @@ class BankController extends Controller {
         })->where('ld_order.student_id' , self::$accept_data['user_info']['user_id'])->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->where('ld_order.nature' , 0)->groupBy('ld_question_bank.id')->get()->count();
 
         //授权题库
-        $bank_list12 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_course_school" , function($join){
+        $bank_list12 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_question_ref_bank" , function($join){
+            $join->on('ld_question_ref_bank.bank_id', '=', 'ld_question_bank.id');
+        })->join("ld_course_school" , function($join){
             $join->on('ld_course_school.parent_id', '=', 'ld_question_bank.parent_id');
         })->join("ld_order" , function($join){
             $join->on('ld_course_school.id', '=', 'ld_order.class_id');
@@ -1957,7 +1959,9 @@ class BankController extends Controller {
                 })->where('ld_order.student_id' , self::$accept_data['user_info']['user_id'])->where('ld_question_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_course.is_del' , 0)->where('ld_order.status' , 2)->where('ld_order.nature' , 0)->groupBy('ld_question_bank.id')->get()->toArray();
                
                 //授权题库
-                $bank_list2 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_course_school" , function($join){
+                $bank_list2 = DB::table('ld_question_bank')->selectRaw("any_value(ld_question_bank.id) as bank_id")->join("ld_question_ref_bank" , function($join){
+                    $join->on('ld_question_ref_bank.bank_id', '=', 'ld_question_bank.id');
+                })->join("ld_course_school" , function($join){
                     $join->on('ld_course_school.parent_id', '=', 'ld_question_bank.parent_id');
                 })->join("ld_order" , function($join){
                     $join->on('ld_course_school.id', '=', 'ld_order.class_id');

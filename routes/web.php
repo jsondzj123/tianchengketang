@@ -97,6 +97,11 @@ $router->group(['prefix' => 'api', 'namespace' => 'Api', 'middleware'=> 'user'],
 
 //PC端路由接口
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
+    $router->group(['prefix' => 'marketing'], function () use ($router) {
+        $router->post('addMarketing','MarketingController@addMarketing');//添加营销数据
+        $router->get('MarketingList','MarketingController@MarketingList');//营销数据列表
+    });
+
     //begin (lys)
     //首页
      $router->group(['prefix' => 'index'], function () use ($router) {
