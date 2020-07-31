@@ -130,7 +130,6 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('preStart','OpenCourseController@preStart');//预开始
         $router->post('underway','OpenCourseController@underway');//直播中
         $router->post('finish','OpenCourseController@end');//往期公开课程 (暂时没做分页)
-
     });
     //教师
     $router->group(['prefix' => 'teacher'], function () use ($router) {
