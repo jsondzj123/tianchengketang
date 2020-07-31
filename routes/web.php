@@ -100,6 +100,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     //begin (lys)
     //首页
      $router->group(['prefix' => 'index'], function () use ($router) {
+        $router->post('getChartList','IndexController@getChartList');                             //APP首页轮播图接口
         $router->post('teacher','IndexController@teacherList');//我们的团队
         $router->post('news','IndexController@newInformation');//新闻资讯
         $router->post('index','IndexController@index');//首页内容
