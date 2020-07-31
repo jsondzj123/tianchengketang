@@ -819,11 +819,10 @@ class Coures extends Model {
         }
         //课程授课方式
         $coursemethod = Couresmethod::where(['course_id'=>$course_id,'is_del'=>0])->get()->toArray();
-        print_r($coursemethod);die;
         $course['method']='';
         if(!empty($coursemethod)){
             foreach ($coursemethod as $methodk=>$methodv){
-                if($methodv == 1){
+                if($methodv['method_id'] == 1){
                     $course['method'] = $course['method'].'直播';
                     //课程关联的班号
                     $livearr = CourseLiveResource::where(['course_id'=>$course_id,'is_del'=>0])->get();
@@ -842,10 +841,10 @@ class Coures extends Model {
                         }
                     }
                 }
-                if($methodv == 2){
+                if($methodv['method_id'] == 2){
                     $course['method'] = $course['method'].'录播';
                 }
-                if($methodv == 3){
+                if($methodv['method_id'] == 3){
                     $course['method'] = $course['method'].'其他';
                 }
             }
