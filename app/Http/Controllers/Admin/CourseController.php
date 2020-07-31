@@ -8,6 +8,7 @@ use App\Models\Coureschapters;
 use App\Models\CouresSubject;
 use App\Models\CourseLiveResource;
 use App\Models\CourseSchool;
+use App\Models\Order;
 
 class CourseController extends Controller {
     //获取学科列表
@@ -166,7 +167,49 @@ class CourseController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
-
+    /******************************用户转班操作************************/
+    /*
+         * @param  转班 - 用户&订单基本信息
+         * @param  author  苏振文
+         * @param  ctime   2020/7/31 10:06
+         * return  array
+         */
+    public function consumerUser(){
+        try{
+            $data = Coures::consumerUser(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    /*
+         * @param  课程详情
+         * @param  author  苏振文
+         * @param  ctime   2020/7/31 10:05
+         * return  array
+         */
+    public function courseDetail(){
+        try{
+            $data = Coures::courseDetail(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    /*
+         * @param  订单进行转班
+         * @param  author  苏振文
+         * @param  ctime   2020/7/31 15:00
+         * return  array
+         */
+    public function classTransfer(){
+        try{
+            $data = Coures::classTransfer(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
     /********录播课程******************************************************/
     /*
          * @param  章节列表

@@ -765,4 +765,193 @@ class Coures extends Model {
         ]);
         return ['code' => 200 , 'msg' => '修改成功'];
     }
+    /*==============================转班========================*/
+    //单条订单购买的课程
+    public static function consumerUser($data){
+        if(!isset($data) || empty($data)){
+            return ['code' => 201 , 'msg' => '传参数组为空'];
+        }
+        if(!isset($data['order_number']) || empty($data['order_number'])){
+            return ['code' => 201 , 'msg' => 'order_number参数为空'];
+        }
+        $order = Order::where(['order_number'=>$data['order_number']])->first();
+        if($order['nature'] == 1){
+            $course = CourseSchool::where(['id'=>$order['class_id']])->first();
+            $course_id = $course['course_id'];
+        }else{
+            $course = Coures::where(['id'=>$order['class_id']])->first();
+            $course_id = $course['id'];
+        }
+        $order['course_cover'] = $course['cover'];
+        $order['course_title'] = $course['title'];
+        $student = Student::where(['id'=>$order['student_id']])->first();
+        $order['real_name'] = $student['real_name'];
+        $order['nickname'] = $student['nickname'];
+        $order['reg_source'] = $student['reg_source'];
+        if($order['status'] == 0){
+            $order['learning'] = "未支付";
+            $order['bgcolor'] = '#26A4FD';
+        }
+        if($order['status'] == 1){
+            $order['learning'] = "待审核";
+            $order['bgcolor'] = '#FDA426';
+        }
+        if($order['status'] == 2){
+            if($order['pay_status'] == 3 || $order['pay_status'] == 4){
+                $order['learning'] = "已开课";
+                $order['bgcolor'] = '#FF4545';
+            }else{
+                $order['learning'] = "尾款未结清";
+                $order['bgcolor'] = '#FDA426';
+            }
+        }
+        if($order['status'] == 3){
+            $order['learning'] = "审核失败";
+            $order['bgcolor'] = '#67C23A';
+        }
+        if($order['status'] == 4){
+            $order['learning'] = "已退款";
+            $order['bgcolor'] = '#f2f6fc';
+        }
+        if($order['status'] == 5){
+            $order['learning'] = "以失效";
+            $order['bgcolor'] = '#FF4545';
+        }
+        //课程详情
+        $coursemethod = Couresmethod::where(['course_id'=>$course_id,'is_del'=>0])->get();
+        $course['method']='';
+        if(!empty($coursemethod)){
+            foreach ($coursemethod as $methodk=>$methodv){
+                if($methodv == 1){
+                    $course['method'] = $course['method'].'直播';
+                    //课程关联的班号
+                    $livearr = CourseLiveResource::where(['course_id'=>$course_id,'is_del'=>0])->get();
+                    if(!empty($livearr)){
+                        foreach ($livearr as $livek=>$livev){
+                            if($livev['shift_id'] != '' && $livev['shift_id'] != null){
+                                $shiftno = LiveClass::where(['id'=>$livev['shift_id'],'is_del'=>0,'is_forbid'=>0])->first();
+                                //查询课次
+                                $class_num = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->count();
+                                //课时
+                                $class_time = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->sum('class_hour');
+                                $shiftno['class_num'] = $class_num;
+                                $shiftno['class_time'] = $class_time;
+                                $course['livearr'][] = $shiftno;
+                            }
+                        }
+                    }
+                }
+                if($methodv == 2){
+                    $course['method'] = $course['method'].'录播';
+                }
+                if($methodv == 3){
+                    $course['method'] = $course['method'].'其他';
+                }
+            }
+        }
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$order];
+    }
+    //课程详情
+    public static function courseDetail($data){
+        //传课程id  根据id 查询直播录播其他
+        //nature  0自增1授权
+        $nature = isset($data['nature'])?$data['nature']:0;
+        if($nature == 1){
+            $course = CourseSchool::where(['id'=>$data['id'],'is_del'=>0,'status'=>1])->first();
+            $data['id'] = $course['course_id'];
+        }else{
+            $course = Coures::where(['id'=>$data['id'],'is_del'=>0,'status'=>1])->first();
+        }
+        $method = Couresmethod::where(['course_id'=>$data['id'],'is_del'=>0])->get();
+        if(!empty($method)){
+            foreach ($method as $methodk=>$methodv){
+                if($methodv == 1){
+                    $course['method'] = $course['method'].'直播';
+                    //课程关联的班号
+                    $livearr = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->get();
+                    if(!empty($livearr)){
+                        foreach ($livearr as $livek=>$livev){
+                            if($livev['shift_id'] != '' && $livev['shift_id'] != null){
+                                $shiftno = LiveClass::where(['id'=>$livev['shift_id'],'is_del'=>0,'is_forbid'=>0])->first();
+                                //查询课次
+                                $class_num = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->count();
+                                //课时
+                                $class_time = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->sum('class_hour');
+                                $shiftno['class_num'] = $class_num;
+                                $shiftno['class_time'] = $class_time;
+                                $course['livearr'][] = $shiftno;
+                            }
+                        }
+                    }
+                }
+                if($methodv == 2){
+                    $course['method'] = $course['method'].'录播';
+                }
+                if($methodv == 3){
+                    $course['method'] = $course['method'].'其他';
+                }
+            }
+        }
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$course];
+    }
+    /*
+         * @param  订单
+         * @param  order_number     原订单号
+         * @param  pay_status     付款类型
+         * @param  pay_type     付款方式
+         * @param  price     付款金额
+         * @param  pay_time     付款时间
+         * @param  id     购买的课程
+         * @param  nature     课程类型
+         * @param  author  苏振文
+         * @param  ctime   2020/7/31 16:16
+         * return  array
+         */
+    public static function classTransfer($arr){
+        //课程信息
+        if($arr['nature'] == 1){
+            $course = CourseSchool::where(['id'=>$arr['id'],'is_del'=>0,'status'=>1])->first();
+        }else{
+            $course = Coures::where(['id'=>$arr['id'],'is_del'=>0,'status'=>1])->first();
+        }
+        //原订单 状态变成5已失效  再新增订单
+        $formerorder = Order::where(['order_number'=>$arr['order_number']])->first();
+        Order::where(['order_number'=>$arr['order_number']])->update(['status'=>5]);
+        //获取后端的操作员id
+        $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;  //操作员id
+        //根据用户id获得分校id
+        $school = Student::select('school_id')->where('id',$arr['student_id'])->first();
+        $data['order_number'] = date('YmdHis', time()) . rand(1111, 9999); //订单号  随机生成
+        $data['order_type'] = 1;        //1线下支付 2 线上支付
+        $data['student_id'] = $formerorder['student_id'];
+        $data['price'] = $course['sale_price']; //应付价格
+        $data['student_price'] = $arr['sale_price'];//学员价格
+        $data['lession_price'] = $arr['price']; //实际支付价格
+        $data['pay_status'] = $arr['pay_status']; //支付类型
+        $data['pay_type'] = $arr['pay_type'];   //支付方式
+        $data['status'] = 2;                  //支付状态
+        $data['pay_time'] = $arr['pay_time']; //支付时间
+        $data['oa_status'] = 1;              //OA状态
+        $data['class_id'] = $arr['id'];  //课程id
+        $data['school_id'] = $school['school_id'];
+        $data['nature'] = $arr['nature'];  //课程类型
+        $data['validity_time'] = $arr['order_number'];  //课程到期时间
+        $data['parent_order_number'] = $arr['order_number'];  //转班订单号
+        $add = self::insert($data);
+        if($add){
+            //添加日志操作
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $data['admin_id']  ,
+                'module_name'    =>  'Order' ,
+                'route_url'      =>  'admin/Course/classTransfer' ,
+                'operate_method' =>  'insert' ,
+                'content'        =>  '转班：'.$arr['order_number'].'转到'.$data['order_number'].',========传参：'.json_encode($arr),
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
+            return ['code' => 200 , 'msg' => '转班成功'];
+        }else{
+            return ['code' => 201 , 'msg' => '转班失败'];
+        }
+    }
 }

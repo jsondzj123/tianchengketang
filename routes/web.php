@@ -201,6 +201,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('userPaying','OrderController@userPaying');//用户进行支付
         $router->post('webajax','OrderController@webajax');//前端轮询查询接口
         $router->post('chargeOrder','OrderController@chargeOrder');//0元购买接口
+        $router->post('scanPay','CourseController@scanPay');//扫码支付
     });
     //课程 无需token
     $router->group(['prefix' => 'course'], function () use ($router) {
@@ -486,9 +487,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('courseUpdate', 'CourseController@courseUpdate');//课程修改
         $router->post('courseRecommend', 'CourseController@courseRecommend');//课程推荐
         $router->post('courseUpStatus', 'CourseController@courseUpStatus');//课程发布
-
-
-
         //录播课程
         $router->post('chapterList', 'CourseController@chapterList');//章/节列表
         $router->post('chapterAdd', 'CourseController@chapterAdd');//章添加
@@ -506,8 +504,13 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('liveToCourse', 'CourseController@liveToCourse');//直播课程取消或选择资源
         $router->post('liveToCourseList', 'CourseController@liveToCourseList');//直播课程排课
         $router->post('liveToCourseshift', 'CourseController@liveToCourseshift');//直播课程进行排课
+
+        //转班
+        $router->post('consumerUser', 'CourseController@consumerUser');//用户订单详情
+        $router->post('courseDetail', 'CourseController@courseDetail');//课程详情
+        $router->post('classTransfer', 'CourseController@classTransfer');//进行转班
     });
-    //运营模块(szw)
+    //运营模块(szw)`
     $router->group(['prefix' => 'article'], function () use ($router) {
         /*------------文章模块---------------------*/
         $router->post('getArticleList', 'ArticleController@getArticleList');//获取文章列表
@@ -534,6 +537,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('ExcelExport', 'OrderController@ExcelExport');//订单导出
         $router->post('buttOa', 'OrderController@buttOa');//对接oa
         $router->post('orderBack', 'OrderController@orderBack');//退回
+
     });
     //数据模块（szw）
     $router->group(['prefix' => 'statistics'], function () use ($router) {
