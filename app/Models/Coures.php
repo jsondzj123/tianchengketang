@@ -818,8 +818,7 @@ class Coures extends Model {
             $order['bgcolor'] = '#FF4545';
         }
         //课程授课方式
-        $coursemethod = Couresmethod::where(['course_id'=>$course_id,'is_del'=>0])->get();
-        print_r($coursemethod);die;
+        $coursemethod = Couresmethod::where(['course_id'=>$course_id,'is_del'=>0])->get()->toArray();
         $course['method']='';
         if(!empty($coursemethod)){
             foreach ($coursemethod as $methodk=>$methodv){
