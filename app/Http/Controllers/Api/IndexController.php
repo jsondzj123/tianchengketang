@@ -164,44 +164,134 @@ class IndexController extends Controller {
      * @param ctime     2020-05-25
      * return string
      */
-    public function getTeacherList() {
+    public function getTeacherList(Request $request) {
         //获取提交的参数
         try{
-            //判断讲师列表是否为空
-            $teacher_count = Teacher::where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->count();
-            if($teacher_count && $teacher_count > 0){
-                //新数组赋值
-                $teacher_array = [];
+            //获取请求的平台端
+            $platform = verifyPlat() ? verifyPlat() : 'pc';
+            //获取用户token值
+            $token = $request->input('user_token');
+            //hash中token赋值
+            $token_key   = "user:regtoken:".$platform.":".$token;
+            //判断token值是否合法
+            $redis_token = Redis::hLen($token_key);
+            if($redis_token && $redis_token > 0) {
+                //解析json获取用户详情信息
+                $json_info = Redis::hGetAll($token_key);
+                //登录显示属于分校的课程
+                if($json_info['school_id'] == 1){
+                    //判断讲师列表是否为空
+                        $teacher_count = Teacher::where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->where("school_id" , $json_info['school_id'])->count();
+                        if($teacher_count && $teacher_count > 0){
+                            //新数组赋值
+                            $teacher_array = [];
+                            //获取讲师列表
+                            $teacher_list  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->where("school_id" , $json_info['school_id'])->offset(0)->limit(6)->get()->toArray();
+                            foreach($teacher_list as $k=>$v){
+                                //根据大分类的id获取大分类的名称
+                                if($v['parent_id'] && $v['parent_id'] > 0){
+                                    $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                                }
 
-                //获取讲师列表
-                $teacher_list  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->offset(0)->limit(6)->get()->toArray();
-                foreach($teacher_list as $k=>$v){
-                    //根据大分类的id获取大分类的名称
-                    if($v['parent_id'] && $v['parent_id'] > 0){
-                        $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                                //根据小分类的id获取小分类的名称
+                                if($v['child_id'] && $v['child_id'] > 0){
+                                    $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                                }
+
+                                //数组赋值
+                                $teacher_array[] = [
+                                    'teacher_id'   =>   $v['id'] ,
+                                    'teacher_name' =>   $v['real_name'] ,
+                                    'teacher_icon' =>   $v['head_icon'] ,
+                                    'lession_parent_name' => $v['parent_id'] > 0 ? !empty($lession_parent_name) ? $lession_parent_name : '' : '',
+                                    'lession_child_name'  => $v['child_id']  > 0 ? !empty($lession_child_name)  ? $lession_child_name  : '' : '',
+                                    'star_num'     => $v['star_num'],
+                                    'lesson_number'=> $v['lesson_number'] ,
+                                    'student_number'=>$v['student_number']
+                                ];
+                            }
+                            return response()->json(['code' => 200 , 'msg' => '获取讲师列表成功' , 'data' => $teacher_array]);
+                        } else {
+                            return response()->json(['code' => 200 , 'msg' => '获取讲师列表成功' , 'data' => []]);
+                        }
+                }else{
+                    //自增老师
+                    //判断讲师列表是否为空
+                    $teacher_count1 = Teacher::where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->where("school_id" , $json_info['school_id'])->count();
+                    //授权老师
+                    $teacher_count2 = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.is_recommend" , 1)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->count();
+                    if($teacher_count1 && $teacher_count1 > 0  && $teacher_count2 && $teacher_count2 > 0){
+                        $teacher_list1  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->where("school_id" , $json_info['school_id'])->get()->toArray();
+                        $teacher_list2  = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->withCount('lessons as lesson_number')->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.is_recommend" , 1)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->get()->toArray();
+                        $teacher_list = array_merge($teacher_list1,$teacher_list2);
+                        $teacher_list = array_unique($teacher_list,SORT_REGULAR);
+                            foreach($teacher_list as $k=>$v){
+                                //根据大分类的id获取大分类的名称
+                                if($v['parent_id'] && $v['parent_id'] > 0){
+                                    $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                                }
+
+                                //根据小分类的id获取小分类的名称
+                                if($v['child_id'] && $v['child_id'] > 0){
+                                    $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                                }
+
+                                //数组赋值
+                                $teacher_array[] = [
+                                    'teacher_id'   =>   $v['id'] ,
+                                    'teacher_name' =>   $v['real_name'] ,
+                                    'teacher_icon' =>   $v['head_icon'] ,
+                                    'lession_parent_name' => $v['parent_id'] > 0 ? !empty($lession_parent_name) ? $lession_parent_name : '' : '',
+                                    'lession_child_name'  => $v['child_id']  > 0 ? !empty($lession_child_name)  ? $lession_child_name  : '' : '',
+                                    'star_num'     => $v['star_num'],
+                                    'lesson_number'=> $v['lesson_number'] ,
+                                    'student_number'=>$v['student_number']
+                                ];
+                            }
+                            return response()->json(['code' => 200 , 'msg' => '获取讲师列表成功' , 'data' => $teacher_array]);
+                    }else{
+                        return response()->json(['code' => 200 , 'msg' => '获取讲师列表成功' , 'data' => []]);
                     }
 
-                    //根据小分类的id获取小分类的名称
-                    if($v['child_id'] && $v['child_id'] > 0){
-                        $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
-                    }
 
-                    //数组赋值
-                    $teacher_array[] = [
-                        'teacher_id'   =>   $v['id'] ,
-                        'teacher_name' =>   $v['real_name'] ,
-                        'teacher_icon' =>   $v['head_icon'] ,
-                        'lession_parent_name' => $v['parent_id'] > 0 ? !empty($lession_parent_name) ? $lession_parent_name : '' : '',
-                        'lession_child_name'  => $v['child_id']  > 0 ? !empty($lession_child_name)  ? $lession_child_name  : '' : '',
-                        'star_num'     => $v['star_num'],
-                        'lesson_number'=> $v['lesson_number'] ,
-                        'student_number'=>$v['student_number']
-                    ];
                 }
-                return response()->json(['code' => 200 , 'msg' => '获取讲师列表成功' , 'data' => $teacher_array]);
-            } else {
-                return response()->json(['code' => 200 , 'msg' => '获取讲师列表成功' , 'data' => []]);
+            }else{
+                //判断讲师列表是否为空
+                $teacher_count = Teacher::where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->where("school_id" , 1)->count();
+                if($teacher_count && $teacher_count > 0){
+                    //新数组赋值
+                    $teacher_array = [];
+                    //获取讲师列表
+                    $teacher_list  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("is_recommend" , 1)->where("type" , 2)->where("school_id" , 1)->offset(0)->limit(6)->get()->toArray();
+                    foreach($teacher_list as $k=>$v){
+                        //根据大分类的id获取大分类的名称
+                        if($v['parent_id'] && $v['parent_id'] > 0){
+                            $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                        }
+
+                        //根据小分类的id获取小分类的名称
+                        if($v['child_id'] && $v['child_id'] > 0){
+                            $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                        }
+
+                        //数组赋值
+                        $teacher_array[] = [
+                            'teacher_id'   =>   $v['id'] ,
+                            'teacher_name' =>   $v['real_name'] ,
+                            'teacher_icon' =>   $v['head_icon'] ,
+                            'lession_parent_name' => $v['parent_id'] > 0 ? !empty($lession_parent_name) ? $lession_parent_name : '' : '',
+                            'lession_child_name'  => $v['child_id']  > 0 ? !empty($lession_child_name)  ? $lession_child_name  : '' : '',
+                            'star_num'     => $v['star_num'],
+                            'lesson_number'=> $v['lesson_number'] ,
+                            'student_number'=>$v['student_number']
+                        ];
+                    }
+                    return response()->json(['code' => 200 , 'msg' => '获取讲师列表成功' , 'data' => $teacher_array]);
+                } else {
+                    return response()->json(['code' => 200 , 'msg' => '获取讲师列表成功' , 'data' => []]);
+                }
             }
+
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
@@ -649,11 +739,45 @@ class IndexController extends Controller {
      * @param ctime     2020-05-28
      * @return string
      */
-    public function getSubjectList() {
+    public function getSubjectList(Request $request) {
         //获取提交的参数
         try{
-            $subject = Subject::select('id', 'subject_name as name')->where(['is_del' => 0,'parent_id' => 0])->limit(6)->get();
-            return $this->response($subject);
+
+            //获取请求的平台端
+            $platform = verifyPlat() ? verifyPlat() : 'pc';
+            //获取用户token值
+            $token = $request->input('user_token');
+            //hash中token赋值
+            $token_key   = "user:regtoken:".$platform.":".$token;
+            //判断token值是否合法
+            $redis_token = Redis::hLen($token_key);
+            if($redis_token && $redis_token > 0) {
+                //解析json获取用户详情信息
+                $json_info = Redis::hGetAll($token_key);
+                //登录显示属于分校的课程
+                if($json_info['school_id'] == 1){
+                    $subject = Subject::select('id', 'subject_name as name')->where(['is_del' => 0,'parent_id' => 0])->limit(6)->get();
+                    return $this->response($subject);
+                }else{
+                    //查询分校学科id
+                    //自增科目
+                    $subject2 = Subject::select('id', 'subject_name as name')
+                    ->where(['is_del' => 0,'parent_id' => 0,"school_id" => $json_info['school_id']])
+                    ->get()->toArray();
+                    //授权科目
+                    $subject1 = CourseRefSubject::join("ld_course_subject","ld_course_ref_subject.parent_id","=","ld_course_subject.id")
+                    ->select('ld_course_subject.id', 'subject_name as name')
+                    ->where(['ld_course_subject.is_del' => 0,'ld_course_subject.parent_id' => 0,'to_school_id'=>$json_info['school_id']])
+                    ->get()->toArray();
+                    $subject = array_merge($subject1,$subject2);
+                    $subject = array_unique($subject,SORT_REGULAR);
+                    return $this->response(array_slice($subject,0,6));
+                }
+            }else{
+                $subject = Subject::select('id', 'subject_name as name')->where(['is_del' => 0,'parent_id' => 0])->limit(6)->get();
+                return $this->response($subject);
+            }
+
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }

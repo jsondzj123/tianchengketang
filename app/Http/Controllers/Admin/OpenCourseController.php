@@ -15,6 +15,11 @@ use App\Models\OpenLivesChilds;
 use App\Models\CourseRefOpen;
 
 class OpenCourseController extends Controller {
+
+	public function subject(){
+		$data = OpenCourse::subject();
+		return response()->json($data);
+	}
     /*
     * @param  公开课列表
     * @param  author  lys
@@ -247,21 +252,22 @@ class OpenCourseController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
        	if($openCourseArr['nature'] == 1 || $openCourseArr['nature'] == 2){
-       		$data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','status','start_at','end_at']);
+   			$data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','status','start_at','end_at']);
 		    if($data['code']!= 200 ){
 		    	 return response()->json($data);
-		    } 
-		    if($data['data']['status'] <1){
-			    	$update['status'] = 1;
-		    }else if($data['data']['status'] == 1){
-		    	if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
-		    		return response()->json(['code'=>207,'msg'=>'直播中，无法停售!']);
-		    	}
-		    	$update['status'] = 2;
-		    }else if($data['data']['status'] == 2){
-		    	$update['status'] = 1;
 		    }
        		if($openCourseArr['nature'] == 1){
+
+       			if($data['data']['status'] <1){
+			    	$update['status'] = 1;
+			    }else if($data['data']['status'] == 1){
+			    	if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
+			    		return response()->json(['code'=>207,'msg'=>'直播中，无法停售!']);
+			    	}
+			    	$update['status'] = 2;
+			    }else if($data['data']['status'] == 2){
+			    	$update['status'] = 1;
+			    }
        			//自增       
 			    try { 
 				    $update['admin_id'] =  isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
@@ -286,10 +292,22 @@ class OpenCourseController extends Controller {
 		            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
 		        }
 
+
        		}
        		if($openCourseArr['nature'] == 2){
        			//授权
-       			 try { 
+       			$natureOpenCourseArr =  CourseRefOpen::where(['course_id'=>$data['data']['id'],'to_school_id'=>$school_id])->first();
+       			if($natureOpenCourseArr['status'] <1){
+			    	$update['status'] = 1;
+			    }else if($natureOpenCourseArr['status'] == 1){
+			    	if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
+			    		return response()->json(['code'=>207,'msg'=>'直播中，无法停售!']);
+			    	}
+			    	$update['status'] = 2;
+			    }else if($natureOpenCourseArr['status'] == 2){
+			    	$update['status'] = 1;
+			    }
+       			try { 
 				    $update['admin_id'] =  isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
 				    $update['update_at'] = date('Y-m-d H:i:s');
 				    $res = CourseRefOpen::where(['course_id'=>$data['data']['id'],'to_school_id'=>$school_id])->update($update);

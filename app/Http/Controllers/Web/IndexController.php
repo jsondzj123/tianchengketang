@@ -25,6 +25,58 @@ class IndexController extends Controller {
         $this->school = School::where(['dns'=>$this->data['dns']])->first();
 
     }
+    /*
+     * @param  description   首页轮播图接口
+     * @param author    dzj
+     * @param ctime     2020-05-25
+     * return string
+     */
+    public function getChartList() {
+        //获取提交的参数
+        try{
+            $rotation_chart_list = [
+                [
+                    'chart_id'     =>   1 ,
+                    'title'        =>   '轮播图1' ,
+                    'jump_url'     =>   '' ,
+                    'pic_image'    =>   "https://longdeapi.oss-cn-beijing.aliyuncs.com/upload/2020-06-17/159238101090725ee9ce52b4dbc.jpg" ,
+                    'type'         =>   1 ,
+                    'lession_info' => [
+                        'lession_id'  => 1 ,
+                        'lession_name'=> '课程名称1'
+                    ]
+                ] ,
+                [
+                    'chart_id'     =>   2 ,
+                    'title'        =>   '轮播图2' ,
+                    'jump_url'     =>   '' ,
+                    'pic_image'    =>   "https://longdeapi.oss-cn-beijing.aliyuncs.com/upload/2020-06-17/159238104323565ee9ce73db673.jpg" ,
+                    'type'         =>   1 ,
+                    'lession_info' =>   [
+                        'lession_id'  => 0 ,
+                        'lession_name'=> ''
+                    ]
+                ] ,
+                [
+                    'chart_id'     =>   3 ,
+                    'title'        =>   '轮播图3' ,
+                    'jump_url'     =>   '' ,
+                    'pic_image'    =>   "https://longdeapi.oss-cn-beijing.aliyuncs.com/upload/2020-06-17/159238106166285ee9ce85ea7e0.jpg" ,
+                    'type'         =>   1 ,
+                    'lession_info' => [
+                        'lession_id'  => 2 ,
+                        'lession_name'=> '课程名称2'
+                    ]
+                ]
+            ];
+            return response()->json(['code' => 200 , 'msg' => '获取轮播图列表成功' , 'data' => $rotation_chart_list]);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+
+
+    
     //讲师列表
     public function teacherList(){
     	$limit = 8;

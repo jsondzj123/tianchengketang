@@ -64,6 +64,7 @@ class LiveListener
             }
             $live->playback = 1;
             $live->playbackUrl = $params['url'];
+            $live->duration = $params['duration'];
             $live->save();
             $response = [
                 'code'=> MTCloud::CODE_SUCCESS,
@@ -80,6 +81,12 @@ class LiveListener
             ];
         }else if($cmd === 'video.convert'){
             Log::info('转码结束:'.json_encode($params));
+            $response = [
+                'code'=> MTCloud::CODE_SUCCESS,
+                'data'=> [
+                    'role'=> MTCloud::ROLE_ADMIN
+                ],
+            ];
         }
 
 
