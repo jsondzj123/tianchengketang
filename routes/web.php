@@ -97,9 +97,15 @@ $router->group(['prefix' => 'api', 'namespace' => 'Api', 'middleware'=> 'user'],
 
 //PC端路由接口
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
+    $router->group(['prefix' => 'marketing'], function () use ($router) {
+        $router->post('addMarketing','MarketingController@addMarketing');//添加营销数据
+        $router->get('MarketingList','MarketingController@MarketingList');//营销数据列表
+    });
+
     //begin (lys)
     //首页
      $router->group(['prefix' => 'index'], function () use ($router) {
+        $router->post('getChartList','IndexController@getChartList');                             //APP首页轮播图接口
         $router->post('teacher','IndexController@teacherList');//我们的团队
         $router->post('news','IndexController@newInformation');//新闻资讯
         $router->post('index','IndexController@index');//首页内容
@@ -290,6 +296,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
      * 科目模块(sxl)
     */
     $router->post('subject', 'CourseController@subject');//课程学科列表(szw改)
+
 
 //    $router->post('subject', 'SubjectController@searchList');
     $router->post('subjectList', 'SubjectController@index');
@@ -631,7 +638,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
     //课程模块（重构）【公开课】（lys）
     $router->group(['prefix' => 'opencourse'], function () use ($router) {
-
+        $router->post('subject', 'OpenCourseController@subject');//公开课程学科列表(lys改)
         $router->post('getList', 'OpenCourseController@getList');//公开课列表
         $router->post('doInsertOpenCourse', 'OpenCourseController@doInsertOpenCourse');//公开课添加
         $router->post('doUpdateRecomend', 'OpenCourseController@doUpdateRecomend');//是否推荐

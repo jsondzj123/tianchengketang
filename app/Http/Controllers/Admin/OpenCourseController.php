@@ -15,6 +15,11 @@ use App\Models\OpenLivesChilds;
 use App\Models\CourseRefOpen;
 
 class OpenCourseController extends Controller {
+
+	public function subject(){
+		$data = OpenCourse::subject();
+		return response()->json($data);
+	}
     /*
     * @param  公开课列表
     * @param  author  lys
