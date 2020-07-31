@@ -819,8 +819,7 @@ class Coures extends Model {
         }
         //课程授课方式
         $coursemethod = Couresmethod::where(['course_id'=>$course_id,'is_del'=>0])->get()->toArray();
-        print_r($coursemethod);
-        $course['methods']='';
+        $course['methods']='1234654464646';
         if(!empty($coursemethod)){
             foreach ($coursemethod as $methodk=>$methodv){
                 if($methodv['method_id'] == 1){
