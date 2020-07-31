@@ -37,6 +37,9 @@ class Teacher extends Model {
     public function lessons() {
         return $this->belongsToMany('App\Models\Teacher', 'ld_course_teacher');
     }
+    public function refTeacher() {
+        return $this->belongsToMany('App\Models\Teacher', 'ld_course_ref_teacher');
+    }
 
     //获取学员数量
     public function getStudentNumberAttribute($value) {
@@ -58,7 +61,7 @@ class Teacher extends Model {
         }
         return $student_number;
     }
-    
+
     //获取学员数量
     public static function getStudentNumberInfo($value) {
         //获取课程的id列表
@@ -142,7 +145,7 @@ class Teacher extends Model {
         }
         return ['code' => 200 , 'msg' => '获取老师信息成功' , 'data' => $teacher_info];
     }
-    
+
     /*
      * @param  descriptsion    判断是否授权讲师教务
      * @param  author          dzj
@@ -175,10 +178,10 @@ class Teacher extends Model {
                 return ['code' => 204 , 'msg' => '此讲师教务不存在'];
             }
         }
-        
+
         //学校id
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
-  
+
         //判断此讲师教务是否授权
         $is_auth = CourseRefTeacher::where('to_school_id' , $school_id)->where('teacher_id' , $body['teacher_id'])->where('is_del' , 0)->count();
         if($is_auth <= 0){
@@ -207,7 +210,7 @@ class Teacher extends Model {
         if(!isset($body['type']) || empty($body['type']) || $body['type'] <= 0 || !in_array($body['type'] , [1,2])){
             return ['code' => 202 , 'msg' => '老师类型不合法'];
         }
-        
+
         //获取分校的状态和id
         $admin_id      = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
@@ -217,7 +220,7 @@ class Teacher extends Model {
         $pagesize = isset($body['pagesize']) && $body['pagesize'] > 0 ? $body['pagesize'] : 15;
         $page     = isset($body['page']) && $body['page'] > 0 ? $body['page'] : 1;
         $offset   = ($page - 1) * $pagesize;
-        
+
         //判断是否是总校的状态
         if($school_status > 0 && $school_status == 1){
             //获取讲师或教务是否有数据
@@ -309,9 +312,9 @@ class Teacher extends Model {
                     }
                 }
             }
-            
+
             $arr = [];
-            
+
             //授权讲师教务列表
             $teacher_list2 = DB::table('ld_course_ref_teacher')->leftJoin("ld_lecturer_educationa" , function($join){
                 $join->on('ld_lecturer_educationa.id', '=', 'ld_course_ref_teacher.teacher_id');
@@ -328,10 +331,10 @@ class Teacher extends Model {
             foreach($teacher_list2 as $k=>$v){
                 //通过老师的id获取老师详情
                 $teacher_info = self::where('id' , $v->teacher_id)->first();
-                
+
                 //获取学员数量
                 $student_number = self::getStudentNumberInfo($v->teacher_id);
-                
+
                 $arr[] = [
                     'teacher_id'       =>    $v->teacher_id ,
                     'real_name'        =>    $teacher_info['real_name'] ,
@@ -346,7 +349,7 @@ class Teacher extends Model {
                     'is_auth'          =>    1
                 ];
             }
-            
+
             //获取总条数
             $teacher_sum_array = array_merge((array)$teacher_list , (array)$arr);
 
@@ -369,7 +372,7 @@ class Teacher extends Model {
         //获取分校的状态和id
         $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
         $school_id     = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
-        
+
         //判断是否是总校的状态
         if($school_status > 0 && $school_status == 1){
             //获取讲师或教务列表
@@ -397,7 +400,7 @@ class Teacher extends Model {
             })->select('id as teacher_id','real_name','type')->orderByDesc('create_at')->get()->toArray();
 
             $arr = ["jiangshi" => [] , "jiaowu" => []];
-            
+
             //判断获取列表是否为空
             if($teacher_list && !empty($teacher_list)){
                 foreach($teacher_list as $k => $v){
@@ -442,7 +445,7 @@ class Teacher extends Model {
             })->select('id as teacher_id','real_name','type')->where('school_id' , $school_id)->orderByDesc('create_at')->get()->toArray();
 
             /*$arr = [];
-            
+
             //授权讲师教务列表
             $teacher_list2 = DB::table('ld_course_ref_teacher')->leftJoin("ld_lecturer_educationa" , function($join){
                 $join->on('ld_lecturer_educationa.id', '=', 'ld_course_ref_teacher.teacher_id');
@@ -470,19 +473,19 @@ class Teacher extends Model {
             foreach($teacher_list2 as $k=>$v){
                 //通过老师的id获取老师详情
                 $teacher_info = self::where('id' , $v->teacher_id)->first();
-                
+
                 $arr[] = [
                     'teacher_id'       =>    $v->teacher_id ,
                     'real_name'        =>    $teacher_info['real_name'] ,
-                    'type'             =>    $teacher_info['type'] 
+                    'type'             =>    $teacher_info['type']
                 ];
             }
-            
+
             //获取总条数
             $teacher_sum_array = array_merge((array)$teacher_list , (array)$arr);*/
-            
+
             $arr = ["jiangshi" => [] , "jiaowu" => []];
-            
+
             //判断获取列表是否为空
             if($teacher_list && !empty($teacher_list)){
                 foreach($teacher_list as $k => $v){
@@ -827,7 +830,7 @@ class Teacher extends Model {
                 return ['code' => 204 , 'msg' => '此讲师教务不存在'];
             }
         }
-        
+
         //判断此讲师是否被授权过
         $is_del_teacher = CourseRefTeacher::where("teacher_id" , $body['teacher_id'])->where('is_del' , 0)->count();
         if($is_del_teacher && $is_del_teacher > 0){
