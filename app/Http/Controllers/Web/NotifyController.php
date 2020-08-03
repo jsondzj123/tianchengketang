@@ -70,6 +70,7 @@ class NotifyController extends Controller {
             return 'fail';
         }
     }
+    //汇聚支付 回调
     public function hjnotify(){
         $order = Converge::where(['order_number' => $_GET['r2_OrderNo']])->first()->toArray();
         if($order['status'] > 0){

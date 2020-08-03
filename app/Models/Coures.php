@@ -788,6 +788,16 @@ class Coures extends Model {
         $order['real_name'] = $student['real_name'];
         $order['nickname'] = $student['nickname'];
         $order['reg_source'] = $student['reg_source'];
+        $order['phone'] = $student['phone'];
+        if($student['reg_source'] == 0){
+            $order['reg_name'] = '官网注册';
+        }
+        if($student['reg_source'] == 1){
+            $order['reg_name'] = '手机端';
+        }
+        if($student['reg_source'] == 2){
+            $order['reg_name'] = '线下录入';
+        }
         if($order['status'] == 0){
             $order['learning'] = "未支付";
             $order['bgcolor'] = '#26A4FD';
