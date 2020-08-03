@@ -931,7 +931,7 @@ class Coures extends Model {
         //获取后端的操作员id
         $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;  //操作员id
         //根据用户id获得分校id
-        $school = Student::select('school_id')->where('id',$arr['student_id'])->first();
+        $school = Student::select('school_id')->where('id',$formerorder['student_id'])->first();
         $data['order_number'] = date('YmdHis', time()) . rand(1111, 9999); //订单号  随机生成
         $data['order_type'] = 1;        //1线下支付 2 线上支付
         $data['student_id'] = $formerorder['student_id'];
