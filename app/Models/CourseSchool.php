@@ -492,7 +492,7 @@ class CourseSchool extends Model {
     * @return  array
    */
     public static function courseCancel($body){
-        $arr = $subjectArr = $bankids = $questionIds = $updateTeacherArr = $updateSubjectArr = $updatelvboArr = $updatezhiboArr = $updateBank = $teacherIdArr =$nonatureCourseId =  [];
+        $arr = $subjectArr = $bankids = $questionIds = $updateTeacherArr = $updateSubjectArr = $updatelvboArr = $updatezhiboArr = $updateBank = $teacherIdArr =$nonatureCourseId =    $noNatuerTeacher_ids =  [];
        //$courseIds=$body['course_id'];
         $courseIds = explode(',',$body['course_id']);
        // $courseIds = json_decode($body['course_id'],1); //前端传值
@@ -528,8 +528,9 @@ class CourseSchool extends Model {
             
             //要取消的教师信息
             $teachers_ids = OpenCourseTeacher::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //要取消授权的教师信息
-        
-            $noNatuerTeacher_ids  =  OpenCourseTeacher::whereNotIn('course_id',$nonatureCourseId)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //除取消授权的教师信息
+            if(!empty($nonatureCourseId)){
+                $noNatuerTeacher_ids  =  OpenCourseTeacher::whereNotIn('course_id',$nonatureCourseId)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //除取消授权的教师信息
+            }
             $refTeacherArr  = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0,'is_public'=>1])->pluck('teacher_id')->toArray(); //现已经授权过的教师
             if(!empty($refTeacherArr)){
                $teachers_ids = array_unique($teachers_ids);
@@ -624,6 +625,7 @@ class CourseSchool extends Model {
         }
         if($body['is_public'] == 0){
            //课程
+
             $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->get()->toArray(); //要取消的授权的课程
             if(empty($nature)){
                 return ['code'=>207,'msg'=>'课程已经取消授权'];
@@ -642,7 +644,9 @@ class CourseSchool extends Model {
             }
             //要取消的教师信息
             $teachers_ids = Couresteacher::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //要取消授权的教师信息
-            $noNatuerTeacher_ids  =  Couresteacher::whereNotIn('course_id',$nonatureCourseId)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //除取消授权的教师信息
+            if(!empty($nonatureCourseId)){
+                $noNatuerTeacher_ids  =  Couresteacher::whereNotIn('course_id',$nonatureCourseId)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //除取消授权的教师信息
+            }
             $refTeacherArr  = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0,'is_public'=>0])->pluck('teacher_id')->toArray(); //现已经授权过的讲师  
             if(!empty($refTeacherArr)){
                 $teachers_ids = array_unique($teachers_ids);
