@@ -874,14 +874,18 @@ class Coures extends Model {
                     $livearr = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->get();
                     if(!empty($livearr)){
                         foreach ($livearr as $livek=>$livev){
+                            //查询直播单元表
+                            $livename = Live::select('name as livename')->where(['id'=>$livev['resource_id'],'is_del'=>0])->where('is_forbid','<',2)->first();
+                            //查询课次表
                             if($livev['shift_id'] != '' && $livev['shift_id'] != null){
-                                $shiftno = LiveClass::where(['id'=>$livev['shift_id'],'is_del'=>0,'is_forbid'=>0])->first();
+                                $shiftno = LiveClass::select('name')->where(['id'=>$livev['shift_id'],'is_del'=>0,'is_forbid'=>0])->first();
                                 //查询课次
                                 $class_num = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->count();
                                 //课时
                                 $class_time = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->sum('class_hour');
                                 $shiftno['class_num'] = $class_num;
                                 $shiftno['class_time'] = $class_time;
+                                $shiftno['livetime'] = $livename['livename'];
                                 $livearrs[] = $shiftno;
                             }
                         }
