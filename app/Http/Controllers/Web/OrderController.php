@@ -208,7 +208,6 @@ class OrderController extends Controller {
                 $token = $this->hjHmac($pay,$str);
                 $pay['hmac'] = $token;
                 $aaa = $this->hjpost($pay);
-                print_r($aaa);die;
             }
             //支付宝
             if($this->data['pay_status'] == 2){
@@ -229,7 +228,6 @@ class OrderController extends Controller {
                 $token = $this->hjHmac($pay,$str);
                 $pay['hmac'] = $token;
                 $aaa = $this->hjpost($pay);
-                print_r($aaa);die;
             }
         }
     }

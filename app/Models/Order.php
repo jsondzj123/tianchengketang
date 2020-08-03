@@ -31,8 +31,8 @@ class Order extends Model {
             $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
             $data['school_id'] = $school_id;
         }
-        $begindata=date('Y-m-01', strtotime(date("Y-m-d")));
-        $enddate = date('Y-m-d',strtotime("$begindata +1 month -1 day"));
+        $begindata="2020-03-04";
+        $enddate = date('Y-m-d');
         $statetime = !empty($data['state_time'])?$data['state_time']:$begindata;
         $endtime = !empty($data['end_time'])?$data['end_time']:$enddate;
         $state_time = $statetime." 00:00:00";
