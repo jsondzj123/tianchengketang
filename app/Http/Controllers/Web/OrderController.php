@@ -207,7 +207,14 @@ class OrderController extends Controller {
                 $str = "15f8014fee1642fbb123fb5684cda48b";
                 $token = $this->hjHmac($pay,$str);
                 $pay['hmac'] = $token;
-                $aaa = $this->hjpost($pay);
+                $wxpay = $this->hjpost($pay);
+                $wxpayarr = json_decode($wxpay,true);
+                file_put_contents('wxhjpay.txt', '时间:'.date('Y-m-d H:i:s').print_r($wxpayarr,true),FILE_APPEND);
+                if($wxpayarr['ra_Code'] == 100){
+                    return response()->json(['code' => 200, 'msg' => '预支付订单生成成功','data'=>$wxpayarr['rd_Pic']]);
+                }else{
+                    return response()->json(['code' => 202, 'msg' => '生成失败，请报告总部']);
+                }
             }
             //支付宝
             if($this->data['pay_status'] == 2){
@@ -227,7 +234,13 @@ class OrderController extends Controller {
                 $str = "15f8014fee1642fbb123fb5684cda48b";
                 $token = $this->hjHmac($pay,$str);
                 $pay['hmac'] = $token;
-                $aaa = $this->hjpost($pay);
+                $alipay = $this->hjpost($pay);
+                file_put_contents('alihjpay.txt', '时间:'.date('Y-m-d H:i:s').print_r($alipay,true),FILE_APPEND);
+                if($alipay['ra_Code'] == 100){
+                    return response()->json(['code' => 200, 'msg' => '预支付订单生成成功','data'=>$alipay['rd_Pic']]);
+                }else{
+                    return response()->json(['code' => 202, 'msg' => '生成失败，请报告总部']);
+                }
             }
         }
     }
