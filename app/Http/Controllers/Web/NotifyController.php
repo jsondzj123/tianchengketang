@@ -10,7 +10,7 @@ use App\Models\Student;
 use Illuminate\Support\Facades\DB;
 
 class NotifyController extends Controller {
-    //汇聚支付宝支付
+    //支付宝回调
     public function alinotify(){
         $arr = $_POST;
         file_put_contents('alipaylogsssssssss.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
@@ -70,10 +70,10 @@ class NotifyController extends Controller {
         }
     }
     public function alihjnotify(){
-        file_put_contents('alihjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($_POST,true),FILE_APPEND);
+        file_put_contents('alihjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($_GET,true),FILE_APPEND);
     }
     public function wxhjnotify(){
-        file_put_contents('wxhjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($_POST,true),FILE_APPEND);
+        file_put_contents('wxhjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($_GET,true),FILE_APPEND);
     }
 }
 

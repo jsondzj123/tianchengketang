@@ -221,6 +221,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('alinotify', 'NotifyController@alinotify');//支付宝 购买回调
         $router->post('alihjnotify', 'NotifyController@alihjnotify');//汇聚支付宝 购买回调
         $router->post('wxhjnotify', 'NotifyController@wxhjnotify');//汇聚微信 购买回调
+
     });
 });
 //后台端路由接口
