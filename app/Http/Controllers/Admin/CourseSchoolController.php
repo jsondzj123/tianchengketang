@@ -105,6 +105,31 @@ class CourseSchoolController extends Controller {
         $result = CourseSchool::courseCancel(self::$accept_data);
         return response()->json($result);
     }
+
+    /**
+     * @param  授权更新
+     * @param  school_id
+     * @param  author  李银生
+     * @param  ctime   2020/7/27
+     * @return  array 
+     */
+    public function authorUpdate()
+    { 
+        $validator = Validator::make(self::$accept_data, 
+        [
+            'is_public' => 'required', 
+            'school_id' => 'required', 
+        ],
+        CourseSchool::message());
+        if($validator->fails()) {
+            return response()->json(json_decode($validator->errors()->first(),1));
+        }
+        $result = CourseSchool::authorUpdate(self::$accept_data);
+        return response()->json($result);
+    }
+
+
+
            
 
 
