@@ -71,7 +71,7 @@ class NotifyController extends Controller {
         }
     }
     public function hjnotify(){
-        $order = Converge::where(['order_number' => $_GET['r2_OrderNo']])->first();
+        $order = Converge::where(['order_number' => $_GET['r2_OrderNo']])->first()->toArray();
         if($order['status'] > 0){
             return "success";
         }
