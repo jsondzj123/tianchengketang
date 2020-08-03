@@ -70,9 +70,11 @@ class NotifyController extends Controller {
         }
     }
     public function alihjnotify(){
+        file_put_contents('111111.txt', '时间:'.date('Y-m-d H:i:s').print_r('1111',true),FILE_APPEND);
         file_put_contents('alihjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($_GET,true),FILE_APPEND);
     }
     public function wxhjnotify(){
+        file_put_contents('2222222.txt', '时间:'.date('Y-m-d H:i:s').print_r('22222',true),FILE_APPEND);
         file_put_contents('wxhjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($_GET,true),FILE_APPEND);
     }
 }
