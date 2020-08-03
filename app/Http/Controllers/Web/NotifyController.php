@@ -79,15 +79,17 @@ class NotifyController extends Controller {
         file_put_contents('order.txt', '时间:'.date('Y-m-d H:i:s').print_r($order,true),FILE_APPEND);
         if($_GET['r6_Status'] == 100){
             //只修改订单号
-            $up = Converge::where(['order_number'=>$_GET['r2_OrderNo']])->update(['status'=>1,'update_time'=>date('Y-m-d H:i:s'),'pay_time'=>date('Y-m-d H:i:s')]);
+            $up = Converge::where(['id'=>$order['id']])->update(['status'=>1,'update_time'=>date('Y-m-d H:i:s'),'pay_time'=>date('Y-m-d H:i:s')]);
+            file_put_contents('update.txt', '时间:'.date('Y-m-d H:i:s').print_r($up,true),FILE_APPEND);
             if($up){
-                file_put_contents('alihjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($up,true),FILE_APPEND);
                 return "success";
             }
         }
         if($_GET['r6_Status'] == 101){
-            $up = Converge::where(['order_number'=>$_GET['r2_OrderNo']])->update(['status'=>2,'update_time'=>date('Y-m-d H:i:s')]);
+            $up = Converge::where(['id'=>$order['id']])->update(['status'=>2,'update_time'=>date('Y-m-d H:i:s')]);
+            file_put_contents('update.txt', '时间:'.date('Y-m-d H:i:s').print_r($up,true),FILE_APPEND);
             if($up){
+
                 return "success";
             }
         }
