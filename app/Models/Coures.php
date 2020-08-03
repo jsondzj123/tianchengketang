@@ -864,17 +864,19 @@ class Coures extends Model {
         }else{
             $course = Coures::where(['id'=>$data['id'],'is_del'=>0,'status'=>1])->first();
         }
+        $return = [];
         $method = Couresmethod::where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
         if(!empty($method)){
             foreach ($method as $methodk=>$methodv){
                 if($methodv['method_id'] == 1){
-                    $course['method'] = $course['method'].'直播';
+//                    $course['method'] = $course['method'].'直播';
                     //课程关联的班号
                     $livearr = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->get();
                     if(!empty($livearr)){
                         foreach ($livearr as $livek=>$livev){
                             //查询直播单元表
                             $livename = Live::select('name as livename')->where(['id'=>$livev['resource_id'],'is_del'=>0])->where('is_forbid','<',2)->first();
+                            $livename['type'] = '直播';
                             //查询课次表
                             if($livev['shift_id'] != '' && $livev['shift_id'] != null){
                                 $shiftno = LiveClass::select('name')->where(['id'=>$livev['shift_id'],'is_del'=>0,'is_forbid'=>0])->first();
@@ -884,21 +886,21 @@ class Coures extends Model {
                                 $class_time = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->sum('class_hour');
                                 $shiftno['class_num'] = $class_num;
                                 $shiftno['class_time'] = $class_time;
-                                $livename['livearr'] = $shiftno;
+                                $livename['livearr'][] = $shiftno;
                             }
+                            $return[] = $livename;
                         }
-                        $course['livearr'] = $livename;
                     }
                 }
-                if($methodv['method_id'] == 2){
-                    $course['method'] = $course['method'].'录播';
-                }
-                if($methodv['method_id'] == 3){
-                    $course['method'] = $course['method'].'其他';
-                }
+//                if($methodv['method_id'] == 2){
+//                    $course['method'] = $course['method'].'录播';
+//                }
+//                if($methodv['method_id'] == 3){
+//                    $course['method'] = $course['method'].'其他';
+//                }
             }
         }
-        return ['code' => 200 , 'msg' => '获取成功','data'=>$course];
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$return];
     }
     /*
          * @param  订单
