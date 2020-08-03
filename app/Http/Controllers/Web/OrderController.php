@@ -159,7 +159,7 @@ class OrderController extends Controller {
     }
 
     //汇聚支付宝支付
-    public function hjaliPcpay(){
+    public function converge(){
          if($this->data['nature'] == 1){
              $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
          }else{
