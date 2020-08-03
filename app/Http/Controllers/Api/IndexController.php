@@ -672,9 +672,20 @@ class IndexController extends Controller {
                                 'student_number'      =>  $v['student_number']
                             ];
                         }
+                        //数据分页
+                        $start =($page - 1) * $pagesize;
+                        $limit_s= $start + $pagesize;
+                        $data = [];
+                        for ($i = $start; $i < $limit_s; $i++) {
+                            if (!empty($teacher_list[$i])) {
+                                    array_push($data, $teacher_list[$i]);
+                                }
+                        }
+                        $teacher_list = $data;
                     } else {
                         $teacher_list = "";
                     }
+
                     return response()->json(['code' => 200 , 'msg' => '获取名师列表成功' , 'data' => $teacher_list]);
 
                 }
