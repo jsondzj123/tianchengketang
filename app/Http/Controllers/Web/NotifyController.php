@@ -77,6 +77,7 @@ class NotifyController extends Controller {
             return "success";
         }
         file_put_contents('alihjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
+        file_put_contents('r2_OrderNo.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr['r2_OrderNo'],true),FILE_APPEND);
         if($arr['r6_Status'] == 100){
             //只修改订单号
             $up = Converge::where(['order_number'=>$arr['r2_OrderNo']])->update(['status'=>1,'update_time'=>date('Y-m-d H:i:s'),'pay_time'=>date('Y-m-d H:i:s')]);
