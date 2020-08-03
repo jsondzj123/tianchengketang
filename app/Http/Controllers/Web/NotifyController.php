@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Converge;
 use App\Models\Coures;
 use App\Models\CourseSchool;
 use App\Models\Order;
@@ -69,13 +70,26 @@ class NotifyController extends Controller {
             return 'fail';
         }
     }
-    public function alihjnotify(){
-        file_put_contents('111111.txt', '时间:'.date('Y-m-d H:i:s').print_r('1111',true),FILE_APPEND);
-        file_put_contents('alihjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($_GET,true),FILE_APPEND);
-    }
-    public function wxhjnotify(){
-        file_put_contents('2222222.txt', '时间:'.date('Y-m-d H:i:s').print_r('22222',true),FILE_APPEND);
-        file_put_contents('wxhjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($_GET,true),FILE_APPEND);
+    public function hjnotify(){
+        $arr = $_GET;
+        $order = Converge::where(['order_number' => $arr['r2_OrderNo']])->first();
+        if($order['status'] > 0){
+            return "success";
+        }
+        file_put_contents('alihjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
+        if($arr['r6_Status'] == 100){
+            //只修改订单号
+            $up = Converge::where(['order_number'=>$arr['r2_OrderNo']])->update(['status'=>1,'update_time'=>date('Y-m-d H:i:s'),'pay_time'=>date('Y-m-d H:i:s')]);
+            if($up){
+                return "success";
+            }
+        }
+        if($arr['r6_Status'] == 101){
+            $up = Converge::where(['order_number'=>$arr['r2_OrderNo']])->update(['status'=>2,'update_time'=>date('Y-m-d H:i:s')]);
+            if($up){
+                return "success";
+            }
+        }
     }
 }
 

@@ -219,8 +219,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
         $router->post('urlcode','CourseController@urlcode');//二维码测试
         $router->post('alinotify', 'NotifyController@alinotify');//支付宝 购买回调
-        $router->get('alihjnotify', 'NotifyController@alihjnotify');//汇聚支付宝 购买回调
-        $router->get('wxhjnotify', 'NotifyController@wxhjnotify');//汇聚微信 购买回调
+        $router->get('hjnotify', 'NotifyController@hjnotify');//汇聚 支付回调
 
     });
 });
