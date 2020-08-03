@@ -899,7 +899,7 @@ class Coures extends Model {
                 if($methodv['method_id'] == 3){
                     $lubo['recordedname'] = $course['title'];
                     $lubo['type'] = '其他';
-                    $return['lubo'] = $lubo;
+                    $return['rest'] = $lubo;
                 }
             }
         }
