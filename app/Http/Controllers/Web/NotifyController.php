@@ -71,23 +71,21 @@ class NotifyController extends Controller {
         }
     }
     public function hjnotify(){
-        print_r($_GET['r2_OrderNo']);die;
-        $order = Converge::where(['order_number' => $arr['r2_OrderNo']])->first();
-
+        $order = Converge::where(['order_number' => $_GET['r2_OrderNo']])->first();
         if($order['status'] > 0){
             return "success";
         }
-        file_put_contents('alihjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
-        file_put_contents('r2_OrderNo.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr['r2_OrderNo'],true),FILE_APPEND);
-        if($arr['r6_Status'] == 100){
+        file_put_contents('alihjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($_GET,true),FILE_APPEND);
+        file_put_contents('r2_OrderNo.txt', '时间:'.date('Y-m-d H:i:s').print_r($_GET['r2_OrderNo'],true),FILE_APPEND);
+        if($_GET['r6_Status'] == 100){
             //只修改订单号
-            $up = Converge::where(['order_number'=>$arr['r2_OrderNo']])->update(['status'=>1,'update_time'=>date('Y-m-d H:i:s'),'pay_time'=>date('Y-m-d H:i:s')]);
+            $up = Converge::where(['order_number'=>$_GET['r2_OrderNo']])->update(['status'=>1,'update_time'=>date('Y-m-d H:i:s'),'pay_time'=>date('Y-m-d H:i:s')]);
             if($up){
                 return "success";
             }
         }
-        if($arr['r6_Status'] == 101){
-            $up = Converge::where(['order_number'=>$arr['r2_OrderNo']])->update(['status'=>2,'update_time'=>date('Y-m-d H:i:s')]);
+        if($_GET['r6_Status'] == 101){
+            $up = Converge::where(['order_number'=>$_GET['r2_OrderNo']])->update(['status'=>2,'update_time'=>date('Y-m-d H:i:s')]);
             if($up){
                 return "success";
             }
