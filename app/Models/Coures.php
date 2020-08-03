@@ -870,7 +870,6 @@ class Coures extends Model {
                 if($methodv['method_id'] == 1){
                     $course['method'] = $course['method'].'直播';
                     //课程关联的班号
-                    $livearrs=[];
                     $livearr = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->get();
                     if(!empty($livearr)){
                         foreach ($livearr as $livek=>$livev){
@@ -888,8 +887,8 @@ class Coures extends Model {
                                 $livename['livearr'] = $shiftno;
                             }
                         }
+                        $course['livearr'] = $livename;
                     }
-                    $course['livearr'] = $livearrs;
                 }
                 if($methodv['method_id'] == 2){
                     $course['method'] = $course['method'].'录播';
