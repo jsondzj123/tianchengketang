@@ -927,6 +927,12 @@ class Coures extends Model {
         }
         //原订单 状态变成5已失效  再新增订单
         $formerorder = Order::where(['order_number'=>$arr['order_number']])->first();
+        //课程到期时间
+        if($course['expiry'] == 0){
+            $validity_time = "3002-01-01 12:12:12";
+        }else{
+            $validity_time = date($formerorder['create_at'], strtotime('+' . $course['expiry'] . ' day'));
+        }
         Order::where(['order_number'=>$arr['order_number']])->update(['status'=>5]);
         //获取后端的操作员id
         $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;  //操作员id
@@ -942,11 +948,11 @@ class Coures extends Model {
         $data['pay_type'] = $arr['pay_type'];   //支付方式
         $data['status'] = 2;                  //支付状态
         $data['pay_time'] = $arr['pay_time']; //支付时间
-        $data['oa_status'] = 1;              //OA状态
+        $data['oa_status'] = 1;             //OA状态
         $data['class_id'] = $arr['id'];  //课程id
         $data['school_id'] = $school['school_id'];
         $data['nature'] = $arr['nature'];  //课程类型
-        $data['validity_time'] = $arr['order_number'];  //课程到期时间
+        $data['validity_time'] = $validity_time;  //课程到期时间
         $data['parent_order_number'] = $arr['order_number'];  //转班订单号
         $add = Order::insert($data);
         if($add){
