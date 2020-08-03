@@ -183,7 +183,7 @@ class OrderController extends Controller {
              'status' => 0,
              'parent_id' => $this->data['parent_id'],
              'chint_id' => $this->data['chint_id'],
-             'course_id' => $this->data['course_id'],
+             'course_id' => $this->data['id'],
              'nature' => $this->data['nature'],
              'school_id' => $this->school['id'],
          ];
