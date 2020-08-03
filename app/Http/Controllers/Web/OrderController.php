@@ -191,7 +191,7 @@ class OrderController extends Controller {
         if($add){
             //微信
             if($this->data['pay_status'] == 1){
-                $notify = "http://".$_SERVER['HTTP_HOST']."/web/course/wxhjnotify";
+                $notify = 'AB|'."http://".$_SERVER['HTTP_HOST']."/web/course/wxhjnotify";
                 $pay=[
                     'p0_Version'=>'1.0',
                     'p1_MerchantNo'=>'888108900009969',
@@ -218,7 +218,7 @@ class OrderController extends Controller {
             }
             //支付宝
             if($this->data['pay_status'] == 2){
-                $notify = "http://".$_SERVER['HTTP_HOST']."/web/course/alihjnotify";
+                $notify = 'AB|'."http://".$_SERVER['HTTP_HOST']."/web/course/alihjnotify";
                 $pay=[
                     'p0_Version'=>'1.0',
                     'p1_MerchantNo'=>'888108900009969',
