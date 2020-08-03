@@ -112,6 +112,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('course','IndexController@course');//精品课程
         $router->post('getCompany','IndexController@getCompany'); //对公信息扫码
         $router->post('getPay','IndexController@getPay'); //对公信息扫码
+        $router->post('alihjnotify', 'NotifyController@alihjnotify');//汇聚支付宝 购买回调
+        $router->post('wxhjnotify', 'NotifyController@wxhjnotify');//汇聚微信 购买回调
     });
 
     $router->group(['prefix' => 'footer'], function () use ($router) {
@@ -219,8 +221,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
         $router->post('urlcode','CourseController@urlcode');//二维码测试
         $router->post('alinotify', 'NotifyController@alinotify');//支付宝 购买回调
-        $router->post('alihjnotify', 'NotifyController@alihjnotify');//汇聚支付宝 购买回调
-        $router->post('wxhjnotify', 'NotifyController@wxhjnotify');//汇聚微信 购买回调
+
     });
 });
 //后台端路由接口
