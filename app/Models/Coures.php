@@ -927,6 +927,9 @@ class Coures extends Model {
         }
         //原订单 状态变成5已失效  再新增订单
         $formerorder = Order::where(['order_number'=>$arr['order_number']])->first();
+        if($formerorder['status'] == 5){
+            return ['code' => 201 , 'msg' => '订单失效'];
+        }
         //课程到期时间
         if($course['expiry'] == 0){
             $validity_time = "3002-01-01 12:12:12";
