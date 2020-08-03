@@ -833,7 +833,7 @@ class Coures extends Model {
             foreach ($method as $methodk => $methodv) {
                 if ($methodv['method_id'] == 1) {
                     //课程关联的班号
-                    $livearr = CourseLiveResource::where(['course_id' => $data['id'], 'is_del' => 0])->get();
+                    $livearr = CourseLiveResource::where(['course_id' => $course_id, 'is_del' => 0])->get();
                     if (!empty($livearr)) {
                         foreach ($livearr as $livek => $livev) {
                             //查询直播单元表
