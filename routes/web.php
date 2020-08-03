@@ -207,6 +207,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('webajax','OrderController@webajax');//前端轮询查询接口
         $router->post('chargeOrder','OrderController@chargeOrder');//0元购买接口
         $router->post('scanPay','CourseController@scanPay');//扫码支付
+        //汇聚扫码支付
+        $router->post('converge', 'OrderController@converge');//汇聚扫码
     });
     //课程 无需token
     $router->group(['prefix' => 'course'], function () use ($router) {
@@ -217,6 +219,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('courseTeacher','CourseController@courseTeacher');//课程讲师信息
         $router->post('urlcode','CourseController@urlcode');//二维码测试
         $router->post('alinotify', 'NotifyController@alinotify');//支付宝 购买回调
+        $router->post('alihjnotify', 'NotifyController@alihjnotify');//汇聚支付宝 购买回调
+        $router->post('wxhjnotify', 'NotifyController@wxhjnotify');//汇聚微信 购买回调
     });
 });
 //后台端路由接口

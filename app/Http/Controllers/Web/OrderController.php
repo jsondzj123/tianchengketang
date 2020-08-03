@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Converge;
 use App\Models\Coures;
 use App\Models\Couresteacher;
 use App\Models\CourseSchool;
@@ -78,8 +79,7 @@ class OrderController extends Controller {
              return ['code' => 203 , 'msg' => '生成订单失败'];
          }
      }
-     //用户进行支付
-    //订单id   支付方式 1微信2支付宝
+     //用户进行支付  支付方式 1微信2支付宝
      public function userPaying(){
         $order = Order::where(['id'=>$this->data['order_id']])->first();
         if($this->data['pay_type'] == 1){
@@ -100,7 +100,6 @@ class OrderController extends Controller {
             }
         }
      }
-
      //前端轮询查订单是否支付完成
     public function webajax(){
         if(!isset($this->data['order_number']) || empty($this->data['order_number'])){
@@ -118,7 +117,6 @@ class OrderController extends Controller {
             return ['code' => 201 , 'msg' => '订单号错误'];
         }
     }
-
     //0元购买接口
     public function chargeOrder(){
        $order = Order::where(['id'=>$this->data['order_id']])->first();
@@ -160,80 +158,81 @@ class OrderController extends Controller {
        }
     }
 
-
-
-
-
     //汇聚支付宝支付
     public function hjaliPcpay(){
-//        if($pay_type == 1){
-//            $notify = "http://".$_SERVER['HTTP_HOST']."/Api/notify/hjAlinotify";
-//        }else{
-            $notify = "http://".$_SERVER['HTTP_HOST']."/Web/notify/hjAlinotify";
-//        }
-        $arr=[
-            'p0_Version'=>'1.0',
-            'p1_MerchantNo'=>'888108900009969',
-            'p2_OrderNo'=>'20200528171614556633',
-            'p3_Amount'=>0.01,
-            'p4_Cur'=>1,
-            'p5_ProductName'=>"龙德产品",
-            'p9_NotifyUrl'=>$notify,
-            'q1_FrpCode'=>'ALIPAY_NATIVE',
-            'q4_IsShowPic'=>1,
-            'qa_TradeMerchantNo'=>'777167300271170'
-        ];
-        $str = "15f8014fee1642fbb123fb5684cda48b";
-        $token = $this->hjHmac($arr,$str);
-        $arr['hmac'] = $token;
-        $aaa = $this->hjpost($arr);
-        print_r($aaa);die;
+         if($this->data['nature'] == 1){
+             $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
+         }else{
+             $course = Coures::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
+         }
+         if(empty($course)){
+             return response()->json(['code' => 201, 'msg' => '未查到此课程信息']);
+         }
+         if(!isset($this->data['phone']) || $this->data['phone'] == ''){
+             return response()->json(['code' => 201, 'msg' => '请填写手机号']);
+         }
+         if(!isset($this->data['price']) || $this->data['price'] <= 0){
+                return response()->json(['code' => 201, 'msg' => '金额不能为0']);
+         }
+         $arr = [
+             'username' => $this->data['username'],
+             'phone' => $this->data['phone'],
+             'order_number' => date('YmdHis', time()) . rand(1111, 9999),
+             'pay_status' => $this->data['pay_status'],
+             'price' => $this->data['price'],
+             'status' => 0,
+             'parent_id' => $this->data['parent_id'],
+             'chint_id' => $this->data['chint_id'],
+             'course_id' => $this->data['course_id'],
+             'nature' => $this->data['nature'],
+             'school_id' => $this->school['id'],
+         ];
+        $add = Converge::insert($arr);
+        if($add){
+            //微信
+            if($this->data['pay_status'] == 1){
+                $notify = "http://".$_SERVER['HTTP_HOST']."/Web/course/wxhjnotify";
+                $pay=[
+                    'p0_Version'=>'1.0',
+                    'p1_MerchantNo'=>'888108900009969',
+                    'p2_OrderNo'=>$arr['order_number'],
+                    'p3_Amount'=>$this->data['price'],
+                    'p4_Cur'=>1,
+                    'p5_ProductName'=>"龙德产品",
+                    'p9_NotifyUrl'=>$notify,
+                    'q1_FrpCode'=>'WEIXIN_NATIVE',
+                    'q4_IsShowPic'=>1,
+                    'qa_TradeMerchantNo'=>'777170100269422'
+                ];
+                $str = "15f8014fee1642fbb123fb5684cda48b";
+                $token = $this->hjHmac($pay,$str);
+                $pay['hmac'] = $token;
+                $aaa = $this->hjpost($pay);
+                print_r($aaa);die;
+            }
+            //支付宝
+            if($this->data['pay_status'] == 2){
+                $notify = "http://".$_SERVER['HTTP_HOST']."/Web/course/alihjnotify";
+                $pay=[
+                    'p0_Version'=>'1.0',
+                    'p1_MerchantNo'=>'888108900009969',
+                    'p2_OrderNo'=>$arr['order_number'],
+                    'p3_Amount'=>$this->data['price'],
+                    'p4_Cur'=>1,
+                    'p5_ProductName'=>"龙德产品",
+                    'p9_NotifyUrl'=>$notify,
+                    'q1_FrpCode'=>'ALIPAY_NATIVE',
+                    'q4_IsShowPic'=>1,
+                    'qa_TradeMerchantNo'=>'777167300271170'
+                ];
+                $str = "15f8014fee1642fbb123fb5684cda48b";
+                $token = $this->hjHmac($pay,$str);
+                $pay['hmac'] = $token;
+                $aaa = $this->hjpost($pay);
+                print_r($aaa);die;
+            }
+        }
     }
-    //汇聚微信支付
-    public function hjwxPcpay(){
-//        if($pay_type == 1){
-//            $notify = "http://".$_SERVER['HTTP_HOST']."/Api/notify/hjAlinotify";
-//        }else{
-        $notify = "http://".$_SERVER['HTTP_HOST']."/Web/notify/hjAlinotify";
-//        }
-        $arr=[
-            'p0_Version'=>'1.0',
-            'p1_MerchantNo'=>'888108900009969',
-            'p2_OrderNo'=>'20200528171614556633',
-            'p3_Amount'=>0.01,
-            'p4_Cur'=>1,
-            'p5_ProductName'=>"龙德产品",
-            'p9_NotifyUrl'=>$notify,
-            'q1_FrpCode'=>'WEIXIN_NATIVE',
-            'q4_IsShowPic'=>1,
-            'qa_TradeMerchantNo'=>'777170100269422'
-        ];
-        $str = "15f8014fee1642fbb123fb5684cda48b";
-        $token = $this->hjHmac($arr,$str);
-        $arr['hmac'] = $token;
-        $aaa = $this->hjpost($arr);
-        print_r($aaa);die;
-
-
-//    "r7_TrxNo": "100220052803060518",
-//    "rb_CodeMsg": "",
-//    "r2_OrderNo": "20200528171614556633",
-//    "r3_Amount": "0.01",
-//    "r6_FrpCode": "WEIXIN_NATIVE",
-//    "rc_Result": "http://trade.joinpay.com/wxPay.action?trxNo=100220052803060518",
-//    "ra_Code": 100,
-//    "hmac": "743CB595BC6729B67978510CD9F61BE9",
-//    "rd_Pic": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANIAAADSAQAAAAAX4qPvAAABvElEQVR42u2YPY6EMAyFjSgoOQI3gYuNBBIXg5vkCJQp0Hjfc9iBndntVnYDRUbko7Dy/PMyon8+i9zsZv/HdsEzJtVtTLmXUfneBTH8bg/J1VZjo927puzFMKkQogxgWcgWeUQyxNm3k9gH0WzUZsWCOOdYRv2oGrafreqHto6MeQy2bsfynvOO7Pvhdhapf+sFXgxxVptIs5RcYtFDxDimc9In2g6Cranf1AWxLlt01SuX1vPMnJmiCbczeo8xqZOy2oJYYqmnPOjE05vQnc84nRlqe2nxARbF9tTh4E79fJmmkkFPVHnD4ckj1CCmzStO6blUF23dmW7CFoii52IZHsSY0jYV1GZV+qGfL9s781mMLlm951M/b6al8eXDStBsyRjFkk0FYb0X/a4578t2KQaC0dm29Jf57swOn8V2fIwGuuIghjSyZjjb9UDKBI1iSCM2w4eYKxaa8xhmD19Y7z1tMB1XDDv8pxQ/wSGx6qxBjL4cN8mBi7AFvt0RXFlRzfzEYCJePF8E401ypJ9QdOdNYpmadIvNqkuNeTO796PeJ5ta7INhzPK6jAbTT/Ut5/3Y/R/ZzULZF7C4BezFfHYqAAAAAElFTkSuQmCC",
-//    "r4_Cur": "1",
-//    "r0_Version": "1.0",
-//    "r1_MerchantNo": "888108900009969"
-    }
-
-
-
-
-
-
     //汇聚签名
     public function hjHmac($arr,$str){
         $newarr = '';

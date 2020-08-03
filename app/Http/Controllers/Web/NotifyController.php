@@ -69,5 +69,11 @@ class NotifyController extends Controller {
             return 'fail';
         }
     }
+    public function alihjnotify(){
+        file_put_contents('alihjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($_POST,true),FILE_APPEND);
+    }
+    public function wxhjnotify(){
+        file_put_contents('wxhjnotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($_POST,true),FILE_APPEND);
+    }
 }
 
