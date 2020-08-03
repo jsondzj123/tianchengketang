@@ -512,19 +512,20 @@ class CourseSchool extends Model {
             }
 
             $nature =OpenCourse::whereIn('id',$nature)->select('parent_id','child_id')->get()->toArray();
-
             foreach ($nature  as $kk => $vv) {
                $natureCourseArr[$kk]['parent_id'] = $vv['parent_id'];
                $natureCourseArr[$kk]['child_id'] = $vv['child_id'];
             }
             $noNatureCourse = CourseRefOpen::whereNotIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->pluck('course_id')->toArray();//除取消授权课程的信息
-            $noNatureCourse =OpenCourse::whereIn('id',$noNatureCourse)->select('id','parent_id','child_id')->get()->toArray();
-   
-            foreach($noNatureCourse as $k=>$v){
-                 $noNaturecourseSubjectArr[$k]['parent_id'] = $v['parent_id'];
-                 $noNaturecourseSubjectArr[$k]['child_id'] = $v['child_id'];
-                 array_push($nonatureCourseId,$v['id']);
+            if(!empty($noNatureCourse)){
+                $noNatureCourse =OpenCourse::whereIn('id',$noNatureCourse)->select('id','parent_id','child_id')->get()->toArray();
+                foreach($noNatureCourse as $k=>$v){
+                     $noNaturecourseSubjectArr[$k]['parent_id'] = $v['parent_id'];
+                     $noNaturecourseSubjectArr[$k]['child_id'] = $v['child_id'];
+                     array_push($nonatureCourseId,$v['id']);
+                }
             }
+            
             //要取消的教师信息
             $teachers_ids = OpenCourseTeacher::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //要取消授权的教师信息
         
@@ -542,8 +543,10 @@ class CourseSchool extends Model {
                    $updateTeacherArr = array_diff($teachers_ids,$refTeacherArr); //$updateTecherArr 要取消授权的讲师信息
                }
             }
+            if(!empty($noNaturecourseSubjectArr)){
+                $noBankSubjectArr  = $noNaturecourseSubjectArr = array_unique($noNaturecourseSubjectArr,SORT_REGULAR);//除取消授权的学科信息    
+            }
             $bankSubjectArr = $natureCourseArr = array_unique($natureCourseArr,SORT_REGULAR);//要取消授权的学科信息
-            $noBankSubjectArr  = $noNaturecourseSubjectArr = array_unique($noNaturecourseSubjectArr,SORT_REGULAR);//除取消授权的学科信息
             $natureSubjectIds = CourseRefSubject::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0,'is_public'=>1])->select('parent_id','child_id')->get()->toArray();//已经授权过的学科信息
             if(!empty($natureSubjectIds)){
                $natureSubjectIds = array_unique($natureSubjectIds,SORT_REGULAR);
@@ -756,7 +759,6 @@ class CourseSchool extends Model {
                 if(!empty($noBankSubjectArr)){
                     foreach($noBankSubjectArr as $key =>$subjectid){
                         $bankArr = Bank::where($subjectid)->where(['is_del'=>0])->pluck('id')->toArray();
-
                         if(!empty($bankArr)){
                             foreach($bankArr as $k=>$v){
                                 array_push($noNatureBankId,$v);
