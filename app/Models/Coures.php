@@ -886,7 +886,7 @@ class Coures extends Model {
                                 $class_time = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->sum('class_hour');
                                 $shiftno['class_num'] = $class_num;
                                 $shiftno['class_time'] = $class_time;
-                                $livename['livearr'][] = $shiftno;
+                                $livename['livearr'] = $shiftno;
                             }
                             $return[] = $livename;
                         }
