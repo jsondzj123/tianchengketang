@@ -864,6 +864,7 @@ class Coures extends Model {
         }else{
             $course = Coures::where(['id'=>$data['id'],'is_del'=>0,'status'=>1])->first();
         }
+        print_r($course);die;
         $return = [];
         $method = Couresmethod::where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
         if(!empty($method)){
