@@ -936,7 +936,7 @@ class Coures extends Model {
         $data['order_type'] = 1;        //1线下支付 2 线上支付
         $data['student_id'] = $formerorder['student_id'];
         $data['price'] = $course['sale_price']; //应付价格
-        $data['student_price'] = $arr['sale_price'];//学员价格
+        $data['student_price'] = $course['sale_price'];//学员价格
         $data['lession_price'] = $arr['price']; //实际支付价格
         $data['pay_status'] = $arr['pay_status']; //支付类型
         $data['pay_type'] = $arr['pay_type'];   //支付方式
