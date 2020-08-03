@@ -118,6 +118,7 @@ class CourseSchoolController extends Controller {
         $validator = Validator::make(self::$accept_data, 
         [
             'is_public' => 'required', 
+            'school_id' => 'required', 
         ],
         CourseSchool::message());
         if($validator->fails()) {
