@@ -888,7 +888,7 @@ class Coures extends Model {
                                 $shiftno['class_time'] = $class_time;
                                 $livename['livearr'] = $shiftno;
                             }
-                            $return[] = $livename;
+                            $return['live'][] = $livename;
                         }
                     }
                 }
