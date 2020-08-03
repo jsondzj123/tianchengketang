@@ -532,7 +532,7 @@ class IndexController extends Controller {
      * @param ctime     2020-06-02
      * return string
      */
-    public function getFamousTeacherList(){
+    public function getFamousTeacherList(Request $request){
         //获取提交的参数
         try{
             //每页显示条数
@@ -543,55 +543,192 @@ class IndexController extends Controller {
             $offset   = ($page - 1) * $pagesize;
             //类型(0表示综合,1表示人气,2表示好评)
             $type     = isset(self::$accept_data['type']) && self::$accept_data['type'] > 0 ? self::$accept_data['type'] : 0;
+            //获取请求的平台端
+            $platform = verifyPlat() ? verifyPlat() : 'pc';
+            //获取用户token值
+            $token = $request->input('user_token');
+            //hash中token赋值
+            $token_key   = "user:regtoken:".$platform.":".$token;
+            //判断token值是否合法
+            $redis_token = Redis::hLen($token_key);
+            if($redis_token && $redis_token > 0) {
+                //解析json获取用户详情信息
+                $json_info = Redis::hGetAll($token_key);
+                if($json_info['school_id'] == 1){
+                    //主校
+                            //根据人气、好评、综合进行排序
+                            if($type == 1){ //人气排序|好评排序
+                                //获取名师列表
+                                $famous_teacher_list = Teacher::withCount('lessons as lesson_number')->where('type' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->offset($offset)->limit($pagesize)->get();
+                            } else {  //综合排序|好评
+                                //获取名师列表
+                                $famous_teacher_list = Teacher::withCount('lessons as lesson_number')->where('type' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->orderBy('is_recommend' , 'DESC')->offset($offset)->limit($pagesize)->get();
+                            }
 
-            //根据人气、好评、综合进行排序
-            if($type == 1){ //人气排序|好评排序
-                //获取名师列表
-                $famous_teacher_list = Teacher::withCount('lessons as lesson_number')->where('type' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->get();
-            } else {  //综合排序|好评
-                //获取名师列表
-                $famous_teacher_list = Teacher::withCount('lessons as lesson_number')->where('type' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->orderBy('is_recommend' , 'DESC')->offset($offset)->limit($pagesize)->get();
-            }
+                            //判断讲师是否为空
+                            if($famous_teacher_list && !empty($famous_teacher_list)){
+                                //将对象转化为数组信息
+                                $famous_teacher_list = $famous_teacher_list->toArray();
+                                if($type == 1){
+                                    $sort_field = $type == 1 ? 'student_number' : 'star_num';
+                                    array_multisort(array_column($famous_teacher_list, $sort_field) , SORT_DESC , $famous_teacher_list);
+                                    $famous_teacher_list = array_slice($famous_teacher_list,$offset,$pagesize);
+                                }
 
-            //判断讲师是否为空
-            if($famous_teacher_list && !empty($famous_teacher_list)){
-                //将对象转化为数组信息
-                $famous_teacher_list = $famous_teacher_list->toArray();
-                if($type == 1){
-                    $sort_field = $type == 1 ? 'student_number' : 'star_num';
-                    array_multisort(array_column($famous_teacher_list, $sort_field) , SORT_DESC , $famous_teacher_list);
-                    $famous_teacher_list = array_slice($famous_teacher_list,$offset,$pagesize);
-                }
+                                //空数组
+                                $teacher_list = [];
+                                foreach($famous_teacher_list as $k=>$v){
+                                    //根据大分类的id获取大分类的名称
+                                    if($v['parent_id'] && $v['parent_id'] > 0){
+                                        $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                                    }
 
-                //空数组
-                $teacher_list = [];
-                foreach($famous_teacher_list as $k=>$v){
-                    //根据大分类的id获取大分类的名称
-                    if($v['parent_id'] && $v['parent_id'] > 0){
-                        $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                                    //根据小分类的id获取小分类的名称
+                                    if($v['child_id'] && $v['child_id'] > 0){
+                                        $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                                    }
+
+                                    //数组数值信息赋值
+                                    $teacher_list[] = [
+                                        'teacher_id'          =>  $v['id'] ,
+                                        'teacher_icon'        =>  $v['head_icon'] ,
+                                        'teacher_name'        =>  $v['real_name'] ,
+                                        'lession_parent_name' =>  $v['parent_id'] > 0 ? !empty($lession_parent_name) ? $lession_parent_name : '' : '',
+                                        'lession_child_name'  =>  $v['child_id']  > 0 ? !empty($lession_child_name)  ? $lession_child_name  : '' : '',
+                                        'star_num'            =>  $v['star_num'] ,
+                                        'lesson_number'       =>  $v['lesson_number'] ,
+                                        'student_number'      =>  $v['student_number']
+                                    ];
+                                }
+                            } else {
+                                $teacher_list = "";
+                            }
+                            return response()->json(['code' => 200 , 'msg' => '获取名师列表成功' , 'data' => $teacher_list]);
+                }else{
+                    //分校
+                    //根据人气、好评、综合进行排序
+                    if($type == 1){ //人气排序|好评排序
+                        //获取名师列表
+                        $famous_teacher_list = Teacher::withCount('lessons as lesson_number')->where('type' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->get();
+                        //自增
+                        $famous_teacher_count1 = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("type" , 2)->where("school_id" , $json_info['school_id'])->count();
+                        //授权老师
+                        $famous_teacher_count2 = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->count();
+                        if($famous_teacher_count1 && $famous_teacher_count1 > 0  && $famous_teacher_count2 && $famous_teacher_count2 > 0){
+                            $famous_teacher_list1  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("type" , 2)->where("school_id" , $json_info['school_id'])->get()->toArray();
+                            $famous_teacher_list2  = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->withCount('lessons as lesson_number')->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->get()->toArray();
+                            $famous_teacher_list = array_merge($famous_teacher_list1,$famous_teacher_list2);
+                            $famous_teacher_list = array_unique($famous_teacher_list,SORT_REGULAR);
+                        }
+                    } else {  //综合排序|好评
+                        //获取名师列表
+                        //$famous_teacher_list = Teacher::withCount('lessons as lesson_number')->where('type' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->orderBy('is_recommend' , 'DESC')->offset($offset)->limit($pagesize)->get();
+                        //获取名师列表
+                        $famous_teacher_list = Teacher::withCount('lessons as lesson_number')->where('type' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->get();
+                        //自增
+                        $famous_teacher_count1 = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("type" , 2)->where("school_id" , $json_info['school_id'])->count();
+                        //授权老师
+                        $famous_teacher_count2 = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->count();
+                        if($famous_teacher_count1 && $famous_teacher_count1 > 0  && $famous_teacher_count2 && $famous_teacher_count2 > 0){
+                            $famous_teacher_list1  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("type" , 2)->where("school_id" , $json_info['school_id'])->orderBy('is_recommend' , 'DESC')->get()->toArray();
+                            $famous_teacher_list2  = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->withCount('lessons as lesson_number')->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->orderBy('is_recommend' , 'DESC')->get()->toArray();
+                            $famous_teacher_list = array_merge($famous_teacher_list1,$famous_teacher_list2);
+                            $famous_teacher_list = array_unique($famous_teacher_list,SORT_REGULAR);
+                        }
                     }
 
-                    //根据小分类的id获取小分类的名称
-                    if($v['child_id'] && $v['child_id'] > 0){
-                        $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                    //判断讲师是否为空
+                    if($famous_teacher_list && !empty($famous_teacher_list)){
+                        //将对象转化为数组信息
+                        //$famous_teacher_list = $famous_teacher_list->toArray();
+                        if($type == 1){
+                            $sort_field = $type == 1 ? 'student_number' : 'star_num';
+                            array_multisort(array_column($famous_teacher_list, $sort_field) , SORT_DESC , $famous_teacher_list);
+                            $famous_teacher_list = array_slice($famous_teacher_list,$offset,$pagesize);
+                        }
+
+                        //空数组
+                        $teacher_list = [];
+                        foreach($famous_teacher_list as $k=>$v){
+                            //根据大分类的id获取大分类的名称
+                            if($v['parent_id'] && $v['parent_id'] > 0){
+                                $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                            }
+
+                            //根据小分类的id获取小分类的名称
+                            if($v['child_id'] && $v['child_id'] > 0){
+                                $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                            }
+
+                            //数组数值信息赋值
+                            $teacher_list[] = [
+                                'teacher_id'          =>  $v['id'] ,
+                                'teacher_icon'        =>  $v['head_icon'] ,
+                                'teacher_name'        =>  $v['real_name'] ,
+                                'lession_parent_name' =>  $v['parent_id'] > 0 ? !empty($lession_parent_name) ? $lession_parent_name : '' : '',
+                                'lession_child_name'  =>  $v['child_id']  > 0 ? !empty($lession_child_name)  ? $lession_child_name  : '' : '',
+                                'star_num'            =>  $v['star_num'] ,
+                                'lesson_number'       =>  $v['lesson_number'] ,
+                                'student_number'      =>  $v['student_number']
+                            ];
+                        }
+                    } else {
+                        $teacher_list = "";
+                    }
+                    return response()->json(['code' => 200 , 'msg' => '获取名师列表成功' , 'data' => $teacher_list]);
+
+                }
+            }else{
+                        //根据人气、好评、综合进行排序
+                    if($type == 1){ //人气排序|好评排序
+                        //获取名师列表
+                        $famous_teacher_list = Teacher::withCount('lessons as lesson_number')->where('type' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->get();
+                    } else {  //综合排序|好评
+                        //获取名师列表
+                        $famous_teacher_list = Teacher::withCount('lessons as lesson_number')->where('type' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->orderBy('is_recommend' , 'DESC')->offset($offset)->limit($pagesize)->get();
                     }
 
-                    //数组数值信息赋值
-                    $teacher_list[] = [
-                        'teacher_id'          =>  $v['id'] ,
-                        'teacher_icon'        =>  $v['head_icon'] ,
-                        'teacher_name'        =>  $v['real_name'] ,
-                        'lession_parent_name' =>  $v['parent_id'] > 0 ? !empty($lession_parent_name) ? $lession_parent_name : '' : '',
-                        'lession_child_name'  =>  $v['child_id']  > 0 ? !empty($lession_child_name)  ? $lession_child_name  : '' : '',
-                        'star_num'            =>  $v['star_num'] ,
-                        'lesson_number'       =>  $v['lesson_number'] ,
-                        'student_number'      =>  $v['student_number']
-                    ];
-                }
-            } else {
-                $teacher_list = "";
+                    //判断讲师是否为空
+                    if($famous_teacher_list && !empty($famous_teacher_list)){
+                        //将对象转化为数组信息
+                        $famous_teacher_list = $famous_teacher_list->toArray();
+                        if($type == 1){
+                            $sort_field = $type == 1 ? 'student_number' : 'star_num';
+                            array_multisort(array_column($famous_teacher_list, $sort_field) , SORT_DESC , $famous_teacher_list);
+                            $famous_teacher_list = array_slice($famous_teacher_list,$offset,$pagesize);
+                        }
+
+                        //空数组
+                        $teacher_list = [];
+                        foreach($famous_teacher_list as $k=>$v){
+                            //根据大分类的id获取大分类的名称
+                            if($v['parent_id'] && $v['parent_id'] > 0){
+                                $lession_parent_name = Subject::where("id" , $v['parent_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                            }
+
+                            //根据小分类的id获取小分类的名称
+                            if($v['child_id'] && $v['child_id'] > 0){
+                                $lession_child_name  = Subject::where("id" , $v['child_id'])->where("is_del" , 0)->where("is_open" , 0)->value("subject_name");
+                            }
+
+                            //数组数值信息赋值
+                            $teacher_list[] = [
+                                'teacher_id'          =>  $v['id'] ,
+                                'teacher_icon'        =>  $v['head_icon'] ,
+                                'teacher_name'        =>  $v['real_name'] ,
+                                'lession_parent_name' =>  $v['parent_id'] > 0 ? !empty($lession_parent_name) ? $lession_parent_name : '' : '',
+                                'lession_child_name'  =>  $v['child_id']  > 0 ? !empty($lession_child_name)  ? $lession_child_name  : '' : '',
+                                'star_num'            =>  $v['star_num'] ,
+                                'lesson_number'       =>  $v['lesson_number'] ,
+                                'student_number'      =>  $v['student_number']
+                            ];
+                        }
+                    } else {
+                        $teacher_list = "";
+                    }
+                    return response()->json(['code' => 200 , 'msg' => '获取名师列表成功' , 'data' => $teacher_list]);
             }
-            return response()->json(['code' => 200 , 'msg' => '获取名师列表成功' , 'data' => $teacher_list]);
+
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
@@ -652,7 +789,6 @@ class IndexController extends Controller {
             $offset   = ($page - 1) * $pagesize;
 
             //获取名师课程列表
-
              //获取请求的平台端
              $platform = verifyPlat() ? verifyPlat() : 'pc';
              //获取用户token值
