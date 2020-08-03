@@ -870,6 +870,7 @@ class Coures extends Model {
                 if($methodv['method_id'] == 1){
                     $course['method'] = $course['method'].'直播';
                     //课程关联的班号
+                    $livearrs=[];
                     $livearr = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->get();
                     if(!empty($livearr)){
                         foreach ($livearr as $livek=>$livev){
@@ -881,10 +882,11 @@ class Coures extends Model {
                                 $class_time = LiveChild::where(['shift_no_id'=>$livev['shift_id'],'is_del'=>0,'status'=>1])->sum('class_hour');
                                 $shiftno['class_num'] = $class_num;
                                 $shiftno['class_time'] = $class_time;
-                                $course['livearr'][] = $shiftno;
+                                $livearrs[] = $shiftno;
                             }
                         }
                     }
+                    $course['livearr'] = $livearrs;
                 }
                 if($methodv['method_id'] == 2){
                     $course['method'] = $course['method'].'录播';
