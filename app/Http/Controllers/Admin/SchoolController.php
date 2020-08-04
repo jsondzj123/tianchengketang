@@ -462,7 +462,7 @@ class SchoolController extends Controller {
         $roleAuthArr = Roleauth::where(['school_id'=>$data['id'],'is_super'=>1,'is_del'=>1])->first(); //判断该网校有无超级管理员
         if(isset($data['admin/school/doSchoolAdminById'])) unset($data['admin/school/doSchoolAdminById']);
         DB::beginTransaction();
-        if(is_null($roleAuthArr)){//无超级管理员
+        if(empty($roleAuthArr)){//无超级管理员
             //无
             $insert =[
                     'role_name'=>'超级管理员',
