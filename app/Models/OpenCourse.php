@@ -64,7 +64,7 @@ class OpenCourse extends Model {
                 $twos['childs'] = $twsss;
                 $subjectArr[] =$twos;
             }
-        }
+        }    
         if(!empty($zizengSubject)){
             $zizengSubject = self::demo($zizengSubject,0,0);
         }
