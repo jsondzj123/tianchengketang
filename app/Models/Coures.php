@@ -839,10 +839,12 @@ class Coures extends Model {
             $course = Coures::where(['id'=>$data['id'],'is_del'=>0,'status'=>1])->first();
         }
         $return = [];
+        $methodstr ='';
         $method = Couresmethod::where(['course_id'=>$data['id'],'is_del'=>0])->get()->toArray();
         if(!empty($method)){
             foreach ($method as $methodk=>$methodv){
                 if($methodv['method_id'] == 1){
+                    $methodstr = $methodstr.'直播';
                     //课程关联的班号
                     $livearr = CourseLiveResource::where(['course_id'=>$data['id'],'is_del'=>0])->get();
                     if(!empty($livearr)){
@@ -866,16 +868,13 @@ class Coures extends Model {
                     }
                 }
                 if($methodv['method_id'] == 2){
-                    $lubo['recordedname'] = $course['title'];
-                    $lubo['type'] = '录播';
-                    $return['lubo'] = $lubo;
+                    $methodstr = $methodstr.'，录播';
                 }
                 if($methodv['method_id'] == 3){
-                    $lubo['recordedname'] = $course['title'];
-                    $lubo['type'] = '其他';
-                    $return['rest'] = $lubo;
+                    $methodstr = $methodstr.'，其他';
                 }
             }
+            $return['methodtype'] = $methodstr;
         }
         return ['code' => 200 , 'msg' => '获取成功','data'=>$return];
     }
