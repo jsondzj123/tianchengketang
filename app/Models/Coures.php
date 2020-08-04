@@ -835,8 +835,6 @@ class Coures extends Model {
         if($nature == 1){
             $course = CourseSchool::where(['id'=>$data['id'],'is_del'=>0,'status'=>1])->first();
             $data['id'] = $course['course_id'];
-        }else{
-            $course = Coures::where(['id'=>$data['id'],'is_del'=>0,'status'=>1])->first();
         }
         $return = [];
         $methodstr ='';
