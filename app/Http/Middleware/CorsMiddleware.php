@@ -58,7 +58,7 @@ class CorsMiddleware
             'http://www.glteach.com',
             'http://mengshu.zhima989.com',
             'http://frontdeskresources.longde999.cn/',
-            'http://www.wanglongzaixian.com',
+            'http://wl.wanglongzaixian.com',
             'http://www.yilong119.com'
         
         ];
