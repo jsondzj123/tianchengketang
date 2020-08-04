@@ -385,8 +385,8 @@ class UserController extends Controller {
             }
         }
         //所有总数
-        $success = Order::where(['student_id'=>$this->userid,'status'=>2])->count();
-        $unfinished = Order::where(['student_id'=>$this->userid])->where('status','<',2)->count();
+        $success = Order::where(['student_id'=>$this->userid,'status'=>1])->count();
+        $unfinished = Order::where(['student_id'=>$this->userid,'status'=>0])->count();
         $error = Order::where(['student_id'=>$this->userid,'status'=>5])->count();
         $count = [
             0=>!empty($success)?$success:0,
