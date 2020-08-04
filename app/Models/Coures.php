@@ -777,10 +777,8 @@ class Coures extends Model {
         $order = Order::where(['order_number'=>$data['order_number']])->first();
         if($order['nature'] == 1){
             $course = CourseSchool::where(['id'=>$order['class_id']])->first();
-            $course_id = $course['course_id'];
         }else{
             $course = Coures::where(['id'=>$order['class_id']])->first();
-            $course_id = $course['id'];
         }
         $order['course_cover'] = $course['cover'];
         $order['course_title'] = $course['title'];
@@ -827,47 +825,7 @@ class Coures extends Model {
             $order['learning'] = "以失效";
             $order['bgcolor'] = '#FF4545';
         }
-        //课程授课方式
-        $method = Couresmethod::where(['course_id'=>$course_id,'is_del'=>0])->get()->toArray();
-        if(!empty($method)) {
-            foreach ($method as $methodk => $methodv) {
-                if ($methodv['method_id'] == 1) {
-                    //课程关联的班号
-                    $livearr = CourseLiveResource::where(['course_id' => $course_id, 'is_del' => 0])->get();
-                    if (!empty($livearr)) {
-                        foreach ($livearr as $livek => $livev) {
-                            //查询直播单元表
-                            $livename = Live::select('name as livename')->where(['id' => $livev['resource_id'], 'is_del' => 0])->where('is_forbid', '<', 2)->first();
-                            $livename['type'] = '直播';
-                            //查询课次表
-                            if ($livev['shift_id'] != '' && $livev['shift_id'] != null) {
-                                $shiftno = LiveClass::select('name')->where(['id' => $livev['shift_id'], 'is_del' => 0, 'is_forbid' => 0])->first();
-                                //查询课次
-                                $class_num = LiveChild::where(['shift_no_id' => $livev['shift_id'], 'is_del' => 0, 'status' => 1])->count();
-                                //课时
-                                $class_time = LiveChild::where(['shift_no_id' => $livev['shift_id'], 'is_del' => 0, 'status' => 1])->sum('class_hour');
-                                $shiftno['class_num'] = $class_num;
-                                $shiftno['class_time'] = $class_time;
-                                $livename['livearr'] = $shiftno;
-                            }
-                            $return['live'][] = $livename;
-                        }
-                    }
-                }
-                if ($methodv['method_id'] == 2) {
-                    $lubo['recordedname'] = $course['title'];
-                    $lubo['type'] = '录播';
-                    $return['lubo'] = $lubo;
-                }
-                if ($methodv['method_id'] == 3) {
-                    $lubo['recordedname'] = $course['title'];
-                    $lubo['type'] = '其他';
-                    $return['rest'] = $lubo;
-                }
-            }
-            $course['method'] = $return;
-        }
-        return ['code' => 200 , 'msg' => '获取成功','data'=>$order,'course'=>$course];
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$order];
     }
     //课程详情
     public static function courseDetail($data){
