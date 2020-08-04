@@ -198,11 +198,10 @@ class CourseSchool extends Model {
 
 
         if($body['is_public'] == 1){ //公开课
-            $nature = CourseRefOpen::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->first();
-
-            if(!empty($nature)){
-                return ['code'=>207,'msg'=>'公开课已经授权'];
-            }
+            // $nature = CourseRefOpen::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->first();
+            // if(!empty($nature)){
+            //     return ['code'=>207,'msg'=>'公开课已经授权'];
+            // }
             $ids = OpenCourseTeacher::whereIn('course_id',$courseIds)->where('is_del',0)->pluck('teacher_id')->toArray(); //要授权的教师信息
             if(!empty($ids)){
                 $ids = array_unique($ids);
@@ -281,11 +280,11 @@ class CourseSchool extends Model {
             }
         }
         if($body['is_public'] == 0){  //课程
-            $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->limit(1)->get()->toArray();
+            // $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->limit(1)->get()->toArray();
 
-            if(!empty($nature)){
-                return ['code'=>207,'msg'=>'课程已经授权'];
-            }
+            // if(!empty($nature)){
+            //     return ['code'=>207,'msg'=>'课程已经授权'];
+            // }
             $course = Coures::whereIn('id',$courseIds)->where(['is_del'=>0])->select('parent_id','child_id','title','keywords','cover','pricing','sale_price','buy_num','expiry','describe','introduce','status','watch_num','is_recommend','id as course_id','school_id as from_school_id')->get()->toArray();//要授权课程 所有信息
             if(!empty($course)){
                 foreach($course as $key=>&$vv){
