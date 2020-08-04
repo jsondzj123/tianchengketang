@@ -296,6 +296,22 @@ class UserController extends Controller {
                         }else{
                             $course['teachername']='';
                         }
+                        //查授课方式
+                        $method = Couresmethod::select('method_id')->where(['course_id' => $course['course_id'], 'is_del' => 0])->get()->toArray();
+                        if (!empty($method)) {
+                            foreach ($method as $key => &$val) {
+                                if ($val['method_id'] == 1) {
+                                    $val['method_name'] = '直播';
+                                }
+                                if ($val['method_id'] == 2) {
+                                    $val['method_name'] = '录播';
+                                }
+                                if ($val['method_id'] == 3) {
+                                    $val['method_name'] = '其他';
+                                }
+                            }
+                            $course['method'] = $method;
+                        }
                         $courses[] = $course;
                     }
                 }else {
@@ -313,6 +329,22 @@ class UserController extends Controller {
                             $course['teachername'] = implode(',', $string);
                         } else {
                             $course['teachername'] = '';
+                        }
+                        //查授课方式
+                        $method = Couresmethod::select('method_id')->where(['course_id' => $v['class_id'], 'is_del' => 0])->get()->toArray();
+                        if (!empty($method)) {
+                            foreach ($method as $key => &$val) {
+                                if ($val['method_id'] == 1) {
+                                    $val['method_name'] = '直播';
+                                }
+                                if ($val['method_id'] == 2) {
+                                    $val['method_name'] = '录播';
+                                }
+                                if ($val['method_id'] == 3) {
+                                    $val['method_name'] = '其他';
+                                }
+                            }
+                            $course['method'] = $method;
                         }
                         $courses[] = $course;
                     }
