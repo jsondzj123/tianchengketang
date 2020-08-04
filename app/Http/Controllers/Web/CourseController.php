@@ -666,9 +666,9 @@ class CourseController extends Controller {
          */
     public function material(){
         //每页显示的条数
-        $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 10;
-        $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
-        $offset   = ($page - 1) * $pagesize;
+//        $pagesize = (int)isset($this->data['pageSize']) && $this->data['pageSize'] > 0 ? $this->data['pageSize'] : 10;
+//        $page     = isset($this->data['page']) && $this->data['page'] > 0 ? $this->data['page'] : 1;
+//        $offset   = ($page - 1) * $pagesize;
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
         //查询订单信息
         if($nature == 1){
@@ -764,11 +764,11 @@ class CourseController extends Controller {
                 }
             }
         }
-        $res = array_slice($ziyuan, $offset, $pagesize);
-        if(empty($res)){
-            $res = array_slice($res, 1, $pagesize);
-        }
-        return ['code' => 200 , 'msg' => '查询成功','data'=>$res,'page'=>$page];
+//        $res = array_slice($ziyuan, $offset, $pagesize);
+//        if(empty($res)){
+//            $res = array_slice($res, 1, $pagesize);
+//        }
+        return ['code' => 200 , 'msg' => '查询成功','data'=>$ziyuan];
     }
 }
 
