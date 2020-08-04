@@ -361,15 +361,18 @@ class UserController extends Controller {
             ->where(function($query) use ($status) {
                 //状态判断
                 if($status == 1){
-                    $query->where('status',2);
+                    $query->where('status',1);
                 }
                 if($status == 2){
-                    $query->where('status','<',2);
+                    $query->where('status',0);
                 }
                 if($status == 3){
                     $query->where('status',5);
                 }
             })
+            ->where('status','!=',2)
+            ->where('status','!=',3)
+            ->where('status','!=',4)
             ->orderByDesc('id')->get()->toArray();
         if(!empty($order)){
             foreach ($order as $k=>&$v){
