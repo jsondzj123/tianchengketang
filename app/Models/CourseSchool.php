@@ -178,9 +178,10 @@ class CourseSchool extends Model {
     public static function store($body){
 
         $arr = $subjectArr = $bankids = $questionIds = $InsertTeacherRef = $InsertSubjectRef = $InsertRecordVideoArr = $InsertZhiboVideoArr = $InsertQuestionArr = $teacherIdArr = [];
-     //    $courseIds=$body['course_id'];
-    	// $courseIds = explode(',',$body['course_id']);
-        $courseIds = json_decode($body['course_id'],1); //前端传值
+        $courseIds=$body['course_id'];
+    	$courseIds = explode(',',$body['course_id']);
+        // $courseIds = json_decode($body['course_id'],1); //前端传值
+
         if(empty($courseIds)){
             return ['code'=>205,'msg'=>'请选择授权课程'];
         }
@@ -198,13 +199,18 @@ class CourseSchool extends Model {
 
 
         if($body['is_public'] == 1){ //公开课
+
             $natureOpenIds = CourseRefOpen::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->pluck('course_id')->toArray();
             $natureOpenIds = array_unique($natureOpenIds);
-            $courseIds = array_diff($courseIds, $natureOpenIds);
+            if(!empty($natureOpenIds)){
+                $courseIds = array_diff($courseIds,$natureOpenIds);
+            }
+          
             $ids = OpenCourseTeacher::whereIn('course_id',$courseIds)->where('is_del',0)->pluck('teacher_id')->toArray(); //要授权的教师信息
             if(!empty($ids)){
+
                 $ids = array_unique($ids);
-                $teacherIds = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>1])->pluck('teacher_id')->toArray();//已经授权过的讲师信息
+                $teacherIds = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0,'is_public'=>1])->pluck('teacher_id')->toArray();//已经授权过的讲师信息
                 if(!empty($teacherIds)){
                     $teacherIdArr = array_diff($ids,$teacherIds);//不在授权讲师表里的数据
                 }else{
@@ -220,32 +226,37 @@ class CourseSchool extends Model {
                         $InsertTeacherRef[$key]['create_at'] = date('Y-m-d H:i:s');
                     }
                 }
-                $natureSubject = OpenCourse::where(function($query) use ($school_id,$courseIds) {
-                                    $query->whereIn('id',$courseIds);
-                                    $query->where('status',1);
-                                    $query->where('school_id',$school_id);
-                                    $query->where('is_del',0);
-                            })->select('parent_id','child_id')->get()->toArray(); //要授权的学科信息
-                $natureSubject = array_unique($natureSubject,SORT_REGULAR);
-                $subjectArr = CourseRefSubject::where(['to_school_id'=>$body['school_id'],'from_school_id'=>$school_id,'is_del'=>0,'is_public'=>1])->select('parent_id','child_id')->get()->toArray();//已经授权的学科信息
-                if(!empty($subjectArr)){
-                     foreach($natureSubject as $k=>$v){
-                        foreach($subjectArr as $kk=>$bv){
-                            if($v == $bv){
-                                unset($natureSubject[$k]);
-                            }
+            }
+           
+            $natureSubject = OpenCourse::where(function($query) use ($school_id,$courseIds) {
+                                $query->whereIn('id',$courseIds);
+                                $query->where('school_id',$school_id);
+                                $query->where('is_del',0);
+                        })->select('parent_id','child_id')->get()->toArray(); //要授权的学科信息
+            $natureSubject = array_unique($natureSubject,SORT_REGULAR);
+
+            $subjectArr = CourseRefSubject::where(['to_school_id'=>$body['school_id'],'from_school_id'=>$school_id,'is_del'=>0,'is_public'=>1])->select('parent_id','child_id')->get()->toArray();//已经授权的学科信息
+        
+            if(!empty($subjectArr)){
+                foreach($natureSubject as $k=>$v){
+                    foreach($subjectArr as $kk=>$bv){
+                        if($v == $bv){
+                            unset($natureSubject[$k]);
                         }
                     }
                 }
-                if(!empty($natureSubject)){
-                    foreach($natureSubject as $key=>&$vs){
-                        $vs['is_public'] = 1;
-                        $vs['from_school_id'] =$school_id;
-                        $vs['to_school_id'] =$body['school_id'];
-                        $vs['admin_id'] =$user_id;
-                        $vs['create_at'] =date('Y-m-d H:i:s');
-                    }
+            }
+
+            if(!empty($natureSubject)){
+                foreach($natureSubject as $key=>&$vs){
+                    $vs['is_public'] = 1;
+                    $vs['from_school_id'] =$school_id;
+                    $vs['to_school_id'] =$body['school_id'];
+                    $vs['admin_id'] =$user_id;
+                    $vs['create_at'] =date('Y-m-d H:i:s');
                 }
+            }
+            if(!empty($courseIds)){
                 foreach($courseIds as $k=>$vv){
                     $refOpenInsert[$k]['admin_id'] = $user_id;
                     $refOpenInsert[$k]['from_school_id'] =$school_id;
@@ -253,35 +264,42 @@ class CourseSchool extends Model {
                     $refOpenInsert[$k]['course_id'] = $vv;
                     $refOpenInsert[$k]['create_at'] =date('Y-m-d H:i:s');
                 }
-                DB::beginTransaction();
-                try{
+            }
+            
+            DB::beginTransaction();
+            try{
+                if(!empty($teacherRes)){
                     $teacherRes = CourseRefTeacher::insert($InsertTeacherRef);
                     if(!$teacherRes){
                         DB::rollback();
                         return ['code'=>203,'msg'=>'公开课授权未成功'];
                     }
+                }
+                if(!empty($natureSubject)){
                     $subjectRes = CourseRefSubject::insert($natureSubject);
                     if(!$subjectRes){
                         DB::rollback();
                         return ['code'=>203,'msg'=>'公开课授权未成功！'];
                     }
+                }
+                
+                if(!empty($refOpenInsert)){
                     $refOpenRes = CourseRefOpen::insert($refOpenInsert);
-
                     if(!$refOpenRes){
                         DB::rollback();
                         return ['code'=>203,'msg'=>'公开课授权未成功！！'];
                     }
 
-                     DB::commit();
-                    return ['code'=>200,'msg'=>'公开课授权成功！'];
-
-
-                } catch (Exception $e) {
-                    return ['code' => 500 , 'msg' => $ex->getMessage()];
                 }
+                
+                 DB::commit();
+                return ['code'=>200,'msg'=>'公开课授权成功！'];
 
+            } catch (Exception $e) {
+                return ['code' => 500 , 'msg' => $ex->getMessage()];
             }
         }
+    
         if($body['is_public'] == 0){  //课程
 
             $natureIds = self::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->pluck('course_id')->toArray();

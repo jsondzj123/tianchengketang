@@ -58,6 +58,7 @@ class OpenCourse extends Model {
                 }
                 $newdata[$v['parent_id']]['childs'][] =$v['child_id'];
             }
+           
             foreach($newdata as $k=>$v){
                 $twos = CouresSubject::select('id','subject_name as name')->where(['id'=>$v['parent_id'],'is_del'=>0,'is_open'=>0])->first();
                 $twsss = CouresSubject::select('id','admin_id','subject_name as name')->whereIn('id',$v['childs'])->where(['is_del'=>0,'is_open'=>0])->get()->toArray();
