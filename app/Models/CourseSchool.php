@@ -229,7 +229,7 @@ class CourseSchool extends Model {
                                     $query->where('school_id',$school_id);
                                     $query->where('is_del',0);
                             })->select('parent_id','child_id')->get()->toArray(); //要授权的学科信息
-                $subjectArr = CourseRefSubject::where(['to_school_id'=>$body['school_id'],'from_school_id'=>$school_id,'is_del'=>0])->select('parent_id','child_id')->get();//已经授权的学科信息
+                $subjectArr = CourseRefSubject::where(['to_school_id'=>$body['school_id'],'from_school_id'=>$school_id,'is_del'=>0,'is_public'=>1])->select('parent_id','child_id')->get()->toArray();//已经授权的学科信息
                 if(!empty($subjectArr)){
                      foreach($natureSubject as $k=>$v){
                         foreach($subjectArr as $kk=>$bv){
@@ -239,15 +239,17 @@ class CourseSchool extends Model {
                         }
                     }
                 }
-                foreach($natureSubject as $key=>&$vs){
-                    $vs['is_public'] = 1;
-                    $vs['from_school_id'] =$school_id;
-                    $vs['to_school_id'] =$body['school_id'];
-                    $vs['admin_id'] =$user_id;
-                    $vs['create_at'] =date('Y-m-d H:i:s');
+                if(!empty($natureSubject)){
+                    foreach($natureSubject as $key=>&$vs){
+                        $vs['is_public'] = 1;
+                        $vs['from_school_id'] =$school_id;
+                        $vs['to_school_id'] =$body['school_id'];
+                        $vs['admin_id'] =$user_id;
+                        $vs['create_at'] =date('Y-m-d H:i:s');
+                    }
                 }
                 foreach($courseIds as $k=>$vv){
-                    $refOpenInsert[$k]['admin_id'] =$user_id;
+                    $refOpenInsert[$k]['admin_id'] = $user_id;
                     $refOpenInsert[$k]['from_school_id'] =$school_id;
                     $refOpenInsert[$k]['to_school_id'] =$body['school_id'];
                     $refOpenInsert[$k]['course_id'] = $vv;
