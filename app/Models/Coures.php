@@ -961,9 +961,6 @@ class Coures extends Model {
         if(!isset($data['order_number']) || empty($data['order_number'])){
             return ['code' => 201 , 'msg' => 'order_number参数为空'];
         }
-        if(!isset($data['nature']) || empty($data['nature'])){
-            return ['code' => 201 , 'msg' => 'onature参数为空'];
-        }
         if(!isset($data['id']) || empty($data['id'])){
             return ['code' => 201 , 'msg' => '课程id参数为空'];
         }
