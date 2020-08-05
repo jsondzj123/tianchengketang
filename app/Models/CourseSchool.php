@@ -563,8 +563,9 @@ class CourseSchool extends Model {
                        $updateTeacherArr = array_intersect($arr,$refTeacherArr);
                    } 
                 }else{
-                   $updateTeacherArr = array_diff($teachers_ids,$refTeacherArr); //$updateTecherArr 要取消授权的讲师信息
+                   $updateTeacherArr = array_intersect($teachers_ids,$refTeacherArr); //$updateTecherArr 要取消授权的讲师信息
                 }
+               
             }
             if(!empty($noNaturecourseSubjectArr)){
                 $noBankSubjectArr  = $noNaturecourseSubjectArr = array_unique($noNaturecourseSubjectArr,SORT_REGULAR);//除取消授权的学科信息    
@@ -679,7 +680,7 @@ class CourseSchool extends Model {
                        $updateTeacherArr = array_intersect($arr,$refTeacherArr);
                     }
                 }else{
-                   $updateTeacherArr = array_diff($teachers_ids,$refTeacherArr); //$updateTecherArr 要取消授权的讲师信息
+                   $updateTeacherArr = array_intersect($teachers_ids,$refTeacherArr); //$updateTecherArr 要取消授权的讲师信息
                 }
             }
            //要取消的直播资源
@@ -699,7 +700,7 @@ class CourseSchool extends Model {
                        $updatezhiboArr = array_intersect($arr,$refzhiboRescourse);
                     }
                 }else{
-                   $updatezhiboArr = array_diff($zhibo_resourse_ids,$refzhiboRescourse); //$updatezhiboArr 要取消授权的讲师信息
+                   $updatezhiboArr = array_intersect($zhibo_resourse_ids,$refzhiboRescourse); //$updatezhiboArr 要取消授权的讲师信息
                 }
             }
             //要取消的录播资源
@@ -719,7 +720,7 @@ class CourseSchool extends Model {
                        $updatelvboArr = array_intersect($arr,$reflvboRescourse);
                     }
                }else{
-                   $updatelvboArr = array_diff($lvbo_resourse_ids,$reflvboRescourse); //$updatezhiboArr 要取消授权的讲师信息
+                   $updatelvboArr = array_intersect($lvbo_resourse_ids,$reflvboRescourse); //$updatezhiboArr 要取消授权的讲师信息
                }
             }
             //学科
@@ -797,12 +798,13 @@ class CourseSchool extends Model {
                     $natureBankId = array_unique($natureBankId); 
                     if(!empty($noNatureBankId)){
                        $noNatureBankId = array_unique($noNatureBankId);
+                       $noNatureBankId = array_intersect($refBank,$noNatureBankId);
                        $arr = array_diff($natureBankId,$noNatureBankId);
                        if(!empty($arr)){
-                           $updateBank = array_diff($arr,$refBank);
+                           $updateBank = array_intersect($arr,$refBank);
                        }
                     }else{
-                       $updateBank = array_diff($natureBankId,$refBank); //$updateBank 要取消授权的题库
+                       $updateBank = array_intersect($natureBankId,$refBank); //$updateBank 要取消授权的题库
                     }
                 }
             }
