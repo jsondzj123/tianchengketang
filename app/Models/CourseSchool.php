@@ -178,9 +178,9 @@ class CourseSchool extends Model {
     public static function store($body){
 
         $arr = $subjectArr = $bankids = $questionIds = $InsertTeacherRef = $InsertSubjectRef = $InsertRecordVideoArr = $InsertZhiboVideoArr = $InsertQuestionArr = $teacherIdArr = [];
-     //    $courseIds=$body['course_id'];
-    	// $courseIds = explode(',',$body['course_id']);
-        $courseIds = json_decode($body['course_id'],1); //前端传值
+        $courseIds=$body['course_id'];
+    	$courseIds = explode(',',$body['course_id']);
+        // $courseIds = json_decode($body['course_id'],1); //前端传值
 
         if(empty($courseIds)){
             return ['code'=>205,'msg'=>'请选择授权课程'];
@@ -207,6 +207,7 @@ class CourseSchool extends Model {
             }
           
             $ids = OpenCourseTeacher::whereIn('course_id',$courseIds)->where('is_del',0)->pluck('teacher_id')->toArray(); //要授权的教师信息
+           
             if(!empty($ids)){
 
                 $ids = array_unique($ids);
@@ -268,7 +269,7 @@ class CourseSchool extends Model {
             
             DB::beginTransaction();
             try{
-                if(!empty($teacherRes)){
+                if(!empty($InsertTeacherRef)){
                     $teacherRes = CourseRefTeacher::insert($InsertTeacherRef);
                     if(!$teacherRes){
                         DB::rollback();
