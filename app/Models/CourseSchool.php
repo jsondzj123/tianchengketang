@@ -512,9 +512,10 @@ class CourseSchool extends Model {
    */
     public static function courseCancel($body){
         $arr = $subjectArr = $bankids = $questionIds = $updateTeacherArr = $updateSubjectArr = $updatelvboArr = $updatezhiboArr = $updateBank = $teacherIdArr =$nonatureCourseId =    $noNatuerTeacher_ids =  [];
-       //$courseIds=$body['course_id'];
-        $courseIds = explode(',',$body['course_id']);
-       // $courseIds = json_decode($body['course_id'],1); //前端传值
+        //$courseIds=$body['course_id'];
+        // $courseIds = explode(',',$body['course_id']);
+        // $courseIds = json_decode($body['course_id'],1); //前端传值
+        $courseIds =[$body['course_id']];
         if(empty($courseIds)){
            return ['code'=>205,'msg'=>'请选择取消授权课程'];
         }
