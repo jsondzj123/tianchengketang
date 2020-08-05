@@ -824,7 +824,6 @@ class CourseSchool extends Model {
                         }
                     }
                 }
-
                 if(!empty($updateSubjectArr)){
                     $updateSubjectArr = array_unique($updateSubjectArr,SORT_REGULAR);
                     foreach ($updateSubjectArr as $k => $vs) {
