@@ -927,7 +927,7 @@ class Coures extends Model {
         $data['class_id'] = $arr['id'];  //课程id
         $data['school_id'] = $school['school_id'];
         $data['nature'] = $arr['nature'];  //课程类型
-        $data['validity_time'] = '';  //课程到期时间
+//        $data['validity_time'] = '';  //课程到期时间
         $data['parent_order_number'] = $arr['order_number'];  //转班订单号
         $add = Order::insert($data);
         if($add){
