@@ -318,7 +318,7 @@ class CourseSchool extends Model {
                 $ids = Couresteacher::whereIn('course_id',$courseIds)->where('is_del',0)->pluck('teacher_id')->toArray(); //要授权的教师信息
                 if(!empty($ids)){
                     $ids = array_unique($ids);
-                    $teacherIds = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->pluck('teacher_id')->toArray();//已经授权过的讲师信息
+                    $teacherIds = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0,'is_public'=>0])->pluck('teacher_id')->toArray();//已经授权过的讲师信息
                     if(!empty($teacherIds)){
                         $teacherIdArr = array_diff($ids,$teacherIds);//不在授权讲师表里的数据
                     }else{
@@ -549,7 +549,7 @@ class CourseSchool extends Model {
             //要取消的教师信息
             $teachers_ids = OpenCourseTeacher::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //要取消授权的教师信息
             if(!empty($nonatureCourseId)){
-                $noNatuerTeacher_ids  =  OpenCourseTeacher::whereNotIn('course_id',$nonatureCourseId)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //除取消授权的教师信息
+                $noNatuerTeacher_ids  =  OpenCourseTeacher::whereIn('course_id',$nonatureCourseId)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //除取消授权的教师信息
             }
             $refTeacherArr  = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0,'is_public'=>1])->pluck('teacher_id')->toArray(); //现已经授权过的教师
             if(!empty($refTeacherArr)){
@@ -559,7 +559,7 @@ class CourseSchool extends Model {
                    $arr = array_diff($teachers_ids,$noNatuerTeacher_ids);
                    if(!empty($arr)){
                        $updateTeacherArr = array_diff($arr,$refTeacherArr);
-                   }
+                   } 
                }else{
                    $updateTeacherArr = array_diff($teachers_ids,$refTeacherArr); //$updateTecherArr 要取消授权的讲师信息
                }
@@ -665,7 +665,7 @@ class CourseSchool extends Model {
             //要取消的教师信息
             $teachers_ids = Couresteacher::whereIn('course_id',$courseIds)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //要取消授权的教师信息
             if(!empty($nonatureCourseId)){
-                $noNatuerTeacher_ids  =  Couresteacher::whereNotIn('course_id',$nonatureCourseId)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //除取消授权的教师信息
+                $noNatuerTeacher_ids  =  Couresteacher::whereIn('course_id',$nonatureCourseId)->where(['is_del'=>0])->pluck('teacher_id')->toArray(); //除取消授权的教师信息
             }
             $refTeacherArr  = CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0,'is_public'=>0])->pluck('teacher_id')->toArray(); //现已经授权过的讲师  
             if(!empty($refTeacherArr)){
@@ -683,7 +683,7 @@ class CourseSchool extends Model {
            //要取消的直播资源
            $zhibo_resourse_ids = CourseLivesResource::whereIn('course_id',$courseIds)->where('is_del',0)->pluck('id')->toArray(); //要取消授权的直播资源
           
-           $no_natuer_zhibo_resourse_ids  =  CourseLivesResource::whereNotIn('course_id',$nonatureCourseId)->where('is_del',0)->pluck('id')->toArray(); //除取消授权的直播资源
+           $no_natuer_zhibo_resourse_ids  =  CourseLivesResource::whereIn('course_id',$nonatureCourseId)->where('is_del',0)->pluck('id')->toArray(); //除取消授权的直播资源
 
            $refzhiboRescourse = CourseRefResource::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0,'type'=>1])->pluck('resource_id')->toArray(); //现在已经授权过的直播资源
 
@@ -703,7 +703,7 @@ class CourseSchool extends Model {
             //要取消的录播资源
             $lvbo_resourse_ids = Coureschapters::whereIn('course_id',$courseIds)->where('is_del',0)->pluck('resource_id')->toArray(); //要取消授权的录播资源
        
-            $no_natuer_lvbo_resourse_ids  =  Coureschapters::whereNotIn('course_id',$nonatureCourseId)->where('is_del',0)->pluck('resource_id')->toArray(); //除取消授权的录播资源
+            $no_natuer_lvbo_resourse_ids  =  Coureschapters::whereIn('course_id',$nonatureCourseId)->where('is_del',0)->pluck('resource_id')->toArray(); //除取消授权的录播资源
                   
             $reflvboRescourse = CourseRefResource::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0,'type'=>0])->pluck('resource_id')->toArray(); //现在已经授权过的录播资源
 
