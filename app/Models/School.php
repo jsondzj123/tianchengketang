@@ -165,6 +165,7 @@ class School extends Model {
                             ->where(['ld_lecturer_educationa.type'=>2,'ld_course_ref_teacher.to_school_id'=>$data['school_id'],'ld_course_ref_teacher.is_del'=>0])
                             ->select('ld_lecturer_educationa.id','ld_lecturer_educationa.head_icon','ld_lecturer_educationa.real_name','ld_lecturer_educationa.describe','ld_lecturer_educationa.school_id')
                             ->get()->toArray();
+    
             if(!empty($teacher)){
                 foreach($teacher as $key => &$v){
                     $v['school_status'] ='自增讲师';
