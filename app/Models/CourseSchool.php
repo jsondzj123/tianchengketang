@@ -178,9 +178,9 @@ class CourseSchool extends Model {
     public static function store($body){
 
         $arr = $subjectArr = $bankids = $questionIds = $InsertTeacherRef = $InsertSubjectRef = $InsertRecordVideoArr = $InsertZhiboVideoArr = $InsertQuestionArr = $teacherIdArr = [];
-        $courseIds=$body['course_id'];
-    	$courseIds = explode(',',$body['course_id']);
-        // $courseIds = json_decode($body['course_id'],1); //前端传值
+     //    $courseIds=$body['course_id'];
+    	// $courseIds = explode(',',$body['course_id']);
+        $courseIds = json_decode($body['course_id'],1); //前端传值
 
         if(empty($courseIds)){
             return ['code'=>205,'msg'=>'请选择授权课程'];
