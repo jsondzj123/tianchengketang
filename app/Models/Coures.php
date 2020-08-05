@@ -909,12 +909,6 @@ class Coures extends Model {
         if($formerorder['status'] == 5){
             return ['code' => 201 , 'msg' => '订单失效'];
         }
-        //课程到期时间
-        if($course['expiry'] == 0){
-            $validity_time = "3002-01-01 12:12:12";
-        }else{
-            $validity_time = date($formerorder['create_at'], strtotime('+' . $course['expiry'] . ' day'));
-        }
         Order::where(['order_number'=>$arr['order_number']])->update(['status'=>5]);
         //获取后端的操作员id
         $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;  //操作员id
@@ -923,9 +917,9 @@ class Coures extends Model {
         $data['order_number'] = date('YmdHis', time()) . rand(1111, 9999); //订单号  随机生成
         $data['order_type'] = 1;        //1线下支付 2 线上支付
         $data['student_id'] = $formerorder['student_id'];
-        $data['price'] = $course['sale_price']; //应付价格
+        $data['price'] = $course['price']; //实际付价格
         $data['student_price'] = $course['sale_price'];//学员价格
-        $data['lession_price'] = $arr['price']; //实际支付价格
+        $data['lession_price'] = $arr['sale_price']; //课程价格
         $data['pay_status'] = $arr['pay_status']; //支付类型
         $data['pay_type'] = $arr['pay_type'];   //支付方式
         $data['status'] = 2;                  //支付状态
@@ -934,10 +928,31 @@ class Coures extends Model {
         $data['class_id'] = $arr['id'];  //课程id
         $data['school_id'] = $school['school_id'];
         $data['nature'] = $arr['nature'];  //课程类型
-        $data['validity_time'] = $validity_time;  //课程到期时间
+        $data['validity_time'] = '';  //课程到期时间
         $data['parent_order_number'] = $arr['order_number'];  //转班订单号
         $add = Order::insert($data);
         if($add){
+            if($arr['pay_status'] == 3 || $arr['pay_status'] == 4){
+                //课程到期时间
+                if($course['expiry'] == 0){
+                    $validity_time = "3002-01-01 12:12:12";
+                }else{
+                    $validity_time = date($formerorder['create_at'], strtotime('+' . $course['expiry'] . ' day'));
+                }
+                Order::where(['order_number'=>$data['order_number']])->update(['validity_time'=>$validity_time,'update_at' => date('Y-m-d H:i:s')]);
+                $overorder = Order::where(['student_id'=>$formerorder['student_id'],'status'=>2])->count(); //用户已完成订单
+                $userorder = Order::where(['student_id'=>$formerorder['student_id']])->count(); //用户所有订单
+                if($overorder == $userorder){
+                    $state_status = 2;
+                }else{
+                    if($overorder > 0 ){
+                        $state_status = 1;
+                    }else{
+                        $state_status = 0;
+                    }
+                }
+                Student::where(['id' => $formerorder['student_id']])->update(['enroll_status' => 1, 'state_status' => $state_status]);
+            }
             //添加日志操作
             AdminLog::insertAdminLog([
                 'admin_id'       =>   $data['admin_id']  ,

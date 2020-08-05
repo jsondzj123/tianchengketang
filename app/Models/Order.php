@@ -516,8 +516,8 @@ class Order extends Model {
                     $v['bgcolor'] = '#f2f6fc';
                 }
                 if($v['status'] == 5){
-                    $v['learning'] = "以失效";
-                    $v['bgcolor'] = '#FF4545';
+                    $v['learning'] = "已失效";
+                    $v['bgcolor'] = '#FDA426';
                 }
             }
         }
