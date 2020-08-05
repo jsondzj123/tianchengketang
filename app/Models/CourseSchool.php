@@ -557,13 +557,14 @@ class CourseSchool extends Model {
                $teachers_ids = array_unique($teachers_ids);
                if(!empty($noNatuerTeacher_ids)){
                    $noNatuerTeacher_ids = array_unique($noNatuerTeacher_ids);
+                   $noNatuerTeacher_ids = array_intersect($refTeacherArr,$noNatuerTeacher_ids);
                    $arr = array_diff($teachers_ids,$noNatuerTeacher_ids);
                    if(!empty($arr)){
-                       $updateTeacherArr = array_diff($arr,$refTeacherArr);
+                       $updateTeacherArr = array_intersect($arr,$refTeacherArr);
                    } 
-               }else{
+                }else{
                    $updateTeacherArr = array_diff($teachers_ids,$refTeacherArr); //$updateTecherArr 要取消授权的讲师信息
-               }
+                }
             }
             if(!empty($noNaturecourseSubjectArr)){
                 $noBankSubjectArr  = $noNaturecourseSubjectArr = array_unique($noNaturecourseSubjectArr,SORT_REGULAR);//除取消授权的学科信息    
@@ -607,7 +608,7 @@ class CourseSchool extends Model {
             try{
                 $updateTime = date('Y-m-d H:i:s');
                 if(!empty($updateTeacherArr)){
-                   foreach ($updateTecherArr as $k => $vt) {
+                   foreach ($updateTeacherArr as $k => $vt) {
                        $teacherRes =CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'teacher_id'=>$vt,'is_public'=>1])->update(['is_del'=>1,'update_at'=>$updateTime]);
                        if(!$teacherRes){
                            DB::rollback();
@@ -646,7 +647,6 @@ class CourseSchool extends Model {
         }
         if($body['is_public'] == 0){
            //课程
-
             $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->get()->toArray(); //要取消的授权的课程
             if(empty($nature)){
                 return ['code'=>207,'msg'=>'课程已经取消授权'];
@@ -673,9 +673,10 @@ class CourseSchool extends Model {
                 $teachers_ids = array_unique($teachers_ids);
                 if(!empty($noNatuerTeacher_ids)){
                     $noNatuerTeacher_ids = array_unique($noNatuerTeacher_ids);
+                    $noNatuerTeacher_ids = array_intersect($refTeacherArr,$noNatuerTeacher_ids);
                     $arr = array_diff($teachers_ids,$noNatuerTeacher_ids);
                     if(!empty($arr)){
-                       $updateTeacherArr = array_diff($arr,$refTeacherArr);
+                       $updateTeacherArr = array_intersect($arr,$refTeacherArr);
                     }
                 }else{
                    $updateTeacherArr = array_diff($teachers_ids,$refTeacherArr); //$updateTecherArr 要取消授权的讲师信息
@@ -692,11 +693,11 @@ class CourseSchool extends Model {
                 $zhibo_resourse_ids = array_unique($zhibo_resourse_ids);
                 if(!empty($no_natuer_zhibo_resourse_ids)){
                     $no_natuer_zhibo_resourse_ids = array_unique($no_natuer_zhibo_resourse_ids);
+                    $no_natuer_zhibo_resourse_ids = array_intersect($refzhiboRescourse,$no_natuer_zhibo_resourse_ids);
                     $arr = array_diff($zhibo_resourse_ids,$no_natuer_zhibo_resourse_ids);
                     if(!empty($arr)){
-                       $updatezhiboArr = array_diff($arr,$refzhiboRescourse);
+                       $updatezhiboArr = array_intersect($arr,$refzhiboRescourse);
                     }
-
                 }else{
                    $updatezhiboArr = array_diff($zhibo_resourse_ids,$refzhiboRescourse); //$updatezhiboArr 要取消授权的讲师信息
                 }
@@ -711,12 +712,12 @@ class CourseSchool extends Model {
             if(!empty($reflvboRescourse)){
                $lvbo_resourse_ids = array_unique($lvbo_resourse_ids);
                if(!empty($no_natuer_lvbo_resourse_ids)){
-                   $no_natuer_lvbo_resourse_ids = array_unique($no_natuer_lvbo_resourse_ids);
-                   $arr = array_diff($lvbo_resourse_ids,$no_natuer_lvbo_resourse_ids);
-                   if(!empty($arr)){
-                       $updatelvboArr = array_diff($arr,$reflvboRescourse);
-                   }
-                  
+                    $no_natuer_lvbo_resourse_ids = array_unique($no_natuer_lvbo_resourse_ids);
+                    $no_natuer_lvbo_resourse_ids = array_intersect($reflvboRescourse,$no_natuer_lvbo_resourse_ids);
+                    $arr = array_diff($lvbo_resourse_ids,$no_natuer_lvbo_resourse_ids);
+                    if(!empty($arr)){
+                       $updatelvboArr = array_intersect($arr,$reflvboRescourse);
+                    }
                }else{
                    $updatelvboArr = array_diff($lvbo_resourse_ids,$reflvboRescourse); //$updatezhiboArr 要取消授权的讲师信息
                }
