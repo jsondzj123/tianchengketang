@@ -976,7 +976,9 @@ class Coures extends Model {
         }
         $arr=[
             'order_price' => $course['sale_price'],
-            'price' => $difference
+            'price' => $difference,
+            'original_course_price' => $order['lession_price'],
+            'original_order_price' => $order['price']
         ];
         return ['code' => 200 , 'msg' => '获取成功','data'=>$arr];
 
