@@ -765,7 +765,7 @@ class Coures extends Model {
         ]);
         return ['code' => 200 , 'msg' => '修改成功'];
     }
-    /*==============================转班========================*/
+    /*==============================转班================================================*/
     //单条订单购买的课程
     public static function consumerUser($data){
         if(!isset($data) || empty($data)){
@@ -952,5 +952,36 @@ class Coures extends Model {
         }else{
             return ['code' => 201 , 'msg' => '转班失败'];
         }
+    }
+    //转班费用
+    public static function coursePay($data){
+        if(!isset($data) || empty($data)){
+            return ['code' => 201 , 'msg' => '传参数组为空'];
+        }
+        if(!isset($data['order_number']) || empty($data['order_number'])){
+            return ['code' => 201 , 'msg' => 'order_number参数为空'];
+        }
+        if(!isset($data['nature']) || empty($data['nature'])){
+            return ['code' => 201 , 'msg' => 'onature参数为空'];
+        }
+        if(!isset($data['id']) || empty($data['id'])){
+            return ['code' => 201 , 'msg' => '课程id参数为空'];
+        }
+        $order = Order::where(['order_number'=>$data['order_number']])->first();
+        if($data['nature'] == 1){
+            $course = CourseSchool::where(['id'=>$data['id']])->first();
+        }else {
+            $course = Coures::where(['id' => $data['id']])->first();
+        }
+        $difference = $course['sale_price'] - $order['price'];
+        if($difference < 0){
+            $difference = 0;
+        }
+        $arr=[
+            'order_price' => $course['sale_price'],
+            'price' => $difference
+        ];
+        return ['code' => 200 , 'msg' => '获取成功','data'=>$arr];
+
     }
 }

@@ -518,6 +518,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         //转班
         $router->post('consumerUser', 'CourseController@consumerUser');//用户订单详情
         $router->post('courseDetail', 'CourseController@courseDetail');//课程详情
+        $router->post('coursePay', 'CourseController@coursePay');//转班费用
         $router->post('classTransfer', 'CourseController@classTransfer');//进行转班
     });
     //运营模块(szw)`

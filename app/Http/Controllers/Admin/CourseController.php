@@ -211,7 +211,17 @@ class CourseController extends Controller {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
         }
     }
-    /********录播课程******************************************************/
+    //转班费用
+    public function coursePay(){
+        try{
+            $data = Coures::coursePay(self::$accept_data);
+            return response()->json($data);
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+
+    /*******************************************************录播课程******************************************************/
     /*
          * @param  章节列表
          * @param  author  苏振文
