@@ -880,7 +880,7 @@ class Coures extends Model {
                     $methodstr = $methodstr.'，其他';
                 }
             }
-            $return['methodtype'] = trim($methodstr,',');
+            $return['methodtype'] = ltrim($methodstr,',');
         }
         return ['code' => 200 , 'msg' => '获取成功','data'=>$return];
     }
