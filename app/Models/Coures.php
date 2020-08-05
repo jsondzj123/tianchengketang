@@ -917,9 +917,9 @@ class Coures extends Model {
         $data['order_number'] = date('YmdHis', time()) . rand(1111, 9999); //订单号  随机生成
         $data['order_type'] = 1;        //1线下支付 2 线上支付
         $data['student_id'] = $formerorder['student_id'];
-        $data['price'] = $course['price']; //实际付价格
+        $data['price'] = $arr['price']; //实际付价格
         $data['student_price'] = $course['sale_price'];//学员价格
-        $data['lession_price'] = $arr['sale_price']; //课程价格
+        $data['lession_price'] = $course['sale_price']; //课程价格
         $data['pay_status'] = $arr['pay_status']; //支付类型
         $data['pay_type'] = $arr['pay_type'];   //支付方式
         $data['status'] = 2;                  //支付状态
