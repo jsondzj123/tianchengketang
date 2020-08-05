@@ -556,12 +556,12 @@ class CourseSchool extends Model {
             if(!empty($refTeacherArr)){
                $teachers_ids = array_unique($teachers_ids);
                if(!empty($noNatuerTeacher_ids)){
-                   $noNatuerTeacher_ids = array_unique($noNatuerTeacher_ids);
-                   $noNatuerTeacher_ids = array_intersect($refTeacherArr,$noNatuerTeacher_ids);
-                   $arr = array_diff($teachers_ids,$noNatuerTeacher_ids);
-                   if(!empty($arr)){
+                    $noNatuerTeacher_ids = array_unique($noNatuerTeacher_ids);
+                    $noNatuerTeacher_ids = array_intersect($refTeacherArr,$noNatuerTeacher_ids);
+                    $arr = array_diff($teachers_ids,$noNatuerTeacher_ids);
+                    if(!empty($arr)){
                        $updateTeacherArr = array_intersect($arr,$refTeacherArr);
-                   } 
+                    } 
                 }else{
                    $updateTeacherArr = array_intersect($teachers_ids,$refTeacherArr); //$updateTecherArr 要取消授权的讲师信息
                 }
@@ -780,6 +780,7 @@ class CourseSchool extends Model {
                     } 
                 }
             }
+
             if(!empty($natureBankId)){
                 //除要取消的题库
                 //$noNaturecourseSubjectArr
@@ -813,7 +814,8 @@ class CourseSchool extends Model {
             try{
                 $updateTime = date('Y-m-d H:i:s');
                 if(!empty($updateTeacherArr)){
-                    foreach ($updateTecherArr as $k => $vt) {
+
+                    foreach ($updateTeacherArr as $k => $vt) {
                         $teacherRes =CourseRefTeacher::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'teacher_id'=>$vt,'is_public'=>0])->update(['is_del'=>1,'update_at'=>$updateTime]);
                         if(!$teacherRes){
                            DB::rollback();
@@ -822,6 +824,7 @@ class CourseSchool extends Model {
                         }
                     }
                 }
+
                 if(!empty($updateSubjectArr)){
                     $updateSubjectArr = array_unique($updateSubjectArr,SORT_REGULAR);
                     foreach ($updateSubjectArr as $k => $vs) {
@@ -834,11 +837,12 @@ class CourseSchool extends Model {
                         }
                     }
                 }
+
                 if(!empty($updatelvboArr)){
                     $updatelvboArr = array_chunk($updatelvboArr,500);
                     foreach($updatelvboArr as $key=>$lvbo){
                         foreach ($lvbo as $k => $vl) {
-                            $lvboRes =CourseRefSubject::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'course_id'=>$vl,'type'=>0])->update(['is_del'=>1,'update_at'=>$updateTime]);
+                            $lvboRes =CourseRefResource::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'resource_id'=>$vl,'type'=>0])->update(['is_del'=>1,'update_at'=>$updateTime]);
                             if(!$lvboRes){
                                 DB::rollback();
                                 return ['code'=>203,'msg'=>'录播资源取消授权未成功'];
@@ -852,7 +856,7 @@ class CourseSchool extends Model {
                     $updatezhiboArr = array_chunk($updatezhiboArr,500);
                     foreach($updatezhiboArr as $key=>$zhibo){
                         foreach ($zhibo as $k => $vz) {
-                            $zhiboRes =CourseRefSubject::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'course_id'=>$vz,'type'=>1])->update(['is_del'=>1,'update_at'=>$updateTime]);
+                            $zhiboRes =CourseRefResource::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'resource_id'=>$vz,'type'=>1])->update(['is_del'=>1,'update_at'=>$updateTime]);
                             if(!$zhiboRes){
                                 DB::rollback();
                                 return ['code'=>203,'msg'=>'直播资源取消授权未成功'];
@@ -872,6 +876,7 @@ class CourseSchool extends Model {
                     }
                 }
                 if(!empty($courseIds)){
+
                     foreach ($courseIds as $key => $vc) {
                         $courseRes =self::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'course_id'=>$vc])->update(['is_del'=>1,'update_at'=>$updateTime]);
                         if(!$courseRes){
