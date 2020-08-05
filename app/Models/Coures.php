@@ -871,13 +871,13 @@ class Coures extends Model {
                     $lubo['recordedname'] = $course['title'];
                     $lubo['type'] = '录播';
                     $return['lubo'] = $lubo;
-                    $methodstr = $methodstr.'，录播';
+                    $methodstr = $methodstr.',录播';
                 }
                 if($methodv['method_id'] == 3){
                     $lubo['recordedname'] = $course['title'];
                     $lubo['type'] = '其他';
                     $return['rest'] = $lubo;
-                    $methodstr = $methodstr.'，其他';
+                    $methodstr = $methodstr.',其他';
                 }
             }
             $return['methodtype'] = ltrim($methodstr,',');
