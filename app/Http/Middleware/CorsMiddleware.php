@@ -47,7 +47,7 @@ class CorsMiddleware
             'http://jl.jinlong567.com',
             'http://bk.tiancheng27.com',
             'http://dc.tiancheng27.com',
-            'http://dc.tiancheng989.com',
+            'http://bw.tiancheng989.com',
             'http://bk.tiancheng989.com',
             'http://gl.tiancheng989.com',
             'http://yl.tiancheng989.com',
