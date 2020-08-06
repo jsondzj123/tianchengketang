@@ -8,6 +8,7 @@ use App\Models\Admin;
 use App\Models\Coures;
 use App\Models\CourseRefResource;
 use App\Models\CourseLiveResource;
+use App\Models\LiveChild;
 class Live extends Model {
 
     //指定别的表名
@@ -450,6 +451,11 @@ class Live extends Model {
             }
             $update = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
             if($update){
+                //删除该直播单元下所有的班号和课次
+                //获取班号
+                $shift_no_id = LiveClass::select("id")->where(['resource_id'=>$data['id']])->first()['id'];
+                LiveClass::where(['resource_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+                LiveChild::where(['shift_no_id'=>$shift_no_id])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
                 //获取后端的操作员id
                 $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                 //添加日志操作

@@ -30,6 +30,13 @@ class TestController extends Controller
     public function index(Request $request)
     {
 
+
+        $MTCloud = new MTCloud();
+        $res = $MTCloud->courseGet("1246757");
+        dd($res);
+        $data['course_id'] = $res['data']['course_id'];
+        $data = [];
+        $d = DB::table("ld_course_live_childs")->insert($data);
         // $file = $_FILES['file'];
         // $is_correct_extensiton = self::detectUploadFileMIME($file);
         // $excel_extension       = substr($_FILES['file']['name'], strrpos($_FILES['file']['name'], '.')+1);   //获取excel后缀名
@@ -60,19 +67,19 @@ class TestController extends Controller
         //     //更新每一条数据
 
         // }
-        $data = $request->all();
-        $pagesize = isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 15;
-        $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
-        $offset   = ($page - 1) * $pagesize;
-        $testt = DB::table("ttt")->offset($offset)->limit($pagesize)->get()->toArray();
-        foreach ($testt as $k=>$v){
+        // $data = $request->all();
+        // $pagesize = isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 15;
+        // $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
+        // $offset   = ($page - 1) * $pagesize;
+        // $testt = DB::table("ttt")->offset($offset)->limit($pagesize)->get()->toArray();
+        // foreach ($testt as $k=>$v){
 
 
-            $res['update_at'] = date('Y-m-d H:i:s');
-            $res['resource_id'] = $v->resource_id;
-            $dd = Coureschapters::where(['id'=>$v->chapters_id])->update($res);
-            Log::info('数据', ['id' => $v->chapters_id,'res'=>$dd,'resource_id'=>$v->resource_id]);
-        }
+        //     $res['update_at'] = date('Y-m-d H:i:s');
+        //     $res['resource_id'] = $v->resource_id;
+        //     $dd = Coureschapters::where(['id'=>$v->chapters_id])->update($res);
+        //     Log::info('数据', ['id' => $v->chapters_id,'res'=>$dd,'resource_id'=>$v->resource_id]);
+        // }
             // "data" => array:37 [
             //     "course_id" => "1058554" 课程id
             //     "partner_id" => "12572"合作方id

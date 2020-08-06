@@ -232,6 +232,8 @@ class LiveClass extends Model {
             //等学科写完继续
             $update = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
             if($update){
+                //删除该班号下所有课次
+                LiveChild::where(['shift_no_id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
                 //获取后端的操作员id
                 $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
                 //添加日志操作
