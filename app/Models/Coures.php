@@ -980,8 +980,9 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '课程id参数为空'];
         }
         $order = Order::where(['order_number'=>$data['order_number']])->first();
-        $price = Order::where(['student_id'=>$order['student_id'],'oa_status'=>1,'class_id'=>$order['class_id'],'nature'=>$order['nature'],'status'=>1])
-            ->orwhere(['student_id'=>$order['student_id'],'oa_status'=>1,'class_id'=>$order['class_id'],'nature'=>$order['nature'],'status'=>2])->sum('price');
+        $price1 = Order::where(['student_id'=>$order['student_id'],'class_id'=>$order['class_id'],'nature'=>$order['nature'],'status'=>1])->sum('price');
+        $price2 = Order::where(['student_id'=>$order['student_id'],'class_id'=>$order['class_id'],'nature'=>$order['nature'],'status'=>2])->sum('price');
+        $price = $price1 + $price2;
         if($data['nature'] == 1){
             $course = CourseSchool::where(['id'=>$data['id']])->first();
         }else {
