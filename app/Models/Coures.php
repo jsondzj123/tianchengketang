@@ -981,7 +981,7 @@ class Coures extends Model {
         }
         $order = Order::where(['order_number'=>$data['order_number']])->first();
         $price = Order::where(['student_id'=>$order['student_id'],'oa_status'=>1,'class_id'=>$order['class_id'],'nature'=>$order['nature'],'status'=>1])
-            ->orwhere(['student_id'=>$order['student_id'],'oa_status'=>1,'class_id'=>$order['class_id'],'nature'=>$order['nature'],'status'=>2])->count('price');
+            ->orwhere(['student_id'=>$order['student_id'],'oa_status'=>1,'class_id'=>$order['class_id'],'nature'=>$order['nature'],'status'=>2])->sum('price');
         if($data['nature'] == 1){
             $course = CourseSchool::where(['id'=>$data['id']])->first();
         }else {
