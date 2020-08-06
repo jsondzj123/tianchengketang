@@ -55,28 +55,30 @@ class TeachController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function startLive()
-    {   
+    {  
+      $user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+      $real_name = isset(AdminLog::getAdminInfo()->admin_user->real_name) ? AdminLog::getAdminInfo()->admin_user->real_name : $this->make_password();
       $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
       $teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->teacher_id : 0;
-      if($teacher_id <= 0){
-        return response()->json(['code'=>207,'msg'=>'非讲师教务进入直播间']);
-      }
+      // if($teacher_id <= 0){
+      //   return response()->json(['code'=>207,'msg'=>'非讲师教务进入直播间']);
+      // }
       $teacherArr = Teacher::where(['school_id'=>$school_id,'id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
-        $data = self::$accept_data;
-        $validator = Validator::make($data, [
-        	'is_public'=>'required',
-          'id' => 'required', 
-        ],Teach::message());
-        if ($validator->fails()) {
-            return response()->json(json_decode($validator->errors()->first(),1));
-        }
-        if($data['is_public'] == 1){ //公开课
-        	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('course_id')->first();
-        }
-       	if($data['is_public']== 0){  //课程
- 			     $live = CourseLiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
-       	}
-       if($teacherArr['type'] == 1){
+      $data = self::$accept_data;
+      $validator = Validator::make($data, [
+      	'is_public'=>'required',
+        'id' => 'required', 
+      ],Teach::message());
+      if ($validator->fails()) {
+          return response()->json(json_decode($validator->errors()->first(),1));
+      }
+      if($data['is_public'] == 1){ //公开课
+      	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('course_id')->first();
+      }
+     	if($data['is_public']== 0){  //课程
+			     $live = CourseLiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
+     	}
+      if(isset($teacherArr['type']) && $teacherArr['type'] == 1){
         //教务
         $liveArr['course_id'] = $live['course_id'];
         $liveArr['uid'] = $teacherArr['id'];
@@ -87,7 +89,7 @@ class TeachController extends Controller {
           return response()->json($res);
         }
       }
-      if($teacherArr['type'] == 2){
+      if(isset($teacherArr['type']) && $teacherArr['type'] == 2){
         //讲师
         $MTCloud = new MTCloud();
         $res = $MTCloud->courseLaunch($live['course_id']); 
@@ -96,10 +98,22 @@ class TeachController extends Controller {
             return $this->response('直播器启动失败', 500);
         }
       }
+      if(!isset($teacherArr['type'])){
+        $liveArr['course_id'] = $live['course_id'];
+        $liveArr['uid'] = $user_id;
+        $liveArr['nickname'] = $real_name;
+        $liveArr['role'] = 'user';
+        $res = $this->courseAccess($liveArr);
+        if($res['code'] == 1203){ //该课程没有回放记录!
+          return response()->json($res);
+        }
+      }
       return $this->response($res['data']);
     }
     //进入直播间
     public function liveInRoom(){
+      $user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+      $real_name = isset(AdminLog::getAdminInfo()->admin_user->real_name) ? AdminLog::getAdminInfo()->admin_user->real_name : $this->make_password();
       $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
       $teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->teacher_id : 0;
       if($teacher_id <= 0){
@@ -123,7 +137,8 @@ class TeachController extends Controller {
       if($data['is_public']== 0){  //课程
           $live = CourseLiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
       }
-      if($teacherArr['type'] == 1){
+
+      if(isset($teacherArr['type']) && $teacherArr['type'] == 1){
         //教务
         $liveArr['course_id'] = $live['course_id'];
         $liveArr['uid'] = $teacherArr['id'];
@@ -134,13 +149,24 @@ class TeachController extends Controller {
           return response()->json($res);
         }
       }
-      if($teacherArr['type'] == 2){
+      if(isset($teacherArr['type']) && $teacherArr['type'] == 2){
         //讲师
         $MTCloud = new MTCloud();
         $res = $MTCloud->courseLaunch($live['course_id']); 
         Log::error('直播器启动:'.json_encode($res));
         if(!array_key_exists('code', $res) && !$res["code"] == 0){
             return $this->response('直播器启动失败', 500);
+        } 
+      }              
+      if(!isset($teacherArr['type'])){
+
+        $liveArr['course_id'] = $live['course_id'];
+        $liveArr['uid'] = $user_id;
+        $liveArr['nickname'] = $real_name;
+        $liveArr['role'] = 'user';
+        $res = $this->courseAccess($liveArr);
+        if($res['code'] == 1203){ //该课程没有回放记录!
+          return response()->json($res);
         }
       }
       return $this->response($res['data']);
@@ -155,17 +181,19 @@ class TeachController extends Controller {
    	public function livePlayback(){
       $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
       $teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->teacher_id : 0;
-      if($teacher_id <= 0){
-        return response()->json(['code'=>207,'msg'=>'非讲师教务查看回放']);
-      }
-      $teacherArr = Teacher::where(['school_id'=>$school_id,'id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
-      if(empty($teacherArr)){
-        return response()->json(['code'=>207,'msg'=>'非讲师教务查看回放']);
-      }
+      $user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
+      $real_name = isset(AdminLog::getAdminInfo()->admin_user->real_name) ? AdminLog::getAdminInfo()->admin_user->real_name :$this->make_password();
+      // if($teacher_id <= 0){
+      //   return response()->json(['code'=>207,'msg'=>'非讲师教务查看回放']);
+      // }
+      // $teacherArr = Teacher::where(['school_id'=>$school_id,'id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
+      // if(empty($teacherArr)){
+      //   return response()->json(['code'=>207,'msg'=>'非讲师教务查看回放']);
+      // }
    		$data = self::$accept_data;
    		$validator = Validator::make($data, [
-   			'is_public'=>'required',
-            'id' => 'required', 
+   			  'is_public'=>'required',
+          'id' => 'required', 
         ],Teach::message());
       if ($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
@@ -177,9 +205,9 @@ class TeachController extends Controller {
 			    $live = CourseLiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
      	}
       $liveArr['course_id'] = $live['course_id'];
-      $liveArr['uid'] = $teacherArr['id'];
-      $liveArr['nickname'] = $teacherArr['real_name'];
-      $liveArr['role'] = 'admin';
+      $liveArr['uid'] = !isset($teacherArr['id'])?$teacherArr['id']:$user_id;
+      $liveArr['nickname'] = !isset($teacherArr['real_name'])?$teacherArr['real_name']:$real_name;
+      $liveArr['role'] = !isset($teacherArr['id'])?'admin':'user';
       $res = $this->courseAccessPlayback($liveArr);
       if($res['code'] == 1203){ //该课程没有回放记录!
           return response()->json($res);
@@ -286,7 +314,26 @@ class TeachController extends Controller {
         return $res;
     }
 
-
+    public function make_password( $length = 8 ){ 
+      
+    // 密码字符集，可任意添加你需要的字符 
+      $chars = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 
+      'i', 'j', 'k', 'l','m', 'n', 'o', 'p', 'q', 'r', 's', 
+      't', 'u', 'v', 'w', 'x', 'y','z', 'A', 'B', 'C', 'D', 
+      'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L','M', 'N', 'O', 
+      'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y','Z', 
+      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!'); 
+      
+      // 在 $chars 中随机取 $length 个数组元素键名 
+      $keys = array_rand($chars, $length); 
+      $password =''; 
+      for($i = 0; $i < $length; $i++) 
+      { 
+      // 将 $length 个数组元素连接成字符串 
+        $password .= $chars[$keys[$i]]; 
+      } 
+      return $password; 
+    }
 
 
 }
