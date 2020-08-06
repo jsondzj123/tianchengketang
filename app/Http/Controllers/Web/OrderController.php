@@ -8,6 +8,7 @@ use App\Models\Coures;
 use App\Models\Couresteacher;
 use App\Models\CourseSchool;
 use App\Models\Order;
+use App\Models\PaySet;
 use App\Models\School;
 use App\Models\Student;
 use App\Models\Teacher;
@@ -157,7 +158,28 @@ class OrderController extends Controller {
            return ['code' => 201 , 'msg' => '订单不合法'];
        }
     }
-
+    //对公购买信息
+    public function scanPay(){
+        $paytype = PaySet::where(['school_id' => $this->school['id'],'pay_status'=>1])->first();
+        $pay=[];
+        if(!empty($paytype)){
+            if($paytype['wx_pay_state'] == 1){
+                $pay[] = 1;
+            }
+            if($paytype['zfb_pay_state'] == 1){
+                $pay[] = 2;
+            }
+            if($paytype['hj_wx_pay_state'] == 1){
+                $pay[] = 3;
+            }
+            if($paytype['hj_zfb_pay_state'] == 1){
+                $pay[] = 4;
+            }
+        }
+        $school['onetype'] = $this->school['name'];
+        $school['twotype'] = $this->school['name'];
+        return response()->json(['code' => 200, 'msg' => '成功','data' => $school,'payarr' => $pay]);
+    }
     //汇聚支付宝支付
     public function converge(){
          if($this->data['nature'] == 1){

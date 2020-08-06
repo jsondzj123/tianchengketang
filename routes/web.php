@@ -208,6 +208,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('chargeOrder','OrderController@chargeOrder');//0元购买接口
         $router->post('scanPay','CourseController@scanPay');//扫码支付
         //汇聚扫码支付
+        $router->post('scanPay', 'OrderController@scanPay');//扫码支付页面信息
         $router->post('converge', 'OrderController@converge');//汇聚扫码
     });
     //课程 无需token
