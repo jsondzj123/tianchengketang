@@ -492,32 +492,32 @@ class Order extends Model {
                 $v['course_title'] = $course['title'];
                 if($v['status'] == 0){
                     $v['learning'] = "未支付";
-                    $v['bgcolor'] = '#26A4FD';
+                    $v['bgcolor'] = '#FF0000';
                 }
                 if($v['status'] == 1){
                     $v['learning'] = "待审核";
-                    $v['bgcolor'] = '#FDA426';
+                    $v['bgcolor'] = '#FF7E00';
                 }
                 if($v['status'] == 2){
                     if($v['pay_status'] == 3 || $v['pay_status'] == 4){
                         $v['learning'] = "已开课";
-                        $v['bgcolor'] = '#FF4545';
+                        $v['bgcolor'] = '#299E00';
                     }else{
                         $v['learning'] = "尾款未结清";
-                        $v['bgcolor'] = '#FDA426';
+                        $v['bgcolor'] = '#9600FF';
                     }
                 }
                 if($v['status'] == 3){
                     $v['learning'] = "审核失败";
-                    $v['bgcolor'] = '#67C23A';
+                    $v['bgcolor'] = '#FF006C';
                 }
                 if($v['status'] == 4){
                     $v['learning'] = "已退款";
-                    $v['bgcolor'] = '#f2f6fc';
+                    $v['bgcolor'] = '#656565';
                 }
                 if($v['status'] == 5){
                     $v['learning'] = "已失效";
-                    $v['bgcolor'] = '#FDA426';
+                    $v['bgcolor'] = '#656565';
                 }
             }
         }

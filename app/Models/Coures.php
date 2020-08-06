@@ -980,12 +980,14 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '课程id参数为空'];
         }
         $order = Order::where(['order_number'=>$data['order_number']])->first();
+        $price = Order::where(['student_id'=>$order['student_id'],'oa_status'=>1,'class_id'=>$order['class_id'],'nature'=>$order['nature'],'status'=>1])
+            ->orwhere(['student_id'=>$order['student_id'],'oa_status'=>1,'class_id'=>$order['class_id'],'nature'=>$order['nature'],'status'=>2])->count('price');
         if($data['nature'] == 1){
             $course = CourseSchool::where(['id'=>$data['id']])->first();
         }else {
             $course = Coures::where(['id' => $data['id']])->first();
         }
-        $difference = $course['sale_price'] - $order['price'];
+        $difference = $course['sale_price'] - $price;
         if($difference < 0){
             $difference = 0;
         }
@@ -993,7 +995,7 @@ class Coures extends Model {
             'order_price' => $course['sale_price'],
             'price' => $difference,
             'original_course_price' => $order['lession_price'],
-            'original_order_price' => $order['price']
+            'original_order_price' => $price
         ];
         return ['code' => 200 , 'msg' => '获取成功','data'=>$arr];
 
