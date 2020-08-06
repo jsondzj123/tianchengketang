@@ -181,7 +181,7 @@ class CourseSchool extends Model {
      //    $courseIds=$body['course_id'];
     	// $courseIds = explode(',',$body['course_id']);
         $courseIds = json_decode($body['course_id'],1); //前端传值
-
+        
         if(empty($courseIds)){
             return ['code'=>205,'msg'=>'请选择授权课程'];
         }
@@ -337,7 +337,8 @@ class CourseSchool extends Model {
                     }
                 }
                 //学科
-                $subjectArr = CourseRefSubject::where(['to_school_id'=>$body['school_id'],'from_school_id'=>$school_id,'is_del'=>0])->select('parent_id','child_id')->get()->toArray();  //已经授权过的学科
+                $courseSubjectArr = array_unique($courseSubjectArr,SORT_REGULAR);
+                $subjectArr = CourseRefSubject::where(['to_school_id'=>$body['school_id'],'from_school_id'=>$school_id,'is_del'=>0,'is_public'=>0])->select('parent_id','child_id')->get()->toArray();  //已经授权过的学科
                 if(!empty($subjectArr)){
                     foreach($courseSubjectArr as $k=>$v){
                         foreach($subjectArr as $kk=>$bv){
@@ -387,8 +388,7 @@ class CourseSchool extends Model {
                         $InsertZhiboVideoArr[$key]['create_at'] = date('Y-m-d H:i:s');
                     }
                 }
-                // print_r($InsertZhiboVideoArr);die;
-
+                
                 //题库
                 foreach($courseSubjectArr as $key=>&$vs){
                     $bankIdArr = QuestionBank::where(['parent_id'=>$vs['parent_id'],'child_id'=>$vs['child_id'],'is_del'=>0])->pluck('id')->toArray();
@@ -398,7 +398,6 @@ class CourseSchool extends Model {
                         }
                     }
                 }
-
                 if(!empty($bankids)){
                     $bankids=array_unique($bankids);
                     $natureQuestionBank = CourseRefBank::where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->pluck('bank_id')->toArray();
@@ -411,7 +410,6 @@ class CourseSchool extends Model {
                         $InsertQuestionArr[$key]['create_at'] = date('Y-m-d H:i:s');
                     }
                 }
-
                 DB::beginTransaction();
                 try{
                     $teacherRes = CourseRefTeacher::insert($InsertTeacherRef);//教师
