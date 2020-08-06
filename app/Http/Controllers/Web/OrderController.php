@@ -93,8 +93,6 @@ class OrderController extends Controller {
             $alipay = new AlipayFactory();
             $return = $alipay->createPcPay($order['order_number'],$order['price']);
             if($return['alipay_trade_precreate_response']['code'] == 10000){
-//                $img = $this->generateQRfromGoogle($return['alipay_trade_precreate_response']['qr_code']);
-//                echo $img;
                 return ['code' => 200 , 'msg' => '支付','data'=>$return['alipay_trade_precreate_response']['qr_code']];
             }else{
                 return ['code' => 202 , 'msg' => '生成二维码失败'];
@@ -160,7 +158,7 @@ class OrderController extends Controller {
     }
     //对公购买信息
     public function scanPay(){
-        $paytype = PaySet::where(['school_id' => $this->school['id'],'pay_status'=>1])->first();
+        $paytype = PaySet::where(['school_id' => $this->school['id']])->first();
         $pay=[];
         if(!empty($paytype)){
             if($paytype['wx_pay_state'] == 1){
@@ -176,8 +174,8 @@ class OrderController extends Controller {
                 $pay[] = 4;
             }
         }
-        $school['onetype'] = $this->school['name'];
-        $school['twotype'] = $this->school['name'];
+        $school['title'] = $this->school['title'];
+        $school['subhead'] = $this->school['subhead'];
         return response()->json(['code' => 200, 'msg' => '成功','data' => $school,'payarr' => $pay]);
     }
     //汇聚支付宝支付
@@ -213,6 +211,23 @@ class OrderController extends Controller {
         if($add){
             //微信
             if($this->data['pay_status'] == 1){
+                $wxpay = new WxpayFactory();
+                $number = date('YmdHis', time()) . rand(1111, 9999);
+                $price = 0.01;
+                $return = $wxpay->getPcPayOrder($number,$price);
+            }
+            //支付宝
+            if($this->data['pay_status'] == 2){
+                $alipay = new AlipayFactory();
+                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
+                if($return['alipay_trade_precreate_response']['code'] == 10000){
+                    return ['code' => 200 , 'msg' => '支付','data'=>$return['alipay_trade_precreate_response']['qr_code']];
+                }else{
+                    return ['code' => 202 , 'msg' => '生成二维码失败'];
+                }
+            }
+            //汇聚微信
+            if($this->data['pay_status'] == 3){
                 $notify = 'AB|'."http://".$_SERVER['HTTP_HOST']."/web/course/hjnotify";
                 $pay=[
                     'p0_Version'=>'1.0',
@@ -238,8 +253,8 @@ class OrderController extends Controller {
                     return response()->json(['code' => 202, 'msg' => '生成失败，请报告总部']);
                 }
             }
-            //支付宝
-            if($this->data['pay_status'] == 2){
+            //汇聚支付宝
+            if($this->data['pay_status'] == 4){
                 $notify = 'AB|'."http://".$_SERVER['HTTP_HOST']."/web/course/hjnotify";
                 $pay=[
                     'p0_Version'=>'1.0',

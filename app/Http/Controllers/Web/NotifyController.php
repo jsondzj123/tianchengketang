@@ -11,11 +11,10 @@ use App\Models\Student;
 use Illuminate\Support\Facades\DB;
 
 class NotifyController extends Controller {
-    //支付宝回调
+    //web端直接购买支付宝回调
     public function alinotify(){
         $arr = $_POST;
-        file_put_contents('alipaylogsssssssss.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
-
+        file_put_contents('alinotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
         if($arr['trade_status'] == 'TRADE_SUCCESS'){
             $orders = Order::where(['order_number'=>$arr['out_trade_no']])->first();
             if ($orders['status'] > 0) {
@@ -89,6 +88,33 @@ class NotifyController extends Controller {
             if($up){
                 return "success";
             }
+        }
+    }
+    //web端扫码购买回调
+    public function convergecreateNotifyPcPay(){
+        $arr = $_POST;
+        file_put_contents('alinotify.txt', '时间:'.date('Y-m-d H:i:s').print_r($arr,true),FILE_APPEND);
+        if($arr['trade_status'] == 'TRADE_SUCCESS'){
+            $orders = Order::where(['order_number'=>$arr['out_trade_no']])->first();
+            if ($orders['status'] > 0) {
+                return 'success';
+            }else {
+                try{
+                    DB::beginTransaction();
+                    //修改订单状态  增加课程  修改用户收费状态
+                    $up = Converge::where(['id'=>$orders['id']])->update(['status'=>1,'update_time'=>date('Y-m-d H:i:s')]);
+                    if($up){
+                        return "success";
+                    }
+                    DB::commit();
+                    return 'success';
+                } catch (Exception $ex) {
+                    DB::rollback();
+                    return 'fail';
+                }
+            }
+        }else{
+            return 'fail';
         }
     }
 }

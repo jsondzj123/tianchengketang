@@ -28,6 +28,7 @@ class AlipayFactory{
         $this->aop->alipayPublicKey ="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlTAdFGs8uzPYG3akYT1qs3gEFtjkuRIjP2i7FHUiF52/FVTSzOiYwy9n4qQYovyP/lKxtFWTlKMZfjy1G8EYJBbcb/5dIdDbgm40yaactPaeGkAvykzw5az0PhYTUFJ7PSewZyTJeqETT8ROpuIY5rxgNVHciASiNvrSOMudHfUtqvS7mUPX/Kcpl9q0ryW6BJUIb5SnFouVmh0x6ZAyb+cXVqPXrBTLlQucT3RKuvR+zMkT9IeFFn9fIsCBGhVg8eHfacKUjOWT00CILyoLk6rIZF+PRDX32kvxLKAlfq1puupT2BZxDpH3+LvcMj0Cpl0jmXylEqAxM6qh5+sdjwIDAQAB";//商户公钥（步骤二中生成的商户公钥）
 //        $this->aop->alipayPublicKey = $payinfo['zfb_public_key'];
     }
+    //app端购买
     public function createAppPay($title,$order_number, $total_amount,$pay_type){
         require_once 'aop/request/AlipayTradeAppPayRequest.php';
         //$this->schoolid = $schoolid;
@@ -53,7 +54,7 @@ class AlipayFactory{
         return $response;
     }
 
-    //支付宝扫码支付
+    //web端直接购买支付宝扫码支付
     public function createPcPay($order_number,$price){
         require_once 'aop/request/AlipayTradePrecreateRequest.php';
         $request = new AlipayTradePrecreateRequest();
@@ -68,6 +69,24 @@ class AlipayFactory{
         $request->setBizContent(json_encode($bizcontent));
 
         $request->setNotifyUrl("http://".$_SERVER['HTTP_HOST'].'/web/course/alinotify');
+        $result =  $this->aop->execute($request);
+        return $result;
+    }
+    //web端扫码支付
+    public function convergecreatePcPay($order_number,$price){
+        require_once 'aop/request/AlipayTradePrecreateRequest.php';
+        $request = new AlipayTradePrecreateRequest();
+        //SDK已经封装掉了公共参数，这里只需要传入业务参数
+        $bizcontent    =    [
+            'out_trade_no'        =>    $order_number,
+            'total_amount'        =>    $price,//价格
+            'subject'                =>    "商品购买",
+            'timeout_express'    =>    '1d',//失效时间为 1天
+            'product_code'        =>    'FACE_TO_FACE_PAYMENT',
+        ];
+        $request->setBizContent(json_encode($bizcontent));
+
+        $request->setNotifyUrl("http://".$_SERVER['HTTP_HOST'].'/web/course/convergecreateNotifyPcPay');
         $result =  $this->aop->execute($request);
         return $result;
     }
