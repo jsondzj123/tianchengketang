@@ -63,6 +63,8 @@ class FootConfig extends Model {
     }
 
     public static function details($body){
+        $schoolid = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登录的id
+        $school_update = [];
     	$body['open'] = isset($body['open']) && $body['open'] > 0 ?1:0;
     	if($body['type'] == 1){ //头部
     		if(!isset($body['name']) || empty($body['name'])){
@@ -75,6 +77,19 @@ class FootConfig extends Model {
                 $update['text'] =  '';
             }else{
                 $update['text'] = $body['text'];
+            }
+            if(isset($body['title']) && !empty($body['title'])){
+                $school_update['title'] = $body['title'];
+            }
+            if(isset($body['subhead']) && !empty($body['subhead'])){
+                $school_update['subhead'] = $body['subhead'];
+            }
+            if(!empty($school_update) && $schoolid >0){
+                $school_update['update_time'] = date('Y-m-d H:i:s');
+                $schoolRes = school::where('id',$schoolid)->update($school_update);
+                if(!$schoolRes){
+                    return ['code'=>203,'msg'=>'网络错误，请重试'];
+                }
             }
     		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'url'=>$body['url'],'is_open'=>$body['open'],'update_at'=>date('Y-m-d H:i:s'),'text'=>$update['text']]);
     	}

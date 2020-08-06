@@ -133,6 +133,7 @@ class TeacherController extends Controller {
 		}
 		if(!empty($data)){
 			foreach($data as $key=>$v){
+
 				if($v['id'] == $this->data['teacher_id']){
 					$arr[] = $v;
 				}
@@ -141,7 +142,27 @@ class TeacherController extends Controller {
 				$teacherInfo['class_number'] = count($arr);//开课数量
 				$sum =0;
 				foreach($arr as $k=>&$v){
-
+					$where=[
+                        'course_id'=>$v['course_id'],
+                        'is_del'=>0
+                    ];
+                    $method = Couresmethod::select('method_id')->where($where)->get()->toArray();
+                    if(empty($method)){
+                        unset($arr[$k]);
+                    }else{
+                        foreach ($method as $key=>&$val){
+                            if($val['method_id'] == 1){
+                                $val['method_name'] = '直播';
+                            }
+                            if($val['method_id'] == 2){
+                                $val['method_name'] = '录播';
+                            }
+                            if($val['method_id'] == 3){
+                                $val['method_name'] = '其他';
+                            }
+                        }
+                        $v['method'] = $method;
+                    }
 					$v['buy_num'] += Order::where(['school_id'=>$this->school['id'],'nature'=>1,'status'=>2,'class_id'=>$v['course_id']])->whereIn('pay_status',[3,4])->count();
 					$sum+=$v['buy_num'];
 				}
