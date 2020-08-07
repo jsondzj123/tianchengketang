@@ -272,6 +272,11 @@ class LiveChild extends Model {
             if(!$LiveClassOne){
                 return ['code' => 204 , 'msg' => '参数不正确'];
             }
+            //课次已发布到欢拓无法删除
+            $LiveClassOne1 = self::where(['id'=>$data['id'],'status' => 1])->first();
+            if(!$LiveClassOne1){
+                return ['code' => 204 , 'msg' => '该课次已发布到欢拓，无法删除该课次'];
+            }
             $update = self::where(['id'=>$data['id'],'is_del'=>0])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
             if($update){
                 //获取后端的操作员id
