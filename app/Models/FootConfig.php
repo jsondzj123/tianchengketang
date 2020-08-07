@@ -46,9 +46,9 @@ class FootConfig extends Model {
                         $schoolData = School::where('id',$school_id)->select('title','subhead')->first();
                         $v['title'] = isset($schoolData['title']) ? $schoolData['title'] :'';
                         $v['subhead'] = isset($schoolData['subhead']) ? $schoolData['subhead'] :'';
-                        $v['is_scan_pay'] = 0;
+                        $v['is_scan_pay'] = 1;
                     }else{
-                        $v['is_scan_pay'] = 1; 
+                        $v['is_scan_pay'] = 0; 
                     }
     				array_push($headerArr,$v);
     			}
