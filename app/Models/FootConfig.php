@@ -40,8 +40,16 @@ class FootConfig extends Model {
     		
     	$headerArr = $footer = $icp= $logo =[];
     	if(!empty($pageSet)){
-    		foreach($pageSet  as $key=>$v){
+    		foreach($pageSet  as $key=>&$v){
     			if($v['type']== 1){
+                    if($v['status'] != 1){
+                        $schoolData = School::where('id',$school_id)->select('title','subhead')->first();
+                        $v['title'] = isset($schoolData['title']) ? $schoolData['title'] :'';
+                        $v['subhead'] = isset($schoolData['subhead']) ? $schoolData['subhead'] :'';
+                        $v['is_scan_pay'] = 0;
+                    }else{
+                        $v['is_scan_pay'] = 1; 
+                    }
     				array_push($headerArr,$v);
     			}
     			if($v['type']== 2){
