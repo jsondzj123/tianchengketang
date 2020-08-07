@@ -78,6 +78,8 @@ class OpenCourseController extends Controller {
                     $v['status'] = 3;
                     $v['sort'] = 3;
                 }
+                $v['data'] = date('Y-m-d',$v['start_at']);
+                $v['time'] = date('H:i',$v['start_at']).'-'.date('H:i',$v['end_at']);;
                 $v['start_at'] = date('Y-m-d H:i:s',$v['start_at']);
                 $v['end_at'] = date('Y-m-d H:i:s',$v['end_at']);
             }
