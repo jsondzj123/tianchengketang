@@ -210,6 +210,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         //汇聚扫码支付
         $router->post('scanPay', 'OrderController@scanPay');//扫码支付页面信息
         $router->post('converge', 'OrderController@converge');//汇聚扫码
+        //h5 支付
+        $router->post('hfivePay', 'OrderController@hfivePay');//汇聚扫码
     });
     //课程 无需token
     $router->group(['prefix' => 'course'], function () use ($router) {

@@ -12,6 +12,7 @@ use App\Models\PaySet;
 use App\Models\School;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\phpqrcode\QRcode;
 use App\Tools\AlipayFactory;
 use App\Tools\WxpayFactory;
 use Illuminate\Support\Facades\DB;
@@ -156,6 +157,7 @@ class OrderController extends Controller {
            return ['code' => 201 , 'msg' => '订单不合法'];
        }
     }
+    /*======================================web 对公扫码支付===========================*/
     //对公购买信息
     public function scanPay(){
         $paytype = PaySet::where(['school_id' => $this->school['id']])->first();
@@ -178,7 +180,7 @@ class OrderController extends Controller {
         $school['subhead'] = $this->school['subhead'];
         return response()->json(['code' => 200, 'msg' => '成功','data' => $school,'payarr' => $pay]);
     }
-    //汇聚支付宝支付
+    //web支付
     public function converge(){
          if($this->data['nature'] == 1){
              $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
@@ -221,9 +223,14 @@ class OrderController extends Controller {
                 $alipay = new AlipayFactory();
                 $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
                 if($return['alipay_trade_precreate_response']['code'] == 10000){
-                    return ['code' => 200 , 'msg' => '支付','data'=>$return['alipay_trade_precreate_response']['qr_code']];
+                    ob_start();//开启缓冲区
+                    $returnData  = QRcode::pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
+                    $imageString = base64_encode(ob_get_contents());
+                    ob_end_clean();
+                    $str = "data:image/png;base64,".$imageString;
+                    return response()->json(['code' => 200, 'msg' => '预支付订单生成成功','data'=>$str]);
                 }else{
-                    return ['code' => 202 , 'msg' => '生成二维码失败'];
+                    return response()->json(['code' => 202, 'msg' => '生成二维码失败']);
                 }
             }
             //汇聚微信
@@ -301,22 +308,6 @@ class OrderController extends Controller {
         $result = curl_exec($ch);
         curl_close($ch);
         return $result;
-    }
-    /**
-     * google api 二维码生成【QRcode可以存储最多4296个字母数字类型的任意文本，具体可以查看二维码数据格式】
-     * @param string $chl 二维码包含的信息，可以是数字、字符、二进制信息、汉字。
-    不能混合数据类型，数据必须经过UTF-8 URL-encoded
-     * @param int $widhtHeight 生成二维码的尺寸设置
-     * @param string $EC_level 可选纠错级别，QR码支持四个等级纠错，用来恢复丢失的、读错的、模糊的、数据。
-     *                            L-默认：可以识别已损失的7%的数据
-     *                            M-可以识别已损失15%的数据
-     *                            Q-可以识别已损失25%的数据
-     *                            H-可以识别已损失30%的数据
-     * @param int $margin 生成的二维码离图片边框的距离
-     */
-    function generateQRfromGoogle($chl,$widhtHeight ='150',$EC_level='L',$margin='0'){
-        $chl = urlencode($chl);
-        echo 'http://chart.apis.google.com/chart?chs='.$widhtHeight.'x'.$widhtHeight.'&cht=qr&chld='.$EC_level.'|'.$margin.'&chl='.$chl;
     }
 }
 
