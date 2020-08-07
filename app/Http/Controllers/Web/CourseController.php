@@ -95,7 +95,7 @@ class CourseController extends Controller {
             $name = isset($this->data['name']) ? $this->data['name'] : '';
             $count = 0;
             //自增课程
-            $course = Coures::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'nature', 'watch_num', 'create_at')
+            $course = Coures::select('id', 'title', 'cover', 'pricing','sale_price', 'buy_num', 'nature', 'watch_num', 'create_at')
                 ->where(function ($query) use ($parent) {
                     if (!empty($parent[0]) && $parent[0] != ''&& $parent[0] != 0) {
                         $query->where('parent_id', $parent[0]);
@@ -135,7 +135,7 @@ class CourseController extends Controller {
                 }
             }
             //授权课程
-            $ref_course = CourseSchool::select('id', 'title', 'cover', 'sale_price', 'buy_num', 'watch_num', 'create_at', 'course_id')
+            $ref_course = CourseSchool::select('id', 'title', 'cover', 'pricing','sale_price', 'buy_num', 'watch_num', 'create_at', 'course_id')
                 ->where(function ($query) use ($parent) {
                     if (!empty($parent[0]) && $parent[0] != ''&& $parent[0] != 0) {
                         $query->where('parent_id', $parent[0]);
