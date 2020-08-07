@@ -336,7 +336,7 @@ class SchoolController extends Controller {
                 }
             }
             $footInsert = array_merge($page_head_logo_icp_insert,$footOne,$fooTwo,$fooThree,$footFore);
-            $footRes = FootConfig::insertGetId($pid);
+            $footRes = FootConfig::insert($footInsert);
             if($footRes){
                 DB::rollBack();
                 return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!!']);
