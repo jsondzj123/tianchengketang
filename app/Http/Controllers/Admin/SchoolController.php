@@ -282,7 +282,7 @@ class SchoolController extends Controller {
                 ['parent_id'=>0,'name'=>'名师','url'=>'/teacher','type'=>1,'sort'=>6,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 ['parent_id'=>0,'name'=>'对公购买','url'=>'/corporatePurchase','type'=>1,'sort'=>7,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 ['parent_id'=>0,'name'=>'扫码支付','url'=>'/scanPay','type'=>1,'sort'=>8,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>0],
-                ['parent_id'=>0,'name'=>$data['name']'url'=>'/scanPay','type'=>3,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>$data['name'],'url'=>'/scanPay','type'=>3,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 ['parent_id'=>0,'logo'=>$data['logo_url'],'type'=>4,'sort'=>8,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
             ]; 
             $page_foot_pid_insert = [
