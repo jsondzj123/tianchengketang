@@ -273,7 +273,7 @@ class SchoolController extends Controller {
                 return response()->json(['code' => 203 , 'msg' => '创建账号未成功!!']);
             }
 
-            $page_head_logo_icp_insert = [
+            $page_head_logo_insert = [
                 ['parent_id'=>0,'name'=>'首页','url'=>'/home','type'=>1,'sort'=>1,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 ['parent_id'=>0,'name'=>'课程','url'=>'/onlineStudent','type'=>1,'sort'=>2,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 ['parent_id'=>0,'name'=>'公开课','url'=>'/courses','type'=>1,'sort'=>3,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
@@ -282,8 +282,8 @@ class SchoolController extends Controller {
                 ['parent_id'=>0,'name'=>'名师','url'=>'/teacher','type'=>1,'sort'=>6,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 ['parent_id'=>0,'name'=>'对公购买','url'=>'/corporatePurchase','type'=>1,'sort'=>7,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 ['parent_id'=>0,'name'=>'扫码支付','url'=>'/scanPay','type'=>1,'sort'=>8,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>0],
-                ['parent_id'=>0,'name'=>$data['name'],'url'=>'/scanPay','type'=>3,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
-                ['parent_id'=>0,'logo'=>$data['logo_url'],'type'=>4,'sort'=>8,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>$data['name'],'type'=>3,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                
             ]; 
             $page_foot_pid_insert = [
                 ['parent_id'=>0,'name'=>'服务声明','url'=>'/service/','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
@@ -296,7 +296,7 @@ class SchoolController extends Controller {
                 $footPidId = FootConfig::insertGetId($pid);
                 if($footPidId<1){
                     DB::rollBack();
-                    return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!']);
+                    return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!']);
                 }
                 array_push($footPidIds,$footPidId);
             }
@@ -335,11 +335,22 @@ class SchoolController extends Controller {
                         break;    
                 }
             }
-            $footInsert = array_merge($page_head_logo_icp_insert,$footOne,$fooTwo,$fooThree,$footFore);
-            $footRes = FootConfig::insert($footInsert);
-            if($footRes){
+            $icp_insert = ['parent_id'=>0,'logo'=>$data['logo_url'],'type'=>4,'sort'=>8,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1];
+            $icp_res = FootConfig::insert($icp_insert);
+            if(!$icp_res){
+                DB::rollBack();
+                return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!']);
+            }
+            $page_head_logo_res = FootConfig::insert($page_head_logo_insert);
+            if(!$page_head_logo_res){
                 DB::rollBack();
                 return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!!']);
+            }
+            $footInsert = array_merge($footOne,$fooTwo,$fooThree,$footFore);
+            $footRes = FootConfig::insert($footInsert);
+            if(!$footRes){
+                DB::rollBack();
+                return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!!!']);
             }
             $payconfig = [
                 'admin_id' => CurrentAdmin::user()['id'],
