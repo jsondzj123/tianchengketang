@@ -28,6 +28,76 @@ class OpenCourseController extends Controller {
         $this->school = School::where(['dns'=>$this->data['dns']])->first();
         // $this->school = School::where(['dns'=>$_SERVER['SERVER_NAME']])->first();
     }
+    //公开课列表
+    public function getList(){
+        $school = $this->school;
+        //自增的公开课
+        $page = !isset($this->data['page']) || $this->data['page'] <=1 ? 1:$this->data['page'];
+        $pagesize = !isset($this->data['pagesize']) || $this->data['pagesize'] <=1 ? 10:$this->data['pagesize'];
+        $openCourse = OpenCourse::leftJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_open.id')
+            ->leftJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_open.id')
+            ->leftJoin('ld_lecturer_educationa','ld_course_open_teacher.teacher_id','=','ld_lecturer_educationa.id')
+            ->where(function($query) use ($school) {//自增
+                $query->where('ld_course_open.school_id',$school['id']);
+                $query->where('ld_course_open.is_del',0);
+                $query->where('ld_course_open.status',1);
+                // $query->where('ld_course_open_live_childs.status',3);//已结束
+                $query->where('ld_lecturer_educationa.type',2);
+            })->select('ld_course_open.id','ld_course_open.title','ld_course_open.cover','ld_lecturer_educationa.real_name','ld_course_open.start_at','ld_course_open.end_at')
+        ->orderBy('ld_course_open.id','desc')
+        ->get()->toArray();
+
+        //授权的公开课
+        $natureOpenCourse = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
+                ->leftJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_ref_open.id')
+                ->leftJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_ref_open.id')
+                ->leftJoin('ld_lecturer_educationa','ld_course_open_teacher.teacher_id','=','ld_lecturer_educationa.id')
+                ->where(function($query) use ($school) {//自增
+                    $query->where('ld_course_ref_open.to_school_id',$school['id']);
+                    $query->where('ld_course_open.is_del',0);
+                    $query->where('ld_course_open.status',1);
+                    // $query->where('ld_course_open_live_childs.status',3);//已结束
+                    $query->where('ld_lecturer_educationa.type',2);
+                })->select('ld_course_open.id','ld_course_open.title','ld_course_open.cover','ld_lecturer_educationa.real_name','ld_course_open.start_at','ld_course_open.end_at')
+            ->orderBy('ld_course_open.id','desc')
+            ->get()->toArray();
+               
+        $openCourseArr = array_merge($openCourse,$natureOpenCourse);
+        $openCourseArr = array_unique($openCourseArr,SORT_REGULAR);
+        if(!empty($openCourseArr)){
+            foreach($openCourseArr as $key=>&$v){
+                if($v['start_at']>time()){
+                    $v['status'] = 1;
+                    $v['sort'] = 2;
+                }
+                if($v['start_at']<time() && $v['end_at']>time()){
+                    $v['status'] = 2;
+                    $v['sort'] = 1;
+                }
+                if($v['end_at']<time()){
+                    $v['status'] = 3;
+                    $v['sort'] = 3;
+                }
+                $v['data'] = date('Y-m-d',$v['start_at']);
+                $v['time'] = date('H:i',$v['start_at']).'-'.date('H:i',$v['end_at']);;
+                $v['start_at'] = date('Y-m-d H:i:s',$v['start_at']);
+                $v['end_at'] = date('Y-m-d H:i:s',$v['end_at']);
+            }
+            array_multisort(array_column($openCourseArr,'sort'),SORT_ASC,$openCourseArr); 
+        }
+        $start=($page-1)*$pagesize;
+        $limit_s=$start+$pagesize;
+        $data=[];
+        for($i=$start;$i<$limit_s;$i++){
+            if(!empty($openCourseArr[$i])){
+                array_push($data,$openCourseArr[$i]);
+            }
+        }
+        return response()->json(['code'=>200,'msg'=>'Success','data'=>$data,'total'=>count($openCourseArr)]);
+    }
+
+
+
 
     //大家都在看
     public function hotList(){
@@ -91,8 +161,8 @@ class OpenCourseController extends Controller {
                 ->leftJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_ref_open.course_id')
                 ->leftJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_ref_open.course_id')
                 ->leftJoin('ld_lecturer_educationa','ld_course_open_teacher.teacher_id','=','ld_lecturer_educationa.id')
-                ->where(function($query) use ($school) {//自增
-                    $query->where('ld_course_open.school_id',$school['id']);
+                ->where(function($query) use ($school) {
+                    $query->where('ld_course_ref_open.to_school_id',$school['id']);
                     $query->where('ld_course_open.is_del',0);
                     $query->where('ld_course_open.status',1);
                     // $query->where('ld_course_open_live_childs.status',1);//预开始
@@ -134,8 +204,8 @@ class OpenCourseController extends Controller {
                 ->leftJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_ref_open.id')
                 ->leftJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_ref_open.id')
                 ->leftJoin('ld_lecturer_educationa','ld_course_open_teacher.teacher_id','=','ld_lecturer_educationa.id')
-                ->where(function($query) use ($school) {//自增
-                    $query->where('ld_course_open.school_id',$school['id']);
+                ->where(function($query) use ($school) {
+                    $query->where('ld_course_ref_open.to_school_id',$school['id']);
                     $query->where('ld_course_open.is_del',0);
                     $query->where('ld_course_open.status',1);
                     // $query->where('ld_course_open_live_childs.status',2);//进行中
@@ -182,7 +252,7 @@ class OpenCourseController extends Controller {
                 ->leftJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_ref_open.id')
                 ->leftJoin('ld_lecturer_educationa','ld_course_open_teacher.teacher_id','=','ld_lecturer_educationa.id')
                 ->where(function($query) use ($school) {//自增
-                    $query->where('ld_course_open.school_id',$school['id']);
+                    $query->where('ld_course_ref_open.to_school_id',$school['id']);
                     $query->where('ld_course_open.is_del',0);
                     $query->where('ld_course_open.status',1);
                     // $query->where('ld_course_open_live_childs.status',3);//已结束

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Tools\CurrentAdmin;
 use App\Models\AdminLog;
 use App\Models\AuthMap;
+use App\Models\FootConfig;
 use Illuminate\Support\Facades\DB;
 use App\Models\CouresSubject;
 use Log;
@@ -143,8 +144,6 @@ class SchoolController extends Controller {
             if($school['is_forbid'] != 1){
                 $school->is_forbid = 1; 
                 $is_forbid = 1;
-
-                $pay_status = 1;
                 $wx_pay_state = 1;
                 $zfb_pay_state = 1;
                 $hj_wx_pay_state = 1;
@@ -153,7 +152,6 @@ class SchoolController extends Controller {
             }else{
                 $school->is_forbid = 0; 
                 $is_forbid = 0;
-                $pay_status = -1;
                 $wx_pay_state = -1;
                 $zfb_pay_state = -1;
                 $hj_wx_pay_state = -1;
@@ -205,6 +203,7 @@ class SchoolController extends Controller {
      * @param ctime     2020-05-06
      */
     public function doInsertSchool(){
+        $user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
         $data = self::$accept_data;
         $validator = Validator::make(
                 $data, 
@@ -234,6 +233,7 @@ class SchoolController extends Controller {
         if($count>0){
             return response()->json(['code'=>205,'msg'=>'用户名已存在']);
         }
+        $date = date('Y-m-d H:i:s');
         try{
             DB::beginTransaction();
             $school = [
@@ -245,10 +245,10 @@ class SchoolController extends Controller {
                 'account_name'=>!isset($data['account_name']) || empty($data['account_name']) ?'':$data['account_name'],
                 'account_num'=>!isset($data['account_num']) || empty($data['account_num']) ?'':$data['account_num'],
                 'open_bank'=>!isset($data['open_bank']) || empty($data['open_bank']) ?'':$data['open_bank'],
-                'create_time'=>date('Y-m-d H:i:s')
+                'create_time'=>$date
             ];
             $school_id = School::insertGetId($school);
-            if($school_id <0){
+            if($school_id <1){
                 DB::rollBack();
                 return response()->json(['code'=>203,'msg'=>'创建学校未成功']);  
             }
@@ -271,6 +271,86 @@ class SchoolController extends Controller {
             if(!$schoolRes){
                 DB::rollBack();
                 return response()->json(['code' => 203 , 'msg' => '创建账号未成功!!']);
+            }
+
+            $page_head_logo_insert = [
+                ['parent_id'=>0,'name'=>'首页','url'=>'/home','type'=>1,'sort'=>1,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>'课程','url'=>'/onlineStudent','type'=>1,'sort'=>2,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>'公开课','url'=>'/courses','type'=>1,'sort'=>3,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>'题库','url'=>'/question','type'=>1,'sort'=>4,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>'新闻','url'=>'/newsNotice','type'=>1,'sort'=>5,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>'名师','url'=>'/teacher','type'=>1,'sort'=>6,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>'对公购买','url'=>'/corporatePurchase','type'=>1,'sort'=>7,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>'扫码支付','url'=>'/scanPay','type'=>1,'sort'=>8,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>0],
+                ['parent_id'=>0,'name'=>$data['name'],'type'=>3,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                
+            ]; 
+            $page_foot_pid_insert = [
+                ['parent_id'=>0,'name'=>'服务声明','url'=>'/service/','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>'关于我们','url'=>'/about/','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>'联系我们','url'=>'/contactUs/','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>'友情链接','url'=>'','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+            ];
+            $footPidIds = $footOne = $fooTwo = $fooThree = $footFore =  [];
+            foreach ($page_foot_pid_insert as $key => $pid) {
+                $footPidId = FootConfig::insertGetId($pid);
+                if($footPidId<1){
+                    DB::rollBack();
+                    return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!']);
+                }
+                array_push($footPidIds,$footPidId);
+            }
+            foreach($footPidIds as $k=>$id){
+                switch ($k) {
+                    case '0':
+                        $footOne = [
+                            ['parent_id'=>$id,'name'=>'服务规则','url'=>'rule','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                            ['parent_id'=>$id,'name'=>'课程使用','url'=>'courseUse','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                            ['parent_id'=>$id,'name'=>'免责声明','url'=>'disclaimer','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                            ['parent_id'=>$id,'name'=>'退费服务','url'=>'refund','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                        ];   
+                        break;
+                    case '1':
+                        $fooTwo = [
+                            ['parent_id'=>$id,'name'=>'产品服务','url'=>'productService','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                            ['parent_id'=>$id,'name'=>'名师简介','url'=>'teacherDetail','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                            ['parent_id'=>$id,'name'=>'企业文化','url'=>'orgCulture','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                            ['parent_id'=>$id,'name'=>'公司声明','url'=>'companyStatement','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                        ];   
+                        break;
+                    case '2':
+                        $fooThree = [
+                            ['parent_id'=>$id,'name'=>'电话咨询','url'=>'phoneCall','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                            ['parent_id'=>$id,'name'=>'分校查询','url'=>'branchSchoolSearch','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                            ['parent_id'=>$id,'name'=>'招商加盟','url'=>'joinIn','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                        ];   
+                        break;
+                    case '3':
+                       $footFore = [
+                            ['parent_id'=>$id,'name'=>'位置一','url'=>'','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                            ['parent_id'=>$id,'name'=>'位置一','url'=>'','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                            ['parent_id'=>$id,'name'=>'位置一','url'=>'','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                            ['parent_id'=>$id,'name'=>'位置一','url'=>'','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                        ];   
+                        break;    
+                }
+            }
+            $icp_insert = ['parent_id'=>0,'logo'=>$data['logo_url'],'type'=>4,'sort'=>8,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1];
+            $icp_res = FootConfig::insert($icp_insert);
+            if(!$icp_res){
+                DB::rollBack();
+                return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!']);
+            }
+            $page_head_logo_res = FootConfig::insert($page_head_logo_insert);
+            if(!$page_head_logo_res){
+                DB::rollBack();
+                return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!!']);
+            }
+            $footInsert = array_merge($footOne,$fooTwo,$fooThree,$footFore);
+            $footRes = FootConfig::insert($footInsert);
+            if(!$footRes){
+                DB::rollBack();
+                return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!!!']);
             }
             $payconfig = [
                 'admin_id' => CurrentAdmin::user()['id'],
