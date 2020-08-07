@@ -126,6 +126,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     });
      //公开课
     $router->group(['prefix' => 'openclass'], function () use ($router) {
+        $router->post('getList','OpenCourseController@getList');//公开课列表 （h5）
         $router->post('hotList','OpenCourseController@hotList');//大家都在看
         $router->post('preStart','OpenCourseController@preStart');//预开始
         $router->post('underway','OpenCourseController@underway');//直播中
