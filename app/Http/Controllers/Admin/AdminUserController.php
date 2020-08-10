@@ -15,7 +15,6 @@ use App\Models\AdminLog;
 use Illuminate\Support\Facades\DB;
 
 class AdminUserController extends Controller {
-
      /*
      * @param  description   获取用户列表
      * @param  参数说明       body包含以下参数[
