@@ -30,13 +30,31 @@ class TestController extends Controller
     public function index(Request $request)
     {
 
+        $headers = array();
+        foreach ($_SERVER as $key => $value) {
+            if ('HTTP_' == substr($key, 0, 5)) {
+                $headers[str_replace('_', '-', substr($key, 5))] = $value;
+            }
+        }
+        echo '<pre>';
+        print_r($headers);
 
+
+<<<<<<< HEAD
         $MTCloud = new MTCloud();
         $res = $MTCloud->courseGet("1250785");
         dd($res);
         $data['course_id'] = $res['data']['course_id'];
         $data = [];
         $d = DB::table("ld_course_live_childs")->insert($data);
+=======
+        // $MTCloud = new MTCloud();
+        // $res = $MTCloud->courseGet("1252263");
+        // dd($res);
+        // $data['course_id'] = $res['data']['course_id'];
+        // $data = [];
+        // $d = DB::table("ld_course_live_childs")->insert($data);
+>>>>>>> zhangzekun
         // $file = $_FILES['file'];
         // $is_correct_extensiton = self::detectUploadFileMIME($file);
         // $excel_extension       = substr($_FILES['file']['name'], strrpos($_FILES['file']['name'], '.')+1);   //获取excel后缀名
