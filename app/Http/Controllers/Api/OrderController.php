@@ -288,13 +288,13 @@ class OrderController extends Controller{
                 return ['code' => 204 , 'msg' => '此课程选择无效'];
             }
             if ($data['pay_type'] == 5) {
-                if ($lesson['sale_price'] > $user_balance) {
+                if ($lesson['favorable_price'] > $user_balance) {
                     return ['code' => 210, 'msg' => '余额不足，请充值！！！！！'];
                 } else {
                     DB::beginTransaction();
                     //2020.06.09  订单支付为2，算出课程有效期
                     //扣除用户余额 修改订单信息 加入用户消费记录日志
-                    $end_balance = $user_balance - $lesson['sale_price'];
+                    $end_balance = $user_balance - $lesson['favorable_price'];
                     $studentstatus = Student::where(['id' => $user_id])->update(['balance' => $end_balance]);
                     //计算用户购买课程到期时间
                     if($lesson['expiry'] ==0){
