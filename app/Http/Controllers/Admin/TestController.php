@@ -39,7 +39,7 @@ class TestController extends Controller
         echo '<pre>';
         print_r($headers);
 
-
+die;
         $MTCloud = new MTCloud();
         $res = $MTCloud->courseGet("1250785");
         dd($res);
