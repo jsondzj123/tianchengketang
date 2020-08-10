@@ -328,7 +328,7 @@ class OrderController extends Controller{
                 }
             } else {
                  Order::where(['id' => $data['order_id']])->update(['pay_type' =>$data['pay_type'],'update_at' =>date('Y-m-d H:i:s')]);
-                $return = $this->payStatus($lesson['title'],$order['order_number'], $data['pay_type'], $lesson['sale_price'],$user_school_id,1);
+                $return = $this->payStatus($lesson['title'],$order['order_number'], $data['pay_type'], $lesson['favorable_price'],$user_school_id,1);
                 return response()->json(['code' => 200, 'msg' => '生成预订单成功', 'data' => $return]);
             }
         } else {
