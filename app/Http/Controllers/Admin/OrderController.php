@@ -199,6 +199,7 @@ class OrderController extends Controller {
     }
     //财务报表导出
     public function orderForExceil(){
+        echo 123456;die;
         return Excel::download(new \App\Exports\FinanceExport(self::$accept_data), '财务报表.xlsx');
     }
 }
