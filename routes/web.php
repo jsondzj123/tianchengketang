@@ -245,8 +245,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('listType', 'ArticleController@listType');//分类列表
     $router->post('schoolLists', 'ArticleController@schoolLists');//学校列表
     $router->post('courseType', 'CourseController@courseType');//根据分类查课程
-
     $router->post('orderForStudent', 'OrderController@orderForStudent');//订单通过学员查询
+    $router->get('orderForExceil', 'OrderController@orderForExceil');//导出订单exceil
 
 });
 //后端登录权限认证相关接口

@@ -1,12 +1,10 @@
 <?php
 namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
-use App\Models\AdminLog;
 use App\Models\Lesson;
 use App\Models\Order;
 use App\Models\Student;
 use App\Models\StudentAccountlog;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 class OrderController extends Controller {
@@ -198,5 +196,9 @@ class OrderController extends Controller {
                 Order::where(['id'=>$v['id']])->update(['status'=>5,'update_at'=>date('Y-m-d H:i:s')]);
             }
         }
+    }
+    //财务报表导出
+    public function orderForExceil(){
+        return Excel::download(new \App\Exports\FinanceExport(self::$accept_data), '财务报表.xlsx');
     }
 }
