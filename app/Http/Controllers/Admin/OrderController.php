@@ -214,8 +214,8 @@ class OrderController extends Controller {
                     if(isset($data['end_time'])){
                         $query->where('ld_order.create_at','<',$data['end_time']);
                     }
-                    $query->where('ld_order.status','=',1)
-                        ->orwhere('ld_order.status','=',2);
+//                    $query->where('ld_order.status','=',1)
+//                        ->orwhere('ld_order.status','=',2);
                 })
                 ->get()->toArray();
 //            foreach ($total as $k=>&$v){
