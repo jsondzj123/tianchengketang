@@ -208,9 +208,9 @@ class OrderController extends Controller {
                 ->leftJoin('ld_school','ld_school.id','=','ld_order.school_id')
                 ->leftJoin('ld_student','ld_student.id','=','ld_order.student_id')
                 ->where(function($query) use ($data) {
-//                    if(isset($data['start_time']) && !empty($data['start_time'] != ''&&$data['start_time'] != 0 )){
-//                        $query->where('ld_order.create_at','>',$data['start_time']);
-//                    }
+                    if(isset($data['start_time'])){
+                        $query->where('ld_order.create_at','>',$data['start_time']);
+                    }
                     if(isset($data['end_time'])){
                         $query->where('ld_order.create_at','<',$data['end_time']);
                     }
@@ -232,6 +232,6 @@ class OrderController extends Controller {
 //            }
             print_r($total);die;
 
-//        return Excel::download(new \App\Exports\FinanceExport(self::$accept_data), '财务报表.xlsx');
+        return Excel::download(new \App\Exports\FinanceExport(self::$accept_data), '财务报表.xlsx');
     }
 }
