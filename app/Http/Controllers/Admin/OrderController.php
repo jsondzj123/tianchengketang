@@ -1,10 +1,13 @@
 <?php
 namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
+use App\Models\Coures;
+use App\Models\CourseSchool;
 use App\Models\Lesson;
 use App\Models\Order;
 use App\Models\Student;
 use App\Models\StudentAccountlog;
+use App\Models\Subject;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 class OrderController extends Controller {
@@ -199,6 +202,36 @@ class OrderController extends Controller {
     }
 //财务报表导出
     public function orderForExceil(){
-        return Excel::download(new \App\Exports\FinanceExport(self::$accept_data), '财务报表.xlsx');
+            $data = self::$accept_data;
+            print_r($data);
+            $total = Order::select('ld_school.name','ld_student.real_name','ld_student.phone','ld_order.price','ld_order.lession_price','ld_order.class_id','ld_order.nature')
+                ->leftJoin('ld_school','ld_school.id','=','ld_order.school_id')
+                ->leftJoin('ld_student','ld_student.id','=','ld_order.student_id')
+                ->where(function($query) use ($data) {
+                    if(isset($data['start_time']) && !empty($data['start_time'] != ''&&$data['start_time'] != 0 )){
+                        $query->where('ld_order.create_at','>=',$data['start_time']);
+                    }
+                    if(isset($data['end_time']) && !empty($data['end_time'] != ''&&$data['end_time'] != 0 )){
+                        $query->where('ld_order.create_at','<=',$data['end_time']);
+                    }
+                    $query->where('ld_order.status','=',1)
+                        ->orwhere('ld_order.status','=',2);
+                })
+                ->get();
+            foreach ($total as $k=>&$v){
+                if($v['nature'] == 1){
+                    $lesson = CourseSchool::where(['id'=>$v['class_id']])->first();
+                }else{
+                    $lesson = Coures::where(['id'=>$v['class_id']])->first();
+                }
+                $subject = Subject::where(['id'=>$lesson['parent_id']])->first();
+                $v['class_name'] = $lesson['title'];
+                $v['subject_name'] = $subject['subject_name'];
+                unset($v['class_id']);
+                unset($v['nature']);
+            }
+            print_r($total);die;
+
+//        return Excel::download(new \App\Exports\FinanceExport(self::$accept_data), '财务报表.xlsx');
     }
 }
