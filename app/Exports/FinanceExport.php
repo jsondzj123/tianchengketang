@@ -1,8 +1,10 @@
 <?php
 namespace App\Exports;
 
-use App\Models\AdminLog;
+use App\Models\Coures;
+use App\Models\CourseSchool;
 use App\Models\Order;
+use App\Models\Subject;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 class FinanceExport implements FromCollection, WithHeadings {
