@@ -120,7 +120,7 @@ class BankController extends Controller {
                 //授权的题库列表
                 $bank_list2 = DB::table('ld_course_ref_bank')->select('ld_course_ref_bank.bank_id')->join("ld_question_bank" , function($join){
                     $join->on('ld_course_ref_bank.bank_id', '=', 'ld_question_bank.id');
-                })->where('ld_course_ref_bank.to_school_id' , $school_id)->where('ld_course_ref_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->orderByDesc('ld_course_ref_bank.create_at')->get();
+                })->where('ld_course_ref_bank.to_school_id' , $school_id)->where('ld_course_ref_bank.is_del' , 0)->where('ld_question_bank.is_open' , 0)->where('ld_question_bank.is_del' , 0)->orderByDesc('ld_course_ref_bank.create_at')->get();
                 if($bank_list2 && !empty($bank_list2)){
                     foreach($bank_list2 as $k=>$v){
                         //根据题库的id获取题库信息
