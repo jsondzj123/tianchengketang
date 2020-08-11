@@ -217,7 +217,7 @@ class OrderController extends Controller {
                     $query->where('ld_order.status','=',1)
                         ->orwhere('ld_order.status','=',2);
                 })
-                ->get();
+                ->get()->toArray();
             foreach ($total as $k=>&$v){
                 if($v['nature'] == 1){
                     $lesson = CourseSchool::where(['id'=>$v['class_id']])->first();
