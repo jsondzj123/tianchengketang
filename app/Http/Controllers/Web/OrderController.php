@@ -12,12 +12,11 @@ use App\Models\PaySet;
 use App\Models\School;
 use App\Models\Student;
 use App\Models\Teacher;
-#use App\phpqrcode\QRcode;
 use App\Tools\AlipayFactory;
+use App\Tools\QRcode;
 use App\Tools\WxpayFactory;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Tools\QRcode;
 
 class OrderController extends Controller {
     protected $school;
