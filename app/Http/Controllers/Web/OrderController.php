@@ -13,7 +13,6 @@ use App\Models\School;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Tools\AlipayFactory;
-use App\Tools\QRcode;
 use App\Tools\WxpayFactory;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -245,7 +244,7 @@ class OrderController extends Controller {
 //                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
 //                if($return['alipay_trade_precreate_response']['code'] == 10000){
                 //require_once './phpqrcode/phpqrcode.php';
-                $code = new QRcode();
+                $code = new \App\Tools\phpqrcode\QRcode();
                 ob_start();//开启缓冲区
 //                    $returnData  = $code->pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
                 $returnData = $code->pngString('123465', false, 'L', 10, 1);//生成二维码
