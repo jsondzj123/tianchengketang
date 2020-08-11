@@ -282,7 +282,7 @@ class OrderController extends Controller {
                 }
             }
             //汇聚支付宝
-            if($this->data['pay_status'] == 5){
+            if($this->data['pay_status'] == 4){
                 $notify = 'AB|'."http://".$_SERVER['HTTP_HOST']."/web/course/hjnotify";
                 $pay=[
                     'p0_Version'=>'1.0',
