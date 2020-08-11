@@ -16,6 +16,7 @@ use App\phpqrcode\QRcode;
 use App\Tools\AlipayFactory;
 use App\Tools\WxpayFactory;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class OrderController extends Controller {
     protected $school;
@@ -328,6 +329,11 @@ class OrderController extends Controller {
         $result = curl_exec($ch);
         curl_close($ch);
         return $result;
+    }
+
+    //财务报表导出
+    public function orderForExceil(){
+        return Excel::download(new \App\Exports\FinanceExport(self::$accept_data), '财务报表.xlsx');
     }
 }
 

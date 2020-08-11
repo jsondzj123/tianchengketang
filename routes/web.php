@@ -226,6 +226,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('convergecreateNotifyPcPay', 'NotifyController@convergecreateNotifyPcPay');//web端扫码购买支付宝 购买回调
         $router->get('hjnotify', 'NotifyController@hjnotify');//汇聚 支付回调
 
+        $router->get('orderForExceil', 'OrderController@orderForExceil');//导出订单exceil
+
     });
 });
 //后台端路由接口
@@ -246,7 +248,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('schoolLists', 'ArticleController@schoolLists');//学校列表
     $router->post('courseType', 'CourseController@courseType');//根据分类查课程
     $router->post('orderForStudent', 'OrderController@orderForStudent');//订单通过学员查询
-    $router->get('orderForExceil', 'OrderController@orderForExceil');//导出订单exceil
 
 });
 //后端登录权限认证相关接口
