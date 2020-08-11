@@ -243,21 +243,20 @@ class OrderController extends Controller {
             }
             //支付宝
             if ($this->data['pay_status'] == 2) {
-//                $alipay = new AlipayFactory();
-//                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
-//                if($return['alipay_trade_precreate_response']['code'] == 10000){
-//                    $returnData  = $code->pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
-                require_once realpath(dirname(__FILE__).'/../../../Tools/phpqrcode/QRcode.php');
-                $code = new QRcode();
-                ob_start();//开启缓冲区
-                $returnData = $code->pngString('123465', false, 'L', 10, 1);//生成二维码
-                $imageString = base64_encode(ob_get_contents());
-                ob_end_clean();
-                $str = "data:image/png;base64," . $imageString;
-                return response()->json(['code' => 200, 'msg' => '预支付订单生成成功', 'data' => $str]);
-//            } else {
-//                return response()->json(['code' => 202, 'msg' => '生成二维码失败']);
-//            }
+                $alipay = new AlipayFactory();
+                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
+                if($return['alipay_trade_precreate_response']['code'] == 10000){
+                    require_once realpath(dirname(__FILE__).'/../../../Tools/phpqrcode/QRcode.php');
+                    $code = new QRcode();
+                    ob_start();//开启缓冲区
+                    $returnData  = $code->pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
+                    $imageString = base64_encode(ob_get_contents());
+                    ob_end_clean();
+                    $str = "data:image/png;base64," . $imageString;
+                    return response()->json(['code' => 200, 'msg' => '预支付订单生成成功', 'data' => $str]);
+                } else {
+                    return response()->json(['code' => 202, 'msg' => '生成二维码失败']);
+                }
             }
             //汇聚微信
             if($this->data['pay_status'] == 3){
