@@ -13,6 +13,7 @@ use App\Models\School;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Tools\AlipayFactory;
+use App\Tools\QRcode;
 use App\Tools\WxpayFactory;
 //use Endroid\QrCode\QrCode;
 use Illuminate\Support\Facades\DB;
