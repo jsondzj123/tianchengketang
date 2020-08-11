@@ -204,6 +204,21 @@ class OrderController extends Controller {
     }
     //web支付
     public function converge(){
+        require_once realpath(dirname(__FILE__).'/../../../Tools/phpqrcode/QRcode.php');
+        $code = new QRcode();
+        ob_start();//开启缓冲区
+        $returnData = $code->pngString('123465', false, 'L', 10, 1);//生成二维码
+        $imageString = base64_encode(ob_get_contents());
+        ob_end_clean();
+        $str = "data:image/png;base64," . $imageString;
+        return response()->json(['code' => 200, 'msg' => '预支付订单生成成功', 'data' => $str]);
+        exit;
+
+
+
+
+
+
 
          if($this->data['nature'] == 1){
              $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
