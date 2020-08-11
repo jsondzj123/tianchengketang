@@ -168,7 +168,7 @@ class OrderController extends Controller {
                 $paystatus=[
                     'paytype' => 1,
                     'payname' => '微信支付',
-                    'payimg' => 'https://longdeapi.oss-cn-beijing.aliyuncs.com/wxtb.png',
+                    'payimg' => 'https://longdeapi.oss-cn-beijing.aliyuncs.com/wx2xtb.png',
                 ];
                 $pay[] = $paystatus;
             }
@@ -176,7 +176,7 @@ class OrderController extends Controller {
                 $paystatus=[
                     'paytype' => 2,
                     'payname' => '支付宝支付',
-                    'payimg' => 'https://longdeapi.oss-cn-beijing.aliyuncs.com/zfbtb.png',
+                    'payimg' => 'https://longdeapi.oss-cn-beijing.aliyuncs.com/zfb2xtb.png',
                 ];
                 $pay[] = $paystatus;
             }
@@ -184,7 +184,7 @@ class OrderController extends Controller {
                 $paystatus=[
                     'paytype' => 1,
                     'payname' => '汇聚微信支付',
-                    'payimg' => 'https://longdeapi.oss-cn-beijing.aliyuncs.com/wxtb.png',
+                    'payimg' => 'https://longdeapi.oss-cn-beijing.aliyuncs.com/wx2xtb.png',
                 ];
                 $pay[] = $paystatus;
             }
@@ -192,7 +192,7 @@ class OrderController extends Controller {
                 $paystatus=[
                     'paytype' => 1,
                     'payname' => '汇聚支付宝支付',
-                    'payimg' => 'https://longdeapi.oss-cn-beijing.aliyuncs.com/zfbtb.png',
+                    'payimg' => 'https://longdeapi.oss-cn-beijing.aliyuncs.com/zfb2xtb.png',
                 ];
                 $pay[] = $paystatus;
             }
