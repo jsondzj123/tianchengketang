@@ -1,15 +1,10 @@
 <?php
 namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
-use App\Models\AdminLog;
-use App\Models\Coures;
-use App\Models\CourseSchool;
 use App\Models\Lesson;
 use App\Models\Order;
 use App\Models\Student;
 use App\Models\StudentAccountlog;
-use App\Models\Subject;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 class OrderController extends Controller {
@@ -238,7 +233,7 @@ class OrderController extends Controller {
             ['10004','DDDDD','89'],
             ['10005','EEEEE','96'],
         ];
-        Excel::create('学生成绩',function($excel) use ($cellData){
+        \Maatwebsite\Excel\Excel::create('学生成绩',function($excel) use ($cellData){
             $excel->sheet('score', function($sheet) use ($cellData){
                 $sheet->rows($cellData);
             });
