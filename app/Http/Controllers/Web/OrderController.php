@@ -14,6 +14,7 @@ use App\Models\Student;
 use App\Models\Teacher;
 use App\Tools\AlipayFactory;
 use App\Tools\WxpayFactory;
+use Endroid\QrCode\QrCode;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -246,8 +247,9 @@ class OrderController extends Controller {
 //                if($return['alipay_trade_precreate_response']['code'] == 10000){
 //                    $returnData  = $code->pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
                 require_once './public/phpqrcode.php';
+                $code = new \QrCode();
                 ob_start();//开启缓冲区
-                QRcode::pngString('123465', false, 'L', 10, 1);//生成二维码
+                $returnData = $code->pngString('123465', false, 'L', 10, 1);//生成二维码
                 $imageString = base64_encode(ob_get_contents());
                 ob_end_clean();
                 $str = "data:image/png;base64," . $imageString;
