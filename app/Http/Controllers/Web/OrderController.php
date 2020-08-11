@@ -324,7 +324,7 @@ class OrderController extends Controller {
                     'p9_NotifyUrl' => $notify,
                     'q1_FrpCode' => 'UNIONPAY_NATIVE',
                     'q4_IsShowPic' => 1,
-                    'qa_TradeMerchantNo' => '777167300271170'
+                    'qa_TradeMerchantNo' => '777127800286029'
                 ];
                 $str = "15f8014fee1642fbb123fb5684cda48b";
                 $token = $this->hjHmac($pay, $str);
