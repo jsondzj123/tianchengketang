@@ -164,16 +164,36 @@ class OrderController extends Controller {
         $pay=[];
         if(!empty($paytype)){
             if($paytype['wx_pay_state'] == 1){
-                $pay[] = 1;
+                $paystatus=[
+                    'paytype' => 1,
+                    'payname' => '微信支付',
+                    'payimg' => '',
+                ];
+                $pay[] = $paystatus;
             }
             if($paytype['zfb_pay_state'] == 1){
-                $pay[] = 2;
+                $paystatus=[
+                    'paytype' => 2,
+                    'payname' => '支付宝支付',
+                    'payimg' => '',
+                ];
+                $pay[] = $paystatus;
             }
             if($paytype['hj_wx_pay_state'] == 1){
-                $pay[] = 3;
+                $paystatus=[
+                    'paytype' => 1,
+                    'payname' => '汇聚微信支付',
+                    'payimg' => '',
+                ];
+                $pay[] = $paystatus;
             }
             if($paytype['hj_zfb_pay_state'] == 1){
-                $pay[] = 4;
+                $paystatus=[
+                    'paytype' => 1,
+                    'payname' => '汇聚支付宝支付',
+                    'payimg' => '',
+                ];
+                $pay[] = $paystatus;
             }
         }
         $school['title'] = $this->school['title'];
