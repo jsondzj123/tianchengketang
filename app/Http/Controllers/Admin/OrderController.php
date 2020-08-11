@@ -204,7 +204,7 @@ class OrderController extends Controller {
     public function orderForExceil(){
             $data = self::$accept_data;
             print_r($data);
-            $total = Order::select('ld_school.name','ld_student.real_name','ld_student.phone','ld_order.price','ld_order.lession_price','ld_order.class_id','ld_order.nature')
+            $total = Order::select('ld_school.name','ld_student.real_name','ld_student.phone','ld_order.price','ld_order.lession_price','ld_order.class_id','ld_order.nature','ld_order.create_at')
                 ->leftJoin('ld_school','ld_school.id','=','ld_order.school_id')
                 ->leftJoin('ld_student','ld_student.id','=','ld_order.student_id')
                 ->where(function($query) use ($data) {
