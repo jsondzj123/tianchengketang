@@ -202,6 +202,7 @@ class OrderController extends Controller {
     }
     //web支付
     public function converge(){
+
          if($this->data['nature'] == 1){
              $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0,'status'=>1])->first();
          }else{
@@ -243,11 +244,10 @@ class OrderController extends Controller {
 //                $alipay = new AlipayFactory();
 //                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
 //                if($return['alipay_trade_precreate_response']['code'] == 10000){
-                require_once './phpqrcode.php';
-//                $code = new \App\Tools\phpqrcode\QRcode();
-                ob_start();//开启缓冲区
 //                    $returnData  = $code->pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
-                $returnData = QRcode::pngString('123465', false, 'L', 10, 1);//生成二维码
+                require_once './public/phpqrcode.php';
+                ob_start();//开启缓冲区
+                QRcode::pngString('123465', false, 'L', 10, 1);//生成二维码
                 $imageString = base64_encode(ob_get_contents());
                 ob_end_clean();
                 $str = "data:image/png;base64," . $imageString;
