@@ -17,6 +17,7 @@ use App\Tools\WxpayFactory;
 use Endroid\QrCode\QrCode;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use function Composer\Autoload\includeFile;
 
 class OrderController extends Controller {
     protected $school;
@@ -246,7 +247,7 @@ class OrderController extends Controller {
 //                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
 //                if($return['alipay_trade_precreate_response']['code'] == 10000){
 //                    $returnData  = $code->pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
-                require './public/phpqrcode.php';
+                includeFile('./public/phpqrcode.php');
                 $code = new \QrCode();
                 ob_start();//开启缓冲区
                 $returnData = $code->pngString('123465', false, 'L', 10, 1);//生成二维码
