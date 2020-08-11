@@ -37,19 +37,19 @@ class LiveChildController extends Controller {
                 $live = LiveChild::join("ld_course_live_childs","ld_course_class_number.id","=","ld_course_live_childs.class_id")
                 ->join("ld_course_shift_no","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
                 ->select('ld_course_class_number.id', 'ld_course_class_number.name as course_name', 'ld_course_class_number.start_at as start_time', 'ld_course_class_number.end_at as end_time', 'ld_course_live_childs.course_id', 'ld_course_live_childs.status','ld_course_shift_no.name as class_name')->where([
-                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 2,'shift_no_id'=>$value['shift_no_id']
+                    'ld_course_live_childs.is_del' => 0,'ld_course_class_number.is_del'=>0,'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 2,'shift_no_id'=>$value['shift_no_id']
                 ])->get();
                 //预告
                 $advance = LiveChild::join("ld_course_live_childs","ld_course_class_number.id","=","ld_course_live_childs.class_id")
                 ->join("ld_course_shift_no","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
                 ->select('ld_course_class_number.id', 'ld_course_class_number.name as course_name', 'ld_course_class_number.start_at as start_time', 'ld_course_class_number.end_at as end_time', 'ld_course_live_childs.course_id', 'ld_course_live_childs.status','ld_course_shift_no.name as class_name')->where([
-                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 1,'shift_no_id'=>$value['shift_no_id']
+                    'ld_course_live_childs.is_del' => 0,'ld_course_class_number.is_del'=>0,'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 1,'shift_no_id'=>$value['shift_no_id']
                 ])->get();
                 //回放
                 $playback = LiveChild::join("ld_course_live_childs","ld_course_class_number.id","=","ld_course_live_childs.class_id")
                 ->join("ld_course_shift_no","ld_course_class_number.shift_no_id","=","ld_course_shift_no.id")
                 ->select('ld_course_class_number.id', 'ld_course_class_number.name as course_name', 'ld_course_class_number.start_at as start_time', 'ld_course_class_number.end_at as end_time', 'ld_course_live_childs.course_id', 'ld_course_live_childs.status','ld_course_shift_no.name as class_name')->where([
-                    'ld_course_live_childs.is_del' => 0, 'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 3,'shift_no_id'=>$value['shift_no_id']
+                    'ld_course_live_childs.is_del' => 0,'ld_course_class_number.is_del'=>0,'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 3,'shift_no_id'=>$value['shift_no_id']
                 ])->get();
             }
             if(!empty($live->toArray())){

@@ -391,7 +391,7 @@ class CourseSchool extends Model {
                 
                 //题库
                 foreach($courseSubjectArr as $key=>&$vs){
-                    $bankIdArr = QuestionBank::where(['parent_id'=>$vs['parent_id'],'child_id'=>$vs['child_id'],'is_del'=>0])->pluck('id')->toArray();
+                    $bankIdArr = QuestionBank::where(['parent_id'=>$vs['parent_id'],'child_id'=>$vs['child_id'],'is_del'=>0,'school_id'=>$school_id])->pluck('id')->toArray();
                     if(!empty($bankIdArr)){
                         foreach($bankIdArr as $k=>$vb){
                             array_push($bankids,$vb);
