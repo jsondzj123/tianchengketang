@@ -1,5 +1,5 @@
 <?php
-namespace App\Tools\phpqrcode;
+namespace App\Tools;
 /*
  * PHP QR Code encoder
  *
