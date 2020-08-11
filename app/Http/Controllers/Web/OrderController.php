@@ -231,30 +231,31 @@ class OrderController extends Controller {
              'school_id' => $this->school['id'],
          ];
         $add = Converge::insert($arr);
-        if($add){
+        if($add) {
             //微信
-            if($this->data['pay_status'] == 1){
+            if ($this->data['pay_status'] == 1) {
                 $wxpay = new WxpayFactory();
                 $number = date('YmdHis', time()) . rand(1111, 9999);
                 $price = 0.01;
-                $return = $wxpay->getPcPayOrder($number,$price);
+                $return = $wxpay->getPcPayOrder($number, $price);
             }
             //支付宝
-            if($this->data['pay_status'] == 2){
-                $alipay = new AlipayFactory();
-                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
-                if($return['alipay_trade_precreate_response']['code'] == 10000){
-                    //require_once './phpqrcode/phpqrcode.php';
-                    $code  = new QRcode();
-                    ob_start();//开启缓冲区
-                    $returnData  = $code->pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
-                    $imageString = base64_encode(ob_get_contents());
-                    ob_end_clean();
-                    $str = "data:image/png;base64,".$imageString;
-                    return response()->json(['code' => 200, 'msg' => '预支付订单生成成功','data'=>$str]);
-                }else{
-                    return response()->json(['code' => 202, 'msg' => '生成二维码失败']);
-                }
+            if ($this->data['pay_status'] == 2) {
+//                $alipay = new AlipayFactory();
+//                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
+//                if($return['alipay_trade_precreate_response']['code'] == 10000){
+                //require_once './phpqrcode/phpqrcode.php';
+                $code = new QRcode();
+                ob_start();//开启缓冲区
+//                    $returnData  = $code->pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
+                $returnData = $code->pngString('123465', false, 'L', 10, 1);//生成二维码
+                $imageString = base64_encode(ob_get_contents());
+                ob_end_clean();
+                $str = "data:image/png;base64," . $imageString;
+                return response()->json(['code' => 200, 'msg' => '预支付订单生成成功', 'data' => $str]);
+//            } else {
+//                return response()->json(['code' => 202, 'msg' => '生成二维码失败']);
+//            }
             }
             //汇聚微信
             if($this->data['pay_status'] == 3){
