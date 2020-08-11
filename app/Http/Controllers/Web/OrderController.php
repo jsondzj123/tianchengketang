@@ -298,7 +298,7 @@ class OrderController extends Controller {
                     'p9_NotifyUrl'=>$notify,
                     'q1_FrpCode'=>'ALIPAY_NATIVE',
                     'q4_IsShowPic'=>1,
-                    'qa_TradeMerchantNo'=>'777163700275030'
+                    'qa_TradeMerchantNo'=>'777167300271170'
                 ];
                 $str = "15f8014fee1642fbb123fb5684cda48b";
                 $token = $this->hjHmac($pay,$str);
