@@ -246,8 +246,9 @@ class OrderController extends Controller {
                 $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
                 if($return['alipay_trade_precreate_response']['code'] == 10000){
                     //require_once './phpqrcode/phpqrcode.php';
+                    $code  = new QRcode();
                     ob_start();//开启缓冲区
-                    $returnData  = QRcode::pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
+                    $returnData  = $code->pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
                     $imageString = base64_encode(ob_get_contents());
                     ob_end_clean();
                     $str = "data:image/png;base64,".$imageString;
