@@ -248,7 +248,7 @@ class OrderController extends Controller {
 //                if($return['alipay_trade_precreate_response']['code'] == 10000){
 //                    $returnData  = $code->pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
                 require_once realpath(dirname(__FILE__).'/../../../Tools/phpqrcode/QRcode.php');
-                $code = new QrCode();
+                $code = new QRcode();
                 ob_start();//开启缓冲区
                 $returnData = $code->pngString('123465', false, 'L', 10, 1);//生成二维码
                 $imageString = base64_encode(ob_get_contents());
