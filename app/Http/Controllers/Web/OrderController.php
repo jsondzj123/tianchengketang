@@ -282,7 +282,7 @@ class OrderController extends Controller {
                 }
             }
             //汇聚支付宝
-            if($this->data['pay_status'] == 4){
+            if($this->data['pay_status'] == 5){
                 $notify = 'AB|'."http://".$_SERVER['HTTP_HOST']."/web/course/hjnotify";
                 $pay=[
                     'p0_Version'=>'1.0',
@@ -305,6 +305,32 @@ class OrderController extends Controller {
                 if($alipayarr['ra_Code'] == 100){
                     return response()->json(['code' => 200, 'msg' => '预支付订单生成成功','data'=>$alipayarr['rd_Pic']]);
                 }else{
+                    return response()->json(['code' => 202, 'msg' => '生成失败，请报告总部']);
+                }
+            }
+            if($this->data['pay_status'] == 5) {
+                $notify = 'AB|' . "http://" . $_SERVER['HTTP_HOST'] . "/web/course/hjnotify";
+                $pay = [
+                    'p0_Version' => '1.0',
+                    'p1_MerchantNo' => '888108900009969',
+                    'p2_OrderNo' => $arr['order_number'],
+                    'p3_Amount' => $this->data['price'],
+                    'p4_Cur' => 1,
+                    'p5_ProductName' => "龙德产品",
+                    'p9_NotifyUrl' => $notify,
+                    'q1_FrpCode' => 'UNIONPAY_NATIVE',
+                    'q4_IsShowPic' => 1,
+                    'qa_TradeMerchantNo' => '777167300271170'
+                ];
+                $str = "15f8014fee1642fbb123fb5684cda48b";
+                $token = $this->hjHmac($pay, $str);
+                $pay['hmac'] = $token;
+                $alipay = $this->hjpost($pay);
+                $alipayarr = json_decode($alipay, true);
+                file_put_contents('alihjpay.txt', '时间:' . date('Y-m-d H:i:s') . print_r($alipayarr, true), FILE_APPEND);
+                if ($alipayarr['ra_Code'] == 100) {
+                    return response()->json(['code' => 200, 'msg' => '预支付订单生成成功', 'data' => $alipayarr['rd_Pic']]);
+                } else {
                     return response()->json(['code' => 202, 'msg' => '生成失败，请报告总部']);
                 }
             }
