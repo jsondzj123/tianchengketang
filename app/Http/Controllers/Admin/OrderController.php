@@ -202,34 +202,6 @@ class OrderController extends Controller {
     }
 //财务报表导出
     public function orderForExceil(){
-            $data = self::$accept_data;
-            print_r($data);
-            $total = Order::select('ld_school.name','ld_student.real_name','ld_student.phone','ld_order.price','ld_order.lession_price','ld_order.class_id','ld_order.nature','ld_order.create_at')
-                ->leftJoin('ld_school','ld_school.id','=','ld_order.school_id')
-                ->leftJoin('ld_student','ld_student.id','=','ld_order.student_id')
-                ->where(function($query) use ($data) {
-                    if(isset($data['start_time'])){
-                        $query->where('ld_order.create_at','>',$data['start_time']);
-                    }
-                    if(isset($data['end_time'])){
-                        $query->where('ld_order.create_at','<',$data['end_time']);
-                    }
-                })->whereIn('ld_order.status',[1,2])
-                ->get()->toArray();
-//            foreach ($total as $k=>&$v){
-//                if($v['nature'] == 1){
-//                    $lesson = CourseSchool::where(['id'=>$v['class_id']])->first();
-//                }else{
-//                    $lesson = Coures::where(['id'=>$v['class_id']])->first();
-//                }
-//                $subject = Subject::where(['id'=>$lesson['parent_id']])->first();
-//                $v['class_name'] = $lesson['title'];
-//                $v['subject_name'] = $subject['subject_name'];
-//                unset($v['class_id']);
-//                unset($v['nature']);
-//            }
-            print_r($total);die;
-
         return Excel::download(new \App\Exports\FinanceExport(self::$accept_data), '财务报表.xlsx');
     }
 }

@@ -25,10 +25,8 @@ class FinanceExport implements FromCollection, WithHeadings {
                 if(isset($data['end_time'])){
                     $query->where('ld_order.create_at','<',$data['end_time']);
                 }
-                $query->where('ld_order.status','=',1)
-                    ->orwhere('ld_order.status','=',2);
-            })
-            ->get();
+            })->whereIn('ld_order.status',[1,2])
+            ->get()->toArray();
         foreach ($total as $k=>&$v){
             if($v['nature'] == 1){
                 $lesson = CourseSchool::where(['id'=>$v['class_id']])->first();
