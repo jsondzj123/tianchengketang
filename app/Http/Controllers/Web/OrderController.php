@@ -327,7 +327,7 @@ class OrderController extends Controller {
                 $pay['hmac'] = $token;
                 $alipay = $this->hjpost($pay);
                 $alipayarr = json_decode($alipay, true);
-                file_put_contents('alihjpay.txt', '时间:' . date('Y-m-d H:i:s') . print_r($alipayarr, true), FILE_APPEND);
+                file_put_contents('ylhjpay.txt', '时间:' . date('Y-m-d H:i:s') . print_r($alipayarr, true), FILE_APPEND);
                 if ($alipayarr['ra_Code'] == 100) {
                     return response()->json(['code' => 200, 'msg' => '预支付订单生成成功', 'data' => $alipayarr['rd_Pic']]);
                 } else {
