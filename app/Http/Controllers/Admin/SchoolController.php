@@ -282,9 +282,10 @@ class SchoolController extends Controller {
                 ['parent_id'=>0,'name'=>'名师','url'=>'/teacher','type'=>1,'sort'=>6,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 ['parent_id'=>0,'name'=>'对公购买','url'=>'/corporatePurchase','type'=>1,'sort'=>7,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 ['parent_id'=>0,'name'=>'扫码支付','url'=>'/scanPay','type'=>1,'sort'=>8,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>0],
-                ['parent_id'=>0,'name'=>$data['name'],'type'=>3,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 
-            ]; 
+                
+            ];
+            $pany_insert =['parent_id'=>0,'name'=>$data['name'],'type'=>3,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1];
             $page_foot_pid_insert = [
                 ['parent_id'=>0,'name'=>'服务声明','url'=>'/service/','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 ['parent_id'=>0,'name'=>'关于我们','url'=>'/about/','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
@@ -336,21 +337,27 @@ class SchoolController extends Controller {
                 }
             }
             $icp_insert = ['parent_id'=>0,'logo'=>$data['logo_url'],'type'=>4,'sort'=>8,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1];
+
             $icp_res = FootConfig::insert($icp_insert);
             if(!$icp_res){
                 DB::rollBack();
                 return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!']);
             }
+            $payname_res = FootConfig::insert($pany_insert);
+            if(!$icp_res){
+                DB::rollBack();
+                return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!!']);
+            }
             $page_head_logo_res = FootConfig::insert($page_head_logo_insert);
             if(!$page_head_logo_res){
                 DB::rollBack();
-                return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!!']);
+                return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!!!']);
             }
             $footInsert = array_merge($footOne,$fooTwo,$fooThree,$footFore);
             $footRes = FootConfig::insert($footInsert);
             if(!$footRes){
                 DB::rollBack();
-                return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!!!']);
+                return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!!!!']);
             }
             $payconfig = [
                 'admin_id' => CurrentAdmin::user()['id'],

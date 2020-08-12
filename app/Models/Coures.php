@@ -437,18 +437,22 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '传参数组为空'];
         }
         if(!isset($data['id']) || empty($data['id'])){
-            return ['code' => 201 , 'msg' => '请选择学科大类'];
+            return ['code' => 201 , 'msg' => '请选择课程'];
         }
         if($data['nature'] == 1){
             return ['code' => 203, 'msg' => '授权课程，无法删除'];
         }
         $school_status = isset(AdminLog::getAdminInfo()->admin_user->school_status) ? AdminLog::getAdminInfo()->admin_user->school_status : 0;
         if($school_status == 1){
-            // 总校删除 先查询授权分校库存，没有进行删除
-            $courseSchool = CourseStocks::where('course_id',$data['id'])->where('add_number','>',0)->get()->toArray();
-            if(!empty($courseSchool)) {
+            // 总校删除 先查询是否有授权的，有再查询授权分校库存，没有进行删除
+            $coursecount = CourseSchool::where(['course_id'=>$data['id'],'is_del'=>0])->count();
+            if($coursecount > 0){
                 return ['code' => 203, 'msg' => '此课程授权给分校，无法删除'];
             }
+//            $courseSchool = CourseStocks::where('course_id',$data['id'])->where('add_number','>',0)->get()->toArray();
+//            if(!empty($courseSchool)) {
+//                return ['code' => 203, 'msg' => '此课程授权给分校，无法删除'];
+//            }
         }
         $del = self::where(['id'=>$data['id']])->update(['is_del'=>1,'update_at'=>date('Y-m-d H:i:s')]);
         if($del){

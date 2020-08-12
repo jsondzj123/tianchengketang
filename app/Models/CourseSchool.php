@@ -93,7 +93,15 @@ class CourseSchool extends Model {
                                 $query->where('ld_course_ref_open.from_school_id',$school_id);
                                 $query->where('ld_course_ref_open.is_del',0);
                         })->select('ld_course_ref_open.course_id as id','ld_course_open.parent_id','ld_course_open.child_id','ld_course_open.title')->get()->toArray(); //授权公开课信息（分校）
-            $OpenCourseArr = array_merge($zizengOpenCourse,$natureOpenCourse);
+                $OpenCourseArr=[];
+                if(!empty($zizengOpenCourse)&&!empty($natureOpenCourse)){
+                    foreach($natureOpenCourse as $k=>$r){
+                        array_push($zizengOpenCourse,$natureOpenCourse[$k]);
+                    }
+                    $OpenCourseArr = $zizengOpenCourse;
+                }else{
+                    $OpenCourseArr = !empty($zizengOpenCourse)?$zizengOpenCourse:$natureOpenCourse;
+                }
             if(!empty($OpenCourseArr)){
                 $OpenCourseArr = array_unique($OpenCourseArr, SORT_REGULAR);
                 foreach ($OpenCourseArr as $key => $v) {
@@ -105,7 +113,7 @@ class CourseSchool extends Model {
             return ['code'=>200,'msg'=>'message','data'=>$OpenCourseArr];
         }
         if($body['is_public'] == 0){//课程
-            $CourseArr = [];
+            $CourseArr =  $natureCourse = $zizengCourse = [];
             $zizengCourse = Coures::where(['school_id'=>$school_id,'nature'=>0])  //自增课程(总校)
                 ->where(function($query) use ($body) {
                     if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
@@ -135,8 +143,15 @@ class CourseSchool extends Model {
                     $query->where('ld_course_school.is_del',0);
             })->select('ld_course_school.course_id as id','ld_course.parent_id','ld_course.child_id','ld_course.title')->get()->toArray();
             //授权课程
-            $CourseArr = array_merge($zizengCourse,$natureCourse);
-
+                $CourseArr=[];
+                if(!empty($natureCourse)&&!empty($zizengCourse)){
+                    foreach($natureCourse as $k=>$r){
+                        array_push($zizengCourse,$natureCourse[$k]);
+                    }
+                    $CourseArr = $zizengCourse;
+                }else{
+                    $CourseArr = !empty($zizengCourse)?$zizengCourse:$natureCourse;
+                }
             if(!empty($CourseArr)){
                 $CourseArr = array_unique($CourseArr, SORT_REGULAR);
 
@@ -391,7 +406,7 @@ class CourseSchool extends Model {
                 
                 //题库
                 foreach($courseSubjectArr as $key=>&$vs){
-                    $bankIdArr = QuestionBank::where(['parent_id'=>$vs['parent_id'],'child_id'=>$vs['child_id'],'is_del'=>0])->pluck('id')->toArray();
+                    $bankIdArr = QuestionBank::where(['parent_id'=>$vs['parent_id'],'child_id'=>$vs['child_id'],'is_del'=>0,'school_id'=>$school_id])->pluck('id')->toArray();
                     if(!empty($bankIdArr)){
                         foreach($bankIdArr as $k=>$vb){
                             array_push($bankids,$vb);

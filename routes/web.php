@@ -238,6 +238,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin'], function () use (
 $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'cors'], function () use ($router) {
     $router->post('register', 'AuthenticateController@register');
     $router->post('login', 'AuthenticateController@postLogin');
+    $router->post('diff', 'TestController@diff');
     $router->post('test', 'TestController@index');
     $router->post('ArticleLead', 'ArticleController@ArticleLead');//文章导入
     $router->post('ArticleTypeLead', 'ArticletypeController@ArticleTypeLead');//文章分类导入

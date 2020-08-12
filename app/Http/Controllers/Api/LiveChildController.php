@@ -72,7 +72,6 @@ class LiveChildController extends Controller {
             }
 
         }
-        dd($playback->toArray());
         foreach($childs as $k => $v){
             foreach($v['data'] as $kk =>$vv){
                 $vv['start_time']  = date("Y:m:d H:i:s",$vv['start_time']);
