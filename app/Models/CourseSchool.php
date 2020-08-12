@@ -93,7 +93,14 @@ class CourseSchool extends Model {
                                 $query->where('ld_course_ref_open.from_school_id',$school_id);
                                 $query->where('ld_course_ref_open.is_del',0);
                         })->select('ld_course_ref_open.course_id as id','ld_course_open.parent_id','ld_course_open.child_id','ld_course_open.title')->get()->toArray(); //授权公开课信息（分校）
-            $OpenCourseArr = array_merge($zizengOpenCourse,$natureOpenCourse);
+                $OpenCourseArr=[];
+                if(!empty($zizengOpenCourse)&&!empty($natureOpenCourse)){
+                    foreach($natureOpenCourse as $k=>$r){
+                        $OpenCourseArr[] = array_merge($r,$zizengOpenCourse[$k]);
+                    }
+                }else{
+                    $OpenCourseArr = !empty($zizengOpenCourse)?$zizengOpenCourse:$natureOpenCourse;
+                }
             if(!empty($OpenCourseArr)){
                 $OpenCourseArr = array_unique($OpenCourseArr, SORT_REGULAR);
                 foreach ($OpenCourseArr as $key => $v) {
@@ -135,8 +142,14 @@ class CourseSchool extends Model {
                     $query->where('ld_course_school.is_del',0);
             })->select('ld_course_school.course_id as id','ld_course.parent_id','ld_course.child_id','ld_course.title')->get()->toArray();
             //授权课程
-            $CourseArr = array_merge($zizengCourse,$natureCourse);
-
+                $CourseArr=[];
+                if(!empty($natureCourse)&&!empty($zizengCourse)){
+                    foreach($natureCourse as $k=>$r){
+                        $CourseArr[] = array_merge($r,$zizengCourse[$k]);
+                    }
+                }else{
+                    $CourseArr = !empty($zizengCourse)?$zizengCourse:$natureCourse;
+                }
             if(!empty($CourseArr)){
                 $CourseArr = array_unique($CourseArr, SORT_REGULAR);
 
