@@ -9,6 +9,9 @@ use Log;
 use App\Models\Lesson;
 use App\Models\LessonChild;
 use App\Models\LessonVideo;
+use App\Models\CourseSchool;
+use App\Models\Bank;
+use App\Models\CourseRefBank;
 use App\Models\Coureschapters;
 use App\Models\SubjectLesson;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +25,51 @@ use Illuminate\Http\Request;
 
 class TestController extends Controller
 {
+
+    public function diff(){
+        $bankids =[];
+        $to_school_id = 8;
+        $from_school_id = 1;
+
+
+
+
+
+
+        $courseArr = CourseSchool::where(['from_school_id'=>$from_school_id,'to_school_id'=>$to_school_id,'is_del'=>0])->select('id','parent_id','child_id')->get()->toArray();
+        foreach ($courseArr as $k => $vc) {
+            $courseSubjectArr[$k]['parent_id'] = $vc['parent_id'];
+            $courseSubjectArr[$k]['child_id'] = $vc['child_id'];
+        }
+        $courseSubjectArr = array_unique($courseSubjectArr,SORT_REGULAR);
+        // print_r($courseSubjectArr);die;
+        foreach($courseSubjectArr as $key=>&$vs){
+            $bankIdArr = Bank::where(['parent_id'=>$vs['parent_id'],'child_id'=>$vs['child_id'],'is_del'=>0,'school_id'=>$from_school_id])->pluck('id')->toArray();
+       
+            if(!empty($bankIdArr)){
+                foreach($bankIdArr as $k=>$vb){
+                    array_push($bankids,$vb);
+                }
+            }
+        }
+        sort($bankids);
+      print_r($bankids);
+        if(!empty($bankids)){
+            $bankids=array_unique($bankids);
+            $natureQuestionBank = CourseRefBank::where(['from_school_id'=>$from_school_id,'to_school_id'=>$to_school_id,'is_del'=>0])->pluck('bank_id')->toArray();
+            sort($natureQuestionBank);
+            print_r($natureQuestionBank);
+            $bankids = array_diff($natureQuestionBank,$bankids);
+        }
+         sort($bankids);
+        print_r($bankids);
+       
+    }
+
+
+
+
+
     /**
      * Create a new controller instance.
      *
