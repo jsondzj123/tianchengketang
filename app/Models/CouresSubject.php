@@ -182,17 +182,17 @@ class CouresSubject extends Model {
             foreach ($course as $k=>$v){
                 $twos = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['id'=>$v['parent_id'],'is_del'=>0,'is_open'=>0])->first();
                 $twsss = self::select('id','parent_id','admin_id','school_id','subject_name as name','subject_cover as cover','subject_cover as cover','description','is_open','is_del','create_at')->where(['parent_id'=>$twos['id'],'is_del'=>0,'is_open'=>0])->get()->toArray();
-                $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->groupBy('child_id')->get()->toArray();
-                if(!empty($course)){
-                    foreach ($twsss as $ks=>$vs){
-                        if(!in_array($vs,$course)){
-                            unset($twsss[$ks]);
-                        }
-                    }
+//                $course = CourseSchool::select('parent_id')->where(['to_school_id'=>$school_id,'is_del'=>0])->groupBy('child_id')->get()->toArray();
+//                if(!empty($course)){
+//                    foreach ($twsss as $ks=>$vs){
+//                        if(!in_array($vs,$course)){
+//                            unset($twsss[$ks]);
+//                        }
+//                    }
                     $twos['childs'] = $twsss;
-                }else{
-                    $twos['childs'] = [];
-                }
+//                }else{
+//                    $twos['childs'] = [];
+//                }
                 $two[] =$twos;
             }
         }
