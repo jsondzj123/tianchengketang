@@ -96,8 +96,9 @@ class CourseSchool extends Model {
                 $OpenCourseArr=[];
                 if(!empty($zizengOpenCourse)&&!empty($natureOpenCourse)){
                     foreach($natureOpenCourse as $k=>$r){
-                        $OpenCourseArr[] = array_merge($r,$zizengOpenCourse[$k]);
+                        array_push($zizengOpenCourse,$natureOpenCourse[$k]);
                     }
+                    $OpenCourseArr = $zizengOpenCourse;
                 }else{
                     $OpenCourseArr = !empty($zizengOpenCourse)?$zizengOpenCourse:$natureOpenCourse;
                 }
@@ -112,7 +113,7 @@ class CourseSchool extends Model {
             return ['code'=>200,'msg'=>'message','data'=>$OpenCourseArr];
         }
         if($body['is_public'] == 0){//课程
-            $CourseArr = [];
+            $CourseArr =  $natureCourse = $zizengCourse = [];
             $zizengCourse = Coures::where(['school_id'=>$school_id,'nature'=>0])  //自增课程(总校)
                 ->where(function($query) use ($body) {
                     if(!empty($body['subjectOne']) && $body['subjectOne'] != ''){
@@ -145,8 +146,9 @@ class CourseSchool extends Model {
                 $CourseArr=[];
                 if(!empty($natureCourse)&&!empty($zizengCourse)){
                     foreach($natureCourse as $k=>$r){
-                        $CourseArr[] = array_merge($r,$zizengCourse[$k]);
+                        array_push($zizengCourse,$natureCourse[$k]);
                     }
+                    $CourseArr = $zizengCourse;
                 }else{
                     $CourseArr = !empty($zizengCourse)?$zizengCourse:$natureCourse;
                 }
