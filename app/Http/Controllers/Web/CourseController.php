@@ -246,6 +246,22 @@ class CourseController extends Controller {
             if (!empty($method)) {
                 $course['method'] = array_column($method, 'method_id');
             }
+            if(in_array('1',$course['method'])){
+                //获取所有的班号
+                $shift = CourseLiveResource::where(['course_id'=>$course['course_id'],'is_del'=>0])->get();
+                if(!empty($shift)){
+                    $classtime = 0;
+                    foreach ($shift as $ks=>$vs){
+                        $time = LiveChild::where(['shift_no_id'=>$vs['shift_id'],'is_del'=>0,'status'=>1])->sum('class_hour');
+                        $classtime = $classtime + $time;
+                    }
+                    $course['classtime'] = $classtime;
+                }else{
+                    $course['classtime'] = 0;
+                }
+            }else{
+                $course['classtime'] = 0;
+            }
             //学习人数   基数+订单数
             $ordernum = Order::where(['class_id' => $course['course_id'], 'status' => 2, 'oa_status' => 1,'nature'=>1])->count();
             $course['buy_num'] = $course['buy_num'] + $ordernum;
@@ -273,6 +289,22 @@ class CourseController extends Controller {
             $method = Couresmethod::select('method_id')->where(['course_id' =>$this->data['id'],'is_del'=>0])->get()->toArray();
             if (!empty($method)) {
                 $course['method'] = array_column($method, 'method_id');
+            }
+            if(in_array('1',$course['method'])){
+                //获取所有的班号
+                $shift = CourseLiveResource::where(['course_id'=>$course['id'],'is_del'=>0])->get();
+                if(!empty($shift)){
+                    $classtime = 0;
+                    foreach ($shift as $ks=>$vs){
+                        $time = LiveChild::where(['shift_no_id'=>$vs['shift_id'],'is_del'=>0,'status'=>1])->sum('class_hour');
+                        $classtime = $classtime + $time;
+                    }
+                    $course['classtime'] = $classtime;
+                }else{
+                    $course['classtime'] = 0;
+                }
+            }else{
+                $course['classtime'] = 0;
             }
             //学习人数   基数+订单数
             $ordernum = Order::where(['class_id' => $this->data['id'], 'status' => 2, 'oa_status' => 1,'nature'=>0])->count();
