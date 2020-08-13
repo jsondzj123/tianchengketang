@@ -83,7 +83,7 @@ class Teach extends Model {
 			if(isset($body['classNoSearch']) && !empty($body['classNoSearch'])){
 				$openCourseArr = [];
 			}
-
+			$courseArr = [];
 			//课程
 			$resourceIds = Live::where(['school_id'=>$school_id,'is_del'=>0])->where('is_forbid','!=',2)->pluck('id')->toArray();
 			
