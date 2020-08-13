@@ -48,7 +48,8 @@ class OpenCourse extends Model {
 
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
         $zizengSubject = CouresSubject::where(['school_id'=>$school_id,'is_del'=>0,'is_open'=>0])->select('id','parent_id','subject_name as name')->get()->toArray();
-        $natureSubeject = CourseRefSubject::where(['to_school_id'=>$school_id,'is_del'=>0,'is_public'=>1])->select('parent_id','child_id')->get()->toArray();
+        $natureSubeject = CourseRefSubject::where(['to_school_id'=>$school_id,'is_del'=>0])->select('parent_id','child_id')->get()->toArray(); 
+        // 8.13 调整 不区分课程还是公开课
         $subject = $subjectArr =  $subjectData = $newdata = [];
         if(!empty($natureSubeject)){
             $natureSubeject = array_unique($natureSubeject,SORT_REGULAR);

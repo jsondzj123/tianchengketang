@@ -487,27 +487,28 @@ class CourseSchool extends Model {
         $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登陆学校id
         $ids= [];
         $ids = $zongSubjectIds = CouresSubject::where(['parent_id'=>0,'school_id'=>$school_id,'is_open'=>0,'is_del'=>0])->pluck('id')->toArray();//总校自增学科大类
-        if($data['is_public'] == 1){//公开课
-            $natureSujectIds = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
+        // if($data['is_public'] == 1){//公开课
+            $natureOpenCourseSujectIds = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
                             ->where(function($query) use ($data,$school_id) {
                                 $query->where('ld_course_ref_open.to_school_id',$data['school_id']);
                                 $query->where('ld_course_ref_open.from_school_id',$school_id);
                                 $query->where('ld_course_ref_open.is_del',0);
                             })->pluck('ld_course_open.parent_id')->toArray();
         }
-        if($data['is_public'] == 0 ){//课程
-            $natureSujectIds = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
+        // if($data['is_public'] == 0 ){//课程
+            $natureCourseSujectIds = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
                             ->where(function($query) use ($data,$school_id) {
                                 $query->where('ld_course_school.to_school_id',$data['school_id']);
                                 $query->where('ld_course_school.from_school_id',$school_id);
                                 $query->where('ld_course_school.is_del',0);
                              })->pluck('ld_course.parent_id')->toArray();
-        }
+        // }
 
-        if(!empty($natureSujectIds)){
+        // if(!empty($natureSujectIds)){
+           $natureSujectIds = array_merge($natureOpenCourseSujectIds,$natureCourseSujectIds); 
            $natureSujectIds = array_unique($natureSujectIds);
            $ids = array_merge($zongSubjectIds,$natureSujectIds);
-        }
+        // }
         $subjectOneArr = CouresSubject::whereIn('id',$ids)->where(['is_open'=>0,'is_del'=>0])->select('id','subject_name')->get();
         return ['code'=>200,'msg'=>'Success','data'=>$subjectOneArr];
     }
