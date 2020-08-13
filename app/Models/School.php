@@ -420,7 +420,8 @@ class School extends Model {
             // return ['code'=>200,'msg'=>'Success','data'=>$subjectIdsData];
         // }
         // if($data['is_public'] == 0){//课程
-            $courserNatureSubject = CourseSchool::where(function($query) use ($data,$school_id) {
+            
+            $courseNatureSubject = CourseSchool::where(function($query) use ($data,$school_id) {
                                 $query->where('to_school_id',$data['school_id']);
                                 $query->where('from_school_id',$school_id);
                                 $query->where('is_del',0);
