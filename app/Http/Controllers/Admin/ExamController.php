@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\PapersExam;
+use App\Models\QuestionSubject;
 
 class ExamController extends Controller {
     /*
@@ -428,6 +429,12 @@ class ExamController extends Controller {
             //判断科目id是否为空
             if(empty(self::$accept_data['subject_id']) || !is_numeric(self::$accept_data['subject_id']) || self::$accept_data['subject_id'] <= 0){
                 return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
+            }
+            
+            //判断此科目是否属于此题库下面
+            $is_bank_subject = QuestionSubject::where('id' , self::$accept_data['subject_id'])->where('bank_id' , self::$accept_data['bank_id'])->where('is_del' , 0)->count();
+            if($is_bank_subject <= 0){
+                return response()->json(['code' => 202 , 'msg' => '此科目不属于此题库下面']);
             }
 
             //返回校验的数据结果
