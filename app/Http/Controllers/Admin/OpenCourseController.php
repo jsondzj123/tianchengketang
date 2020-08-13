@@ -13,6 +13,8 @@ use App\Tools\CurrentAdmin;
 use App\Tools\MTCloud;
 use App\Models\OpenLivesChilds;
 use App\Models\CourseRefOpen;
+use App\Models\CourseRefSubject;
+
 
 class OpenCourseController extends Controller {
 
@@ -73,11 +75,37 @@ class OpenCourseController extends Controller {
         }
         $openCourseArr['keywords'] = !isset($openCourseArr['keywords']) || empty($openCourseArr['keywords'])?'':$openCourseArr['keywords'];
         try{
+        	$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0 ;
+        	$admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
         	unset($openCourseArr['/admin/opencourse/doInsertOpenCourse']);
 	        DB::beginTransaction();
 	        $openCourseArr['subject'] = json_decode($openCourseArr['subject'],1);
-	        $openCourseArr['parent_id'] = $openCourseArr['subject'][0]<0 ? 0: $openCourseArr['subject'][0];
-	        $openCourseArr['child_id'] = !isset($openCourseArr['subject'][1]) && empty($openCourseArr['subject'][1]) ? 0 : $openCourseArr['subject'][1];
+	        $parent_id =$openCourseArr['subject'][0]<0 ? 0: $openCourseArr['subject'][0];
+	        $child_id = !isset($openCourseArr['subject'][1]) && empty($openCourseArr['subject'][1]) ? 0 : $openCourseArr['subject'][1];
+	        $openCourseArr['parent_id'] =  $parent_id ;
+	        $openCourseArr['child_id'] = $child_id;
+	        $count = OpenCourse::where(['school_id'=>$school_id,'parent_id'=>$parent_id,'child_id'=>$child_id,'is_del'=>0])->count(); //看学科大类小类是否为授权还是自增
+	        if($count<=0){
+	        	$courseData =CourseRefSubject::where(['to_school_id'=>$school_id,'parent_id'=>$parent_id,'child_id'=>$child_id,'is_public'=>0,'is_del'=>0])->first();
+	        	$OpenCourseCount =CourseRefSubject::where(['to_school_id'=>$school_id,'parent_id'=>$parent_id,'child_id'=>$child_id,'is_public'=>1,'is_del'=>0])->count();
+	        	if(!empty($courseData) && $OpenCourseCount <=0 ){
+	        		$insert['from_school_id'] = $courseData['from_school_id'];
+	        		$insert['to_school_id'] = $school_id;
+	        		$insert['parent_id'] = $parent_id;
+	        		$insert['child_id'] = $child_id;
+	        		$insert['is_public'] = 1;
+	        		$insert['admin_id'] = $admin_id;
+	        		$insert['create_at'] = date('Y-m-d H:i:s');
+	        		$openCourseSubjectId = CourseRefSubject::insertGetId($insert);
+			        if($openCourseSubjectId <0){
+			        	DB::rollBack();
+			            return response()->json(['code'=>203,'msg'=>'公开课学科创建未成功']);  
+			        }
+	        	}
+	        	if(empty($courseData)&&$OpenCourseCount <=0){
+	        		  return response()->json(['code'=>203,'msg'=>'公开课学科不存在']);  
+	        	}
+	        }
 	     	$eduTeacherArr = !isset($openCourseArr['edu_teacher_id']) && empty($openCourseArr['edu_teacher_id'])?[]:json_decode($openCourseArr['edu_teacher_id'],1);
 
 	        $lectTeacherId  = json_decode($openCourseArr['lect_teacher_id'],1);
@@ -98,12 +126,20 @@ class OpenCourseController extends Controller {
 	        if(strtotime($start_at) >  strtotime($end_at) ){
 	        	return response()->json(['code'=>207,'msg'=>'开始时间不能大于结束时间']); 
 	        }
+
+
+
+
+
+
 	        $openCourseArr['start_at'] = strtotime($start_at);
 	        $openCourseArr['end_at'] = strtotime($end_at);
-	        $openCourseArr['school_id']  = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0 ;
+	       
+	      
 	        $openCourseArr['admin_id']  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
 	        $openCourseArr['describe']  = isset($openCourseArr['describe']) ?$openCourseArr['describe']:'';
 	   		$openCourseArr['create_at'] = date('Y-m-d H:i:s');
+	   		 $openCourseArr['school_id']  = $school_id;
 			$openCourseId = OpenCourse::insertGetId($openCourseArr);
 	        if($openCourseId <0){
 	        	DB::rollBack();
@@ -517,14 +553,38 @@ class OpenCourseController extends Controller {
         }
 	     try{
 	        DB::beginTransaction();
+	        $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0 ;
+        	$admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
 	     	if(isset($openCourseArr['/admin/opencourse/doOpenLessById'])){
 	     		unset($openCourseArr['/admin/opencourse/doOpenLessById']);
 	     	}
 	     	$openCourseArr['subject'] = json_decode($openCourseArr['subject'],1);
-	    
-	     	$openCourseArr['parent_id'] = $openCourseArr['subject'][0]<0 ? 0: $openCourseArr['subject'][0];
-	        $openCourseArr['child_id'] = !isset($openCourseArr['subject'][1]) || empty($openCourseArr['subject'][1]) ? 0 : $openCourseArr['subject'][1];
-	  
+	    	$parent_id = $openCourseArr['subject'][0]<0 ? 0: $openCourseArr['subject'][0];
+	    	$child_id = !isset($openCourseArr['subject'][1]) || empty($openCourseArr['subject'][1]) ? 0 : $openCourseArr['subject'][1];
+	     	$openCourseArr['parent_id'] = $parent_id;
+	        $openCourseArr['child_id'] = $child_id;
+	  		$count = OpenCourse::where(['school_id'=>$school_id,'parent_id'=>$parent_id,'child_id'=>$child_id,'is_del'=>0])->count(); //看学科大类小类是否为授权还是自增
+	        if($count<=0){
+	        	$courseData =CourseRefSubject::where(['to_school_id'=>$school_id,'parent_id'=>$parent_id,'child_id'=>$child_id,'is_public'=>0,'is_del'=>0])->first();
+	        	$OpenCourseCount =CourseRefSubject::where(['to_school_id'=>$school_id,'parent_id'=>$parent_id,'child_id'=>$child_id,'is_public'=>1,'is_del'=>0])->count();
+	        	if(!empty($courseData) && $OpenCourseCount <=0 ){
+	        		$insert['from_school_id'] = $courseData['from_school_id'];
+	        		$insert['to_school_id'] = $school_id;
+	        		$insert['parent_id'] = $parent_id;
+	        		$insert['child_id'] = $child_id;
+	        		$insert['is_public'] = 1;
+	        		$insert['admin_id'] = $admin_id;
+	        		$insert['create_at'] = date('Y-m-d H:i:s');
+	        		$openCourseSubjectId = CourseRefSubject::insertGetId($insert);
+			        if($openCourseSubjectId <0){
+			        	DB::rollBack();
+			            return response()->json(['code'=>203,'msg'=>'公开课学科更改未成功']);  
+			        }
+	        	}
+	        	if(empty($courseData)&&$OpenCourseCount <=0){
+	        		  return response()->json(['code'=>203,'msg'=>'公开课学科不存在']);  
+	        	}
+	        }
 	       	$eduTeacherArr = !isset($openCourseArr['edu_teacher_id']) && empty($openCourseArr['edu_teacher_id'])?[]:json_decode($openCourseArr['edu_teacher_id'],1);
 	        $lectTeacherId = $openCourseArr['lect_teacher_id'];
 	        unset($openCourseArr['edu_teacher_id']);
