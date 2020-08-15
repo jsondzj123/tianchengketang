@@ -311,7 +311,7 @@ class LessonController extends Controller {
                     //录播小节
                     //获取该课程下所有录播的资料   小节
                     //录播资料
-                    $jie = Coureschapters::where(['course_id'=>$lesson['id'],'is_del'=>0])->where('parent_id','>',0)->get();
+                    $jie = Coureschapters::where(['course_id'=>$lesson['course_id'],'is_del'=>0])->where('parent_id','>',0)->get();
                     if(!empty($jie)){
                         foreach ($jie as $k=>$v){
                             $ziliao = Couresmaterial::select('material_name as name','material_url  as url','material_size as size','type')->where(['parent_id'=>$v['id'],'is_del'=>0,'mold'=>1])->get();
