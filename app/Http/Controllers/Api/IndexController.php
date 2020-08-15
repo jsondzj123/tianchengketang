@@ -999,12 +999,14 @@ class IndexController extends Controller {
                         $subject2 = Subject::select('id', 'subject_name as name')
                         ->where(['is_del' => 0,'parent_id' => 0,"school_id" => $json_info['school_id']])
                         ->get()->toArray();
+
                         //授权科目
                         $subject1 = CourseRefSubject::join("ld_course_subject","ld_course_ref_subject.parent_id","=","ld_course_subject.id")
                         ->select('ld_course_subject.id', 'subject_name as name')
                         ->where(['ld_course_subject.is_del' => 0,'ld_course_subject.parent_id' => 0,'to_school_id'=>$json_info['school_id']])
                         ->get()->toArray();
                         $subject = array_merge($subject1,$subject2);
+                        $subject = array_unique($subject,SORT_REGULAR);
                     }
                         $subject = array_slice($subject,0,5);
                         $lessons = [];
