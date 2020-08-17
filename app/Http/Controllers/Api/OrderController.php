@@ -272,21 +272,21 @@ class OrderController extends Controller{
                 return ['code' => 202, 'msg' => '此订单已支付'];
             }
             //订单查询课程
-//            if($order['nature'] == 1){
-//                $lesson = CourseSchool::where(['id' => $order['class_id'], 'is_del' => 0, 'status' => 1])->first();
-//            }else{
-//                $lesson = Coures::where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1])->first();
-//            }
-//            if (!$lesson) {
-//                return ['code' => 202, 'msg' => '此课程选择无效'];
-//            }
-            $lesson = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1])->first();
-            if(empty($lesson)){
-                $lesson = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$order['class_id'],'to_school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
+            if($order['nature'] == 1){
+                $lesson = CourseSchool::where(['id' => $order['class_id'], 'is_del' => 0, 'status' => 1])->first();
+            }else{
+                $lesson = Coures::where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1])->first();
             }
-            if(!$lesson){
-                return ['code' => 204 , 'msg' => '此课程选择无效'];
+            if (!$lesson) {
+                return ['code' => 202, 'msg' => '此课程选择无效'];
             }
+//            $lesson = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1,'school_id'=>$student['school_id']])->first();
+//            if(empty($lesson)){
+//                $lesson = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$order['class_id'],'to_school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
+//            }s
+//            if(!$lesson){
+//                return ['code' => 204 , 'msg' => '此课程选择无效'];
+//            }
             if ($data['pay_type'] == 5) {
                 if ($lesson['favorable_price'] > $user_balance) {
                     return ['code' => 210, 'msg' => '余额不足，请充值！！！！！'];
