@@ -27,7 +27,7 @@ class LiveChildController extends Controller {
             return $this->response($validator->errors()->first(), 202);
         }
 
-        $courseArr = CourseLiveResource::select('shift_id as shift_no_id')->where(['course_id'=>$request->input('lesson_id'),'is_del'=>0])->get();
+        $courseArr = CourseLiveResource::select('shift_id as shift_no_id')->where(['course_id'=>$request->input('lesson_id'),'is_del'=>0])->get()->toArray();
         //获取班号
         //获取班号下所有课次'
         $childs = [];
@@ -51,24 +51,24 @@ class LiveChildController extends Controller {
                 ->select('ld_course_class_number.id', 'ld_course_class_number.name as course_name', 'ld_course_class_number.start_at as start_time', 'ld_course_class_number.end_at as end_time', 'ld_course_live_childs.course_id', 'ld_course_live_childs.status','ld_course_shift_no.name as class_name')->where([
                     'ld_course_live_childs.is_del' => 0,'ld_course_class_number.is_del'=>0,'ld_course_live_childs.is_forbid' => 0, 'ld_course_live_childs.status' => 3,'shift_no_id'=>$value['shift_no_id']
                 ])->get();
-            }
-            if(!empty($live->toArray())){
-            array_push($childs, [
-                    'title' => '正在播放',
-                    'data'  => $live,
-                ]);
-            }
-            if(!empty($advance->toArray())){
-                array_push($childs, [
-                        'title' => '播放预告',
-                        'data'  => $advance,
-                    ]);
-            }
-            if(!empty($playback->toArray())){
-                array_push($childs, [
-                        'title' => '历史课程',
-                        'data'  => $playback,
-                    ]);
+                if(!empty($live->toArray())){
+                    array_push($childs, [
+                            'title' => '正在播放',
+                            'data'  => $live,
+                        ]);
+                    }
+                    if(!empty($advance->toArray())){
+                        array_push($childs, [
+                                'title' => '播放预告',
+                                'data'  => $advance,
+                            ]);
+                    }
+                    if(!empty($playback->toArray())){
+                        array_push($childs, [
+                                'title' => '历史课程',
+                                'data'  => $playback,
+                            ]);
+                    }
             }
 
         }
