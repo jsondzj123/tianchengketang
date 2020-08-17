@@ -207,7 +207,7 @@ class Order extends Model {
                 $nature = 0;
             }
             if(!$course){
-                return ['code' => 204 , 'msg' => '此课程选择无效'.$arr['class_id']];
+                return ['code' => 204 , 'msg' => '此课程选择无效'];
             }
             if(empty($course['favorable_price']) || empty($course['price'])){
                 return ['code' => 204 , 'msg' => '此课程信息有误选择无效'];
