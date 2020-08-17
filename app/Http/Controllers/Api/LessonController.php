@@ -269,7 +269,7 @@ class LessonController extends Controller {
                 $lesson = Lesson::select("*","pricing as price","sale_price as favorable_price","expiry as ttl","introduce as introduction","describe as description")->where(["school_id"=>$json_info['school_id'],'is_del'=>0])->find($request->input('id'));
                 if(empty($lesson)){
                     //查询授权课程id
-                    $lesson = CourseSchool::select("*","pricing as price","sale_price as favorable_price","expiry as ttl","introduce as introduction","describe as description")->where(["to_school_id"=>$json_info['school_id'],'is_del'=>0])->where("course_id",$request->input('id'))->first();
+                    $lesson = CourseSchool::select("*","pricing as price","sale_price as favorable_price","expiry as ttl","introduce as introduction","describe as description")->where(["to_school_id"=>$json_info['school_id'],'is_del'=>0])->where("id",$request->input('id'))->first();
                     if(empty($lesson)){
                         return $this->response('课程不存在', 404);
                     }
@@ -282,8 +282,7 @@ class LessonController extends Controller {
                         $lesson['is_collection'] = 0;
                     }
                     //is_buy  是否购买
-                    $is_buy = Order::where(['student_id'=>$json_info['user_id'],'status'=>2,'oa_status'=>1,'class_id'=>$lesson['course_id']])->first();
-                    //dd($is_buy);
+                    $is_buy = Order::where(['student_id'=>$json_info['user_id'],'status'=>2,'oa_status'=>1,'class_id'=>$request->input('id')])->first();
                     if($is_buy){
                         $lesson['is_buy'] = 1;
                     }else{
