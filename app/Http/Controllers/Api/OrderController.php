@@ -282,7 +282,7 @@ class OrderController extends Controller{
 //            }
             $lesson = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$order['class_id'],'is_del'=>0,'status'=>1])->first();
             if(empty($lesson)){
-                $lesson = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['course_id'=>$order['class_id'],'to_school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
+                $lesson = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$order['class_id'],'to_school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
             }
             if(!$lesson){
                 return ['code' => 204 , 'msg' => '此课程选择无效'];
@@ -317,7 +317,11 @@ class OrderController extends Controller{
                     }
                     Student::where(['id'=>$order['student_id']])->update(['enroll_status'=>1,'state_status'=>$state_status]);
                     $orderstatus = Order::where(['id' => $data['order_id']])->update(['pay_type' => 5, 'status' => 2,'oa_status'=>1,'validity_time'=>$validity,'pay_time' => date('Y-m-d H:i:s'),'update_at' =>date('Y-m-d H:i:s')]);
+<<<<<<< HEAD
                     $studentlogstatus = StudentAccountlog::insert(['user_id' => $user_id, 'price' => $lesson['favorable_price'], 'end_price' => $end_balance, 'status' => 2, 'class_id' => $order['class_id']]);
+=======
+                    $studentlogstatus = StudentAccountlog::insert(['user_id' => $user_id, 'price' => $lesson['price'], 'end_price' => $end_balance, 'status' => 2, 'class_id' => $order['class_id']]);
+>>>>>>> zhangzekun
                     if($studentstatus && $orderstatus&&$studentlogstatus){
                         DB::commit();
                         return response()->json(['code' => 200, 'msg' => '购买成功']);
