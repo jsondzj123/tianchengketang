@@ -105,7 +105,7 @@ class SchoolController extends Controller {
                 AdminLog::insertAdminLog([
                     'admin_id'       =>   CurrentAdmin::user()['id'] ,
                     'module_name'    =>  'School' ,
-                    'route_url'      =>  'admin/school/doSchoolForbid' , 
+                    'route_url'      =>  'admin/school/doSchoolDel' , 
                     'operate_method' =>  'update' ,
                     'content'        =>  json_encode($data),
                     'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
@@ -169,7 +169,7 @@ class SchoolController extends Controller {
                 AdminLog::insertAdminLog([
                     'admin_id'       =>   CurrentAdmin::user()['id'] ,
                     'module_name'    =>  'School' ,
-                    'route_url'      =>  'admin/school/doSchoolDel' , 
+                    'route_url'      =>  'admin/school/doSchoolForbid' , 
                     'operate_method' =>  'update',
                     'content'        =>  json_encode($data),
                     'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
@@ -365,6 +365,15 @@ class SchoolController extends Controller {
                 'create_at'=> date('Y-m-d H:i:s')
             ];
             if(PaySet::insertGetId($payconfig)>0){
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                    'module_name'    =>  'School' ,
+                    'route_url'      =>  'admin/school/doInsertSchool' , 
+                    'operate_method' =>  'update',
+                    'content'        =>  json_encode($data),
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
                 DB::commit();
                 return response()->json(['code' => 200 , 'msg' => '创建账号成功']);
             }else{
@@ -678,7 +687,7 @@ class SchoolController extends Controller {
         if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-        $result = School::doAdminUpdate($data);
+        $result = School::doAdminUpdate($data);     
         return response()->json(['code'=>$result['code'],'msg'=>$result['msg']]);
     }
     /*
