@@ -201,13 +201,13 @@ class Order extends Model {
           // }
             $course = Coures::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'is_del'=>0,'status'=>1,'school_id'=>$student['school_id']])->first();
             if(empty($course)){
-                $course = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['id'=>$arr['class_id'],'to_school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
+                $course = CourseSchool::select('id','title','cover','pricing as price','sale_price as favorable_price')->where(['course_id'=>$arr['class_id'],'to_school_id'=>$student['school_id'],'is_del'=>0,'status'=>1])->first();
                 $nature = 1;
             }else{
                 $nature = 0;
             }
             if(!$course){
-                return ['code' => 204 , 'msg' => '此课程选择无效'];
+                return ['code' => 204 , 'msg' => '此课程选择无效'.$arr['class_id']];
             }
             if(empty($course['favorable_price']) || empty($course['price'])){
                 return ['code' => 204 , 'msg' => '此课程信息有误选择无效'];
