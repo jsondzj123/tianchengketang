@@ -282,8 +282,7 @@ class LessonController extends Controller {
                         $lesson['is_collection'] = 0;
                     }
                     //is_buy  是否购买
-                    $is_buy = Order::where(['student_id'=>$json_info['user_id'],'status'=>2,'oa_status'=>1,'class_id'=>$lesson['course_id']])->first();
-                    //dd($is_buy);
+                    $is_buy = Order::where(['student_id'=>$json_info['user_id'],'status'=>2,'oa_status'=>1,'class_id'=>$lesson['id']])->first();
                     if($is_buy){
                         $lesson['is_buy'] = 1;
                     }else{
