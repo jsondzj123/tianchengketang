@@ -913,6 +913,15 @@ class Coures extends Model {
         if($formerorder['status'] == 5){
             return ['code' => 201 , 'msg' => '订单失效'];
         }
+        $bmcourse =  Order::select('class_id')->where(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>3])
+            ->orWhere(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>4])->groupBy('class_id')->get();
+        if(!empty($bmcourse)){
+            foreach ($bmcourse as $ks=>$vs){
+                if($vs['class_id'] == $arr['id']){
+                    return ['code' => 202 , 'msg' => '此课程已报名'];
+                }
+            }
+        }
         //获取后端的操作员id
         $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;  //操作员id
         //根据用户id获得分校id
