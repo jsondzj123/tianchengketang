@@ -170,7 +170,13 @@ class AdminUserController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
         $data['teacher_id'] = !isset($data['teacher_id'])  || empty($data['teacher_id']) || $data['teacher_id']<=0 ? 0: $data['teacher_id'];
-        
+        if($data['teacher_id']>0){
+            $count  = Adminuser::where(['teacher_id'=>$data['teacher_id'],'school_id'=>$data['school_id'],'is_del'=>1])->count();
+            if($count>=1){
+                return response()->json(['code'=>207,'msg'=>'该教师已被其他账号绑定！']);
+            }
+        }
+
         if(strlen($data['password']) <8){
             return response()->json(['code'=>207,'msg'=>'密码长度不能小于8位']);
         }
@@ -234,10 +240,6 @@ class AdminUserController extends Controller {
         if($adminUserArr['code'] != 200){
             return response()->json(['code'=>204,'msg'=>'用户不存在']);
         }
-         
-
-
-
         $adminUserArr['data']['school_name']  = School::getSchoolOne(['id'=>$adminUserArr['data']['school_id'],'is_forbid'=>1,'is_del'=>1],['name'])['data']['name'];
         $roleAuthArr = Roleauth::getRoleAuthAlls(['school_id'=>$adminUserArr['data']['school_id'],'is_del'=>1],['id','role_name']);
         $teacherArr = [];
@@ -293,6 +295,12 @@ class AdminUserController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
         $data['teacher_id']= !isset($data['teacher_id']) || empty($data['teacher_id']) || $data['teacher_id']<=0 ?0 :$data['teacher_id'];
+        if($data['teacher_id']>0){
+            $count  = Adminuser::where(['teacher_id'=>$data['teacher_id'],'school_id'=>$data['school_id'],'is_del'=>1])->where('id','!=',$data['id'])->count();
+            if($count>=1){
+                return response()->json(['code'=>207,'msg'=>'该教师已被其他账号绑定！']);
+            }
+        }       
         //7.11  begin
        if($school_status  == 1){//总校
             $zongxiaoAdminArr = Adminuser::where(['id'=>$data['id']])->first(); 
