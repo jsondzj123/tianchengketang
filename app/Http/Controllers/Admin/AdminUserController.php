@@ -296,7 +296,7 @@ class AdminUserController extends Controller {
         }
         $data['teacher_id']= !isset($data['teacher_id']) || empty($data['teacher_id']) || $data['teacher_id']<=0 ?0 :$data['teacher_id'];
         if($data['teacher_id']>0){
-            $count  = Adminuser::where(['teacher_id',=>$data['teacher_id'],'school_id'=>$data['school_id'],'is_del'=>1])->where('id','!=',$data['id'],'is_del'=>1)->count();
+            $count  = Adminuser::where(['teacher_id',=>$data['teacher_id'],'school_id'=>$data['school_id'],'is_del'=>1])->where('id','!=',$data['id'])->count();
             if($count>=1){
                 return response()->json(['code'=>207,'msg'=>'该教师已被其他账号绑定！']);
             }
