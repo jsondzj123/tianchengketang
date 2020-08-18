@@ -922,6 +922,7 @@ class Coures extends Model {
                 }
             }
         }
+        Order::where(['order_number'=>$arr['order_number']])->update(['status'=>5]);
         //获取后端的操作员id
         $data['admin_id'] = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;  //操作员id
         //根据用户id获得分校id
@@ -964,7 +965,7 @@ class Coures extends Model {
                     }
                 }
                 Student::where(['id' => $formerorder['student_id']])->update(['enroll_status' => 1, 'state_status' => $state_status]);
-                Order::where(['order_number'=>$arr['order_number']])->update(['status'=>5]);
+//                Order::where(['order_number'=>$arr['order_number']])->update(['status'=>5]);
             }
             //添加日志操作
             AdminLog::insertAdminLog([
