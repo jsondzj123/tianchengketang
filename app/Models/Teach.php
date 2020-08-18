@@ -232,33 +232,33 @@ class Teach extends Model {
 				$openCourseArr['state'] = 1;
 				$openCourseArr['status'] = '预开始';
 				if($teacher_id <= 0){
-					$newcourseArr[$k]['statusName'] = '进入直播间';
+					$openCourseArr['statusName'] = '进入直播间';
 				}else{
 					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 1){
-						$newcourseArr[$k]['statusName'] = '教务辅教';
+						$openCourseArr['statusName'] = '教务辅教';
 					}
 					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 2){
-						$newcourseArr[$k]['statusName'] = '讲师教学';
+						$openCourseArr['statusName'] = '讲师教学';
 					}
 				}
 			}
 			if($openCourseArr['end_at']<time()){
 				$openCourseArr['state'] = 3;
 				$openCourseArr['status'] = '直播已结束';
-				$newcourseArr[$k]['statusName']  = '查看回放';
+				$newcourseArr['statusName']  = '查看回放';
 
 			}
 			if($openCourseArr['start_at']<time() && $openCourseArr['end_at']>time()){
 				$openCourseArr['state'] = 2;
 				$openCourseArr['status'] = '直播中';
 				if($teacher_id <= 0){
-					$newcourseArr[$k]['statusName'] = '进入直播间';
+					$openCourseArr['statusName'] = '进入直播间';
 				}else{
 					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 1){
-						$newcourseArr[$k]['statusName'] = '教务辅教';
+						$openCourseArr['statusName'] = '教务辅教';
 					}
 					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 2){
-						$newcourseArr[$k]['statusName'] = '讲师教学';
+						$openCourseArr['statusName'] = '讲师教学';
 					}
 				}
 			} 

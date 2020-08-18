@@ -138,10 +138,10 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('dateils','TeacherController@dateils');//查看详情
     });
     //H5 我的
-    $router->group(['prefix' => 'my'], function () use ($router) {
+    $router->group(['prefix' => 'my','middleware'=>'user.app'], function () use ($router) {
         $router->post('about','MyController@getAbout');//关于我们
     });
-     //end (lys)
+    //end (lys)
 
 
 

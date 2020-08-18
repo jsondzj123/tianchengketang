@@ -47,7 +47,6 @@ class FootConfig extends Model {
                         $v['title'] = isset($schoolData['title']) ? $schoolData['title'] :'';
                         $v['subhead'] = isset($schoolData['subhead']) ? $schoolData['subhead'] :'';
                     }
-                    
     				array_push($headerArr,$v);
     			}
     			if($v['type']== 2){
