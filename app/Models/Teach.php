@@ -303,6 +303,23 @@ class Teach extends Model {
 				}
 				$live['courseware'] = $newArr;  //欢拓课件信息
 			}	
+		
+			$live = [
+				'class_name'=>$classno_id['name'],
+				'title'=>$LiveChildArr['name'],
+				'start_at'=>date('Y-m-d H:i:s',$liveChildClassArr['start_at']),
+				'end_at'=>date('Y-m-d H:i:s',$liveChildClassArr['end_at']),
+				'watch_num'=>$liveChildClassArr['watch_num'],
+				'status'=> $liveChildClassArr['status'] == 1?'预直播':($liveChildClassArr['status']==2?'直播中':'直播已结束'),
+				'duration'=>timetodate((int)$liveChildClassArr['end_at']-(int)$liveChildClassArr['start_at']),
+				'courseware'=>$live['courseware'],
+				'lect_teacher_name'=>$live['lect_teacher_name'],
+				'edu_teacher_name'=>$live['edu_teacher_name'],
+				'is_public' =>$body['is_public'],
+				'classno_id' =>$body['classno_id'],
+				'class_id'=>$body['class_id'],
+				'time' => timetodate((int)$liveChildClassArr['end_at']-(int)$liveChildClassArr['start_at'])//时长
+			];
 			if($liveChildClassArr['start_at']>time()){
 				$live['state'] = 1;
 				if($teacher_id <= 0){
@@ -333,22 +350,6 @@ class Teach extends Model {
 					}
 				}
 			} 
-			$live = [
-				'class_name'=>$classno_id['name'],
-				'title'=>$LiveChildArr['name'],
-				'start_at'=>date('Y-m-d H:i:s',$liveChildClassArr['start_at']),
-				'end_at'=>date('Y-m-d H:i:s',$liveChildClassArr['end_at']),
-				'watch_num'=>$liveChildClassArr['watch_num'],
-				'status'=> $liveChildClassArr['status'] == 1?'预直播':($liveChildClassArr['status']==2?'直播中':'直播已结束'),
-				'duration'=>timetodate((int)$liveChildClassArr['end_at']-(int)$liveChildClassArr['start_at']),
-				'courseware'=>$live['courseware'],
-				'lect_teacher_name'=>$live['lect_teacher_name'],
-				'edu_teacher_name'=>$live['edu_teacher_name'],
-				'is_public' =>$body['is_public'],
-				'classno_id' =>$body['classno_id'],
-				'class_id'=>$body['class_id'],
-				'time' => timetodate((int)$liveChildClassArr['end_at']-(int)$liveChildClassArr['start_at'])//时长
-			];
 			return ['code'=>200,'msg'=>'Success','data'=>$live];
 		}
 	}
