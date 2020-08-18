@@ -914,7 +914,7 @@ class Coures extends Model {
             return ['code' => 201 , 'msg' => '订单失效'];
         }
         $bmcourse =  Order::select('class_id')->where(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>3])
-            ->orWhere(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>4])->groupBy('class_id')->get();
+            ->orWhere(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>4])->groupBy('class_id')->get()->toArray();
         print_r($bmcourse);die;
         if(!empty($bmcourse)){
             foreach ($bmcourse as $ks=>$vs){
