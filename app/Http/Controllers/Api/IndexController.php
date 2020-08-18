@@ -102,11 +102,20 @@ class IndexController extends Controller {
                         ->orderBy('ld_course_open.start_at' , 'ASC')->offset(0)->limit(3)->get()->toArray();
 
                     }else{
-                        $open_class_list = CourseRefOpen::join("ld_course_open","ld_course_ref_open.course_id","=","ld_course_open.id")
+                        //自增公开课
+                        $open_class_list1 = OpenCourse::join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                        ->select('ld_course_open.id' , 'ld_course_open.cover' ,"ld_course_open_live_childs.course_id", 'ld_course_open.start_at' , 'ld_course_open.end_at')
+                        ->where('ld_course_open.status' , 1)->where('ld_course_open.is_del' , 0)->where('ld_course_open.is_recommend', 1)->where('ld_course_open.school_id',$json_info['school_id'])
+                        ->orderBy('ld_course_open.start_at' , 'ASC')->get()->toArray();
+                        //授权公开课
+                        $open_class_list2 = CourseRefOpen::join("ld_course_open","ld_course_ref_open.course_id","=","ld_course_open.id")
                         ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
                         ->select('ld_course_open.id' , 'ld_course_open.cover' ,"ld_course_open_live_childs.course_id", 'ld_course_open.start_at' , 'ld_course_open.end_at')
                         ->where('ld_course_open.status' , 1)->where('ld_course_open.is_del' , 0)->where('ld_course_open.is_recommend', 1)->where('ld_course_ref_open.to_school_id',$json_info['school_id'])
-                        ->orderBy('ld_course_open.start_at' , 'ASC')->offset(0)->limit(3)->get()->toArray();
+                        ->orderBy('ld_course_open.start_at' , 'ASC')->get()->toArray();
+                        $open_class_list = array_merge($open_class_list1,$open_class_list2);
+                        $open_class_list = array_slice($open_class_list,0 ,3);
+
                     }
                 }else{
                     //未登录显示总校
@@ -119,6 +128,7 @@ class IndexController extends Controller {
                 //新数组赋值
                 $lession_array = [];
                 //循环公开课列表
+
                 foreach($open_class_list as $k=>$v){
                     //根据课程id获取讲师姓名
                     $info = DB::table('ld_course_open')
@@ -393,7 +403,25 @@ class IndexController extends Controller {
                         ->groupBy('ld_course_open.start_at')
                         ->offset($offset)->limit($pagesize)->get()->toArray();
                     }else{
-                        $lession_list= DB::table('ld_course_ref_open')
+                        //自增
+                        $lession_list1 = DB::table('ld_course_open')
+                        ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
+                        ->select(
+                        DB::raw("any_value(ld_course_open.id) as id") ,
+                        DB::raw("any_value(ld_course_open.cover) as cover") ,
+                        DB::raw("any_value(ld_course_open.start_at) as start_at") ,
+                        DB::raw("any_value(ld_course_open.end_at) as end_at") ,
+                        DB::raw("any_value(ld_course_open_live_childs.course_id) as course_id") ,
+                        DB::raw("from_unixtime(ld_course_open.start_at , '%Y-%m-%d') as start_time")
+                        )
+                        ->where('ld_course_open.school_id',$json_info['school_id'])
+                        ->where('ld_course_open.is_del',0)
+                        ->where('ld_course_open.status',1)
+                        ->orderBy('ld_course_open.start_at' , 'DESC')
+                        ->groupBy('ld_course_open.start_at')
+                        ->get()->toArray();
+                        //授权
+                        $lession_list2 = DB::table('ld_course_ref_open')
                         ->join("ld_course_open","ld_course_ref_open.course_id","=","ld_course_open.id")
                         ->join("ld_course_open_live_childs","ld_course_open.id","=","ld_course_open_live_childs.lesson_id")
                         ->select(
@@ -409,7 +437,17 @@ class IndexController extends Controller {
                         ->where('ld_course_open.status',1)
                         ->orderBy('ld_course_open.start_at' , 'DESC')
                         ->groupBy('ld_course_open.start_at')
-                        ->offset($offset)->limit($pagesize)->get()->toArray();
+                        ->get()->toArray();
+                        $lession_list = array_merge($lession_list1,$lession_list2);
+                        $start =($page - 1) * $pagesize;
+                        $limit_s= $start + $pagesize;
+                        $data = [];
+                        for ($i = $start; $i < $limit_s; $i++) {
+                            if (!empty($lession_list[$i])) {
+                                    array_push($data, $lession_list[$i]);
+                                }
+                        }
+                        $lession_list = $data;
                     }
                 }else{
                     $lession_list= DB::table('ld_course_open')
@@ -961,12 +999,14 @@ class IndexController extends Controller {
                         $subject2 = Subject::select('id', 'subject_name as name')
                         ->where(['is_del' => 0,'parent_id' => 0,"school_id" => $json_info['school_id']])
                         ->get()->toArray();
+
                         //授权科目
                         $subject1 = CourseRefSubject::join("ld_course_subject","ld_course_ref_subject.parent_id","=","ld_course_subject.id")
                         ->select('ld_course_subject.id', 'subject_name as name')
                         ->where(['ld_course_subject.is_del' => 0,'ld_course_subject.parent_id' => 0,'to_school_id'=>$json_info['school_id']])
                         ->get()->toArray();
                         $subject = array_merge($subject1,$subject2);
+                        $subject = array_unique($subject,SORT_REGULAR);
                     }
                         $subject = array_slice($subject,0,5);
                         $lessons = [];
@@ -977,7 +1017,7 @@ class IndexController extends Controller {
                             ->where(['ld_course.is_del' => 0,'ld_course.school_id' => $json_info['school_id'], 'ld_course.is_recommend' => 1, 'ld_course.status' => 1,'ld_course.parent_id' => $v['id']])
                             ->get();
                             $lesson_school = CourseSchool::join("ld_course_subject","ld_course_subject.id","=","ld_course_school.parent_id")
-                            ->select('ld_course_school.id', 'ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.buy_num', 'ld_course_school.pricing as old_price', 'ld_course_school.sale_price as favorable_price')
+                            ->select('ld_course_school.id as course_id', 'ld_course_school.course_id as id','ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.buy_num', 'ld_course_school.pricing as old_price', 'ld_course_school.sale_price as favorable_price')
                             ->where(['ld_course_school.is_del' => 0,'ld_course_school.to_school_id' => $json_info['school_id'], 'ld_course_school.is_recommend' => 1, 'ld_course_school.status' => 1,'ld_course_school.parent_id' => $v['id']])
                             ->get();
 
