@@ -228,6 +228,21 @@ class Teach extends Model {
 				$openCourseArr['edu_teacher_name'] = implode(',', $eduTeacherName);
 			}
 			$openCourseArr['time'] = timetodate((int)$openCourseArr['end_at']-(int)$openCourseArr['start_at']);//时长
+			 
+			$openCourseArr['start_at'] = date('Y-m-d H:i:s',$openCourseArr['start_at']);
+			$openCourseArr['end_at'] = date('Y-m-d H:i:s',$openCourseArr['end_at']);
+			$MTCloud = new MTCloud();
+			$res =$MTCloud->courseDocumentList($openChildsArr['course_id'],1);
+			$openCourseArr['courseware'] = $newArr = [];
+			if(!empty($res['data'])){
+				foreach($res['data'] as $key =>$v){
+					$arr= $MTCloud->documentGet($v['id']);
+					$newArr[] =$arr['data'];
+				}
+				$openCourseArr['courseware'] = $newArr;  //欢拓课件信息
+			}
+			$openCourseArr['class_id'] = $body['class_id'];
+			$openCourseArr['is_public'] = $body['is_public'];
 			if($openCourseArr['start_at']>time()){
 				$openCourseArr['state'] = 1;
 				$openCourseArr['status'] = '预开始';
@@ -245,7 +260,7 @@ class Teach extends Model {
 			if($openCourseArr['end_at']<time()){
 				$openCourseArr['state'] = 3;
 				$openCourseArr['status'] = '直播已结束';
-				$newcourseArr['statusName']  = '查看回放';
+				$openCourseArr['statusName']  = '查看回放';
 
 			}
 			if($openCourseArr['start_at']<time() && $openCourseArr['end_at']>time()){
@@ -261,21 +276,7 @@ class Teach extends Model {
 						$openCourseArr['statusName'] = '讲师教学';
 					}
 				}
-			} 
-			$openCourseArr['start_at'] = date('Y-m-d H:i:s',$openCourseArr['start_at']);
-			$openCourseArr['end_at'] = date('Y-m-d H:i:s',$openCourseArr['end_at']);
-			$MTCloud = new MTCloud();
-			$res =$MTCloud->courseDocumentList($openChildsArr['course_id'],1);
-			$openCourseArr['courseware'] = $newArr = [];
-			if(!empty($res['data'])){
-				foreach($res['data'] as $key =>$v){
-					$arr= $MTCloud->documentGet($v['id']);
-					$newArr[] =$arr['data'];
-				}
-				$openCourseArr['courseware'] = $newArr;  //欢拓课件信息
 			}
-			$openCourseArr['class_id'] = $body['class_id'];
-			$openCourseArr['is_public'] = $body['is_public'];
 			return ['code'=>200,'msg'=>'Success','data'=>$openCourseArr];
 		}
 		if($body['is_public'] == 0){  //课程
