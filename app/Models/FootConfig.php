@@ -124,6 +124,15 @@ class FootConfig extends Model {
     		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'is_open'=>$body['open'],'update_at'=>date('Y-m-d H:i:s')]);
     	}
     	if($res){
+            AdminLog::insertAdminLog([
+                    'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                    'module_name'    =>  'Pageset' ,
+                    'route_url'      =>  'admin/pageset/details' , 
+                    'operate_method' =>  'update',
+                    'content'        =>  json_encode($body),
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
     		return ['code'=>200,'msg'=>'Success'];
     	}else{
     		return ['code'=>203,'msg'=>'网络错误，请重试'];
@@ -143,6 +152,15 @@ class FootConfig extends Model {
         $update['logo']  = $body['logo'];
         $res = self::where(['school_id'=>$body['school_id'],'type'=>4,'is_del'=>0])->update($update);  
         if($res){
+            AdminLog::insertAdminLog([
+                    'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                    'module_name'    =>  'Pageset' ,
+                    'route_url'      =>  'admin/pageset/doLogoUpdate' , 
+                    'operate_method' =>  'update',
+                    'content'        =>  json_encode(array_merge($body,$update)),
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"],
+                    'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return ['code'=>200,'msg'=>'更改成功'];
         }else{
             return ['code'=>203,'msg'=>'网络错误，请重试'];

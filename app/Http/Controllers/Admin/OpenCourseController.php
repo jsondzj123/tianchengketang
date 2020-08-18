@@ -113,8 +113,6 @@ class OpenCourseController extends Controller {
 	      	$start_at = $openCourseArr['date'].$time[0];
 	      	$end_at = $openCourseArr['date'].$time[1];
 
-	        
-
 	        unset($openCourseArr['edu_teacher_id']);
 	        unset($openCourseArr['lect_teacher_id']);
 	        unset($openCourseArr['subject']);
@@ -127,15 +125,9 @@ class OpenCourseController extends Controller {
 	        	return response()->json(['code'=>207,'msg'=>'开始时间不能大于结束时间']); 
 	        }
 
-
-
-
-
-
 	        $openCourseArr['start_at'] = strtotime($start_at);
 	        $openCourseArr['end_at'] = strtotime($end_at);
 	       
-	      
 	        $openCourseArr['admin_id']  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
 	        $openCourseArr['describe']  = isset($openCourseArr['describe']) ?$openCourseArr['describe']:'';
 	   		$openCourseArr['create_at'] = date('Y-m-d H:i:s');
@@ -175,6 +167,15 @@ class OpenCourseController extends Controller {
             	$openCourseData['nickname'] = Teacher::where('id',$lectTeacherId)->select('real_name')->first()['real_name'];
             	$res = $this->addLive($openCourseData,$openCourseId);
             	if(!$res){
+            		AdminLog::insertAdminLog([
+		                'admin_id'       =>   isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0  ,
+		                'module_name'    =>  'OpenCourse' ,
+		                'route_url'      =>  'admin/OpenCourse/doInsertOpenCourse' , 
+		                'operate_method' =>  'insert',
+		                'content'        =>  json_encode($openCourseArr) ,
+		                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+		                'create_at'      =>  date('Y-m-d H:i:s')
+	            	]);
             		return response()->json(['code'=>203,'msg'=>'公开课创建房间未成功，请重试！']);
             	}
             	DB::commit();
@@ -204,7 +205,7 @@ class OpenCourseController extends Controller {
 	    if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-        if($openCourseArr['nature'] == 1 || $openCourseArr == 2 ){
+        if($openCourseArr['nature'] == 1 || $openCourseArr['nature'] == 2 ){
         	if($openCourseArr['nature'] == 1){
         		//自增  
 	        	$data = OpenCourse::getOpenLessById(['id'=>$openCourseArr['openless_id'],'is_del'=>0],['id','is_recommend']);
@@ -316,7 +317,7 @@ class OpenCourseController extends Controller {
 			                'module_name'    =>  'OpenCourse' ,
 			                'route_url'      =>  'admin/OpenCourse/doUpdateStatus' , 
 			                'operate_method' =>  'update',
-			                'content'        =>  json_encode($update) ,
+			                'content'        =>  json_encode(array_merge($data['data'],$update)) ,
 			                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
 			                'create_at'      =>  date('Y-m-d H:i:s')
 		            	]);
@@ -353,7 +354,7 @@ class OpenCourseController extends Controller {
 			                'module_name'    =>  'OpenCourse' ,
 			                'route_url'      =>  'admin/OpenCourse/doUpdateStatus' , 
 			                'operate_method' =>  'update',
-			                'content'        =>  json_encode($update) ,
+			                'content'        =>  json_encode(array_merge($data['data'],$update)) ,
 			                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
 			                'create_at'      =>  date('Y-m-d H:i:s')
 		            	]);
@@ -637,6 +638,15 @@ class OpenCourseController extends Controller {
             	DB::rollBack();
 	            return response()->json(['code'=>203,'msg'=>'公开课更改未成功']);  
             }
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0  ,
+                'module_name'    =>  'OpenCourse' ,
+                'route_url'      =>  'admin/OpenCourse/doOpenLessById' , 
+                'operate_method' =>  'update',
+                'content'        =>  json_encode($openCourseData) ,
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+        	]);
         	DB::commit();
         	return response()->json(['code'=>200,'msg'=>'公开课更改成功']);  
             

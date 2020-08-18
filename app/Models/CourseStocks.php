@@ -60,6 +60,15 @@ class CourseStocks extends Model {
    		$data['create_at'] = date('Y-m-d H:i:s');
 		$result = self::insert($data);
 		if($result){
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                'module_name'    =>  'Courstocks' ,
+                'route_url'      =>  'admin/courstocks/doInsertStocks' , 
+                'operate_method' =>  'insert',
+                'content'        =>  '库存添加'.json_encode($data),
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
 			return ['code'=>200,'msg'=>'添加成功'];
 		}else{
 			return ['code'=>203,'msg'=>'网络错误,请重试！'];	
