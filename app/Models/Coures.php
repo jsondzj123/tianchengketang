@@ -915,6 +915,7 @@ class Coures extends Model {
         }
         $bmcourse =  Order::select('class_id')->where(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>3])
             ->orWhere(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>4])->groupBy('class_id')->get();
+        print_r($bmcourse);die;
         if(!empty($bmcourse)){
             foreach ($bmcourse as $ks=>$vs){
                 if($vs['class_id'] == $arr['id']){
