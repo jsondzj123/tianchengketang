@@ -25,12 +25,12 @@ class Teach extends Model {
 	//教学列表
 	public static function getList($body){
 		$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
-
+		$teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->school_id : ''; //当前用户绑定的教师id
 		//公开课数据
 		$openCourseArr = OpenCourse::rightJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_open.id') 
 						->rightJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_open.id')
 						->rightJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_open_teacher.teacher_id')
-						->where(function($query) use ($body,$school_id) {
+						->where(function($query) use ($body,$school_id,$teacher_id) {
 						if(isset($body['time']) && !empty($body['time'])){
 							switch ($body['time']) {
 								case '1': //今天
@@ -74,6 +74,7 @@ class Teach extends Model {
 						if(isset($body['classSearch']) && !empty($body['classSearch'])){
 							$query->where('ld_course_open.title','like','%'.$body['classSearch'].'%');
 						}
+						$query->where('ld_course_open_teacher.teacher_id',$teacher_id);
 						$query->where('ld_course_open.nature',0);
 						$query->where('ld_course_open.is_del',0);
 						$query->where('ld_course_open.school_id',$school_id);
@@ -92,7 +93,7 @@ class Teach extends Model {
 					->rightJoin('ld_course_live_childs','ld_course_live_childs.class_id','=','ld_course_class_number.id')
 					->rightJoin('ld_course_class_teacher','ld_course_class_number.id','=','ld_course_class_teacher.class_id')
 					->rightJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_class_teacher.teacher_id')
-					->where(function($query) use ($body,$school_id,$resourceIds) {
+					->where(function($query) use ($body,$school_id,$resourceIds,$teacher_id) {
 						if(isset($body['time']) && !empty($body['time'])){
 							switch ($body['time']) {
 								case '1': //今天
@@ -145,6 +146,7 @@ class Teach extends Model {
 						$query->where('ld_course_class_number.is_del',0);
 						$query->whereIn('ld_course_shift_no.resource_id',$resourceIds);
 						$query->where('ld_course_shift_no.school_id',$school_id);
+						$query->where('ld_course_class_teacher.teacher_id',$teacher_id);
 						$query->where('ld_lecturer_educationa.type',2);
 				})->select('ld_course_shift_no.name as classno_name','ld_course_class_number.name as class_name','ld_course_class_number.start_at','ld_course_class_number.end_at','ld_lecturer_educationa.real_name as teacher_name','ld_course_live_childs.watch_num','ld_course_class_number.id as class_id','ld_course_class_number.shift_no_id as classno_id')
 				->get()->toArray();
