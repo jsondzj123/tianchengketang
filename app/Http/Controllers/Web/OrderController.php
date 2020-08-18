@@ -263,7 +263,7 @@ class OrderController extends Controller {
                 $notify = 'AB|'."http://".$_SERVER['HTTP_HOST']."/web/course/hjnotify";
                 $pay=[
                     'p0_Version'=>'1.0',
-                    'p1_MerchantNo'=>'888108900009969',
+                    'p1_MerchantNo'=>'888107600008111',
                     'p2_OrderNo'=>$arr['order_number'],
                     'p3_Amount'=>$this->data['price'],
                     'p4_Cur'=>1,
@@ -271,9 +271,9 @@ class OrderController extends Controller {
                     'p9_NotifyUrl'=>$notify,
                     'q1_FrpCode'=>'WEIXIN_NATIVE',
                     'q4_IsShowPic'=>1,
-                    'qa_TradeMerchantNo'=>'777170100269422'  //无效 777127800286029  777183600275031 777163700275030
+                    'qa_TradeMerchantNo'=>'777159500273321'  //无效 777127800286029  777183600275031 777163700275030
                 ];
-                $str = "15f8014fee1642fbb123fb5684cda48b";
+                $str = "3f101520d11240299b25b2d2608b03a3";
                 $token = $this->hjHmac($pay,$str);
                 $pay['hmac'] = $token;
                 $wxpay = $this->hjpost($pay);
@@ -290,7 +290,7 @@ class OrderController extends Controller {
                 $notify = 'AB|'."http://".$_SERVER['HTTP_HOST']."/web/course/hjnotify";
                 $pay=[
                     'p0_Version'=>'1.0',
-                    'p1_MerchantNo'=>'888108900009969',
+                    'p1_MerchantNo'=>'888107600008111',
                     'p2_OrderNo'=>$arr['order_number'],
                     'p3_Amount'=>$this->data['price'],
                     'p4_Cur'=>1,
@@ -298,9 +298,9 @@ class OrderController extends Controller {
                     'p9_NotifyUrl'=>$notify,
                     'q1_FrpCode'=>'ALIPAY_NATIVE',
                     'q4_IsShowPic'=>1,
-                    'qa_TradeMerchantNo'=>'777167300271170'
+                    'qa_TradeMerchantNo'=>'777159500273321'
                 ];
-                $str = "15f8014fee1642fbb123fb5684cda48b";
+                $str = "3f101520d11240299b25b2d2608b03a3";
                 $token = $this->hjHmac($pay,$str);
                 $pay['hmac'] = $token;
                 $alipay = $this->hjpost($pay);
