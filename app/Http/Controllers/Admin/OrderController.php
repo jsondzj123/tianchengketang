@@ -204,4 +204,9 @@ class OrderController extends Controller {
     public function orderForExceil(){
         return Excel::download(new \App\Exports\FinanceExport(self::$accept_data), '财务报表.xlsx');
     }
+
+    //扫码支付列表
+    public function scanOrderList(){
+
+    }
 }

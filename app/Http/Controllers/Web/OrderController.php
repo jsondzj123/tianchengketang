@@ -271,7 +271,7 @@ class OrderController extends Controller {
                     'p9_NotifyUrl'=>$notify,
                     'q1_FrpCode'=>'WEIXIN_NATIVE',
                     'q4_IsShowPic'=>1,
-                    'qa_TradeMerchantNo'=>'777159500273321'  //无效 777127800286029  777183600275031 777163700275030
+                    'qa_TradeMerchantNo'=>'777183300269333'  //无效 777127800286029  777183600275031 777163700275030
                 ];
                 $str = "3f101520d11240299b25b2d2608b03a3";
                 $token = $this->hjHmac($pay,$str);
