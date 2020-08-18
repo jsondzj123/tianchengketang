@@ -910,13 +910,13 @@ class Coures extends Model {
         }
         //原订单 状态变成5已失效  再新增订单
         $formerorder = Order::where(['order_number'=>$arr['order_number']])->first()->toArray();
-        print_r($formerorder);
         if($formerorder['status'] == 5){
             return ['code' => 201 , 'msg' => '订单失效'];
         }
-        $bmcourse =  Order::select('class_id')->where(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>3])
-            ->orWhere(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>4])->groupBy('class_id')->get()->toArray();
-        print_r($bmcourse);die;
+        $bmcourse1 =  Order::select('class_id')->where(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>3])->groupBy('class_id')->get()->toArray();
+        $bmcourse2 = Order::select('class_id')->Where(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>4])->groupBy('class_id')->get()->toArray();
+        print_r($bmcourse1);
+        print_r($bmcourse2);die;
         if(!empty($bmcourse)){
             foreach ($bmcourse as $ks=>$vs){
                 if($vs['class_id'] == $arr['id']){
