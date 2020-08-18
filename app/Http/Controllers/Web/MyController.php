@@ -21,11 +21,12 @@ class MyController extends Controller {
     protected $data;
     public function __construct(){
         $this->data = $_REQUEST;
-        $this->school = School::where(['dns'=>$this->data['dns']])->first();
+        // $this->school = School::where(['dns'=>$this->data['dns']])->first();
     }
     //关于我们
     public function getAbout(){
         print_r($this->data);die;
+        
     	$aboutArr = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'type'=>5])->select('text')->first();
     	$about = isset($aboutArr['text']) ?$aboutArr['text'] :'';
     	return response()->json(['code'=>200,'msg'=>'success','about'=>$about]);

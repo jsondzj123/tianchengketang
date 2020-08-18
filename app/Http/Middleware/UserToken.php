@@ -29,7 +29,6 @@ class UserToken {
             //hash中token赋值
             $token_key   = "user:regtoken:".$platform.":".$token;
         }
-
         //判断token值是否合法
         $redis_token = Redis::hLen($token_key);
         if($redis_token && $redis_token > 0) {
@@ -54,6 +53,7 @@ class UserToken {
         } else {
            $json_info = [];
         }
+         print_r($json_info);die;
         $_REQUEST['user_info'] = $json_info;
         return $next($request);//进行下一步(即传递给控制器)
     }
