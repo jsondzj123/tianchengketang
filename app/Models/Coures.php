@@ -909,7 +909,8 @@ class Coures extends Model {
             $course = Coures::where(['id'=>$arr['id'],'is_del'=>0,'status'=>1])->first();
         }
         //原订单 状态变成5已失效  再新增订单
-        $formerorder = Order::where(['order_number'=>$arr['order_number']])->first();
+        $formerorder = Order::where(['order_number'=>$arr['order_number']])->first()->toArray();
+        print_r($formerorder);
         if($formerorder['status'] == 5){
             return ['code' => 201 , 'msg' => '订单失效'];
         }
