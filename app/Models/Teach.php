@@ -212,6 +212,9 @@ class Teach extends Model {
 	}
 	//教学详情
 	public static function details($body){
+		$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
+		$teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->teacher_id : 0; //当前学校id
+		$teacher_type_arr  = Teacher::where(['id'=>$teacher_id,'school_id'=>$school_id,'is_del'=>0,'is_forbid'=>0])->select('type')->first();
 		if($body['is_public'] == 1){  //公开课
 			$openCourseArr = OpenCourse::where('id',$body['class_id'])->select('id','title','start_at','end_at')->first();//公开课名称
 			$openChildsArr = OpenLivesChilds::where('lesson_id',$openCourseArr['id'])->select('watch_num','course_id')->first(); 
@@ -228,14 +231,36 @@ class Teach extends Model {
 			if($openCourseArr['start_at']>time()){
 				$openCourseArr['state'] = 1;
 				$openCourseArr['status'] = '预开始';
+				if($teacher_id <= 0){
+					$newcourseArr[$k]['statusName'] = '进入直播间';
+				}else{
+					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 1){
+						$newcourseArr[$k]['statusName'] = '教务辅教';
+					}
+					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 2){
+						$newcourseArr[$k]['statusName'] = '讲师教学';
+					}
+				}
 			}
 			if($openCourseArr['end_at']<time()){
 				$openCourseArr['state'] = 3;
 				$openCourseArr['status'] = '直播已结束';
+				$newcourseArr[$k]['statusName']  = '查看回放';
+
 			}
 			if($openCourseArr['start_at']<time() && $openCourseArr['end_at']>time()){
 				$openCourseArr['state'] = 2;
 				$openCourseArr['status'] = '直播中';
+				if($teacher_id <= 0){
+					$newcourseArr[$k]['statusName'] = '进入直播间';
+				}else{
+					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 1){
+						$newcourseArr[$k]['statusName'] = '教务辅教';
+					}
+					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 2){
+						$newcourseArr[$k]['statusName'] = '讲师教学';
+					}
+				}
 			} 
 			$openCourseArr['start_at'] = date('Y-m-d H:i:s',$openCourseArr['start_at']);
 			$openCourseArr['end_at'] = date('Y-m-d H:i:s',$openCourseArr['end_at']);
@@ -278,6 +303,36 @@ class Teach extends Model {
 				}
 				$live['courseware'] = $newArr;  //欢拓课件信息
 			}	
+			if($liveChildClassArr['start_at']>time()){
+				$live['state'] = 1;
+				if($teacher_id <= 0){
+					$live['statusName'] = '进入直播间';
+				}else{
+					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 1){
+						$live['statusName'] = '教务辅教';
+					}
+					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 2){
+						$live['statusName'] = '讲师教学';
+					}
+				}
+			}
+			if($liveChildClassArr['end_at']<time()){
+				$live['state'] = 3;
+				$live['statusName']  = '查看回放';
+			}
+			if($liveChildClassArr['start_at']<time() && $liveChildClassArr['end_at']>time()){
+				$live['state'] = 2;
+				if($teacher_id <= 0){
+					$live['statusName'] = '进入直播间';
+				}else{
+					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 1){
+						$live['statusName'] = '教务辅教';
+					}
+					if(isset($teacher_type_arr['type'])  && $teacher_type_arr['type'] == 2){
+						$live['statusName'] = '讲师教学';
+					}
+				}
+			} 
 			$live = [
 				'class_name'=>$classno_id['name'],
 				'title'=>$LiveChildArr['name'],
