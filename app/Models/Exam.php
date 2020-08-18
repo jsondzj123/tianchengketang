@@ -124,7 +124,7 @@ class Exam extends Model {
             $exam_arr = [
                 'parent_id'     =>  $body['exam_id'] ,
                 'exam_content'  =>  $body['exam_content'] ,
-                'answer'        =>  $body['type'] < 7 ? isset($body['answer']) && !empty($body['answer']) ? $body['answer'] : '' : '' ,
+                'answer'        =>  $body['type'] < 7 ? isset($body['answer']) && !empty($body['answer']) ? trim($body['answer']) : '' : '' ,
                 'text_analysis' =>  isset($body['text_analysis'])  && !empty($body['text_analysis']) ? $body['text_analysis']   : '' ,
                 'audio_analysis'=>  isset($body['audio_analysis']) && !empty($body['audio_analysis']) ? $body['audio_analysis'] : '' ,
                 'video_analysis'=>  isset($body['video_analysis']) && !empty($body['video_analysis']) ? $body['video_analysis'] : '' ,
@@ -143,7 +143,7 @@ class Exam extends Model {
                 'subject_id'    =>  $body['subject_id'] ,
                 'bank_id'       =>  $body['bank_id'] ,
                 'exam_content'  =>  $body['exam_content'] ,
-                'answer'        =>  $body['type'] < 7 ? isset($body['answer']) && !empty($body['answer']) ? $body['answer'] : '' : '' ,
+                'answer'        =>  $body['type'] < 7 ? isset($body['answer']) && !empty($body['answer']) ? trim($body['answer']) : '' : '' ,
                 'text_analysis' =>  isset($body['text_analysis'])  && !empty($body['text_analysis']) ? $body['text_analysis']   : '' ,
                 'audio_analysis'=>  isset($body['audio_analysis']) && !empty($body['audio_analysis']) ? $body['audio_analysis'] : '' ,
                 'video_analysis'=>  isset($body['video_analysis']) && !empty($body['video_analysis']) ? $body['video_analysis'] : '' ,
@@ -294,7 +294,7 @@ class Exam extends Model {
         //试题数据组合
         $exam_arr = [
             'exam_content'  =>  $body['exam_content'] ,
-            'answer'        =>  $exam_info['type'] < 7 ? isset($body['answer']) && !empty($body['answer']) ? $body['answer'] : '' : '' ,
+            'answer'        =>  $exam_info['type'] < 7 ? isset($body['answer']) && !empty($body['answer']) ? trim($body['answer']) : '' : '' ,
             'text_analysis' =>  isset($body['text_analysis'])  && !empty($body['text_analysis']) ?  $body['text_analysis']   : '' ,
             'audio_analysis'=>  isset($body['audio_analysis']) && !empty($body['audio_analysis']) ? $body['audio_analysis']  : '' ,
             'video_analysis'=>  isset($body['video_analysis']) && !empty($body['video_analysis']) ? $body['video_analysis'] : '' ,
@@ -957,7 +957,7 @@ class Exam extends Model {
                         'subject_id'     =>  $body['subject_id'] ,                                     //科目的id
                         'admin_id'       =>  $admin_id ,                                               //后端的操作员id
                         'exam_content'   =>  !empty($v[1]) ? trim($v[1]) : '' ,                        //试题内容
-                        'answer'         =>  $exam_type == 3 ? $v[2] == '正确' ?  '正确'  : '错误'  : $v[2]  ,   //试题答案
+                        'answer'         =>  $exam_type == 3 ? $v[2] == '正确' ?  '正确'  : '错误'  : trim($v[2])  ,   //试题答案
                         'text_analysis'  =>  !empty($v[11]) ? trim($v[11]) : '' ,                      //文字解析
                         'item_diffculty' =>  !empty($v[12]) ? $diffculty_array[trim($v[12])] : 0 ,     //试题难度
                         'chapter_id'     =>  $v[13] && !empty($v[13]) ? $chapter_id > 0 ? $chapter_id : 0 : 0,         //章id
@@ -981,7 +981,7 @@ class Exam extends Model {
                     //数组信息赋值
                     $arr[$exam_type][] = [
                         'exam_content'  =>  $v[1]  ,                                                  //试题内容
-                        'answer'        =>  $exam_type == 3 ? $v[2] == '正确' ?  '正确'  : '错误'  : $v[2]  ,   //试题答案
+                        'answer'        =>  $exam_type == 3 ? $v[2] == '正确' ?  '正确'  : '错误'  : trim($v[2])  ,   //试题答案
                         'text_analysis' =>  !empty($v[11]) ? $v[11] : '' ,                            //文字解析
                         'item_diffculty'=>  !empty($v[12]) ? $diffculty_array[trim($v[12])] : 0 ,     //试题难度
                         'chapter_id'     =>  $v[13] && !empty($v[13]) ? $chapter_id > 0 ? $chapter_id : 0 : 0,         //章id
