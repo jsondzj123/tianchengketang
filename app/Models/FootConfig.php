@@ -128,7 +128,7 @@ class FootConfig extends Model {
             if(!isset($body['text']) || empty($body['text'])){
                 return ['code'=>201,'msg'=>'关于我们内容为空'];
             }   
-            $res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['text'=>$body['text'],'is_open'=>1,'update_at'=>date('Y-m-d H:i:s')]);
+            $res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['text'=>$body['text'],'is_open'=>0,'update_at'=>date('Y-m-d H:i:s')]);
         }
     	if($res){
     		return ['code'=>200,'msg'=>'Success'];
