@@ -915,8 +915,11 @@ class Coures extends Model {
         }
         $bmcourse1 =  Order::select('class_id')->where(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>3])->groupBy('class_id')->get()->toArray();
         $bmcourse2 = Order::select('class_id')->Where(['student_id'=>$formerorder['student_id'],'status'=>2,'pay_status'=>4])->groupBy('class_id')->get()->toArray();
-        print_r($bmcourse1);
-        print_r($bmcourse2);die;
+        if(!empty($bmcourse1) && !empty($bmcourse2)){
+            $bmcourse = array_merge($bmcourse1,$bmcourse2);
+        }else{
+            $bmcourse = !empty($bmcourse1)? $bmcourse1 : $bmcourse2;
+        }
         if(!empty($bmcourse)){
             foreach ($bmcourse as $ks=>$vs){
                 if($vs['class_id'] == $arr['id']){
