@@ -43,7 +43,7 @@ class MyController extends Controller {
         }
         $aboutArr = FootConfig::where(['school_id'=>$school_id,'is_del'=>0,'is_open'=>0,'type'=>5,'name'=>'关于我们'])->select('text')->first();
     	$about = isset($aboutArr['text']) ?$aboutArr['text'] :'';
-    	return response()->json(['code'=>200,'msg'=>'success','about'=>$about]);
+    	return response()->json(['code'=>200,'msg'=>'success','data'=>$about]);
     }
     //联系客服
     public function getContact(){
@@ -65,6 +65,6 @@ class MyController extends Controller {
         }
         $contactArr = FootConfig::where(['school_id'=>$school_id,'is_del'=>0,'is_open'=>0,'type'=>5,'name'=>'联系客服'])->select('text')->first();
         $contact = isset($contactArr['text']) ?$contactArr['text'] :'';
-        return response()->json(['code'=>200,'msg'=>'success','contact'=>$contact]);
+        return response()->json(['code'=>200,'msg'=>'success','data'=>$contact]);
     }
 }
