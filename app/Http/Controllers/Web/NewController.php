@@ -15,7 +15,7 @@ use App\Models\Admin;
 use App\Models\CouresSubject;
 use App\Models\Article;
 
-class NewsController extends Controller {
+class NewController extends Controller {
 	protected $school;
     protected $data;
     public function __construct(){
@@ -30,8 +30,8 @@ class NewsController extends Controller {
         $school_id = 1;
         if(isset($this->data['user_info']['school_id'])  && isset($this->data['dns'])){
                 $school_id = $this->data['user_info']['school_id'];
-        }else{
-            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0){
+        }else{  
+            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0 ){
                 $school_id = $this->data['user_info']['school_id'];
             }else{
                 if(isset($this->data['dns'])&& !empty($this->data['dns'])){
@@ -43,7 +43,6 @@ class NewsController extends Controller {
                     }
                 }
             }
-            
         }
     	$pagesize = !isset($data['pagesize']) || $data['pagesize']  <= 0 ? 8:$data['pagesize'];   
     	$page = !isset($data['page']) || $data['page'] <= 0 ?1 :$data['page'];
