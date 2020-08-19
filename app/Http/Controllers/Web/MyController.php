@@ -30,18 +30,19 @@ class MyController extends Controller {
                 $school_id = $this->data['user_info']['school_id'];
         }else{
              
-            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0 && !isset($this->data['dns'])){
-              
+            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0 ){
                 $school_id = $this->data['user_info']['school_id'];
-            }
-            if(isset($this->data['dns'])&& !empty($this->data['dns']) && !isset($this->data['user_info']['school_id']) ){
-                $school = School::where(['dns'=>$this->data['dns'],'is_forbid'=>0])->first();
-                if($school){
-                    $school_id = $school['id'];
-                }else{
-                    $school_id = 1;
+            }else{
+                if(isset($this->data['dns'])&& !empty($this->data['dns'])){
+                    $school = School::where(['dns'=>$this->data['dns'],'is_forbid'=>0])->first();
+                    if($school){
+                        $school_id = $school['id'];
+                    }else{
+                        $school_id = 1;
+                    }
                 }
             }
+           
         }
         $aboutArr = FootConfig::where(['school_id'=>$school_id,'is_del'=>0,'is_open'=>0,'type'=>5,'name'=>'关于我们'])->select('text')->first();
     	$about = isset($aboutArr['text']) ?$aboutArr['text'] :'';
@@ -54,16 +55,16 @@ class MyController extends Controller {
                 $school_id = $this->data['user_info']['school_id'];
         }else{
              
-            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0 && !isset($this->data['dns'])){
-              
+            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0 ){
                 $school_id = $this->data['user_info']['school_id'];
-            }
-            if(isset($this->data['dns'])&& !empty($this->data['dns']) && !isset($this->data['user_info']['school_id']) ){
-                $school = School::where(['dns'=>$this->data['dns'],'is_forbid'=>0])->first();
-                if($school){
-                    $school_id = $school['id'];
-                }else{
-                    $school_id = 1;
+            }else{
+                if(isset($this->data['dns'])&& !empty($this->data['dns'])){
+                    $school = School::where(['dns'=>$this->data['dns'],'is_forbid'=>0])->first();
+                    if($school){
+                        $school_id = $school['id'];
+                    }else{
+                        $school_id = 1;
+                    }
                 }
             }
         }

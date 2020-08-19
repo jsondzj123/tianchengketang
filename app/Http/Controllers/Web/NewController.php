@@ -31,18 +31,19 @@ class NewsController extends Controller {
         if(isset($this->data['user_info']['school_id'])  && isset($this->data['dns'])){
                 $school_id = $this->data['user_info']['school_id'];
         }else{
-            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0 && !isset($this->data['dns'])){
-              
+            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0){
                 $school_id = $this->data['user_info']['school_id'];
-            }
-            if(isset($this->data['dns'])&& !empty($this->data['dns']) && !isset($this->data['user_info']['school_id']) ){
-                $school = School::where(['dns'=>$this->data['dns'],'is_forbid'=>0])->first();
-                if($school){
-                    $school_id = $school['id'];
-                }else{
-                    $school_id = 1;
+            }else{
+                if(isset($this->data['dns'])&& !empty($this->data['dns'])){
+                    $school = School::where(['dns'=>$this->data['dns'],'is_forbid'=>0])->first();
+                    if($school){
+                        $school_id = $school['id'];
+                    }else{
+                        $school_id = 1;
+                    }
                 }
             }
+            
         }
     	$pagesize = !isset($data['pagesize']) || $data['pagesize']  <= 0 ? 8:$data['pagesize'];   
     	$page = !isset($data['page']) || $data['page'] <= 0 ?1 :$data['page'];
