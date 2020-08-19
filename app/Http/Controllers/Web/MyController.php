@@ -26,13 +26,18 @@ class MyController extends Controller {
     //关于我们
     public function getAbout(){
         $school_id = 1;
+        print_r($this->data);die;
         if(isset($this->data['user_info']['school_id'])  && isset($this->data['dns'])){
+
                 $school_id = $this->data['user_info']['school_id'];
         }else{
+             echo $this->data['user_info']['school_id'];die;
             if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0){
+              
                 $school_id = $this->data['user_info']['school_id'];
             }
             if(isset($this->data['dns'])&& !empty($this->data['dns'])){
+                echo 2222;die;
                 $school = School::where(['dns'=>$this->data['dns']])->first();
                 if($school){
                     $school_id = $school['id'];
@@ -41,6 +46,7 @@ class MyController extends Controller {
                 }
             }
         }
+        echo $school_id;die;
         $aboutArr = FootConfig::where(['school_id'=>$school_id,'is_del'=>0,'is_open'=>0,'type'=>5,'name'=>'关于我们'])->select('text')->first();
     	$about = isset($aboutArr['text']) ?$aboutArr['text'] :'';
     	return response()->json(['code'=>200,'msg'=>'success','data'=>$about]);
