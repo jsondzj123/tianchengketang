@@ -137,10 +137,14 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('List','TeacherController@getList');//查看详情
         $router->post('dateils','TeacherController@dateils');//查看详情
     });
-    //H5 我的
+    //H5/APP 我的
     $router->group(['prefix' => 'my','middleware'=>'user.web'], function () use ($router) {
         $router->post('about','MyController@getAbout');//关于我们
         $router->post('contact','MyController@getContact');//联系客服
+    });
+    //app/h5 首页-新闻
+    $router->group(['prefix' => 'new','middleware'=>'user.web'], function () use ($router) {
+        $router->post('List','NewsController@getList');//新闻资讯列表
     });
     //end (lys)
 
