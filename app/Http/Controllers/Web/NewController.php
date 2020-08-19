@@ -28,14 +28,15 @@ class NewsController extends Controller {
     	$articleArr = [];
         $data = $this->data;
         $school_id = 1;
-        if(isset($data['user_info']['school_id'])  && isset($data['dns'])){
-                $school_id = $data['user_info']['school_id'];
+        if(isset($this->data['user_info']['school_id'])  && isset($this->data['dns'])){
+                $school_id = $this->data['user_info']['school_id'];
         }else{
-            if(isset($data['user_info']['school_id']) && $data['user_info']['school_id']>0){
-                $school_id = $data['user_info']['school_id'];
+            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0 && !isset($this->data['dns'])){
+              
+                $school_id = $this->data['user_info']['school_id'];
             }
-            if(isset($data['dns'])&& !empty($data['dns'])){
-                $school = School::where(['dns'=>$data['dns']])->first();
+            if(isset($this->data['dns'])&& !empty($this->data['dns']) && !isset($this->data['user_info']['school_id']) ){
+                $school = School::where(['dns'=>$this->data['dns'],'is_forbid'=>0])->first();
                 if($school){
                     $school_id = $school['id'];
                 }else{
