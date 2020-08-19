@@ -904,9 +904,9 @@ class Coures extends Model {
     public static function classTransfer($arr){
         //课程信息
         if($arr['nature'] == 1){
-            $course = CourseSchool::where(['id'=>$arr['id'],'is_del'=>0,'status'=>1])->first();
+            $course = CourseSchool::where(['id'=>$arr['id'],'is_del'=>0,'status'=>1])->first()->toArray();
         }else{
-            $course = Coures::where(['id'=>$arr['id'],'is_del'=>0,'status'=>1])->first();
+            $course = Coures::where(['id'=>$arr['id'],'is_del'=>0,'status'=>1])->first()->toArray();
         }
         //原订单 状态变成5已失效  再新增订单
         $formerorder = Order::where(['order_number'=>$arr['order_number']])->first()->toArray();
@@ -955,7 +955,7 @@ class Coures extends Model {
                 if($course['expiry'] == 0){
                     $validity_time = "3002-01-01 12:12:12";
                 }else{
-                    $validity_time = date($formerorder['create_at'], strtotime('+' . $course['expiry'] . ' day'));
+                    $validity_time = date("Y-m-d H:i:s",strtotime("+".$course['expiry']." day",strtotime($formerorder['create_at'])));
                 }
                 Order::where(['order_number'=>$data['order_number']])->update(['validity_time'=>$validity_time,'update_at' => date('Y-m-d H:i:s')]);
                 $overorder = Order::where(['student_id'=>$formerorder['student_id'],'status'=>2])->count(); //用户已完成订单
