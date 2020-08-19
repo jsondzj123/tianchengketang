@@ -140,6 +140,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     //H5 我的
     $router->group(['prefix' => 'my','middleware'=>'user.web'], function () use ($router) {
         $router->post('about','MyController@getAbout');//关于我们
+        $router->post('contact','MyController@getContact');//联系客服
     });
     //end (lys)
 

@@ -25,10 +25,46 @@ class MyController extends Controller {
     }
     //关于我们
     public function getAbout(){
-        print_r($this->data);die;
-        
-    	$aboutArr = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'type'=>5])->select('text')->first();
+        $school_id = 1;
+        if(isset($this->data['user_info']['school_id'])  && isset($this->data['dns'])){
+                $school_id = $this->data['user_info']['school_id'];
+        }else{
+            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0){
+                $school_id = $this->data['user_info']['school_id'];
+            }
+            if(isset($this->data['dns'])&& !empty($this->data['dns'])){
+                $school = School::where(['dns'=>$this->data['dns']])->first();
+                if($school){
+                    $school_id = $school['id'];
+                }else{
+                    $school_id = 1;
+                }
+            }
+        }
+        $aboutArr = FootConfig::where(['school_id'=>$school_id,'is_del'=>0,'is_open'=>0,'type'=>5,'name'=>'关于我们'])->select('text')->first();
     	$about = isset($aboutArr['text']) ?$aboutArr['text'] :'';
     	return response()->json(['code'=>200,'msg'=>'success','about'=>$about]);
+    }
+    //联系客服
+    public function getContact(){
+        $school_id = 1;
+        if(isset($this->data['user_info']['school_id'])  && isset($this->data['dns'])){
+                $school_id = $this->data['user_info']['school_id'];
+        }else{
+            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0){
+                $school_id = $this->data['user_info']['school_id'];
+            }
+            if(isset($this->data['dns'])&& !empty($this->data['dns'])){
+                $school = School::where(['dns'=>$this->data['dns']])->first();
+                if($school){
+                    $school_id = $school['id'];
+                }else{
+                    $school_id = 1;
+                }
+            }
+        }
+        $contactArr = FootConfig::where(['school_id'=>$school_id,'is_del'=>0,'is_open'=>0,'type'=>5,'name'=>'联系客服'])->select('text')->first();
+        $contact = isset($contactArr['text']) ?$contactArr['text'] :'';
+        return response()->json(['code'=>200,'msg'=>'success','contact'=>$contact]);
     }
 }
