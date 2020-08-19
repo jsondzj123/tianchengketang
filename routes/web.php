@@ -137,7 +137,12 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('List','TeacherController@getList');//查看详情
         $router->post('dateils','TeacherController@dateils');//查看详情
     });
-     //end (lys)
+    //H5 我的
+    $router->group(['prefix' => 'my','middleware'=>'user.web'], function () use ($router) {
+        $router->post('about','MyController@getAbout');//关于我们
+        $router->post('contact','MyController@getContact');//联系客服
+    });
+    //end (lys)
 
 
 
@@ -650,6 +655,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getList', 'PageSetController@getList');  //页面设置 列表
         $router->post('details', 'PageSetController@details');  //详情 （修改动作）
         $router->post('doLogoUpdate', 'PageSetController@doLogoUpdate');  //修改logo
+
     });
 
 

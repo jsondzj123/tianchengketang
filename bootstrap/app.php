@@ -88,7 +88,7 @@ $app->routeMiddleware([
      'user'=> App\Http\Middleware\UserAuthToken::class,
     // 'jwt.role' => App\Http\Middleware\JWTRoleAuth::class,
      'cors' => App\Http\Middleware\Cors::class,
-
+     'user.web' => App\Http\Middleware\UserToken::class,
 ]);
 
 /*

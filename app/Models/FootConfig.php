@@ -36,9 +36,9 @@ class FootConfig extends Model {
     	$pageSet = self::where(['is_del'=>0])
     		->where(function($query) use ($body,$school_id){
     				$query->where('school_id',$school_id);
-    	})->get()->toArray(); //
+    	})->select('id','parent_id','school_id','logo','name','url','text','type','sort','status','is_show','is_open')->get()->toArray(); //
     		
-    	$headerArr = $footer = $icp= $logo =[];
+    	$headerArr = $footer = $icp= $logo = $about = [];
     	if(!empty($pageSet)){
     		foreach($pageSet  as $key=>&$v){
     			if($v['type']== 1){
@@ -47,7 +47,6 @@ class FootConfig extends Model {
                         $v['title'] = isset($schoolData['title']) ? $schoolData['title'] :'';
                         $v['subhead'] = isset($schoolData['subhead']) ? $schoolData['subhead'] :'';
                     }
-                    
     				array_push($headerArr,$v);
     			}
     			if($v['type']== 2){
@@ -59,15 +58,16 @@ class FootConfig extends Model {
                 if($v['type']== 4){
                     array_push($logo,$v);
                 }
+                if($v['type']== 5){
+                    array_push($about,$v);
+                }
     		}
     		if(!empty($footer)){
     			$footer =getParentsList($footer);
     		}
     	}
-    	
-    	return ['code'=>200,'msg'=>'Success','data'=>['header'=>$headerArr,'footer'=>$footer,'icp'=>$icp,'school_name'=>$school_name,'logo'=>$logo]];
+    	return ['code'=>200,'msg'=>'Success','data'=>['header'=>$headerArr,'footer'=>$footer,'icp'=>$icp,'school_name'=>$school_name,'logo'=>$logo,'about'=>$about]];
     }
-
     public static function details($body){
         $schoolid = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前登录的id
         $school_update = [];
@@ -119,10 +119,16 @@ class FootConfig extends Model {
     	}
     	if($body['type'] == 3){ //icp
     		if(!isset($body['name']) || empty($body['name'])){
-    			return ['code'=>201,'msg'=>'icp为空'];
+    			return ['code'=>201,'msg'=>'icp为不能空'];
     		}	
     		$res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['name'=>$body['name'],'is_open'=>$body['open'],'update_at'=>date('Y-m-d H:i:s')]);
     	}
+        if($body['type'] == 5){ //APP/H5  关于我们
+            if(!isset($body['text']) || empty($body['text'])){
+                return ['code'=>201,'msg'=>'关于我们内容为空'];
+            }   
+            $res = self::where(['id'=>$body['id'],'type'=>$body['type']])->update(['text'=>$body['text'],'is_open'=>0,'update_at'=>date('Y-m-d H:i:s')]);
+        }
     	if($res){
     		return ['code'=>200,'msg'=>'Success'];
     	}else{
