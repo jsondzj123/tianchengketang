@@ -244,7 +244,7 @@ class OrderController extends Controller {
             //支付宝
             if ($this->data['pay_status'] == 2) {
                 $alipay = new AlipayFactory();
-                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
+                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price'],$course['title']);
                 if($return['alipay_trade_precreate_response']['code'] == 10000){
                     require_once realpath(dirname(__FILE__).'/../../../Tools/phpqrcode/QRcode.php');
                     $code = new QRcode();
@@ -267,7 +267,7 @@ class OrderController extends Controller {
                     'p2_OrderNo'=>$arr['order_number'],
                     'p3_Amount'=>$this->data['price'],
                     'p4_Cur'=>1,
-                    'p5_ProductName'=>"龙德产品",
+                    'p5_ProductName'=>$course['title'],
                     'p9_NotifyUrl'=>$notify,
                     'q1_FrpCode'=>'WEIXIN_NATIVE',
                     'q4_IsShowPic'=>1,
@@ -294,7 +294,7 @@ class OrderController extends Controller {
                     'p2_OrderNo'=>$arr['order_number'],
                     'p3_Amount'=>$this->data['price'],
                     'p4_Cur'=>1,
-                    'p5_ProductName'=>"龙德产品",
+                    'p5_ProductName'=>$course['title'],
                     'p9_NotifyUrl'=>$notify,
                     'q1_FrpCode'=>'ALIPAY_NATIVE',
                     'q4_IsShowPic'=>1,
@@ -320,7 +320,7 @@ class OrderController extends Controller {
                     'p2_OrderNo' => $arr['order_number'],
                     'p3_Amount' => $this->data['price'],
                     'p4_Cur' => 1,
-                    'p5_ProductName' => "龙德产品",
+                    'p5_ProductName' => $course['title'],
                     'p9_NotifyUrl' => $notify,
                     'q1_FrpCode' => 'UNIONPAY_NATIVE',
                     'q4_IsShowPic' => 1,

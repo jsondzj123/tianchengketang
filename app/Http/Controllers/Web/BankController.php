@@ -1509,6 +1509,74 @@ class BankController extends Controller {
     
     
     /*
+     * @param  description   章节练习/快速做题/模拟真题最新做题接口
+     * @param author    dzj
+     * @param ctime     2020-08-19
+     * return string
+     */
+    public function getNewMakeExamInfo(){
+        $bank_id      = isset(self::$accept_data['bank_id']) && self::$accept_data['bank_id'] > 0 ? self::$accept_data['bank_id'] : 0;                    //获取题库id
+        $subject_id   = isset(self::$accept_data['subject_id']) && self::$accept_data['subject_id'] > 0 ? self::$accept_data['subject_id'] : 0;           //获取科目id
+        
+        //判断题库的id是否传递合法
+        if(!$bank_id || $bank_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '题库id不合法']);
+        }
+        
+        //检验用户是否有做题权限
+        $iurisdiction = self::verifyUserExamJurisdiction($bank_id);
+        if($iurisdiction['code'] == 209){
+            return response()->json(['code' => 209 , 'msg' => $iurisdiction['msg']]);
+        }
+        
+        //判断科目的id是否传递合法
+        if(!$subject_id || $subject_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
+        }
+        
+        $data = [];
+        
+        //获取章节最新做题情况
+        $zhangjie_info = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('is_over' , 0)->orderBy('update_at' , 'DESC')->first();
+        if($zhangjie_info && !empty($zhangjie_info)){
+            //通过章的id获取章的名称
+            $name = Chapters::where('id' , $zhangjie_info['chapter_id'])->where('type' , 0)->value('name');
+            //做题数量
+            $make_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $zhangjie_info['id'])->where('type' , 1)->where('is_right' , '>' , 0)->count();
+            //总共多少道题
+            $sum_exam_count  = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $zhangjie_info['id'])->where('type' , 1)->count();
+            $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'chapter_id' => $zhangjie_info['chapter_id'] , 'joint_id' => $zhangjie_info['joint_id'] , 'type' => 1];
+        }
+        
+        //获取快速做题最新做题情况
+        $quckly_info = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 2)->where('is_over' , 0)->orderBy('update_at' , 'DESC')->first();
+        if($quckly_info && !empty($quckly_info)){
+            //获取科目名称
+            $name = QuestionSubject::where('id' , $subject_id)->value('subject_name');
+            //做题数量
+            $make_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $quckly_info['id'])->where('type' , 2)->where('is_right' , '>' , 0)->count();
+            //总共多少道题
+            $sum_exam_count  = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $quckly_info['id'])->where('type' , 2)->count();
+            $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'papers_id' => $quckly_info['id'] , 'type' => 2];
+        }
+        
+        //模拟真题最新做题情况
+        $moni_info = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 3)->where('is_over' , 0)->orderBy('update_at' , 'DESC')->first();
+        if($moni_info && !empty($moni_info)){
+            //根据试卷的id获取试卷名称
+            $name = Papers::where("id" , $moni_info['papers_id'])->value('papers_name');
+            //做题数量
+            $make_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $moni_info['papers_id'])->where('type' , 3)->where('is_right' , '>' , 0)->count();
+            //总共多少道题
+            $sum_exam_count  = PapersExam::where("papers_id" , $moni_info['papers_id'])->where("subject_id" , $subject_id)->where("is_del" , 0)->whereIn("type" ,[1,2,3,4])->count();
+            $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'papers_id' => $moni_info['papers_id'] , 'type' => 3];
+        }
+        
+        //返回数据数组
+        return response()->json(['code' => 200 , 'msg' => '返回数据成功' , 'data' => $data]);
+    }
+    
+    /*
      * @param  description   做题记录详情接口
      * @param author    dzj
      * @param ctime     2020-07-09
