@@ -1548,7 +1548,7 @@ class BankController extends Controller {
                 $make_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $zhangjie_info['papers_id'])->where('type' , 1)->where('is_right' , '>' , 0)->count();
                 //总共多少道题
                 $sum_exam_count  = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $zhangjie_info['papers_id'])->where('type' , 1)->count();
-                $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'type' => 1];
+                $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'chapter_id' => $zhangjie_info['chapter_id'] , 'joint_id' => $zhangjie_info['joint_id'] , 'type' => 1];
             }
         }
         
@@ -1564,7 +1564,7 @@ class BankController extends Controller {
                 $make_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $quckly_info['papers_id'])->where('type' , 2)->where('is_right' , '>' , 0)->count();
                 //总共多少道题
                 $sum_exam_count  = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $quckly_info['papers_id'])->where('type' , 2)->count();
-                $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'type' => 2];
+                $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'papers_id' => $quckly_info['papers_id'] , 'type' => 2];
             }
         }
         
@@ -1580,7 +1580,7 @@ class BankController extends Controller {
                 $make_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $moni_info['papers_id'])->where('type' , 3)->where('is_right' , '>' , 0)->count();
                 //总共多少道题
                 $sum_exam_count  = PapersExam::where("papers_id" , $moni_info['papers_id'])->where("subject_id" , $subject_id)->where("is_del" , 0)->whereIn("type" ,[1,2,3,4])->count();
-                $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'type' => 3];
+                $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'papers_id' => $moni_info['papers_id'] , 'type' => 3];
             }
         }
         
