@@ -1534,10 +1534,7 @@ class BankController extends Controller {
             return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
         }
         
-        //新数组赋值
-        $chapter_array = [];
-        $quckly_array  = [];
-        $papers_array  = [];
+        $data = [];
         
         //获取章节最新做题情况
         $zhangjie_info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 1)->where('is_right' , '>' , 0)->orderBy('update_at' , 'DESC')->first();
@@ -1551,7 +1548,7 @@ class BankController extends Controller {
                 $make_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $zhangjie_info['papers_id'])->where('type' , 1)->where('is_right' , '>' , 0)->count();
                 //总共多少道题
                 $sum_exam_count  = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $zhangjie_info['papers_id'])->where('type' , 1)->count();
-                $chapter_array = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count];
+                $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'type' => 1];
             }
         }
         
@@ -1567,7 +1564,7 @@ class BankController extends Controller {
                 $make_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $quckly_info['papers_id'])->where('type' , 2)->where('is_right' , '>' , 0)->count();
                 //总共多少道题
                 $sum_exam_count  = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $quckly_info['papers_id'])->where('type' , 2)->count();
-                $quckly_array = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count];
+                $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'type' => 2];
             }
         }
         
@@ -1583,12 +1580,12 @@ class BankController extends Controller {
                 $make_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $moni_info['papers_id'])->where('type' , 3)->where('is_right' , '>' , 0)->count();
                 //总共多少道题
                 $sum_exam_count  = PapersExam::where("papers_id" , $moni_info['papers_id'])->where("subject_id" , $subject_id)->where("is_del" , 0)->whereIn("type" ,[1,2,3,4])->count();
-                $papers_array = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count];
+                $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'type' => 3];
             }
         }
         
         //返回数据数组
-        return response()->json(['code' => 200 , 'msg' => '返回数据成功' , 'data' => ['chapter_array' => $chapter_array , 'quckly_array' => $quckly_array , 'papers_array' => $papers_array]]);
+        return response()->json(['code' => 200 , 'msg' => '返回数据成功' , 'data' => $data]);
     }
     
     /*
