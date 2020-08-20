@@ -1561,19 +1561,15 @@ class BankController extends Controller {
         }
         
         //模拟真题最新做题情况
-        $moni_info     = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 3)->where('is_right' , '>' , 0)->orderBy('update_at' , 'DESC')->first();
+        $moni_info = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('type' , 3)->where('is_over' , 0)->orderBy('update_at' , 'DESC')->first();
         if($moni_info && !empty($moni_info)){
-            //获取此试卷是否做完了
-            $papers_count = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where("papers_id" , $moni_info['papers_id'])->where('type' , 3)->where('is_over' , 1)->count();
-            if(!$papers_count || $papers_count <= 0){
-                //根据试卷的id获取试卷名称
-                $name = Papers::where("id" , $zhangjie_info['papers_id'])->value('papers_name');
-                //做题数量
-                $make_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $moni_info['papers_id'])->where('type' , 3)->where('is_right' , '>' , 0)->count();
-                //总共多少道题
-                $sum_exam_count  = PapersExam::where("papers_id" , $moni_info['papers_id'])->where("subject_id" , $subject_id)->where("is_del" , 0)->whereIn("type" ,[1,2,3,4])->count();
-                $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'papers_id' => $moni_info['papers_id'] , 'type' => 3];
-            }
+            //根据试卷的id获取试卷名称
+            $name = Papers::where("id" , $moni_info['papers_id'])->value('papers_name');
+            //做题数量
+            $make_exam_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $moni_info['papers_id'])->where('type' , 3)->where('is_right' , '>' , 0)->count();
+            //总共多少道题
+            $sum_exam_count  = PapersExam::where("papers_id" , $moni_info['papers_id'])->where("subject_id" , $subject_id)->where("is_del" , 0)->whereIn("type" ,[1,2,3,4])->count();
+            $data[] = ['name' => $name , 'make_exam_count' => $make_exam_count , 'sum_exam_count' => $sum_exam_count , 'papers_id' => $moni_info['papers_id'] , 'type' => 3];
         }
         
         //返回数据数组
