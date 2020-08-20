@@ -15,7 +15,7 @@ use App\Models\Admin;
 use App\Models\CouresSubject;
 use App\Models\Article;
 
-class NewsController extends Controller {
+class NewController extends Controller {
 	protected $school;
     protected $data;
     public function __construct(){
@@ -28,18 +28,19 @@ class NewsController extends Controller {
     	$articleArr = [];
         $data = $this->data;
         $school_id = 1;
-        if(isset($data['user_info']['school_id'])  && isset($data['dns'])){
-                $school_id = $data['user_info']['school_id'];
-        }else{
-            if(isset($data['user_info']['school_id']) && $data['user_info']['school_id']>0){
-                $school_id = $data['user_info']['school_id'];
-            }
-            if(isset($data['dns'])&& !empty($data['dns'])){
-                $school = School::where(['dns'=>$data['dns']])->first();
-                if($school){
-                    $school_id = $school['id'];
-                }else{
-                    $school_id = 1;
+        if(isset($this->data['user_info']['school_id'])  && isset($this->data['dns'])){
+                $school_id = $this->data['user_info']['school_id'];
+        }else{  
+            if(isset($this->data['user_info']['school_id']) && $this->data['user_info']['school_id']>0 ){
+                $school_id = $this->data['user_info']['school_id'];
+            }else{
+                if(isset($this->data['dns'])&& !empty($this->data['dns'])){
+                    $school = School::where(['dns'=>$this->data['dns'],'is_forbid'=>0])->first();
+                    if($school){
+                        $school_id = $school['id'];
+                    }else{
+                        $school_id = 1;
+                    }
                 }
             }
         }

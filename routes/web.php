@@ -144,7 +144,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
     });
     //app/h5 首页-新闻
     $router->group(['prefix' => 'new','middleware'=>'user.web'], function () use ($router) {
-        $router->post('List','NewsController@getList');//新闻资讯列表
+        $router->post('List','NewController@getList');//新闻资讯列表
     });
     //end (lys)
 
