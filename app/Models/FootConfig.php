@@ -91,6 +91,10 @@ class FootConfig extends Model {
                 $school_update['subhead'] = $body['subhead'];
             }
             if(!empty($school_update) && $schoolid >0){
+                $schoolData = self::where(['id'=>$body['id'],'is_del'=>0])->select('school_id')->first();
+                if(isset($schoolData['school_id']) && $schoolData['school_id'] >0){
+                    $schoolid = $schoolData['school_id'];
+                }
                 $school_update['update_time'] = date('Y-m-d H:i:s');
                 $schoolRes = school::where('id',$schoolid)->update($school_update);
                 if(!$schoolRes){
