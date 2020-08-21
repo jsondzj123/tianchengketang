@@ -369,6 +369,8 @@ class SchoolController extends Controller {
                 return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!']);
             }
             $payconfig = [
+                'zfb_app_public_key'=>'',
+                'zfb_public_key'=>'',
                 'admin_id' => CurrentAdmin::user()['id'],
                 'school_id'=> $school_id,
                 'create_at'=> date('Y-m-d H:i:s')

@@ -54,13 +54,16 @@ class Authrules extends Model {
                 }
             }
         }
-
+        print_r($arr);die;
         if(!empty($arr)){
             foreach($arr as $kk=>&$vv){
                 $vv['name']  = !isset($authData[$vv['auth_id']]) ?'':substr(substr($authData[$vv['auth_id']],5),0,-8);
-
-                foreach ($vv['child_array'] as $kkk => &$vvv) {
-                     $vvv['name']  = !isset($authData[$vvv['auth_id']]) ?'':substr($authData[$vvv['auth_id']],5);
+                if(isset($vv['child_array'])){
+                    foreach ($vv['child_array'] as $kkk => &$vvv) {
+                        $vvv['name']  = !isset($authData[$vvv['auth_id']]) ?'':substr($authData[$vvv['auth_id']],5);
+                    }
+                }else{
+                    $vv['child_array'] = [];
                 }
             }
         }
