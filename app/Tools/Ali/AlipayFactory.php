@@ -22,9 +22,6 @@ class AlipayFactory{
             ];
         }else{
             $payinfo = PaySet::select('zfb_app_id','zfb_app_public_key','zfb_public_key')->where(['school_id'=>$school_id])->first();
-            if($payinfo['zfb_app_id'] ==''){
-                return "201";
-            }
         }
         $this->aop    =    new AopClient();
         $this->aop->gatewayUrl             = "https://openapi.alipay.com/gateway.do";
