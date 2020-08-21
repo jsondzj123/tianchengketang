@@ -516,8 +516,13 @@ class Order extends Model {
                     $v['bgcolor'] = '#656565';
                 }
                 if($v['status'] == 5){
-                    $v['learning'] = "已失效";
-                    $v['bgcolor'] = '#656565';
+                    if($v['parent_order_number'] != ''){
+                        $v['learning'] = "已转班";
+                        $v['bgcolor'] = '#656565';
+                    }else{
+                        $v['learning'] = "已失效";
+                        $v['bgcolor'] = '#656565';
+                    }
                 }
             }
         }
