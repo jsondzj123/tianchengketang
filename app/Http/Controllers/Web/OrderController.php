@@ -94,7 +94,11 @@ class OrderController extends Controller {
             $return = $wxpay->getPcPayOrder($number,$price);
         }
         if($this->data['pay_type'] == 2){
-            $alipay = new AlipayFactory();
+            $payinfo = PaySet::select('zfb_app_id','zfb_app_public_key','zfb_public_key')->where(['school_id'=>$this->school['id']])->first();
+            if(empty($payinfo) || empty($payinfo['zfb_app_id']) || empty($payinfo['zfb_app_public_key'])){
+                return response()->json(['code' => 202, 'msg' => '商户号为空']);
+            }
+            $alipay = new AlipayFactory($this->school['id']);
             $return = $alipay->createPcPay($order['order_number'],$order['price']);
             if($return['alipay_trade_precreate_response']['code'] == 10000){
                 return ['code' => 200 , 'msg' => '支付','data'=>$return['alipay_trade_precreate_response']['qr_code']];
@@ -236,10 +240,11 @@ class OrderController extends Controller {
         if($add) {
             //微信
             if ($this->data['pay_status'] == 1) {
-                $wxpay = new WxpayFactory();
-                $number = date('YmdHis', time()) . rand(1111, 9999);
-                $price = 0.01;
-                $return = $wxpay->getPcPayOrder($number, $price);
+//                $wxpay = new WxpayFactory();
+//                $number = date('YmdHis', time()) . rand(1111, 9999);
+//                $price = 0.01;
+//                $return = $wxpay->getPcPayOrder($number, $price);
+                return response()->json(['code' => 202, 'msg' => '生成二维码失败']);
             }
             //支付宝
             if ($this->data['pay_status'] == 2) {
