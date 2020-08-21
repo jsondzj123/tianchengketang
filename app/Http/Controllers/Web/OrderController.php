@@ -88,10 +88,11 @@ class OrderController extends Controller {
      public function userPaying(){
         $order = Order::where(['id'=>$this->data['order_id']])->first();
         if($this->data['pay_type'] == 1){
-            $wxpay = new WxpayFactory();
-            $number = date('YmdHis', time()) . rand(1111, 9999);
-            $price = 0.01;
-            $return = $wxpay->getPcPayOrder($number,$price);
+//            $wxpay = new WxpayFactory();
+//            $number = date('YmdHis', time()) . rand(1111, 9999);
+//            $price = 0.01;
+//            $return = $wxpay->getPcPayOrder($number,$price);
+            return ['code' => 202 , 'msg' => '生成二维码失败'];
         }
         if($this->data['pay_type'] == 2){
             $payinfo = PaySet::select('zfb_app_id','zfb_app_public_key','zfb_public_key')->where(['school_id'=>$this->school['id']])->first();
