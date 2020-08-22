@@ -127,7 +127,7 @@ class IndexController extends Controller {
         }else{
             $arr['icp'] = $icp['name'];
         }
-        $arr['header'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>1])->select('id','parent_id','name','url','create_at')->orderBy('sort')->get();
+        $arr['header'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>1])->select('id','parent_id','name','url','create_at','text')->orderBy('sort')->get();
         $logo =  FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>4])->select('logo')->orderBy('sort')->first();
         if(empty($logo)){
             $arr['index_logo'] = '';
