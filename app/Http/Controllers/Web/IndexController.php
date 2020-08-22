@@ -203,7 +203,7 @@ class IndexController extends Controller {
         $company['account_num'] =  isset($this->school['account_num']) ?$this->school['account_num']:'';
         $company['open_bank'] =  isset($this->school['open_bank']) ?$this->school['open_bank']:'';
         if($company['account_name'] == '' && $company['account_num'] == '' &&  $company['open_bank'] == ''  ){
-            $company = [];
+            return response()->json(['code'=>201,'msg'=>'Success']);
         }
         return response()->json(['code'=>200,'msg'=>'Success','data'=>$company]);
     }
