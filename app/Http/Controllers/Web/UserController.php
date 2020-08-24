@@ -312,6 +312,16 @@ class UserController extends Controller {
                             }
                             $course['method'] = $method;
                         }
+                        //查询有效期
+                        $date1 = date_create($v['pay_time']);
+                        $date2 = date_create($v['validity_time']);
+                        $interval = date_diff($date1, $date2);
+                        $day = $interval->format('%a');
+                        if($day > 0){
+                            $course['day'] = $day.'天';
+                        }else{
+                            $course['day'] = '已过期';
+                        }
                         $courses[] = $course;
                     }
                 }else {
@@ -345,6 +355,16 @@ class UserController extends Controller {
                                 }
                             }
                             $course['method'] = $method;
+                        }
+                        //查询有效期
+                        $date1 = date_create($v['pay_time']);
+                        $date2 = date_create($v['validity_time']);
+                        $interval = date_diff($date1, $date2);
+                        $day = $interval->format('%a');
+                        if($day > 0){
+                            $course['day'] = $day.'天';
+                        }else{
+                            $course['day'] = '已过期';
                         }
                         $courses[] = $course;
                     }
