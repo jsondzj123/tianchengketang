@@ -58,7 +58,7 @@ class Order extends Model {
             })
             ->whereBetween('ld_order.create_at', [$state_time, $end_time])
             ->count();
-        $order = self::select('ld_order.id','ld_order.order_number','ld_order.order_type','ld_order.price','ld_order.pay_status','ld_order.pay_type','ld_order.status','ld_order.create_at','ld_order.oa_status','ld_order.student_id','ld_student.phone','ld_student.real_name')
+        $order = self::select('ld_order.id','ld_order.order_number','ld_order.order_type','ld_order.price','ld_order.pay_status','ld_order.pay_type','ld_order.status','ld_order.create_at','ld_order.oa_status','ld_order.student_id','ld_order.parent_order_number','ld_student.phone','ld_student.real_name')
             ->leftJoin('ld_student','ld_student.id','=','ld_order.student_id')
             ->where(function($query) use ($data) {
                 if(isset($data['school_id']) && !empty($data['school_id'])){
@@ -76,6 +76,7 @@ class Order extends Model {
             ->whereBetween('ld_order.create_at', [$state_time, $end_time])
             ->orderByDesc('ld_order.id')
             ->offset($offset)->limit($pagesize)->get()->toArray();
+
         $schooltype = Article::schoolANDtype($role_id);
         $page=[
             'pageSize'=>$pagesize,
@@ -516,8 +517,13 @@ class Order extends Model {
                     $v['bgcolor'] = '#656565';
                 }
                 if($v['status'] == 5){
-                    $v['learning'] = "已失效";
-                    $v['bgcolor'] = '#656565';
+                    if($v['parent_order_number'] != ''){
+                        $v['learning'] = "已转班";
+                        $v['bgcolor'] = '#656565';
+                    }else{
+                        $v['learning'] = "已失效";
+                        $v['bgcolor'] = '#656565';
+                    }
                 }
             }
         }

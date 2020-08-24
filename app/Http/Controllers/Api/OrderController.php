@@ -366,12 +366,12 @@ class OrderController extends Controller{
                 return $return = $wxpay->getPrePayOrder($title,$order_number, $price,$school_id, $pay_type);
             case "2":
                 $alipay = new AlipayFactory($school_id);
-                $url = $_SERVER["SERVER_NAME"];
-                if($url == 'testwo.longde999.cn'){
-                    $return = $alipay->createAppPay($title,$order_number, 0.01,$pay_type);
-                }else{
+//                $url = $_SERVER["SERVER_NAME"];
+//                if($url == 'testwo.longde999.cn'){
+//                    $return = $alipay->createAppPay($title,$order_number, 0.01,$pay_type);
+//                }else{
                     $return = $alipay->createAppPay($title,$order_number, $price,$pay_type);
-                }
+//                }
                 $alipay = [
                     'alipay' => $return
                 ];
@@ -383,9 +383,21 @@ class OrderController extends Controller{
                 } else {
                     $notify = "http://" . $_SERVER['HTTP_HOST'] . "/Api/notify/hjWxTopnotify";
                 }
+                if($school_id == ''){
+                    $paylist=[
+                        'hj_md_key' => '3f101520d11240299b25b2d2608b03a3',
+                        'hj_commercial_tenant_number' => '888107600008111',
+                        'hj_wx_commercial_tenant_deal_number' => '777183300269333'
+                    ];
+                }else{
+                    $paylist = PaySet::select('hj_commercial_tenant_number','hj_md_key','hj_wx_commercial_tenant_deal_number')->where(['school_id'=>$school_id])->first();
+                    if(empty($paylist) || empty($paylist['hj_commercial_tenant_number'])){
+                        return response()->json(['code' => 202, 'msg' => '商户号错误']);
+                    }
+                }
                 $arr = [
                     'p0_Version' => '1.0',
-                    'p1_MerchantNo' => '888108900009969',
+                    'p1_MerchantNo' => $paylist['hj_commercial_tenant_number'],
                     'p2_OrderNo' => $order_number,
                     'p3_Amount' => $price,
                     'p4_Cur' => 1,
@@ -393,9 +405,9 @@ class OrderController extends Controller{
                     'p9_NotifyUrl' => $notify,
                     'q1_FrpCode' => 'WEIXIN_APP',
                     'q7_AppId' => '',
-                    'qa_TradeMerchantNo' => '777170100269422'
+                    'qa_TradeMerchantNo' => $paylist['hj_wx_commercial_tenant_deal_number']
                 ];
-                $str = "15f8014fee1642fbb123fb5684cda48b";
+                $str = $paylist['hj_md_key'];
                 $token = $this->hjHmac($arr, $str);
                 $arr['hmac'] = $token;
                 if (strlen($token) == 32) {
@@ -410,18 +422,30 @@ class OrderController extends Controller{
                 }else{
                     $notify = "http://".$_SERVER['HTTP_HOST']."/Api/notify/hjAliTopnotify";
                 }
+                if($school_id == ''){
+                    $paylist=[
+                        'hj_md_key' => '3f101520d11240299b25b2d2608b03a3',
+                        'hj_commercial_tenant_number' => '888107600008111',
+                        'hj_zfb_commercial_tenant_deal_number' => '777183300269333'
+                    ];
+                }else{
+                    $paylist = PaySet::select('hj_commercial_tenant_number','hj_md_key','hj_zfb_commercial_tenant_deal_number')->where(['school_id'=>$school_id])->first();
+                    if(empty($paylist) || empty($paylist['hj_commercial_tenant_number'])){
+                        return response()->json(['code' => 202, 'msg' => '商户号错误']);
+                    }
+                }
                 $arr=[
                     'p0_Version'=>'1.0',
-                    'p1_MerchantNo'=>'888108900009969',
+                    'p1_MerchantNo'=>$paylist['hj_commercial_tenant_number'],
                     'p2_OrderNo'=>$order_number,
                     'p3_Amount'=>$price,
                     'p4_Cur'=>1,
                     'p5_ProductName'=>$title,
                     'p9_NotifyUrl'=>$notify,
                     'q1_FrpCode'=>'ALIPAY_APP',
-                    'qa_TradeMerchantNo'=>'777170100269422'
+                    'qa_TradeMerchantNo'=>$paylist['hj_zfb_commercial_tenant_deal_number']
                 ];
-                $str = "15f8014fee1642fbb123fb5684cda48b";
+                $str = $paylist['hj_md_key'];
                 $token = $this->hjHmac($arr,$str);
                 $arr['hmac'] = $token;
                 if(strlen($token) ==32){
