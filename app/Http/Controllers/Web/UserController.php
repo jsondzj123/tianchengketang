@@ -312,7 +312,7 @@ class UserController extends Controller {
                             $course['method'] = $method;
                         }
                         //查询有效期
-                        $date1 = date_create($v['pay_time']);
+                        $date1 = date_create('Y-m-d');
                         $date2 = date_create($v['validity_time']);
                         $interval = date_diff($date1, $date2);
                         $day = $interval->format('%a');
@@ -360,7 +360,7 @@ class UserController extends Controller {
                             $course['method'] = $method;
                         }
                         //查询有效期
-                        $date1 = date_create($v['pay_time']);
+                        $date1 = date_create('Y-m-d');
                         $date2 = date_create($v['validity_time']);
                         $interval = date_diff($date1, $date2);
                         $day = $interval->format('%a');
