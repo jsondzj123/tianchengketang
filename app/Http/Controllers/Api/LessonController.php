@@ -85,13 +85,14 @@ class LessonController extends Controller {
                 $sort_type = $request->input('sort_type') ?: 'asc';
                 $data_list =  Lesson::join("ld_course_subject","ld_course_subject.id","=","ld_course.parent_id")
                         ->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")
-                        ->select('ld_course.id', 'ld_course.admin_id','ld_course.child_id','ld_course.parent_id', 'ld_course.title', 'ld_course.cover', 'ld_course.pricing as price', 'ld_course.sale_price as favorable_price','ld_course.buy_num','ld_course.is_del','ld_course.status','ld_course.watch_num','ld_course.keywords','ld_course_subject.subject_name')->where(function($query) use ($where,$keyWord){
-                        $query->where($where);
-                        if(!empty($keyWord)){
-                            $query->where('ld_course.title', 'like', $keyWord);
-                            $query->orWhere('ld_course.keywords', 'like', $keyWord);
-                        }
-                        })->orderBy($sort_name, $sort_type)
+                        ->select('ld_course.id', 'ld_course.admin_id','ld_course.child_id','ld_course.parent_id', 'ld_course.title', 'ld_course.cover', 'ld_course.pricing as price', 'ld_course.sale_price as favorable_price','ld_course.buy_num','ld_course.is_del','ld_course.status','ld_course.watch_num','ld_course.keywords','ld_course_subject.subject_name')->where(function($query) use ($where){
+                            $query->where($where);
+                        })->where(function($query) use ($keyWord){
+                            if(!empty($keyWord)){
+                                $query->where('ld_course.title', 'like', $keyWord);
+                                $query->orWhere('ld_course.keywords', 'like', $keyWord);
+                            }})
+                        ->orderBy($sort_name, $sort_type)
                         ->groupBy("ld_course.id")
                         ->get()->toArray();
                 foreach($data_list as $k => &$v){
@@ -135,8 +136,9 @@ class LessonController extends Controller {
                 $sort_type = $request->input('sort_type') ?: 'asc';
                 $data_list_accredit = CourseSchool::join("ld_course_subject","ld_course_subject.id","=","ld_course_school.parent_id")
                         ->join("ld_course_method","ld_course_school.course_id","=","ld_course_method.course_id")
-                        ->select('ld_course_school.course_id as id', 'ld_course_school.admin_id','ld_course_school.child_id','ld_course_school.parent_id', 'ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.pricing as price', 'ld_course_school.sale_price as favorable_price','ld_course_school.buy_num','ld_course_school.is_del','ld_course_school.status','ld_course_school.watch_num','ld_course_school.keywords','ld_course_subject.subject_name')->where(function($query) use ($where_two,$keyWord){
+                        ->select('ld_course_school.to_school_id','ld_course_school.course_id as id', 'ld_course_school.admin_id','ld_course_school.child_id','ld_course_school.parent_id', 'ld_course_school.title', 'ld_course_school.cover', 'ld_course_school.pricing as price', 'ld_course_school.sale_price as favorable_price','ld_course_school.buy_num','ld_course_school.is_del','ld_course_school.status','ld_course_school.watch_num','ld_course_school.keywords','ld_course_subject.subject_name')->where(function($query) use ($where_two){
                             $query->where($where_two);
+                        })->where(function($query) use ($keyWord){
                             if(!empty($keyWord)){
                                 $query->where('ld_course_school.title', 'like', $keyWord);
                                 $query->orWhere('ld_course_school.keywords', 'like', $keyWord);
