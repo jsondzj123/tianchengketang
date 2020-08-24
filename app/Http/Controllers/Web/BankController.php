@@ -776,9 +776,6 @@ class BankController extends Controller {
                 
                 //根据条件获取此学生此题是否答了
                 $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("papers_id" , $papers_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->first();
-
-                //试题序号
-                $number = bcadd($k , 1);
                     
                 //试题随机展示
                 $exam_array[$exam_info['type']][] = [
@@ -794,16 +791,6 @@ class BankController extends Controller {
                     'is_collect'          =>  $is_collect ? 1 : 0 ,
                     'type'                =>  3
                 ];
-            }
-        }
-        
-        //增加序号
-        if($exam_array && !empty($exam_array)){
-            foreach($exam_array as $k=>$v){
-                foreach($v as $k1=>$v1){
-                    $v[$k1]['number'] = (int)bcadd($k1 , 1);
-                }
-                $exam_array[$k] = $v;
             }
         }
         
