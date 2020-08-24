@@ -507,6 +507,11 @@ class Order extends Model {
                         $v['learning'] = "尾款未结清";
                         $v['bgcolor'] = '#9600FF';
                     }
+                    if($v['validity_time'] < date('Y-m-d H:i:s')){
+                        $v['learning'] = "已过期";
+                        $v['bgcolor'] = '#656565';
+                        $v['status'] = '6';
+                    }
                 }
                 if($v['status'] == 3){
                     $v['learning'] = "审核失败";
