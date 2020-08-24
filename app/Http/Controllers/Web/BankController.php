@@ -801,7 +801,7 @@ class BankController extends Controller {
         if($exam_array && !empty($exam_array)){
             foreach($exam_array as $k=>$v){
                 foreach($v as $k1=>$v1){
-                    $v[$k1]['number'] = bcadd($k1 , 1);
+                    $v[$k1]['number'] = (int)bcadd($k1 , 1);
                 }
                 $exam_array[$k] = $v;
             }
