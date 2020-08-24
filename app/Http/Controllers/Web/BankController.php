@@ -599,7 +599,7 @@ class BankController extends Controller {
                     $is_collect =  StudentCollectQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
                     
                     //判断学员是否标记此题
-                    $is_tab     =  StudentTabQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
+                    $is_tab     =  StudentTabQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $v['papers_id'])->where('type' , 1)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
                     
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
@@ -722,7 +722,7 @@ class BankController extends Controller {
                     $is_collect =  StudentCollectQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
                     
                     //判断学员是否标记此题
-                    $is_tab     =  StudentTabQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
+                    $is_tab     =  StudentTabQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $v['papers_id'])->where('type' , 2)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
                     
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
@@ -786,7 +786,7 @@ class BankController extends Controller {
                 $is_collect =  StudentCollectQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
                 
                 //判断学员是否标记此题
-                $is_tab     =  StudentTabQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
+                $is_tab     =  StudentTabQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 3)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
                 
                 //根据条件获取此学生此题是否答了
                 $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("papers_id" , $papers_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->first();
@@ -1020,6 +1020,7 @@ class BankController extends Controller {
         $subject_id   = isset(self::$accept_data['subject_id']) && self::$accept_data['subject_id'] > 0 ? self::$accept_data['subject_id'] : 0;           //获取科目id
         $papers_id    = isset(self::$accept_data['papers_id']) && self::$accept_data['papers_id'] > 0 ? self::$accept_data['papers_id'] : 0;              //获取试卷id
         $exam_id      = isset(self::$accept_data['exam_id']) && self::$accept_data['exam_id'] > 0 ? self::$accept_data['exam_id'] : 0;                    //获取试题id
+        $type         = isset(self::$accept_data['type']) && self::$accept_data['type'] > 0 ? self::$accept_data['type'] : 0;                             //获取类型
         
         //检验用户是否有做题权限
         $iurisdiction = self::verifyUserExamJurisdiction($bank_id);
@@ -1047,14 +1048,19 @@ class BankController extends Controller {
             return response()->json(['code' => 202 , 'msg' => '试题id不合法']);
         }
         
+        //判断类型是否传递
+        if($type <= 0 || !in_array($type , [1,2,3])){
+            return response()->json(['code' => 202 , 'msg' => '类型不合法']);
+        }
+        
         //开启事务
         DB::beginTransaction();
         
         //标记试题操作
-        $is_tab =  StudentTabQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $exam_id)->first();
+        $is_tab =  StudentTabQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('exam_id' , $exam_id)->first();
         if($is_tab && !empty($is_tab)){
             if($is_tab['status'] == 1){
-                $res = StudentTabQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $exam_id)->update(['status' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
+                $res = StudentTabQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('exam_id' , $exam_id)->update(['status' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
                 if($res && !empty($res)){
                     //事务提交
                     DB::commit();
@@ -1065,7 +1071,7 @@ class BankController extends Controller {
                     return response()->json(['code' => 203 , 'msg' => '取消标记失败']);
                 }
             } else {
-                $res = StudentTabQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $exam_id)->update(['status' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
+                $res = StudentTabQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('exam_id' , $exam_id)->update(['status' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
                 if($res && !empty($res)){
                     //事务提交
                     DB::commit();
@@ -1084,6 +1090,7 @@ class BankController extends Controller {
                 'subject_id'   =>   $subject_id ,
                 'papers_id'    =>   $papers_id ,
                 'exam_id'      =>   $exam_id ,
+                'type'         =>   $type ,
                 'status'       =>   1 ,
                 'create_at'    =>   date('Y-m-d H:i:s')
             ]);
