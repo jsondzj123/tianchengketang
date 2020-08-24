@@ -317,10 +317,14 @@ class UserController extends Controller {
                         $date2 = date_create($v['validity_time']);
                         $interval = date_diff($date1, $date2);
                         $day = $interval->format('%a');
-                        if($day > 0){
-                            $course['day'] = $day.'天';
+                        if($course['expiry'] == 0){
+                            $course['day'] = '无期限';
                         }else{
-                            $course['day'] = '已过期';
+                            if($day > 0){
+                                $course['day'] = $day.'天';
+                            }else{
+                                $course['day'] = '已过期';
+                            }
                         }
                         $courses[] = $course;
                     }
@@ -361,10 +365,14 @@ class UserController extends Controller {
                         $date2 = date_create($v['validity_time']);
                         $interval = date_diff($date1, $date2);
                         $day = $interval->format('%a');
-                        if($day > 0){
-                            $course['day'] = $day.'天';
+                        if($course['expiry'] == 0){
+                            $course['day'] = '无期限';
                         }else{
-                            $course['day'] = '已过期';
+                            if($day > 0){
+                                $course['day'] = $day.'天';
+                            }else{
+                                $course['day'] = '已过期';
+                            }
                         }
                         $courses[] = $course;
                     }
