@@ -312,7 +312,7 @@ class UserController extends Controller {
                             $course['method'] = $method;
                         }
                         //查询有效期
-                        $date1 = date_create('Y-m-d');
+                        $date1 = date_create(date('Y-m-d H:i:s'));
                         $date2 = date_create($v['validity_time']);
                         $interval = date_diff($date1, $date2);
                         $day = $interval->format('%a');
@@ -360,7 +360,7 @@ class UserController extends Controller {
                             $course['method'] = $method;
                         }
                         //查询有效期
-                        $date1 = date_create('Y-m-d');
+                        $date1 = date_create(date('Y-m-d H:i:s'));
                         $date2 = date_create($v['validity_time']);
                         $interval = date_diff($date1, $date2);
                         $day = $interval->format('%a');
@@ -378,7 +378,6 @@ class UserController extends Controller {
                 }
             }
         }
-
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$courses]);
     }
     //我的订单  status 1已完成2未完成3已失效
