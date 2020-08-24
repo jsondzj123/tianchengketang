@@ -550,9 +550,6 @@ class BankController extends Controller {
                         $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                     }
                     
-                    //试题序号
-                    $number = bcadd($k , 1);
-                    
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
                         'papers_id'           =>  $papers_id ,
@@ -565,8 +562,7 @@ class BankController extends Controller {
                         'my_answer'           =>  '' ,
                         'is_right'            =>  0 ,
                         'is_collect'          =>  0 ,
-                        'type'                =>  1 ,
-                        'number'              =>  $number
+                        'type'                =>  1
                     ];
                 }
             } else {
@@ -600,9 +596,6 @@ class BankController extends Controller {
                     //$is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("papers_id" , $v['papers_id'])->where('exam_id' , $v['exam_id'])->where('type' , 1)->where('status' , 1)->count();
                     $is_collect =  StudentCollectQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
                     
-                    //试题序号
-                    $number = bcadd($k , 1);
-                    
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
                         'papers_id'           =>  $v['papers_id'] ,
@@ -615,8 +608,7 @@ class BankController extends Controller {
                         'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                         'is_right'            =>  $v['is_right'] ,
                         'is_collect'          =>  $is_collect ? 1 : 0 ,
-                        'type'                =>  1 ,
-                        'number'              =>  $number
+                        'type'                =>  1
                     ];
                 }
                 //模式返回
@@ -676,9 +668,6 @@ class BankController extends Controller {
                         $exam_type_name = $exam_info['type'] == 3 ? $exam_type_arr[$exam_info['type']] : "";
                     }
                     
-                    //试题序号
-                    $number = bcadd($k , 1);
-                    
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
                         'papers_id'           =>  $papers_id ,
@@ -691,8 +680,7 @@ class BankController extends Controller {
                         'my_answer'           =>  '' ,
                         'is_right'            =>  0  ,
                         'is_collect'          =>  0  ,
-                        'type'                =>  2  ,
-                        'number'              =>  $number
+                        'type'                =>  2
                     ];
                 }
             } else {
@@ -726,9 +714,6 @@ class BankController extends Controller {
                     //$is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("papers_id" , $v['papers_id'])->where('exam_id' , $v['exam_id'])->where('type' , 2)->where('status' , 1)->count();
                     $is_collect =  StudentCollectQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
                     
-                    //试题序号
-                    $number = bcadd($k , 1);
-                    
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
                         'papers_id'           =>  $v['papers_id'] ,
@@ -741,8 +726,7 @@ class BankController extends Controller {
                         'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                         'is_right'            =>  $v['is_right'] ,
                         'is_collect'          =>  $is_collect ? 1 : 0 ,
-                        'type'                =>  2 ,
-                        'number'              =>  $number
+                        'type'                =>  2
                     ];
                 }
             }
@@ -808,8 +792,7 @@ class BankController extends Controller {
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
                     'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
                     'is_collect'          =>  $is_collect ? 1 : 0 ,
-                    'type'                =>  3 ,
-                    'number'              =>  $number
+                    'type'                =>  3
                 ];
             }
         }
