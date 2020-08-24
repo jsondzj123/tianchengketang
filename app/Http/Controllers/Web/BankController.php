@@ -797,6 +797,16 @@ class BankController extends Controller {
             }
         }
         
+        //增加序号
+        if($exam_array && !empty($exam_array)){
+            foreach($exam_array as $k=>$v){
+                foreach($v as $k1=>$v1){
+                    $v[$k1]['number'] = bcadd($k1 , 1);
+                }
+                $exam_array[$k][] = $v;
+            }
+        }
+        
         //判断是否为章节
         if($type == 1){
             //返回数据信息
