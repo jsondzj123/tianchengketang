@@ -170,6 +170,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('doRandExamList','BankController@doRandExamList');            //随机生成试题接口
         $router->post('getExamPapersList','BankController@getExamPapersList');      //模拟真题试卷列表接口
         $router->post('doCollectQuestion','BankController@doCollectQuestion');      //试题收藏/取消收藏接口
+        $router->post('doTabQuestion','BankController@doTabQuestion');              //试题标记/取消标记接口
         $router->post('doBankMakeExam','BankController@doBankMakeExam');            //做题接口
         $router->post('getCollectErrorExamCount','BankController@getCollectErrorExamCount');  //我的收藏/错题本/做题记录数量接口
         $router->post('getMyCollectExamList','BankController@getMyCollectExamList');  //我的收藏列表接口

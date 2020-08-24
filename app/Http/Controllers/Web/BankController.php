@@ -11,6 +11,7 @@ use App\Models\Papers;
 use App\Models\PapersExam;
 use App\Models\StudentDoTitle;
 use App\Models\StudentCollectQuestion;
+use App\Models\StudentTabQuestion;
 use App\Models\StudentPapers;
 use App\Models\Coures;
 use App\Models\Order;
@@ -562,6 +563,7 @@ class BankController extends Controller {
                         'my_answer'           =>  '' ,
                         'is_right'            =>  0 ,
                         'is_collect'          =>  0 ,
+                        'is_tab'              =>  0 ,
                         'type'                =>  1
                     ];
                 }
@@ -596,6 +598,9 @@ class BankController extends Controller {
                     //$is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("papers_id" , $v['papers_id'])->where('exam_id' , $v['exam_id'])->where('type' , 1)->where('status' , 1)->count();
                     $is_collect =  StudentCollectQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
                     
+                    //判断学员是否标记此题
+                    $is_tab     =  StudentTabQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
+                    
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
                         'papers_id'           =>  $v['papers_id'] ,
@@ -608,6 +613,7 @@ class BankController extends Controller {
                         'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                         'is_right'            =>  $v['is_right'] ,
                         'is_collect'          =>  $is_collect ? 1 : 0 ,
+                        'is_tab'              =>  $is_tab ? 1 : 0 ,
                         'type'                =>  1
                     ];
                 }
@@ -680,6 +686,7 @@ class BankController extends Controller {
                         'my_answer'           =>  '' ,
                         'is_right'            =>  0  ,
                         'is_collect'          =>  0  ,
+                        'is_tab'              =>  0  ,
                         'type'                =>  2
                     ];
                 }
@@ -714,6 +721,9 @@ class BankController extends Controller {
                     //$is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("papers_id" , $v['papers_id'])->where('exam_id' , $v['exam_id'])->where('type' , 2)->where('status' , 1)->count();
                     $is_collect =  StudentCollectQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
                     
+                    //判断学员是否标记此题
+                    $is_tab     =  StudentTabQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
+                    
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
                         'papers_id'           =>  $v['papers_id'] ,
@@ -726,6 +736,7 @@ class BankController extends Controller {
                         'my_answer'           =>  !empty($v['answer']) ? $v['answer'] : '' ,
                         'is_right'            =>  $v['is_right'] ,
                         'is_collect'          =>  $is_collect ? 1 : 0 ,
+                        'is_tab'              =>  $is_tab ? 1 : 0 ,
                         'type'                =>  2
                     ];
                 }
@@ -774,6 +785,9 @@ class BankController extends Controller {
                 //$is_collect =  StudentCollectQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("papers_id" , $papers_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->where('status' , 1)->count();
                 $is_collect =  StudentCollectQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
                 
+                //判断学员是否标记此题
+                $is_tab     =  StudentTabQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
+                
                 //根据条件获取此学生此题是否答了
                 $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("papers_id" , $papers_id)->where("subject_id" , $subject_id)->where('exam_id' , $v['exam_id'])->where('type' , 3)->first();
                     
@@ -789,6 +803,7 @@ class BankController extends Controller {
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
                     'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
                     'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'is_tab'              =>  $is_tab ? 1 : 0 ,
                     'type'                =>  3
                 ];
             }
@@ -990,6 +1005,98 @@ class BankController extends Controller {
                 //事务回滚
                 DB::rollBack();
                 return response()->json(['code' => 203 , 'msg' => '收藏失败']);
+            }
+        }
+    }
+    
+    /*
+     * @param  description   标记/取消标记试题接口
+     * @param author    dzj
+     * @param ctime     2020-08-24
+     * return string
+     */
+    public function doTabQuestion(){
+        $bank_id      = isset(self::$accept_data['bank_id']) && self::$accept_data['bank_id'] > 0 ? self::$accept_data['bank_id'] : 0;                    //获取题库id
+        $subject_id   = isset(self::$accept_data['subject_id']) && self::$accept_data['subject_id'] > 0 ? self::$accept_data['subject_id'] : 0;           //获取科目id
+        $papers_id    = isset(self::$accept_data['papers_id']) && self::$accept_data['papers_id'] > 0 ? self::$accept_data['papers_id'] : 0;              //获取试卷id
+        $exam_id      = isset(self::$accept_data['exam_id']) && self::$accept_data['exam_id'] > 0 ? self::$accept_data['exam_id'] : 0;                    //获取试题id
+        
+        //检验用户是否有做题权限
+        $iurisdiction = self::verifyUserExamJurisdiction($bank_id);
+        if($iurisdiction['code'] == 209){
+            return response()->json(['code' => 209 , 'msg' => $iurisdiction['msg']]);
+        }
+        
+        //判断题库的id是否传递合法
+        if(!$bank_id || $bank_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '题库id不合法']);
+        }
+        
+        //判断科目的id是否传递合法
+        if(!$subject_id || $subject_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
+        }
+        
+        //判断试卷的id是否传递合法
+        if(!$papers_id || $papers_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '试卷id不合法']);
+        }
+        
+        //判断试题的id是否传递合法
+        if(!$exam_id || $exam_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '试题id不合法']);
+        }
+        
+        //开启事务
+        DB::beginTransaction();
+        
+        //标记试题操作
+        $is_tab =  StudentTabQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $exam_id)->first();
+        if($is_tab && !empty($is_tab)){
+            if($is_tab['status'] == 1){
+                $res = StudentTabQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $exam_id)->update(['status' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
+                if($res && !empty($res)){
+                    //事务提交
+                    DB::commit();
+                    return response()->json(['code' => 200 , 'msg' => '取消标记成功']);
+                } else {
+                    //事务回滚
+                    DB::rollBack();
+                    return response()->json(['code' => 203 , 'msg' => '取消标记失败']);
+                }
+            } else {
+                $res = StudentTabQuestion::where('student_id' , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('exam_id' , $exam_id)->update(['status' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
+                if($res && !empty($res)){
+                    //事务提交
+                    DB::commit();
+                    return response()->json(['code' => 200 , 'msg' => '收藏成功']);
+                } else {
+                    //事务回滚
+                    DB::rollBack();
+                    return response()->json(['code' => 203 , 'msg' => '收藏失败']);
+                }
+            }
+        } else {
+            //标记试题
+            $tab_id = StudentTabQuestion::insertGetId([
+                'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                'bank_id'      =>   $bank_id ,
+                'subject_id'   =>   $subject_id ,
+                'papers_id'    =>   $papers_id ,
+                'exam_id'      =>   $exam_id ,
+                'status'       =>   1 ,
+                'create_at'    =>   date('Y-m-d H:i:s')
+            ]);
+            
+            //判断是否标记成功
+            if($tab_id && $tab_id > 0){
+                //事务提交
+                DB::commit();
+                return response()->json(['code' => 200 , 'msg' => '标记成功']);
+            } else {
+                //事务回滚
+                DB::rollBack();
+                return response()->json(['code' => 203 , 'msg' => '标记失败']);
             }
         }
     }
