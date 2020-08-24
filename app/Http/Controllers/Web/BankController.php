@@ -803,7 +803,7 @@ class BankController extends Controller {
                 foreach($v as $k1=>$v1){
                     $v[$k1]['number'] = bcadd($k1 , 1);
                 }
-                $exam_array[$k][] = $v;
+                $exam_array[$k] = $v;
             }
         }
         
