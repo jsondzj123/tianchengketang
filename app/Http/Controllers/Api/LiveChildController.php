@@ -84,7 +84,7 @@ class LiveChildController extends Controller {
             }
 
         }
-        $arr = [
+        $arr[] = [
             [
                 'title' => '正在播放',
                 'data'  => $live1
@@ -99,10 +99,12 @@ class LiveChildController extends Controller {
             ]
         ];
         foreach($arr as $k => $v){
-            foreach($v['data'] as $kk =>$vv){
-                foreach($vv as $kkk =>$vvv){
-                    $vvv['start_time']  = date("Y:m:d H:i:s",$vvv['start_time']);
-                    $vvv['end_time']  = date("Y:m:d H:i:s",$vvv['end_time']);
+            foreach($v as $kk =>$vv){
+                foreach($vv['data'] as $kkk =>$vvv){
+                    foreach($vvv as $kkkk =>$vvvv){
+                        $vvvv['start_time']  = date("Y:m:d H:i:s",$vvvv['start_time']);
+                        $vvvv['end_time']  = date("Y:m:d H:i:s",$vvvv['end_time']);
+                    }
                 }
             }
         }
