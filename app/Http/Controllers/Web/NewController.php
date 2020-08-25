@@ -70,6 +70,17 @@ class NewController extends Controller {
                     ->offset($offset)->limit($pagesize)
     				->get();
     	}
+        if(!empty($articleArr)){
+            foreach ($articleArr as $k => &$new) {
+                if($new['share'] == null || $new['share'] == 'null'){
+                    $new['share'] = 0;
+                }
+                if($new['watch_num'] == null || $new['watch_num'] == 'null'){
+                    $new['watch_num'] = 0;
+                }
+                $new['share'] = $new['share'] + $new['watch_num'];
+            }
+        }
     	return  ['code'=>200,'msg'=>'Success','data'=>$articleArr,'total'=>$count,'article_type'=>$Articletype];
     }
 }

@@ -166,6 +166,7 @@ class IndexController extends Controller {
         $newArr = [];
 
         foreach ($subject as $key => $val) {
+
             $natureCourseData = CourseSchool::where(['to_school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id'],'status'=>1])->limit(8)->get()->toArray();//授权课程
             $count = count($natureCourseData);
             if($count<8){
@@ -174,11 +175,13 @@ class IndexController extends Controller {
 
             if(!empty($CouresData)){
                     foreach($CouresData as $key=>&$zizeng){
+                        $zizeng['buy_num'] = $zizeng['buy_num']+$zizeng['watch_num'];
                         $zizeng['nature'] = 0;
                     }
                 }
             if(!empty($natureCourseData)){
                 foreach($natureCourseData as $key=>&$nature){
+                    $nature['buy_num'] = $nature['buy_num']+$nature['watch_num'];
                     $nature['nature'] = 1;
                 }
             }
@@ -188,7 +191,7 @@ class IndexController extends Controller {
                 $courseArr = empty($natureCourseData) ?$CouresData:$natureCourseData;
             }
            $newArr[$val['id']] = $courseArr;
-        }
+        }   
 
     	$arr = [
             'course'=>$newArr,
