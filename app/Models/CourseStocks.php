@@ -32,7 +32,8 @@ class CourseStocks extends Model {
         unset($data['/admin/courstocks/getList']);
     	$info = self::where($data)->where(['school_pid'=>$school_id,'is_del'=>0])->orderBy('id','desc')->select('id','create_at','current_number','add_number','school_id')->get();
     	$sum_current_number = 0;
-    	$residue_number = Order::whereIn('pay_status',[3,4])->where(['class_id'=>$data['course_id'],'school_id'=>$data['school_id'],'oa_status'=>1])->count();
+        $courseSchoolData = CourseSchool::where('course_id',$data['course_id'])->select('id')->first();
+    	$residue_number = Order::whereIn('pay_status',[3,4])->where(['class_id'=>$courseSchoolData['id'],'school_id'=>$data['school_id'],'oa_status'=>1,'nature'=>1])->count();
         if(!empty($info)){
             foreach($info as $k=>$v){
                 $sum_current_number += $v['add_number'];

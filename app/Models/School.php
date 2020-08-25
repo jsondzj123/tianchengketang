@@ -216,7 +216,7 @@ class School extends Model {
                 if(!empty($data['subjectTwo']) && $data['subjectTwo'] != ''){
                     $query->where('child_id',$data['subjectTwo']);
                 }
-            })->select('id','title','cover','nature','status','pricing','school_id')
+            })->select('id','title','cover','nature','status','pricing','school_id','id as course_id')
             ->orderBy('id','desc')->get()->toArray();//自增课程
 
         $natureCourse = CourseSchool::leftJoin('ld_course','ld_course.id','=','ld_course_school.course_id')
@@ -230,7 +230,7 @@ class School extends Model {
                             $query->where('ld_course_school.to_school_id',$data['school_id']);
                             $query->where('ld_course_school.from_school_id',$school_id);
                             $query->where('ld_course_school.is_del',0);
-                })->select('ld_course_school.course_id as id','ld_course_school.title','ld_course_school.cover','ld_course_school.pricing','ld_course_school.status')
+                })->select('ld_course_school.course_id as id','ld_course_school.title','ld_course_school.cover','ld_course_school.pricing','ld_course_school.status','ld_course_school.course_id')
                 ->get()->toArray(); //授权课程信息（分校）
            
             if(!empty($course)){
@@ -257,14 +257,18 @@ class School extends Model {
             if(!empty($arr)){
                 foreach($arr  as $k=>&$v){
                     $v['school_dns'] = School::where('id',$data['school_id'])->select('dns')->first()['dns'];
-                    $v['buy_nember'] = Order::whereIn('pay_status',[3,4])->whereIn('nature',[0,1])->where(['school_id'=>$data['school_id'],'class_id'=>$v['id'],'status'=>2,'oa_status'=>1])->count();
-                    $v['sum_nember'] = 0;
-                    if($v['nature'] == 1){
-                        $v['sum_nember'] = CourseStocks::where(['school_pid'=>$school_id,'school_id'=>$data['school_id'],'course_id'=>$v['id'],'is_del'=>0])->sum('add_number');
+                    if($v['nature'] == 0){
+                        $v['sum_nember'] = 0;
+                        $v['buy_nember'] = Order::whereIn('pay_status',[3,4])->where('nature',0)->where(['school_id'=>$data['school_id'],'class_id'=>$v['id'],'status'=>2,'oa_status'=>1])->count();
+                        $v['surplus'] = 0;
                     }
-                    $v['surplus'] = $v['sum_nember']-$v['buy_nember'] <=0 ?0:$v['sum_nember']-$v['buy_nember'];
+                    if($v['nature'] == 1){
+                        $v['buy_nember'] = Order::whereIn('pay_status',[3,4])->where('nature',1)->where(['school_id'=>$data['school_id'],'class_id'=>$v['id'],'status'=>2,'oa_status'=>1])->count();
+                        $v['sum_nember'] = CourseStocks::where(['school_pid'=>$school_id,'school_id'=>$data['school_id'],'course_id'=>$v['id'],'is_del'=>0])->sum('add_number');
+                        $v['surplus'] = $v['sum_nember']-$v['buy_nember'] <=0 ?0:$v['sum_nember']-$v['buy_nember']; //剩余库存量
+                    }
                     $where=[
-                        'course_id'=>$v['id'],
+                        'course_id'=>$v['course_id'],
                         'is_del'=>0
                     ];
                     if(!empty($data['type'])) {
