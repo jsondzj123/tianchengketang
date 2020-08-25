@@ -104,6 +104,10 @@ class CourseController extends Controller {
                 ->get()->toArray();
             if(!empty($course)) {
                 foreach ($course as $k => &$v) {
+                    //查询课程购买数
+                    $buynum =   Order::where(['class_id'=>$v['id'],'nature'=>0,'status'=>2])->whereIn('pay_status',[3,4])->count();
+                    $v['buy_num'] = $v['buy_num'] + $buynum;
+
                     $method = Couresmethod::select('method_id')->where(['course_id' => $v['id'], 'is_del' => 0])
                         ->where(function ($query) use ($methodwhere) {
                             if ($methodwhere != '') {
@@ -153,8 +157,9 @@ class CourseController extends Controller {
                     }
                     if ($stocknum != 0) {
                         //查订单表
-                        $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'student_id' => $school_id, 'class_id' => $vs['id'], 'nature' => 1])->count();
+                        $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'school_id' => $school_id, 'class_id' => $vs['id'], 'nature' => 1])->count();
                         if ($ordercount < $stocknum) {
+                            $vs['buy_num'] = $vs['buy_num'] + $ordercount;
                             $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])
                                 ->where(function ($query) use ($methodwhere) {
                                     if ($methodwhere != '') {
