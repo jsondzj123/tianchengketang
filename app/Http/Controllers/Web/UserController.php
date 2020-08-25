@@ -319,7 +319,7 @@ class UserController extends Controller {
                         }else{
                             $interval = $date2 -$date1;
                             $a = $interval / 86400;
-                            $day = number_format($a,1);
+                            $day = floor($a);
                             if($course['expiry'] == 0){
                                 $course['day'] = '无期限';
                             }else{
@@ -372,7 +372,7 @@ class UserController extends Controller {
                         }else{
                             $interval = $date2 -$date1;
                             $a = $interval / 86400;
-                            $day = number_format($a,1);
+                            $day = floor($a);
                             if($course['expiry'] == 0){
                                 $course['day'] = '无期限';
                             }else{
