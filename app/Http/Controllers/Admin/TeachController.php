@@ -73,9 +73,11 @@ class TeachController extends Controller {
           return response()->json(json_decode($validator->errors()->first(),1));
       }
       if($data['is_public'] == 1){ //公开课
+        OpenLivesChilds::increment('watch_num',1);
       	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('course_id')->first();
       }
-     	if($data['is_public']== 0){  //课程
+     	if($data['is_public']== 0){  //课程\
+           CourseLiveClassChild::increment('watch_num',1);
 			     $live = CourseLiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
      	}
       if(isset($teacherArr['type']) && $teacherArr['type'] == 1){
@@ -132,9 +134,11 @@ class TeachController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
       }
       if($data['is_public'] == 1){ //公开课
+          OpenLivesChilds::increment('watch_num',1);
           $live = OpenLivesChilds::where('lesson_id',$data['id'])->select('course_id')->first();
       }
       if($data['is_public']== 0){  //课程
+          CourseLiveClassChild::increment('watch_num',1);
           $live = CourseLiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
       }
 
@@ -199,9 +203,11 @@ class TeachController extends Controller {
             return response()->json(json_decode($validator->errors()->first(),1));
       }
       if($data['is_public'] == 1){ //公开课
+        OpenLivesChilds::increment('watch_num',1);
       	$live = OpenLivesChilds::where('lesson_id',$data['id'])->select('course_id')->first();
       }
      	if($data['is_public']== 0){  //课程
+        CourseLiveClassChild::increment('watch_num',1);
 			    $live = CourseLiveClassChild::where('class_id',$data['id'])->select('course_id')->first();
      	}
       $liveArr['course_id'] = $live['course_id'];
