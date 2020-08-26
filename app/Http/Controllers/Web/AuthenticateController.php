@@ -157,6 +157,11 @@ class AuthenticateController extends Controller {
             if(!isset($body['password']) || empty($body['password'])){
                 return response()->json(['code' => 201 , 'msg' => '请输入密码']);
             }
+            
+            //分校域名
+            if(!isset($body['school_dns']) || empty($body['school_dns'])){
+                return response()->json(['code' => 201 , 'msg' => '分校域名为空']);
+            }
 
             //key赋值
             $key = 'user:login:'.$body['phone'];
@@ -191,6 +196,18 @@ class AuthenticateController extends Controller {
             //判断此手机号是否被禁用了
             if($user_login->is_forbid == 2){
                 return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
+            }
+            
+            //根据分校的域名获取所属分校的id
+            $school_id = School::where('dns' , $body['school_dns'])->value('id');
+            //判断此分校是否存在
+            if(!$school_id || $school_id <= 0){
+                return response()->json(['code' => 203 , 'msg' => '此分校不存在']);
+            }
+            
+            //判断此用户对应得分校是否是一样得
+            if($user_login->school_id != $school_id){
+                return response()->json(['code' => 203 , 'msg' => '该网校无此用户']);
             }
             
             //生成随机唯一的token
