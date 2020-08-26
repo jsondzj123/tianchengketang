@@ -555,10 +555,8 @@ class CourseController extends Controller {
             $res = $MTCloud->courseAccessPlayback($ziyuan['course_id'], $this->userid,$this->data['user_info']['nickname'], 'user');
             $res['data']['is_live'] = 0;
             if($res['code'] ==  0){
-                $res['code'] = 200;
-                $res['msg'] = '获取成功';
 //                $video_url = $video_url['data']['videoUrl'];
-                return response()->json($res);
+                return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$res['data']]);
             }else{
                 return response()->json(['code' => 201 , 'msg' => '暂无资源']);
             }
