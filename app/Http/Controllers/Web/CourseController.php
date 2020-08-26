@@ -474,7 +474,7 @@ class CourseController extends Controller {
         }
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
         if($nature == 1){
-            $course = CourseSchool::where(['to_school_id'=>$this->school['id'],'id'=>$this->data['id'],'is_del'=>0])->first();
+            $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first();
             if(!$course){
                 return response()->json(['code' => 201 , 'msg' => '无查看权限']);
             }
