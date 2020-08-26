@@ -312,17 +312,22 @@ class UserController extends Controller {
                             $course['method'] = $method;
                         }
                         //查询有效期
-                        $date1 = date_create('Y-m-d');
-                        $date2 = date_create($v['validity_time']);
-                        $interval = date_diff($date1, $date2);
-                        $day = $interval->format('%a');
-                        if($course['expiry'] == 0){
-                            $course['day'] = '无期限';
+                        $date1 = time();
+                        $date2 = strtotime($v['validity_time']);
+                        if($date1 >= $date2){
+                            $course['day'] = '已过期';
                         }else{
-                            if($day > 0){
-                                $course['day'] = $day.'天';
+                            $interval = $date2 -$date1;
+                            $a = $interval / 86400;
+                            $day = floor($a);
+                            if($course['expiry'] == 0){
+                                $course['day'] = '无期限';
                             }else{
-                                $course['day'] = '已过期';
+                                if($day > 0){
+                                    $course['day'] = $day.'天';
+                                }else{
+                                    $course['day'] = '已过期';
+                                }
                             }
                         }
                         $courses[] = $course;
@@ -360,17 +365,22 @@ class UserController extends Controller {
                             $course['method'] = $method;
                         }
                         //查询有效期
-                        $date1 = date_create('Y-m-d');
-                        $date2 = date_create($v['validity_time']);
-                        $interval = date_diff($date1, $date2);
-                        $day = $interval->format('%a');
-                        if($course['expiry'] == 0){
-                            $course['day'] = '无期限';
+                        $date1 = time();
+                        $date2 = strtotime($v['validity_time']);
+                        if($date1 >= $date2){
+                            $course['day'] = '已过期';
                         }else{
-                            if($day > 0){
-                                $course['day'] = $day.'天';
+                            $interval = $date2 -$date1;
+                            $a = $interval / 86400;
+                            $day = floor($a);
+                            if($course['expiry'] == 0){
+                                $course['day'] = '无期限';
                             }else{
-                                $course['day'] = '已过期';
+                                if($day > 0){
+                                    $course['day'] = $day.'天';
+                                }else{
+                                    $course['day'] = '已过期';
+                                }
                             }
                         }
                         $courses[] = $course;
@@ -378,7 +388,6 @@ class UserController extends Controller {
                 }
             }
         }
-
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$courses]);
     }
     //我的订单  status 1已完成2未完成3已失效

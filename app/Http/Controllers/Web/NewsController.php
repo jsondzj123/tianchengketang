@@ -55,6 +55,17 @@ class NewsController extends Controller {
                     ->offset($offset)->limit($pagesize)
     				->get();
     	}
+        if(!empty($articleArr)){
+            foreach ($articleArr as $k => &$new) {
+                if($new['share'] == null || $new['share'] == 'null'){
+                    $new['share'] = 0;
+                }
+                if($new['watch_num'] == null || $new['watch_num'] == 'null'){
+                    $new['watch_num'] = 0;
+                }
+                $new['share'] = $new['share'] + $new['watch_num'];
+            }
+        }
     	return  ['code'=>200,'msg'=>'Success','data'=>$articleArr,'total'=>$count,'article_type'=>$Articletype];
     }
     //热门文章
@@ -62,6 +73,17 @@ class NewsController extends Controller {
     	$hotList = Article::where(['school_id'=>$this->school['id'],'status'=>1,'is_del'=>1])->orderBy('share','desc')
     	->select('id','article_type_id','title','share','create_at')
     	->limit(10)->get();
+        if(!empty($hotList)){
+            foreach ($hotList as $k => &$new) {
+                if($new['share'] == null || $new['share'] == 'null'){
+                    $new['share'] = 0;
+                }
+                if($new['watch_num'] == null || $new['watch_num'] == 'null'){
+                    $new['watch_num'] = 0;
+                }
+                $new['share'] = $new['share'] + $new['watch_num'];
+            }
+        }
     	return ['code'=>200,'msg'=>'Success','data'=>$hotList];
     } 
     //推荐文章
@@ -71,6 +93,17 @@ class NewsController extends Controller {
              ->where($where)
              ->select('ld_article.id','ld_article.article_type_id','ld_article.title','ld_article.share','ld_article.create_at','ld_article.image','ld_article.description')
              ->orderBy('ld_article.update_at','desc')->limit(4)->get();
+        if(!empty($newestList)){
+            foreach ($newestList as $k => &$new) {
+                if($new['share'] == null || $new['share'] == 'null'){
+                    $new['share'] = 0;
+                }
+                if($new['watch_num'] == null || $new['watch_num'] == 'null'){
+                    $new['watch_num'] = 0;
+                }
+                $new['share'] = $new['share'] + $new['watch_num'];
+            }
+        }     
     	return ['code'=>200,'msg'=>'Success','data'=>$newestList];
     }
     //查看详情
@@ -79,6 +112,16 @@ class NewsController extends Controller {
     	$newData = Articletype::leftJoin('ld_article','ld_article.article_type_id','=','ld_article_type.id')
              ->where($where)
            	 ->first();
+        if(!empty($newData)){
+            if($newData['share'] == null || $newData['share'] == 'null'){
+                $newData['share'] = 0;
+            }
+            if($newData['watch_num'] == null || $newData['watch_num'] == 'null'){
+                $newData['watch_num'] = 0;
+            }
+            $newData['share'] = $newData['share'] + $newData['watch_num'];
+        } 
+        $res = Article::increment('watch_num',1);
         return ['code'=>200,'msg'=>'Success','data'=>$newData]; 
     }
 
