@@ -414,6 +414,9 @@ class BankController extends Controller {
         //题型数组
         $exam_type_arr = [1=>'单选题',2=>'多选题',3=>'判断题',4=>'不定项',5=>'填空题',6=>'简答题'];
         
+        //试题难度数组
+        $exam_diffculty= [1=>'简单',2=>'一般',3=>'困难'];
+        
         //判断是否为章节练习
         if($type == 1){
             //判断章的id是否传递合法
@@ -557,6 +560,7 @@ class BankController extends Controller {
                         'exam_id'             =>  $v['id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
+                        'exam_diffculty'      =>  isset($exam_diffculty[$exam_info['item_diffculty']]) ? $exam_diffculty[$exam_info['item_diffculty']] : '' ,
                         'text_analysis'       =>  $exam_info['text_analysis'] ,
                         'correct_answer'      =>  trim($exam_info['answer']) ,
                         'option_list'         =>  $option_content ,
@@ -607,6 +611,7 @@ class BankController extends Controller {
                         'exam_id'             =>  $v['exam_id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
+                        'exam_diffculty'      =>  isset($exam_diffculty[$exam_info['item_diffculty']]) ? $exam_diffculty[$exam_info['item_diffculty']] : '' ,
                         'text_analysis'       =>  $exam_info['text_analysis'] ,
                         'correct_answer'      =>  trim($exam_info['answer']) ,
                         'option_list'         =>  $option_content ,
@@ -680,6 +685,7 @@ class BankController extends Controller {
                         'exam_id'             =>  $v['id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
+                        'exam_diffculty'      =>  isset($exam_diffculty[$exam_info['item_diffculty']]) ? $exam_diffculty[$exam_info['item_diffculty']] : '' ,
                         'text_analysis'       =>  $exam_info['text_analysis'] ,
                         'correct_answer'      =>  trim($exam_info['answer']) ,
                         'option_list'         =>  $option_content ,
@@ -730,6 +736,7 @@ class BankController extends Controller {
                         'exam_id'             =>  $v['exam_id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
+                        'exam_diffculty'      =>  isset($exam_diffculty[$exam_info['item_diffculty']]) ? $exam_diffculty[$exam_info['item_diffculty']] : '' ,
                         'text_analysis'       =>  $exam_info['text_analysis'] ,
                         'correct_answer'      =>  trim($exam_info['answer']) ,
                         'option_list'         =>  $option_content ,
@@ -797,6 +804,7 @@ class BankController extends Controller {
                     'exam_id'             =>  $v['exam_id'] ,
                     'exam_name'           =>  $exam_info['exam_content'] ,
                     'exam_type_name'      =>  $exam_type_name ,
+                    'exam_diffculty'      =>  isset($exam_diffculty[$exam_info['item_diffculty']]) ? $exam_diffculty[$exam_info['item_diffculty']] : '' ,
                     'text_analysis'       =>  $exam_info['text_analysis'] ,
                     'correct_answer'      =>  trim($exam_info['answer']) ,
                     'option_list'         =>  $option_content ,
