@@ -296,7 +296,7 @@ class OpenCourseController extends Controller {
             }else{
                 $this->data['nickname'] = $StudentData['nickname'] != '' ?$StudentData['nickname']: ($StudentData['real_name'] != '' ?$StudentData['real_name']:$this->make_password());
             }
-            return response()->json(['code'=>201,'msg'=>'nickname为空或不合法']);
+           
         }
         OpenLivesChilds::increment('watch_num',1);
         $openCourse = OpenLivesChilds::where(['lesson_id'=>$this->data['course_id'],'is_del'=>0,'is_forbid'=>0])->first();
