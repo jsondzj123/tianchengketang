@@ -31,11 +31,11 @@ class TeachController extends Controller {
 	}
 	//教学详情
 	public function details(){
-		$validator = Validator::make(self::$accept_data, 
+		$validator = Validator::make(self::$accept_data,
                 [
                 	'class_id' => 'required',//课次 （公开课时为课程id）
                 	// 'classno_id' => 'required',//班号
-                	'is_public' => 'required',//是否未公开课   (1 公开课  0课程)    	
+                	'is_public' => 'required',//是否未公开课   (1 公开课  0课程)
                	],
                 Teach::message());
         if($validator->fails()) {
@@ -55,7 +55,7 @@ class TeachController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function startLive()
-    {  
+    {
       $user_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
       $real_name = isset(AdminLog::getAdminInfo()->admin_user->real_name) ? AdminLog::getAdminInfo()->admin_user->real_name : $this->make_password();
       $school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0;
@@ -67,7 +67,7 @@ class TeachController extends Controller {
       $data = self::$accept_data;
       $validator = Validator::make($data, [
       	'is_public'=>'required',
-        'id' => 'required', 
+        'id' => 'required',
       ],Teach::message());
       if ($validator->fails()) {
           return response()->json(json_decode($validator->errors()->first(),1));
@@ -94,7 +94,7 @@ class TeachController extends Controller {
       if(isset($teacherArr['type']) && $teacherArr['type'] == 2){
         //讲师
         $MTCloud = new MTCloud();
-        $res = $MTCloud->courseLaunch($live['course_id']); 
+        $res = $MTCloud->courseLaunch($live['course_id']);
         Log::error('直播器启动:'.json_encode($res));
         if(!array_key_exists('code', $res) && !$res["code"] == 0){
             return $this->response('直播器启动失败', 500);
@@ -128,7 +128,7 @@ class TeachController extends Controller {
       $data = self::$accept_data;
       $validator = Validator::make($data, [
           'is_public'=>'required',
-          'id' => 'required', 
+          'id' => 'required',
         ],Teach::message());
       if ($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
@@ -156,12 +156,12 @@ class TeachController extends Controller {
       if(isset($teacherArr['type']) && $teacherArr['type'] == 2){
         //讲师
         $MTCloud = new MTCloud();
-        $res = $MTCloud->courseLaunch($live['course_id']); 
+        $res = $MTCloud->courseLaunch($live['course_id']);
         Log::error('直播器启动:'.json_encode($res));
         if(!array_key_exists('code', $res) && !$res["code"] == 0){
             return $this->response('直播器启动失败', 500);
-        } 
-      }              
+        }
+      }
       if(!isset($teacherArr['type'])){
 
         $liveArr['course_id'] = $live['course_id'];
@@ -179,7 +179,7 @@ class TeachController extends Controller {
    	/**
      * 查看回放
      * @param   auther  lys  2020.7.2
-     * @param  int  $id 
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
    	public function livePlayback(){
@@ -190,14 +190,14 @@ class TeachController extends Controller {
       // if($teacher_id <= 0){
       //   return response()->json(['code'=>207,'msg'=>'非讲师教务查看回放']);
       // }
-      // $teacherArr = Teacher::where(['school_id'=>$school_id,'id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
+      $teacherArr = Teacher::where(['school_id'=>$school_id,'id'=>$teacher_id,'is_del'=>0,'is_forbid'=>0])->first();
       // if(empty($teacherArr)){
       //   return response()->json(['code'=>207,'msg'=>'非讲师教务查看回放']);
       // }
    		$data = self::$accept_data;
    		$validator = Validator::make($data, [
    			  'is_public'=>'required',
-          'id' => 'required', 
+          'id' => 'required',
         ],Teach::message());
       if ($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
@@ -226,7 +226,7 @@ class TeachController extends Controller {
      * @param   auther  lys  2020.7.2
      * @param  int  $id
      * @return \Illuminate\Http\Response
-     */ 
+     */
     public function courseUpload(){
   		$data = self::$accept_data;
       $validator = Validator::make($data, [
@@ -265,7 +265,7 @@ class TeachController extends Controller {
 		       	if($data['is_public']== 0){  //课程
 		 			    $live = LiveChild::where('class_id',$data['class_id'])->select('course_id')->first();
 		       	}
-		       	$MTCloud = new MTCloud();	
+		       	$MTCloud = new MTCloud();
 		       	$res = $MTCloud->courseDocumentUpload($live['course_id'],$file);
 	       	  if(array_key_exists('code', $res) && $res["code"] != 0){
                return  response()->json($res);
@@ -273,7 +273,7 @@ class TeachController extends Controller {
             return  response()->json(['code'=>200,'msg'=>'上传课件成功']);
           } else {
               return response()->json(['code' => 203 , 'msg' => '上传课件失败']);
-          } 
+          }
       } else {
           return response()->json(['code' => 202 , 'msg' => '上传方式非法']);
       }
@@ -287,7 +287,7 @@ class TeachController extends Controller {
 
     public function coursewareDel(){
     	$validator = Validator::make(self::$accept_data, [
-        
+
             'id' => 'required', //课件id
         ],Teach::message());
         if ($validator->fails()) {
@@ -320,25 +320,25 @@ class TeachController extends Controller {
         return $res;
     }
 
-    public function make_password( $length = 8 ){ 
-      
-    // 密码字符集，可任意添加你需要的字符 
-      $chars = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 
-      'i', 'j', 'k', 'l','m', 'n', 'o', 'p', 'q', 'r', 's', 
-      't', 'u', 'v', 'w', 'x', 'y','z', 'A', 'B', 'C', 'D', 
-      'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L','M', 'N', 'O', 
-      'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y','Z', 
-      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!'); 
-      
-      // 在 $chars 中随机取 $length 个数组元素键名 
-      $keys = array_rand($chars, $length); 
-      $password =''; 
-      for($i = 0; $i < $length; $i++) 
-      { 
-      // 将 $length 个数组元素连接成字符串 
-        $password .= $chars[$keys[$i]]; 
-      } 
-      return $password; 
+    public function make_password( $length = 8 ){
+
+    // 密码字符集，可任意添加你需要的字符
+      $chars = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
+      'i', 'j', 'k', 'l','m', 'n', 'o', 'p', 'q', 'r', 's',
+      't', 'u', 'v', 'w', 'x', 'y','z', 'A', 'B', 'C', 'D',
+      'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L','M', 'N', 'O',
+      'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y','Z',
+      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!');
+
+      // 在 $chars 中随机取 $length 个数组元素键名
+      $keys = array_rand($chars, $length);
+      $password ='';
+      for($i = 0; $i < $length; $i++)
+      {
+      // 将 $length 个数组元素连接成字符串
+        $password .= $chars[$keys[$i]];
+      }
+      return $password;
     }
 
 
