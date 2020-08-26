@@ -27,7 +27,7 @@ class Teach extends Model {
 		$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
 		$teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->teacher_id : 0; //当前学校id
 		$teacher_type_arr  = Teacher::where(['id'=>$teacher_id,'school_id'=>$school_id,'is_del'=>0,'is_forbid'=>0])->select('type')->first();
-        if(isset($teacher_type_arr)&&empty($teacher_type_arr)){
+        if(!isset($teacher_type_arr) && empty($teacher_type_arr)){
             return  ['code'=>201,'msg'=>'账户关联教师已删除或已禁用'];
         }
 		//公开课数据
@@ -218,7 +218,7 @@ class Teach extends Model {
 		$school_id = isset(AdminLog::getAdminInfo()->admin_user->school_id) ? AdminLog::getAdminInfo()->admin_user->school_id : 0; //当前学校id
 		$teacher_id = isset(AdminLog::getAdminInfo()->admin_user->teacher_id) ? AdminLog::getAdminInfo()->admin_user->teacher_id : 0; //当前学校id
 		$teacher_type_arr  = Teacher::where(['id'=>$teacher_id,'school_id'=>$school_id,'is_del'=>0,'is_forbid'=>0])->select('type')->first();
-        if(isset($teacher_type_arr)&&empty($teacher_type_arr)){
+        if(!isset($teacher_type_arr)&&empty($teacher_type_arr)){
            return  ['code'=>201,'msg'=>'账户关联教师已删除或已禁用'];
         }
 		if($body['is_public'] == 1){  //公开课
