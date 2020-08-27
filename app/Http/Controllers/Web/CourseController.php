@@ -157,8 +157,8 @@ class CourseController extends Controller {
                     }
                     if ($stocknum != 0) {
                         //查订单表
-                        $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'school_id' => $school_id, 'class_id' => $vs['id'], 'nature' => 1])->count();
-                        if ($ordercount < $stocknum) {
+                        $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'school_id' => $school_id, 'class_id' => $vs['id'], 'nature' => 1])->whereIn('pay_status',[3,4])->count();
+                        if ($ordercount <= $stocknum) {
                             $vs['buy_num'] = $vs['buy_num'] + $ordercount;
                             $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])
                                 ->where(function ($query) use ($methodwhere) {
