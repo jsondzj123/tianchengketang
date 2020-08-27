@@ -346,7 +346,7 @@ class CourseController extends Controller {
                 }
             }
             $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'school_id' => $this->school['id'], 'class_id' => $this->data['id'], 'nature' => 1])->whereIn('pay_status',[3,4])->count();
-            if($add_number >= $ordercount){
+            if($stocknum >= $ordercount){
                 $data['is_pay'] = 2;
             }else{
                 //是否已购买
@@ -385,7 +385,7 @@ class CourseController extends Controller {
                 }
             }
             $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'school_id' => $this->school['id'], 'class_id' => $this->data['id'], 'nature' => 0])->whereIn('pay_status',[3,4])->count();
-            if($add_number >= $ordercount){
+            if($stocknum >= $ordercount){
                 $data['is_pay'] =2;
             }else{
                 //是否已购买
