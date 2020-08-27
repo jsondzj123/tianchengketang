@@ -230,7 +230,7 @@ class School extends Model {
                             $query->where('ld_course_school.to_school_id',$data['school_id']);
                             $query->where('ld_course_school.from_school_id',$school_id);
                             $query->where('ld_course_school.is_del',0);
-                })->select('ld_course_school.course_id as id','ld_course_school.title','ld_course_school.cover','ld_course_school.pricing','ld_course_school.status','ld_course_school.course_id')
+                })->select('ld_course_school.id','ld_course_school.title','ld_course_school.cover','ld_course_school.pricing','ld_course_school.status','ld_course_school.course_id')
                 ->get()->toArray(); //授权课程信息（分校）
            
             if(!empty($course)){
