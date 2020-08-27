@@ -63,12 +63,10 @@ class CourseStocks extends Model {
         if((int)$data['add_number'] == 0){
             return ['code'=>203,'msg'=>'添加库存数不能为0'];
         }
-        if($sum_current_number+(int)$data['add_number'] <0){
+	   	$data['current_number'] = $residue_number<=0 ?$sum_current_number:(int)$sum_current_number-(int)$residue_number;  //剩余库存
+        if($data['current_number']+(int)$data['add_number'] <0){
             return ['code'=>203,'msg'=>'添加库存数不能小于剩余库存数'];
         } 
-
-	   	$data['current_number'] = $residue_number<=0 ?$sum_current_number:(int)$sum_current_number-(int)$residue_number;  //剩余库存
-    
    		$data['create_at'] = date('Y-m-d H:i:s');
         $data['course_id'] = $CourseSchoolData['course_id'];
     
