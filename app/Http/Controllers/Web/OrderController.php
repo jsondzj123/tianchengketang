@@ -58,10 +58,6 @@ class OrderController extends Controller {
              $course['teachername'] = implode(',',$string);
             }
         }
-        //查询课程库存
-         return ['code' => 203 , 'msg' => '生成订单失败'];
-
-
         //生成订单
          $data['order_number'] = date('YmdHis', time()) . rand(1111, 9999);
          $data['admin_id'] = 0;  //操作员id
