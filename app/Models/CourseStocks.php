@@ -73,7 +73,7 @@ class CourseStocks extends Model {
 		$result = self::insert($data);
 		if($result){
             AdminLog::insertAdminLog([
-                'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                'admin_id'       =>   $data['admin_id'] ,
                 'module_name'    =>  'Courstocks' ,
                 'route_url'      =>  'admin/courstocks/doInsertStocks' , 
                 'operate_method' =>  'insert',

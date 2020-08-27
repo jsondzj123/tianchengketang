@@ -132,10 +132,6 @@ class OpenCourseController extends Controller {
 	        	return response()->json(['code'=>207,'msg'=>'开始时间不能大于结束时间']); 
 	        }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> dev
 	        $openCourseArr['start_at'] = strtotime($start_at);
 	        $openCourseArr['end_at'] = strtotime($end_at);
 	       

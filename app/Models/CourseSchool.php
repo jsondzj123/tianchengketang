@@ -307,7 +307,7 @@ class CourseSchool extends Model {
 
                 }
                 AdminLog::insertAdminLog([
-                    'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                    'admin_id'       =>   $user_id ,
                     'module_name'    =>  'Courschool' ,
                     'route_url'      =>  'admin/courschool/courseStore' , 
                     'operate_method' =>  'update',
@@ -477,7 +477,7 @@ class CourseSchool extends Model {
                     $courseRes = self::insert($course); //
                     if(!$courseRes){
                         AdminLog::insertAdminLog([
-                            'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                            'admin_id'       =>   $user_id ,
                             'module_name'    =>  'Courschool' ,
                             'route_url'      =>  'admin/courschool/courseStore' , 
                             'operate_method' =>  'update',
@@ -669,7 +669,7 @@ class CourseSchool extends Model {
                     }
                 }
                 AdminLog::insertAdminLog([
-                    'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                    'admin_id'       =>   $user_id ,
                     'module_name'    =>  'Courschool' ,
                     'route_url'      =>  'admin/courschool/courseCancel' , 
                     'operate_method' =>  'update',
@@ -929,7 +929,7 @@ class CourseSchool extends Model {
                     }
                 }
                 AdminLog::insertAdminLog([
-                    'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                    'admin_id'       =>   $user_id ,
                     'module_name'    =>  'Courschool' ,
                     'route_url'      =>  'admin/courschool/courseCancel' , 
                     'operate_method' =>  'update',
@@ -1036,7 +1036,7 @@ class CourseSchool extends Model {
                             }
                         }
                         AdminLog::insertAdminLog([
-                            'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                            'admin_id'       =>   $user_id ,
                             'module_name'    =>  'Courschool' ,
                             'route_url'      =>  'admin/courschool/authorUpdate' , 
                             'operate_method' =>  'update',
@@ -1233,7 +1233,7 @@ class CourseSchool extends Model {
                         }
                     }
                     AdminLog::insertAdminLog([
-                            'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                            'admin_id'       =>   $user_id ,
                             'module_name'    =>  'Courschool' ,
                             'route_url'      =>  'admin/courschool/authorUpdate' , 
                             'operate_method' =>  'update',
