@@ -60,6 +60,9 @@ class CourseStocks extends Model {
    		$sum_current_number = self::where('school_id',$data['school_id'])->where(['school_pid'=>$data['school_pid'],'is_del'=>0,'course_id'=>$CourseSchoolData['course_id']])->orderBy('id','desc')->sum('add_number');//当前已经添加总库存
 
    		$residue_number = Order::whereIn('pay_status',[3,4])->where(['class_id'=>$data['course_id'],'school_id'=>$data['school_id'],'oa_status'=>1,'nature'=>1,'status'=>2])->count(); //使用数量
+        if((int)$data['add_number'] == 0){
+            return ['code'=>203,'msg'=>'添加库存数不能为0'];
+        }
         if($sum_current_number+(int)$data['add_number'] <0){
             return ['code'=>203,'msg'=>'添加库存数不能小于剩余库存数'];
         } 
