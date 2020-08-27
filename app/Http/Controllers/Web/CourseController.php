@@ -338,9 +338,9 @@ class CourseController extends Controller {
         if($nature == 1){
             //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
             $add_number = CourseStocks::where(['course_id' => $this->data['id'], 'school_id' => $this->school['id'], 'is_del' => 0])->get();
+            $stocknum = 0;
             if (!empty($add_number)) {
                 //库存总数
-                $stocknum = 0;
                 foreach ($add_number as $kstock => $vstock) {
                     $stocknum = $stocknum + $vstock['add_number'];
                 }
@@ -377,9 +377,9 @@ class CourseController extends Controller {
         }else{
             //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
             $add_number = CourseStocks::where(['course_id' => $this->data['id'], 'school_id' => $this->school['id'], 'is_del' => 0])->get();
+            $stocknum = 0;
             if (!empty($add_number)) {
                 //库存总数
-                $stocknum = 0;
                 foreach ($add_number as $kstock => $vstock) {
                     $stocknum = $stocknum + $vstock['add_number'];
                 }
