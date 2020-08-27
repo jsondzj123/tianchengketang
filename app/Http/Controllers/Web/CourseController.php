@@ -550,9 +550,13 @@ class CourseController extends Controller {
         }else{
             $MTCloud = new MTCloud();
             //查询小节绑定的录播资源
-            $ziyuan = Video::where(['id' => $this->data['resource_id'], 'is_del' => 0, 'status' => 0])->first();
+            $ziyuan = Video::where(['id' => $this->data['resource_id'], 'is_del' => 0])->first();
 //            $video_url = $MTCloud->videoGet($ziyuan['mt_video_id'],'720d');
-            $res = $MTCloud->courseAccessPlayback($ziyuan['course_id'], $this->userid,$this->data['user_info']['nickname'], 'user');
+            $nickname = !empty($this->data['user_info']['nickname'])?$this->data['user_info']['nickname']:$this->data['user_info']['real_name'];
+            if(empty($nickname)){
+                $nickname = $this->data['user_info']['phone'];
+            }
+            $res = $MTCloud->courseAccessPlayback($ziyuan['course_id'], $this->userid,$nickname, 'user');
             $res['data']['is_live'] = 0;
             if($res['code'] ==  0){
 //                $video_url = $video_url['data']['videoUrl'];
