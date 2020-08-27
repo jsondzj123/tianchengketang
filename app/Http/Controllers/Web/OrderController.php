@@ -88,13 +88,18 @@ class OrderController extends Controller {
      public function userPaying(){
         $order = Order::where(['id'=>$this->data['order_id']])->first();
         if($this->data['pay_type'] == 1){
-            $wxpay = new WxpayFactory();
-            $number = date('YmdHis', time()) . rand(1111, 9999);
-            $price = 0.01;
-            $return = $wxpay->getPcPayOrder($number,$price);
+//            $wxpay = new WxpayFactory();
+//            $number = date('YmdHis', time()) . rand(1111, 9999);
+//            $price = 0.01;
+//            $return = $wxpay->getPcPayOrder($number,$price);
+            return ['code' => 202 , 'msg' => '生成二维码失败'];
         }
         if($this->data['pay_type'] == 2){
-            $alipay = new AlipayFactory();
+            $payinfo = PaySet::select('zfb_app_id','zfb_app_public_key','zfb_public_key')->where(['school_id'=>$this->school['id']])->first();
+            if(empty($payinfo) || empty($payinfo['zfb_app_id']) || empty($payinfo['zfb_app_public_key'])){
+                return response()->json(['code' => 202, 'msg' => '商户号为空']);
+            }
+            $alipay = new AlipayFactory($this->school['id']);
             $return = $alipay->createPcPay($order['order_number'],$order['price']);
             if($return['alipay_trade_precreate_response']['code'] == 10000){
                 return ['code' => 200 , 'msg' => '支付','data'=>$return['alipay_trade_precreate_response']['qr_code']];
@@ -236,15 +241,20 @@ class OrderController extends Controller {
         if($add) {
             //微信
             if ($this->data['pay_status'] == 1) {
-                $wxpay = new WxpayFactory();
-                $number = date('YmdHis', time()) . rand(1111, 9999);
-                $price = 0.01;
-                $return = $wxpay->getPcPayOrder($number, $price);
+//                $wxpay = new WxpayFactory();
+//                $number = date('YmdHis', time()) . rand(1111, 9999);
+//                $price = 0.01;
+//                $return = $wxpay->getPcPayOrder($number, $price);
+                return response()->json(['code' => 202, 'msg' => '生成二维码失败']);
             }
             //支付宝
             if ($this->data['pay_status'] == 2) {
-                $alipay = new AlipayFactory();
-                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price']);
+                $payinfo = PaySet::select('zfb_app_id','zfb_app_public_key','zfb_public_key')->where(['school_id'=>$this->school['id']])->first();
+                if(empty($payinfo) || empty($payinfo['zfb_app_id']) || empty($payinfo['zfb_app_public_key'])){
+                    return response()->json(['code' => 202, 'msg' => '商户号为空']);
+                }
+                $alipay = new AlipayFactory($this->school['id']);
+                $return = $alipay->convergecreatePcPay($arr['order_number'],$arr['price'],$course['title']);
                 if($return['alipay_trade_precreate_response']['code'] == 10000){
                     require_once realpath(dirname(__FILE__).'/../../../Tools/phpqrcode/QRcode.php');
                     $code = new QRcode();
@@ -260,20 +270,32 @@ class OrderController extends Controller {
             }
             //汇聚微信
             if($this->data['pay_status'] == 3){
+                if($this->school['id'] == ''){
+                    $paylist=[
+                        'hj_md_key' => '3f101520d11240299b25b2d2608b03a3',
+                        'hj_commercial_tenant_number' => '888107600008111',
+                        'hj_wx_commercial_tenant_deal_number' => '777183300269333'
+                    ];
+                }else{
+                    $paylist = PaySet::select('hj_commercial_tenant_number','hj_md_key','hj_wx_commercial_tenant_deal_number')->where(['school_id'=>$this->school['id']])->first();
+                    if(empty($paylist) || empty($paylist['hj_commercial_tenant_number'])){
+                        return response()->json(['code' => 202, 'msg' => '商户号错误']);
+                    }
+                }
                 $notify = 'AB|'."http://".$_SERVER['HTTP_HOST']."/web/course/hjnotify";
                 $pay=[
                     'p0_Version'=>'1.0',
-                    'p1_MerchantNo'=>'888108900009969',
+                    'p1_MerchantNo'=> $paylist['hj_commercial_tenant_number'],
                     'p2_OrderNo'=>$arr['order_number'],
                     'p3_Amount'=>$this->data['price'],
                     'p4_Cur'=>1,
-                    'p5_ProductName'=>"龙德产品",
+                    'p5_ProductName'=>$course['title'],
                     'p9_NotifyUrl'=>$notify,
                     'q1_FrpCode'=>'WEIXIN_NATIVE',
                     'q4_IsShowPic'=>1,
-                    'qa_TradeMerchantNo'=>'777170100269422'  //无效 777127800286029  777183600275031 777163700275030
+                    'qa_TradeMerchantNo'=>$paylist['hj_wx_commercial_tenant_deal_number']
                 ];
-                $str = "15f8014fee1642fbb123fb5684cda48b";
+                $str = $paylist['hj_md_key'];
                 $token = $this->hjHmac($pay,$str);
                 $pay['hmac'] = $token;
                 $wxpay = $this->hjpost($pay);
@@ -287,20 +309,32 @@ class OrderController extends Controller {
             }
             //汇聚支付宝
             if($this->data['pay_status'] == 4){
+                if($this->school['id'] == ''){
+                    $paylist=[
+                        'hj_md_key' => '3f101520d11240299b25b2d2608b03a3',
+                        'hj_commercial_tenant_number' => '888107600008111',
+                        'hj_zfb_commercial_tenant_deal_number' => '777183300269333'
+                    ];
+                }else{
+                    $paylist = PaySet::select('hj_commercial_tenant_number','hj_md_key','hj_zfb_commercial_tenant_deal_number')->where(['school_id'=>$this->school['id']])->first();
+                    if(empty($paylist) || empty($paylist['hj_commercial_tenant_number'])){
+                        return response()->json(['code' => 202, 'msg' => '商户号错误']);
+                    }
+                }
                 $notify = 'AB|'."http://".$_SERVER['HTTP_HOST']."/web/course/hjnotify";
                 $pay=[
                     'p0_Version'=>'1.0',
-                    'p1_MerchantNo'=>'888108900009969',
+                    'p1_MerchantNo'=>$paylist['hj_commercial_tenant_number'],
                     'p2_OrderNo'=>$arr['order_number'],
                     'p3_Amount'=>$this->data['price'],
                     'p4_Cur'=>1,
-                    'p5_ProductName'=>"龙德产品",
+                    'p5_ProductName'=>$course['title'],
                     'p9_NotifyUrl'=>$notify,
                     'q1_FrpCode'=>'ALIPAY_NATIVE',
                     'q4_IsShowPic'=>1,
-                    'qa_TradeMerchantNo'=>'777167300271170'
+                    'qa_TradeMerchantNo'=>$paylist['hj_zfb_commercial_tenant_deal_number']
                 ];
-                $str = "15f8014fee1642fbb123fb5684cda48b";
+                $str = $paylist['hj_md_key'];
                 $token = $this->hjHmac($pay,$str);
                 $pay['hmac'] = $token;
                 $alipay = $this->hjpost($pay);
@@ -320,7 +354,7 @@ class OrderController extends Controller {
                     'p2_OrderNo' => $arr['order_number'],
                     'p3_Amount' => $this->data['price'],
                     'p4_Cur' => 1,
-                    'p5_ProductName' => "龙德产品",
+                    'p5_ProductName' => $course['title'],
                     'p9_NotifyUrl' => $notify,
                     'q1_FrpCode' => 'UNIONPAY_NATIVE',
                     'q4_IsShowPic' => 1,

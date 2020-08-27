@@ -686,9 +686,14 @@ class CourseSchool extends Model {
         }
         if($body['is_public'] == 0){
            //课程
+            $natureData = self::whereIn('id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->select('course_id')->first();
+            if(empty($natureData)){
+                return ['code'=>207,'msg'=>'课程已经取消授权'];
+            }
+            $courseIds = [$natureData['course_id']];
             $nature = self::whereIn('course_id',$courseIds)->where(['from_school_id'=>$school_id,'to_school_id'=>$body['school_id'],'is_del'=>0])->get()->toArray(); //要取消的授权的课程
             if(empty($nature)){
-                return ['code'=>207,'msg'=>'课程已经取消授权'];
+                return ['code'=>207,'msg'=>'课程已经取消授权!'];
             }
             foreach ($nature  as $kk => $vv) {
                $natureCourseArr[$kk]['parent_id'] = $vv['parent_id'];

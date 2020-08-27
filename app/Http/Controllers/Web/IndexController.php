@@ -127,7 +127,7 @@ class IndexController extends Controller {
         }else{
             $arr['icp'] = $icp['name'];
         }
-        $arr['header'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>1])->select('id','parent_id','name','url','create_at')->orderBy('sort')->get();
+        $arr['header'] = FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>1])->select('id','parent_id','name','url','create_at','text')->orderBy('sort')->get();
         $logo =  FootConfig::where(['school_id'=>$this->school['id'],'is_del'=>0,'is_open'=>0,'is_show'=>0,'type'=>4])->select('logo')->orderBy('sort')->first();
         if(empty($logo)){
             $arr['index_logo'] = '';
@@ -166,6 +166,7 @@ class IndexController extends Controller {
         $newArr = [];
 
         foreach ($subject as $key => $val) {
+
             $natureCourseData = CourseSchool::where(['to_school_id'=>$this->school['id'],'is_del'=>0,'parent_id'=>$val['id'],'status'=>1])->limit(8)->get()->toArray();//授权课程
             $count = count($natureCourseData);
             if($count<8){
@@ -174,11 +175,13 @@ class IndexController extends Controller {
 
             if(!empty($CouresData)){
                     foreach($CouresData as $key=>&$zizeng){
+                        $zizeng['buy_num'] = $zizeng['buy_num']+$zizeng['watch_num'];
                         $zizeng['nature'] = 0;
                     }
                 }
             if(!empty($natureCourseData)){
                 foreach($natureCourseData as $key=>&$nature){
+                    $nature['buy_num'] = $nature['buy_num']+$nature['watch_num'];
                     $nature['nature'] = 1;
                 }
             }
@@ -188,7 +191,7 @@ class IndexController extends Controller {
                 $courseArr = empty($natureCourseData) ?$CouresData:$natureCourseData;
             }
            $newArr[$val['id']] = $courseArr;
-        }
+        }   
 
     	$arr = [
             'course'=>$newArr,
@@ -202,6 +205,9 @@ class IndexController extends Controller {
         $company['account_name'] = isset($this->school['account_name']) ?$this->school['account_name']:'';
         $company['account_num'] =  isset($this->school['account_num']) ?$this->school['account_num']:'';
         $company['open_bank'] =  isset($this->school['open_bank']) ?$this->school['open_bank']:'';
+        if($company['account_name'] == '' && $company['account_num'] == '' &&  $company['open_bank'] == ''  ){
+            return response()->json(['code'=>201,'msg'=>'Success']);
+        }
         return response()->json(['code'=>200,'msg'=>'Success','data'=>$company]);
     }
     public function getPay(){

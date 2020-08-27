@@ -137,7 +137,16 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('List','TeacherController@getList');//查看详情
         $router->post('dateils','TeacherController@dateils');//查看详情
     });
-     //end (lys)
+    //H5/APP 我的
+    $router->group(['prefix' => 'my','middleware'=>'user.web'], function () use ($router) {
+        $router->post('about','MyController@getAbout');//关于我们
+        $router->post('contact','MyController@getContact');//联系客服
+    });
+    //app/h5 首页-新闻
+    $router->group(['prefix' => 'new','middleware'=>'user.web'], function () use ($router) {
+        $router->post('List','NewController@getList');//新闻资讯列表
+    });
+    //end (lys)
 
 
 
@@ -161,11 +170,13 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('doRandExamList','BankController@doRandExamList');            //随机生成试题接口
         $router->post('getExamPapersList','BankController@getExamPapersList');      //模拟真题试卷列表接口
         $router->post('doCollectQuestion','BankController@doCollectQuestion');      //试题收藏/取消收藏接口
+        $router->post('doTabQuestion','BankController@doTabQuestion');              //试题标记/取消标记接口
         $router->post('doBankMakeExam','BankController@doBankMakeExam');            //做题接口
         $router->post('getCollectErrorExamCount','BankController@getCollectErrorExamCount');  //我的收藏/错题本/做题记录数量接口
         $router->post('getMyCollectExamList','BankController@getMyCollectExamList');  //我的收藏列表接口
         $router->post('getMyErrorExamList','BankController@getMyErrorExamList');      //错题本列表接口
         $router->post('getMyMakeExamList','BankController@getMyMakeExamList');        //做题记录列表接口
+        $router->post('getNewMakeExamInfo','BankController@getNewMakeExamInfo');      //章节练习/快速做题/模拟真题最新做题接口
         $router->post('getMakeExamInfo','BankController@getMakeExamInfo');            //做题记录详情接口
         $router->post('doHandInPapers','BankController@doHandInPapers');              //做题交卷接口
         $router->post('getMyBankList','BankController@getMyBankList');                //我的题库
@@ -557,7 +568,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('ExcelExport', 'OrderController@ExcelExport');//订单导出
         $router->post('buttOa', 'OrderController@buttOa');//对接oa
         $router->post('orderBack', 'OrderController@orderBack');//退回
-
+        //扫码支付模块
+        $router->post('scanOrderList', 'OrderController@scanOrderList ');//扫码支付列表
     });
     //数据模块（szw）
     $router->group(['prefix' => 'statistics'], function () use ($router) {
@@ -649,6 +661,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getList', 'PageSetController@getList');  //页面设置 列表
         $router->post('details', 'PageSetController@details');  //详情 （修改动作）
         $router->post('doLogoUpdate', 'PageSetController@doLogoUpdate');  //修改logo
+
     });
 
 

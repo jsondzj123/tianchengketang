@@ -292,7 +292,11 @@ class SchoolController extends Controller {
                 ['parent_id'=>0,'name'=>'联系我们','url'=>'/contactUs/','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
                 ['parent_id'=>0,'name'=>'友情链接','url'=>'','type'=>2,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
             ];
-            $footPidIds = $footOne = $fooTwo = $fooThree = $footFore =  [];
+            $my_insert = [
+                ['parent_id'=>0,'name'=>'关于我们','text'=>'关于我们','type'=>5,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+                ['parent_id'=>0,'name'=>'联系客服','text'=>'联系客服','type'=>5,'sort'=>0,'school_id' =>$school_id,'admin_id'=>$user_id,'create_at'=>$date,'status'=>1],
+            ];
+            $footPidIds = $footOne = $fooTwo = $fooThree = $footFore = [];
             foreach ($page_foot_pid_insert as $key => $pid) {
                 $footPidId = FootConfig::insertGetId($pid);
                 if($footPidId<1){
@@ -359,7 +363,14 @@ class SchoolController extends Controller {
                 DB::rollBack();
                 return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!!!!']);
             }
+            $my_res = FootConfig::insert($my_insert);
+            if(!$my_res){
+                DB::rollBack();
+                return response()->json(['code' => 203 , 'msg' => '页面配置创建未成功!!']);
+            }
             $payconfig = [
+                'zfb_app_public_key'=>'',
+                'zfb_public_key'=>'',
                 'admin_id' => CurrentAdmin::user()['id'],
                 'school_id'=> $school_id,
                 'create_at'=> date('Y-m-d H:i:s')

@@ -274,7 +274,6 @@ class UserController extends Controller {
     //我的课程
     public function myCourse(){
         $order = Order::where(['student_id'=>$this->userid,'status'=>2])
-            ->where('validity_time','>',date('Y-m-d H:i:s'))
             ->whereIn('pay_status',[3,4])
             ->get()->toArray();
         $courses = [];
@@ -312,6 +311,25 @@ class UserController extends Controller {
                             }
                             $course['method'] = $method;
                         }
+                        //查询有效期
+                        $date1 = time();
+                        $date2 = strtotime($v['validity_time']);
+                        if($date1 >= $date2){
+                            $course['day'] = '已过期';
+                        }else{
+                            $interval = $date2 -$date1;
+                            $a = $interval / 86400;
+                            $day = floor($a);
+                            if($course['expiry'] == 0){
+                                $course['day'] = '无期限';
+                            }else{
+                                if($day > 0){
+                                    $course['day'] = $day.'天';
+                                }else{
+                                    $course['day'] = '已过期';
+                                }
+                            }
+                        }
                         $courses[] = $course;
                     }
                 }else {
@@ -346,12 +364,30 @@ class UserController extends Controller {
                             }
                             $course['method'] = $method;
                         }
+                        //查询有效期
+                        $date1 = time();
+                        $date2 = strtotime($v['validity_time']);
+                        if($date1 >= $date2){
+                            $course['day'] = '已过期';
+                        }else{
+                            $interval = $date2 -$date1;
+                            $a = $interval / 86400;
+                            $day = floor($a);
+                            if($course['expiry'] == 0){
+                                $course['day'] = '无期限';
+                            }else{
+                                if($day > 0){
+                                    $course['day'] = $day.'天';
+                                }else{
+                                    $course['day'] = '已过期';
+                                }
+                            }
+                        }
                         $courses[] = $course;
                     }
                 }
             }
         }
-
         return response()->json(['code' => 200 , 'msg' => '获取成功','data'=>$courses]);
     }
     //我的订单  status 1已完成2未完成3已失效

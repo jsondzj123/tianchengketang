@@ -14,6 +14,7 @@ use App\Models\FootConfig;
 use App\Models\Admin;
 use App\Models\CouresSubject;
 use App\Models\Article;
+use App\Models\Student;
 use App\Models\OpenCourse;
 use App\Models\CourseRefTeacher;
 use App\Models\CourseRefOpen;
@@ -61,7 +62,7 @@ class OpenCourseController extends Controller {
                 })->select('ld_course_open.id','ld_course_open.title','ld_course_open.cover','ld_lecturer_educationa.real_name','ld_course_open.start_at','ld_course_open.end_at')
             ->orderBy('ld_course_open.id','desc')
             ->get()->toArray();
-               
+
         $openCourseArr = array_merge($openCourse,$natureOpenCourse);
         $openCourseArr = array_unique($openCourseArr,SORT_REGULAR);
         if(!empty($openCourseArr)){
@@ -83,7 +84,7 @@ class OpenCourseController extends Controller {
                 $v['start_at'] = date('Y-m-d H:i:s',$v['start_at']);
                 $v['end_at'] = date('Y-m-d H:i:s',$v['end_at']);
             }
-            array_multisort(array_column($openCourseArr,'sort'),SORT_ASC,$openCourseArr); 
+            array_multisort(array_column($openCourseArr,'sort'),SORT_ASC,$openCourseArr);
         }
         $start=($page-1)*$pagesize;
         $limit_s=$start+$pagesize;
@@ -102,7 +103,7 @@ class OpenCourseController extends Controller {
     //大家都在看
     public function hotList(){
         //自增的公开课
-        $data = $this->school; 
+        $data = $this->school;
         $openCourse = OpenCourse::leftJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_open.id')
             ->leftJoin('ld_course_open_teacher','ld_course_open_teacher.course_id','=','ld_course_open.id')
             ->leftJoin('ld_lecturer_educationa','ld_course_open_teacher.teacher_id','=','ld_lecturer_educationa.id')
@@ -134,7 +135,7 @@ class OpenCourseController extends Controller {
 
             $openCourse = array_merge($natureOpenCourse,$openCourse);
         }
- 
+
         return response()->json(['code'=>200,'msg'=>'Success','data'=>$openCourse]);
     }
     //预开始
@@ -155,7 +156,7 @@ class OpenCourseController extends Controller {
         ->select('ld_course_open.id','ld_course_open.title','ld_course_open.cover','ld_lecturer_educationa.real_name','ld_course_open.start_at','ld_course_open.end_at','ld_course_open_live_childs.status')
         ->orderBy('ld_course_open.id','desc')
         ->get()->toArray();
-        
+
         //授权的公开课
         $natureOpenCourse = CourseRefOpen::leftJoin('ld_course_open','ld_course_open.id','=','ld_course_ref_open.course_id')
                 ->leftJoin('ld_course_open_live_childs','ld_course_open_live_childs.lesson_id','=','ld_course_ref_open.course_id')
@@ -288,16 +289,24 @@ class OpenCourseController extends Controller {
             return response()->json(['code'=>201,'msg'=>'user_id为空或不合法']);
         }
         if(!isset($this->data['nickname'])  || empty($this->data['nickname'])){
+
+            $StudentData = Student::where('id',$this->data['user_id'])->select('real_name','nickname')->first();
+            if(empty($StudentData)){
+                $this->data['nickname']=$this->make_password();
+            }else{
+                $this->data['nickname'] = $StudentData['nickname'] != '' ?$StudentData['nickname']: ($StudentData['real_name'] != '' ?$StudentData['real_name']:$this->make_password());
+            }
             return response()->json(['code'=>201,'msg'=>'nickname为空或不合法']);
         }
-       
+        OpenLivesChilds::increment('watch_num',1);
         $openCourse = OpenLivesChilds::where(['lesson_id'=>$this->data['course_id'],'is_del'=>0,'is_forbid'=>0])->first();
         if(empty($openCourse)){
             return response()->json(['code'=>201,'msg'=>'非法请求！！！']);
         }
+
         $data['course_id'] = $openCourse['course_id'];
-        $data['uid'] = $this->data['user_id'];  
-        $data['nickname'] =$this->data['nickname']; 
+        $data['uid'] = $this->data['user_id'];
+        $data['nickname'] =$this->data['nickname'];
         $data['role'] = 'user';
         if($openCourse['status'] == 1 || $openCourse['status'] == 2){
             $result=$this->courseAccess($data);
@@ -323,10 +332,10 @@ class OpenCourseController extends Controller {
      */
     public function startLive($course_id)
     {
-        
+
         $MTCloud = new MTCloud();
         $res = $MTCloud->courseLaunch($course_id);
-     
+
         if(!array_key_exists('code', $res) && !$res["code"] == 0){
             return $this->response('直播器启动失败', 500);
         }
@@ -351,7 +360,26 @@ class OpenCourseController extends Controller {
         }
         return $res;
     }
+    public function make_password( $length = 8 ){
+
+    // 密码字符集，可任意添加你需要的字符
+      $chars = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
+      'i', 'j', 'k', 'l','m', 'n', 'o', 'p', 'q', 'r', 's',
+      't', 'u', 'v', 'w', 'x', 'y','z', 'A', 'B', 'C', 'D',
+      'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L','M', 'N', 'O',
+      'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y','Z',
+      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!');
+
+      // 在 $chars 中随机取 $length 个数组元素键名
+      $keys = array_rand($chars, $length);
+      $password ='';
+      for($i = 0; $i < $length; $i++)
+      {
+      // 将 $length 个数组元素连接成字符串
+        $password .= $chars[$keys[$i]];
+      }
+      return $password;
+    }
 
 
 }
-	
