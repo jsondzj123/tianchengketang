@@ -59,9 +59,12 @@ class CourseStocks extends Model {
         $CourseSchoolData = CourseSchool::where('id',$data['course_id'])->select('course_id')->first(); //前端传的course_id 为ld_course_school自增id
    		$sum_current_number = self::where('school_id',$data['school_id'])->where(['school_pid'=>$data['school_pid'],'is_del'=>0,'course_id'=>$CourseSchoolData['course_id']])->orderBy('id','desc')->sum('add_number');//当前已经添加总库存
 
-
    		$residue_number = Order::whereIn('pay_status',[3,4])->where(['class_id'=>$data['course_id'],'school_id'=>$data['school_id'],'oa_status'=>1,'nature'=>1,'status'=>2])->count(); //使用数量
+        
 		$data['current_number'] = $residue_number<=0 ?$sum_current_number:(int)$sum_current_number-(int)$residue_number;
+        if($data['current_number'] <= 0 && $data['add_number'] < 1 ){
+            return ['code'=>203,'msg'=>'库存添加数不能小于剩余库存数'];
+        }
    		$data['create_at'] = date('Y-m-d H:i:s');
         $data['course_id'] = $CourseSchoolData['course_id'];
     
