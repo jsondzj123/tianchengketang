@@ -367,8 +367,8 @@ class CourseController extends Controller {
             }
             //判断用户是否收藏
             if($this->userid != 0){
-                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
-                if($collects != 0){
+                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->first();
+                if(!empty($collects)){
                     $data['is_collect'] = 1;
                 }else{
                     $data['is_collect'] = 0;
@@ -378,18 +378,18 @@ class CourseController extends Controller {
             }
         }else{
             //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
-            $add_number = CourseStocks::where(['course_id' => $this->data['id'], 'school_id' => $this->school['id'], 'is_del' => 0])->get();
-            $stocknum = 0;
-            if (!empty($add_number)) {
-                //库存总数
-                foreach ($add_number as $kstock => $vstock) {
-                    $stocknum = $stocknum + $vstock['add_number'];
-                }
-            }
-            $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'school_id' => $this->school['id'], 'class_id' => $this->data['id'], 'nature' => 0])->whereIn('pay_status',[3,4])->count();
-            if($ordercount >= $stocknum){
-                $data['is_pay'] =2;
-            }else{
+//            $add_number = CourseStocks::where(['course_id' => $this->data['id'], 'school_id' => $this->school['id'], 'is_del' => 0])->get();
+//            $stocknum = 0;
+//            if (!empty($add_number)) {
+//                //库存总数
+//                foreach ($add_number as $kstock => $vstock) {
+//                    $stocknum = $stocknum + $vstock['add_number'];
+//                }
+//            }
+//            $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'school_id' => $this->school['id'], 'class_id' => $this->data['id'], 'nature' => 0])->whereIn('pay_status',[3,4])->count();
+//            if($ordercount >= $stocknum){
+//                $data['is_pay'] =2;
+//            }else{
                 //是否已购买
                 if($this->userid != 0){
                     $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->whereIn('pay_status',[3,4])->orderByDesc('id')->first();
@@ -403,11 +403,11 @@ class CourseController extends Controller {
                  }else{
                      $data['is_pay'] = 0;
                 }
-            }
+//            }
             //判断用户是否收藏
             if($this->userid != 0){
-                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->count();
-                if($collects != 0){
+                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->first();
+                if(!empty($collects)){
                     $data['is_collect'] = 1;
                 }else{
                     $data['is_collect'] = 0;
