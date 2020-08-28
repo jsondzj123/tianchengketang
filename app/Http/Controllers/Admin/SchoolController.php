@@ -171,7 +171,7 @@ class SchoolController extends Controller {
                     'module_name'    =>  'School' ,
                     'route_url'      =>  'admin/school/doSchoolForbid' , 
                     'operate_method' =>  'update',
-                    'content'        =>  json_encode($data),
+                    'content'        =>  json_encode(array_merge($data,$school)),
                     'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                     'create_at'      =>  date('Y-m-d H:i:s')
                 ]);
@@ -698,7 +698,16 @@ class SchoolController extends Controller {
         if($validator->fails()) {
             return response()->json(json_decode($validator->errors()->first(),1));
         }
-        $result = School::doAdminUpdate($data);     
+        $result = School::doAdminUpdate($data); 
+        AdminLog::insertAdminLog([
+                'admin_id'       =>   CurrentAdmin::user()['id'] ,
+                'module_name'    =>  'School' ,
+                'route_url'      =>  'admin/school/doAdminUpdate' , 
+                'operate_method' =>  'update' ,
+                'content'        =>  json_encode($data),
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+        ]);    
         return response()->json(['code'=>$result['code'],'msg'=>$result['msg']]);
     }
     /*
@@ -716,6 +725,7 @@ class SchoolController extends Controller {
             if ($validator->fails()) {
                 return response()->json(json_decode($validator->errors()->first(),1));
             }
+
             $result = School::getSchoolTeacherList(self::$accept_data);
             return response()->json($result);
     }
