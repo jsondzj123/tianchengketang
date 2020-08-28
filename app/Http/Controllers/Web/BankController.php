@@ -60,7 +60,8 @@ class BankController extends Controller {
                     //判断token值是否合法
                     $redis_token = Redis::hLen($token_key);
                     if($redis_token <= 0){
-                        return response()->json(['code' => 201 , 'msg' => '用户token为空']);
+                        $school_id = 1;
+                        //return response()->json(['code' => 201 , 'msg' => '用户token为空']);
                     }
 
                     //解析json获取用户详情信息
