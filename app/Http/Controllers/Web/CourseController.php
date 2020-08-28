@@ -332,12 +332,14 @@ class CourseController extends Controller {
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
     }
     //用户与课程关系
-        public function courseToUser(){
+    public function courseToUser(){
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
         $data=[];
         if($nature == 1){
-            //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
-            $add_number = CourseStocks::where(['course_id' => $this->data['id'], 'school_id' => $this->school['id'], 'is_del' => 0])->get();
+            //获取被授权的课程id
+            $courseschool = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first();
+            //获取库存计算总数  订单总数 判断
+            $add_number = CourseStocks::where(['course_id' => $courseschool['course_id'], 'school_id' => $this->school['id'], 'is_del' => 0])->get();
             $stocknum = 0;
             if (!empty($add_number)) {
                 //库存总数
