@@ -62,13 +62,13 @@ class BankController extends Controller {
                     if($redis_token <= 0){
                         $school_id = 1;
                         //return response()->json(['code' => 201 , 'msg' => '用户token为空']);
+                    } else {
+                        //解析json获取用户详情信息
+                        $json_info = Redis::hGetAll($token_key);
+
+                        //学校id赋值
+                        $school_id = $json_info['school_id'];
                     }
-
-                    //解析json获取用户详情信息
-                    $json_info = Redis::hGetAll($token_key);
-
-                    //学校id赋值
-                    $school_id = $json_info['school_id'];
                 } else {
                     $school_id = 1;
                 }
