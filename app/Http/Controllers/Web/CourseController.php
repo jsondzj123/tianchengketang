@@ -148,17 +148,17 @@ class CourseController extends Controller {
                 ->get()->toArray();
             foreach ($ref_course as $ks => &$vs) {
                 //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
-                $add_number = CourseStocks::where(['course_id' => $vs['course_id'], 'school_id' => $school_id, 'is_del' => 0])->get();
-                if (!empty($add_number)) {
-                    //库存总数
-                    $stocknum = 0;
-                    foreach ($add_number as $kstock => $vstock) {
-                        $stocknum = $stocknum + $vstock['add_number'];
-                    }
-                    if ($stocknum != 0) {
+//                $add_number = CourseStocks::where(['course_id' => $vs['course_id'], 'school_id' => $school_id, 'is_del' => 0])->get();
+//                if (!empty($add_number)) {
+//                    //库存总数
+//                    $stocknum = 0;
+//                    foreach ($add_number as $kstock => $vstock) {
+//                        $stocknum = $stocknum + $vstock['add_number'];
+//                    }
+//                    if ($stocknum != 0) {
                         //查订单表
                         $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'school_id' => $school_id, 'class_id' => $vs['id'], 'nature' => 1])->whereIn('pay_status',[3,4])->count();
-                        if ($ordercount <= $stocknum) {
+//                        if ($ordercount <= $stocknum) {
                             $vs['buy_num'] = $vs['buy_num'] + $ordercount;
                             $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])
                                 ->where(function ($query) use ($methodwhere) {
@@ -184,15 +184,15 @@ class CourseController extends Controller {
                             } else {
                                 unset($ref_course[$ks]);
                             }
-                        } else {
-                            unset($ref_course[$ks]);
-                        }
-                    } else {
-                        unset($ref_course[$ks]);
-                    }
-                } else {
-                    unset($ref_course[$ks]);
-                }
+//                        } else {
+//                            unset($ref_course[$ks]);
+//                        }
+//                    } else {
+//                        unset($ref_course[$ks]);
+//                    }
+//                } else {
+//                    unset($ref_course[$ks]);
+//                }
             }
             //两数组合并 排序
             if (!empty($course) && !empty($ref_course)) {
@@ -332,12 +332,14 @@ class CourseController extends Controller {
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
     }
     //用户与课程关系
-        public function courseToUser(){
+    public function courseToUser(){
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
         $data=[];
         if($nature == 1){
-            //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
-            $add_number = CourseStocks::where(['course_id' => $this->data['id'], 'school_id' => $this->school['id'], 'is_del' => 0])->get();
+            //获取被授权的课程id
+            $courseschool = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first();
+            //获取库存计算总数  订单总数 判断
+            $add_number = CourseStocks::where(['course_id' => $courseschool['course_id'], 'school_id' => $this->school['id'], 'is_del' => 0])->get();
             $stocknum = 0;
             if (!empty($add_number)) {
                 //库存总数
