@@ -367,8 +367,8 @@ class CourseController extends Controller {
             }
             //判断用户是否收藏
             if($this->userid != 0){
-                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->first();
-                if(!empty($collects)){
+                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>1])->count();
+                if($collects != 0){
                     $data['is_collect'] = 1;
                 }else{
                     $data['is_collect'] = 0;
@@ -406,8 +406,8 @@ class CourseController extends Controller {
 //            }
             //判断用户是否收藏
             if($this->userid != 0){
-                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->first();
-                if(!empty($collects)){
+                $collects = Collection::where(['lesson_id'=>$this->data['id'],'student_id'=>$this->userid,'is_del'=>0,'nature'=>0])->count();
+                if($collects != 0){
                     $data['is_collect'] = 1;
                 }else{
                     $data['is_collect'] = 0;
