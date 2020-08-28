@@ -63,17 +63,24 @@ class CourseStocks extends Model {
         if((int)$data['add_number'] == 0){
             return ['code'=>203,'msg'=>'添加库存数不能为0'];
         }
-        if($sum_current_number+(int)$data['add_number'] <0){
+	   	$data['current_number'] = $residue_number<=0 ?$sum_current_number:(int)$sum_current_number-(int)$residue_number;  //剩余库存
+        if((int)$data['current_number']+(int)$data['add_number'] <0){
             return ['code'=>203,'msg'=>'添加库存数不能小于剩余库存数'];
         } 
-
-	   	$data['current_number'] = $residue_number<=0 ?$sum_current_number:(int)$sum_current_number-(int)$residue_number;  //剩余库存
-    
    		$data['create_at'] = date('Y-m-d H:i:s');
         $data['course_id'] = $CourseSchoolData['course_id'];
     
 		$result = self::insert($data);
 		if($result){
+            AdminLog::insertAdminLog([
+                'admin_id'       =>   $data['admin_id'] ,
+                'module_name'    =>  'Courstocks' ,
+                'route_url'      =>  'admin/courstocks/doInsertStocks' , 
+                'operate_method' =>  'insert',
+                'content'        =>  '库存添加'.json_encode($data),
+                'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
 			return ['code'=>200,'msg'=>'添加成功'];
 		}else{
 			return ['code'=>203,'msg'=>'网络错误,请重试！'];	

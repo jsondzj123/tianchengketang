@@ -306,8 +306,16 @@ class CourseSchool extends Model {
                     }
 
                 }
-                
-                 DB::commit();
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $user_id ,
+                    'module_name'    =>  'Courschool' ,
+                    'route_url'      =>  'admin/courschool/courseStore' , 
+                    'operate_method' =>  'update',
+                    'content'        =>  json_encode(array_merge($body,$InsertTeacherRef,$natureSubject,$refOpenInsert)),
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
+                DB::commit();
                 return ['code'=>200,'msg'=>'公开课授权成功！'];
 
             } catch (Exception $e) {
@@ -468,6 +476,15 @@ class CourseSchool extends Model {
 
                     $courseRes = self::insert($course); //
                     if(!$courseRes){
+                        AdminLog::insertAdminLog([
+                            'admin_id'       =>   $user_id ,
+                            'module_name'    =>  'Courschool' ,
+                            'route_url'      =>  'admin/courschool/courseStore' , 
+                            'operate_method' =>  'update',
+                            'content'        =>  '课程授权'.json_encode($body),
+                            'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                            'create_at'      =>  date('Y-m-d H:i:s')
+                        ]);
                         DB::rollback();
                         return ['code'=>203,'msg'=>'课程资源授权未成功！'];
                     }else{
@@ -651,6 +668,15 @@ class CourseSchool extends Model {
                         }
                     }
                 }
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $user_id ,
+                    'module_name'    =>  'Courschool' ,
+                    'route_url'      =>  'admin/courschool/courseCancel' , 
+                    'operate_method' =>  'update',
+                    'content'        =>  '公开课取消授权'.json_encode(array_merge($body,$updateTeacherArr,$updateSubjectArr,$courseIds)),
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
                 DB::commit();
                 return ['code'=>200,'msg'=>'公开课课程取消授权成功'];
 
@@ -902,6 +928,15 @@ class CourseSchool extends Model {
                         }
                     }
                 }
+                AdminLog::insertAdminLog([
+                    'admin_id'       =>   $user_id ,
+                    'module_name'    =>  'Courschool' ,
+                    'route_url'      =>  'admin/courschool/courseCancel' , 
+                    'operate_method' =>  'update',
+                    'content'        =>  '课程取消授权'.json_encode(array_merge($body,$updateTeacherArr,$updateSubjectArr,$updatelvboArr,$updatezhiboArr,$updateBank,$courseIds)),
+                    'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                    'create_at'      =>  date('Y-m-d H:i:s')
+                ]);
                 DB::commit();
                 return ['code'=>200,'msg'=>'课程取消授权成功'];
 
@@ -1000,6 +1035,15 @@ class CourseSchool extends Model {
                                 return ['code'=>203,'msg'=>'公开课授权更新未成功！'];
                             }
                         }
+                        AdminLog::insertAdminLog([
+                            'admin_id'       =>   $user_id ,
+                            'module_name'    =>  'Courschool' ,
+                            'route_url'      =>  'admin/courschool/authorUpdate' , 
+                            'operate_method' =>  'update',
+                            'content'        =>  '公开课授权更新'.json_encode($body),
+                            'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                            'create_at'      =>  date('Y-m-d H:i:s')
+                        ]);
                         DB::commit();
                         return ['code'=>200,'msg'=>'公开课授权更新成功！'];
                     } catch (Exception $e) {
@@ -1188,6 +1232,15 @@ class CourseSchool extends Model {
                             exit;
                         }
                     }
+                    AdminLog::insertAdminLog([
+                            'admin_id'       =>   $user_id ,
+                            'module_name'    =>  'Courschool' ,
+                            'route_url'      =>  'admin/courschool/authorUpdate' , 
+                            'operate_method' =>  'update',
+                            'content'        =>  '课程授权更新'.json_encode($body),
+                            'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+                            'create_at'      =>  date('Y-m-d H:i:s')
+                    ]);
                     DB::commit();
                 }
             // }   

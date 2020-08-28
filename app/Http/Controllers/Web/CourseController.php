@@ -148,17 +148,17 @@ class CourseController extends Controller {
                 ->get()->toArray();
             foreach ($ref_course as $ks => &$vs) {
                 //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
-                $add_number = CourseStocks::where(['course_id' => $vs['course_id'], 'school_id' => $school_id, 'is_del' => 0])->get();
-                if (!empty($add_number)) {
-                    //库存总数
-                    $stocknum = 0;
-                    foreach ($add_number as $kstock => $vstock) {
-                        $stocknum = $stocknum + $vstock['add_number'];
-                    }
-                    if ($stocknum != 0) {
+//                $add_number = CourseStocks::where(['course_id' => $vs['course_id'], 'school_id' => $school_id, 'is_del' => 0])->get();
+//                if (!empty($add_number)) {
+//                    //库存总数
+//                    $stocknum = 0;
+//                    foreach ($add_number as $kstock => $vstock) {
+//                        $stocknum = $stocknum + $vstock['add_number'];
+//                    }
+//                    if ($stocknum != 0) {
                         //查订单表
                         $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'school_id' => $school_id, 'class_id' => $vs['id'], 'nature' => 1])->whereIn('pay_status',[3,4])->count();
-                        if ($ordercount <= $stocknum) {
+//                        if ($ordercount <= $stocknum) {
                             $vs['buy_num'] = $vs['buy_num'] + $ordercount;
                             $method = Couresmethod::select('method_id')->where(['course_id' => $vs['course_id'], 'is_del' => 0])
                                 ->where(function ($query) use ($methodwhere) {
@@ -184,15 +184,15 @@ class CourseController extends Controller {
                             } else {
                                 unset($ref_course[$ks]);
                             }
-                        } else {
-                            unset($ref_course[$ks]);
-                        }
-                    } else {
-                        unset($ref_course[$ks]);
-                    }
-                } else {
-                    unset($ref_course[$ks]);
-                }
+//                        } else {
+//                            unset($ref_course[$ks]);
+//                        }
+//                    } else {
+//                        unset($ref_course[$ks]);
+//                    }
+//                } else {
+//                    unset($ref_course[$ks]);
+//                }
             }
             //两数组合并 排序
             if (!empty($course) && !empty($ref_course)) {
@@ -332,23 +332,38 @@ class CourseController extends Controller {
         return response()->json(['code' => 200, 'msg' => '查询成功', 'data' => $course]);
     }
     //用户与课程关系
-        public function courseToUser(){
+    public function courseToUser(){
         $nature = isset($this->data['nature'])?$this->data['nature']:0;
         $data=[];
-
         if($nature == 1){
-            //是否购买
-            if($this->userid != 0){
-                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>1])->orderByDesc('id')->first();
-                //看订单里面的到期时间 进行判断
-                if (date('Y-m-d H:i:s') >= $order['validity_time']) {
-                    //课程到期  只能观看
-                    $data['is_pay'] = 0;
-                } else {
-                    $data['is_pay'] = 1;
+            //获取被授权的课程id
+            $courseschool = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first();
+            //获取库存计算总数  订单总数 判断
+            $add_number = CourseStocks::where(['course_id' => $courseschool['course_id'], 'school_id' => $this->school['id'], 'is_del' => 0])->get();
+            $stocknum = 0;
+            if (!empty($add_number)) {
+                //库存总数
+                foreach ($add_number as $kstock => $vstock) {
+                    $stocknum = $stocknum + $vstock['add_number'];
                 }
+            }
+            $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'school_id' => $this->school['id'], 'class_id' => $this->data['id'], 'nature' => 1])->whereIn('pay_status',[3,4])->count();
+            if($ordercount >= $stocknum){
+                $data['is_pay'] = 2;
             }else{
-                $data['is_pay'] = 0;
+                //是否已购买
+                if($this->userid != 0){
+                    $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>1])->whereIn('pay_status',[3,4])->orderByDesc('id')->first();
+                    //看订单里面的到期时间 进行判断
+                    if (date('Y-m-d H:i:s') >= $order['validity_time']) {
+                        //课程到期  只能观看
+                        $data['is_pay'] = 0;
+                    } else {
+                        $data['is_pay'] = 1;
+                    }
+                }else{
+                    $data['is_pay'] = 0;
+                }
             }
             //判断用户是否收藏
             if($this->userid != 0){
@@ -362,18 +377,32 @@ class CourseController extends Controller {
                 $data['is_collect'] = 0;
             }
         }else{
-            //是否购买
-            if($this->userid != 0){
-                $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->orderByDesc('id')->first();
-                //看订单里面的到期时间 进行判断
-                if (date('Y-m-d H:i:s') >= $order['validity_time']) {
-                    //课程到期  只能观看
-                    $data['is_pay'] = 0;
-                }else {
-                    $data['is_pay'] = 1;
+            //获取库存计算总数  订单总数   判断 相等或大于就删除，否则展示
+            $add_number = CourseStocks::where(['course_id' => $this->data['id'], 'school_id' => $this->school['id'], 'is_del' => 0])->get();
+            $stocknum = 0;
+            if (!empty($add_number)) {
+                //库存总数
+                foreach ($add_number as $kstock => $vstock) {
+                    $stocknum = $stocknum + $vstock['add_number'];
                 }
+            }
+            $ordercount = Order::where(['status' => 2, 'oa_status' => 1, 'school_id' => $this->school['id'], 'class_id' => $this->data['id'], 'nature' => 0])->whereIn('pay_status',[3,4])->count();
+            if($ordercount >= $stocknum){
+                $data['is_pay'] =2;
             }else{
-                $data['is_pay'] = 0;
+                //是否已购买
+                if($this->userid != 0){
+                    $order = Order::where(['student_id' => $this->userid, 'class_id' =>$this->data['id'], 'status' => 2,'nature'=>0])->whereIn('pay_status',[3,4])->orderByDesc('id')->first();
+                    //看订单里面的到期时间 进行判断
+                    if (date('Y-m-d H:i:s') >= $order['validity_time']) {
+                        //课程到期  只能观看
+                        $data['is_pay'] = 0;
+                    } else {
+                        $data['is_pay'] = 1;
+                    }
+                 }else{
+                     $data['is_pay'] = 0;
+                }
             }
             //判断用户是否收藏
             if($this->userid != 0){

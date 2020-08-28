@@ -4,6 +4,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\AdminLog;
 use App\Models\Order;
+use App\Models\CourseStocks;
 use Illuminate\Support\Facades\DB;
 
 class Enrolment extends Model {
@@ -104,6 +105,14 @@ class Enrolment extends Model {
         $count = Order::where('student_id' , $body['student_id'])->where('class_id' , $body['lession_id'])->where('nature' ,  $body['nature'])->where('status' , 2)->where('oa_status' , 1)->whereIn('pay_status' , [3,4])->where('validity_time' , '>' , date('Y-m-d H:i:s'))->count();
         if($count && $count > 0){
             return ['code' => 202 , 'msg' => '该课程已经开课成功，请不要重复添加'];
+        }
+        
+        //添加库存总数量
+        $add_number = CourseStocks::where('school_id' , $body['school_id'])->where('course_id' , $body['lession_id'])->where('is_del' , 0)->where('is_forbid' , 0)->sum('add_number');
+        //已使用的库存量
+        $use_number = Order::where('class_id' , $body['lession_id'])->where('nature' ,  $body['nature'])->where('status' , 2)->where('oa_status' , 1)->whereIn('pay_status' , [3,4])->count();
+        if($use_number >= $add_number){
+            return ['code' => 202 , 'msg' => '该课程已售完'];
         }
         
         //获取后端的操作员id

@@ -110,6 +110,15 @@ class TeachController extends Controller {
           return response()->json($res);
         }
       }
+      AdminLog::insertAdminLog([
+        'admin_id'       =>   CurrentAdmin::user()['id'] ,
+        'module_name'    =>  'Teach' ,
+        'route_url'      =>  'admin/teach/startLiveChild' , 
+        'operate_method' =>  'insert' ,
+        'content'        =>  json_encode($data),
+        'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+        'create_at'      =>  date('Y-m-d H:i:s')
+      ]);
       return $this->response($res['data']);
     }
     //进入直播间
@@ -173,6 +182,15 @@ class TeachController extends Controller {
           return response()->json($res);
         }
       }
+      AdminLog::insertAdminLog([
+        'admin_id'       =>   CurrentAdmin::user()['id'] ,
+        'module_name'    =>  'Teach' ,
+        'route_url'      =>  'admin/teach/liveInRoom' , 
+        'operate_method' =>  'insert' ,
+        'content'        =>  json_encode($data),
+        'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+        'create_at'      =>  date('Y-m-d H:i:s')
+      ]);
       return $this->response($res['data']);
     }
 
@@ -218,6 +236,15 @@ class TeachController extends Controller {
       if($res['code'] == 1203){ //该课程没有回放记录!
           return response()->json($res);
       }
+      AdminLog::insertAdminLog([
+        'admin_id'       =>   CurrentAdmin::user()['id'] ,
+        'module_name'    =>  'Teach' ,
+        'route_url'      =>  'admin/teach/livePlayback' , 
+        'operate_method' =>  'insert' ,
+        'content'        =>  json_encode($data),
+        'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
+        'create_at'      =>  date('Y-m-d H:i:s')
+      ]);
      	return ['code'=>200,'msg'=>'Success','data'=>$res['data']];
    	}
 
@@ -270,6 +297,15 @@ class TeachController extends Controller {
 	       	  if(array_key_exists('code', $res) && $res["code"] != 0){
                return  response()->json($res);
             }
+            AdminLog::insertAdminLog([
+              'admin_id'       =>   CurrentAdmin::user()['id'] ,
+              'module_name'    =>  'Teach' ,
+              'route_url'      =>  'admin/teach/coursewareUpload' , 
+              'operate_method' =>  'insert' ,
+              'content'        =>  json_encode(array_merge($data,$file)),
+              'ip'             =>  $_SERVER["REMOTE_ADDR"],
+              'create_at'      =>  date('Y-m-d H:i:s')
+            ]);
             return  response()->json(['code'=>200,'msg'=>'上传课件成功']);
           } else {
               return response()->json(['code' => 203 , 'msg' => '上传课件失败']);
@@ -298,6 +334,15 @@ class TeachController extends Controller {
         if(!array_key_exists('code', $res) && !$res["code"] == 0){
             return $this->response('课件删除失败', 500);
         }
+        AdminLog::insertAdminLog([
+          'admin_id'       =>   CurrentAdmin::user()['id'] ,
+          'module_name'    =>  'Teach' ,
+          'route_url'      =>  'admin/teach/coursewareDel' , 
+          'operate_method' =>  'insert' ,
+          'content'        =>  json_encode(array_merge(self::$accept_data,$res)),
+          'ip'             =>  $_SERVER["REMOTE_ADDR"],
+          'create_at'      =>  date('Y-m-d H:i:s')
+        ]);
         return ['code'=>200,'msg'=>'课件删除成功'];
     }
     //观看直播【欢拓】  lys
