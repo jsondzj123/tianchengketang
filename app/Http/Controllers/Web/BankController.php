@@ -1700,7 +1700,7 @@ class BankController extends Controller {
                         } else {
                             //已做完题的数量
                             $make_over_exam = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 1)->where('is_right' , '>' , 0)->count();
-                            $percentage = round($make_over_exam / $sum_exam);
+                            $percentage = round(($make_over_exam / $sum_exam) * 100);
                         }
                     } else if($type == 2){
                         //获取科目名称
@@ -1715,7 +1715,7 @@ class BankController extends Controller {
                         } else {
                             //已做完题的数量
                             $make_over_exam = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 2)->where('is_right' , '>' , 0)->count();
-                            $percentage = round($make_over_exam / $sum_exam);
+                            $percentage = round(($make_over_exam / $sum_exam) * 100);
                         }
                     } else if($type == 3){
                         //根据试卷的id获取试卷名称
@@ -1730,7 +1730,7 @@ class BankController extends Controller {
                         } else {
                             //已做完题的数量
                             $make_over_exam = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 3)->where('is_right' , '>' , 0)->count();
-                            $percentage = round($make_over_exam / $sum_exam);
+                            $percentage = round(($make_over_exam / $sum_exam) * 100);
                         }
                     }
                     
