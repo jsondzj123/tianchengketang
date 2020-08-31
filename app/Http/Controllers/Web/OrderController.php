@@ -190,7 +190,7 @@ class OrderController extends Controller {
             if($paytype['hj_wx_pay_state'] == 1){
                 $paystatus=[
                     'paytype' => 3,
-                    'payname' => '汇聚微信支付',
+                    'payname' => '微信支付',
                     'payimg' => 'https://longdeapi.oss-cn-beijing.aliyuncs.com/wx2xtb.png',
                 ];
                 $pay[] = $paystatus;
@@ -198,7 +198,7 @@ class OrderController extends Controller {
             if($paytype['hj_zfb_pay_state'] == 1){
                 $paystatus=[
                     'paytype' => 4,
-                    'payname' => '汇聚支付宝支付',
+                    'payname' => '支付宝支付',
                     'payimg' => 'https://longdeapi.oss-cn-beijing.aliyuncs.com/zfb2xtb.png',
                 ];
                 $pay[] = $paystatus;
