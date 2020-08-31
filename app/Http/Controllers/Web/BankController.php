@@ -1765,6 +1765,7 @@ class BankController extends Controller {
                         'type_name'     =>  $type_name ,
                         'type'          =>  $type ,
                         'make_date'     =>  $make_date ,
+                        'answer_time'   =>  !empty($v['answer_time']) ? $v['answer_time'] : "" ,
                         'answer_score'  =>  !empty($v['answer_score']) && $v['answer_score'] > 0 ? $v['answer_score'] : 0 ,
                         'sum_exam_count'=>  $sum_exam ,
                         'percentage'    =>  $percentage ,
