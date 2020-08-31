@@ -1778,7 +1778,7 @@ class BankController extends Controller {
             $exam_sum_count = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->count();
             return response()->json(['code' => 200 , 'msg' => '返回做题记录列表成功' , 'data' => ['list' => $new_array , 'count' => $exam_sum_count , 'page' => (int)$page , 'pagesize' => (int)$pagesize]]);
         } else {
-            return response()->json(['code' => 203 , 'msg' => '暂无做题记录']);
+            return response()->json(['code' => 200 , 'msg' => '返回做题记录列表成功' , 'data' => ['list' => [] , 'count' => 0 , 'page' => (int)$page , 'pagesize' => (int)$pagesize]]);
         }
     }
     
