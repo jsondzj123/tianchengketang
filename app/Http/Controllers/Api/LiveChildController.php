@@ -90,10 +90,10 @@ class LiveChildController extends Controller {
             }
 
         }
-        foreach($childs as $k => $v){
-            foreach($v['data'] as $kk =>$vv){
-                $vv['start_time']  = date("Y:m:d H:i:s",$vv['start_time']);
-                $vv['end_time']  = date("Y:m:d H:i:s",$vv['end_time']);
+        foreach($childs as $k => &$v){
+            foreach($v['data'] as $kk =>&$vv){
+                    $vv['start_time']  = date("Y-m-d H:i:s",$vv['start_time']);
+                    $vv['end_time']  = date("Y-m-d H:i:s",$vv['end_time']);
             }
         }
         return $this->response($childs);
