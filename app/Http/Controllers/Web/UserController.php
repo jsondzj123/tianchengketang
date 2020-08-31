@@ -238,9 +238,11 @@ class UserController extends Controller {
                 if ($v['nature'] == 1) {
                     $course = CourseSchool::where(['id' => $v['lesson_id'], 'is_del' => 0, 'status' => 1])->first();
                     $courseid = $course['course_id'];
+                    $course['nature'] = 1;
                 } else {
                     $course = Coures::where(['id' => $v['lesson_id'], 'is_del' => 0, 'status' => 1])->first();
                     $courseid = $course['id'];
+                    $course['nature'] = 0;
                 }
                 $method = Couresmethod::select('method_id')->where(['course_id' => $courseid, 'is_del' => 0])
                     ->where(function ($query) use ($methods) {
