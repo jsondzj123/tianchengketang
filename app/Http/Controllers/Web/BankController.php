@@ -1632,6 +1632,158 @@ class BankController extends Controller {
     
     
     /*
+     * @param  description   做题记录列表分页接口
+     * @param author    dzj
+     * @param ctime     2020-07-09
+     * return string
+     */
+    public function getMyMakeExamPageList(){
+        $bank_id      = isset(self::$accept_data['bank_id']) && self::$accept_data['bank_id'] > 0 ? self::$accept_data['bank_id'] : 0;                    //获取题库id
+        $subject_id   = isset(self::$accept_data['subject_id']) && self::$accept_data['subject_id'] > 0 ? self::$accept_data['subject_id'] : 0;           //获取科目id
+        $pagesize     = isset(self::$accept_data['pagesize']) && self::$accept_data['pagesize'] > 0 ? self::$accept_data['pagesize'] : 15;
+        $page         = isset(self::$accept_data['page']) && self::$accept_data['page'] > 0 ? self::$accept_data['page'] : 1;
+        
+        //起始位置
+        $offset   = ($page - 1) * $pagesize;
+        
+        //判断题库的id是否传递合法
+        if(!$bank_id || $bank_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '题库id不合法']);
+        }
+        
+        //检验用户是否有做题权限
+        $iurisdiction = self::verifyUserExamJurisdiction($bank_id);
+        if($iurisdiction['code'] == 209){
+            return response()->json(['code' => 209 , 'msg' => $iurisdiction['msg']]);
+        }
+        
+        //判断科目的id是否传递合法
+        if(!$subject_id || $subject_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
+        }
+        
+        //新数组赋值
+        $new_array = [];
+
+        //获取学员的做题记录列表
+        $make_exam_list = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->orderBy('update_at' , 'DESC')->offset($offset)->limit($pagesize)->get()->toArray();
+        
+        //判断信息是否为空
+        if($make_exam_list && !empty($make_exam_list)){
+            foreach($make_exam_list as $k=>$v){
+                //类型
+                $type = $v['type'];
+                
+                //试卷id
+                $papers_id = $type == 3 ? $v['papers_id'] : $v['id'];
+                
+                //判断是否有答过题的数量了
+                $is_right_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->count();
+                if($is_right_count && $is_right_count > 0){
+                   //判断是否是章节
+                    if($type == 1){
+                        //判断节是否存在
+                        if($v['joint_id'] > 0){
+                            //通过节的id获取节的名称
+                            $name = Chapters::where('id' , $v['joint_id'])->where('type' , 1)->value('name');
+                        } else {
+                            //通过章的id获取章的名称
+                            $name = Chapters::where('id' , $v['chapter_id'])->where('type' , 0)->value('name');
+                        }
+                        //类型名称
+                        $type_name = "章节练习";
+                        //总共题的数量
+                        $sum_exam  = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 1)->count();
+                        //判断是否做完题
+                        if($v['is_over'] == 1){
+                            $percentage = 100;
+                        } else {
+                            //已做完题的数量
+                            $make_over_exam = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 1)->where('is_right' , '>' , 0)->count();
+                            $percentage = round($make_over_exam / $sum_exam);
+                        }
+                    } else if($type == 2){
+                        //获取科目名称
+                        $name = QuestionSubject::where('id' , $subject_id)->value('subject_name');
+                        //类型名称
+                        $type_name = "快速做题";
+                        //总共题的数量
+                        $sum_exam  = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 2)->count();
+                        //判断是否做完题
+                        if($v['is_over'] == 1){
+                            $percentage = 100;
+                        } else {
+                            //已做完题的数量
+                            $make_over_exam = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 2)->where('is_right' , '>' , 0)->count();
+                            $percentage = round($make_over_exam / $sum_exam);
+                        }
+                    } else if($type == 3){
+                        //根据试卷的id获取试卷名称
+                        $name = Papers::where("id" , $papers_id)->value('papers_name');
+                        //类型名称
+                        $type_name = "模拟真题";
+                        //总共题的数量
+                        $sum_exam  = PapersExam::where("papers_id" , $papers_id)->where("subject_id" , $subject_id)->where("is_del" , 0)->whereIn("type" ,[1,2,3,4])->count();
+                        //判断是否做完题
+                        if($v['is_over'] == 1){
+                            $percentage = 100;
+                        } else {
+                            //已做完题的数量
+                            $make_over_exam = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 3)->where('is_right' , '>' , 0)->count();
+                            $percentage = round($make_over_exam / $sum_exam);
+                        }
+                    }
+
+                    //判断如果学员没有做完题则展示最近做题的时间
+                    if($v['is_over'] == 1){
+                        //获取学员作对的道数
+                        $collect_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , 1)->count();
+                        //获取学员做错的道数
+                        $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , 2)->count();
+
+                        $make_date   =   date('Y-m-d' ,strtotime($v['update_at']));
+                        $make_time   =   date('H:i:s' ,strtotime($v['update_at']));
+                        $is_over     =   1;
+                    } else {
+                        $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , '>' , 0)->orderBy('update_at' , 'DESC')->first();
+                        if($info && !empty($info)){
+                            $make_date   =   date('Y-m-d' ,strtotime($info['update_at']));
+                            $make_time   =   date('H:i:s' ,strtotime($info['update_at']));
+                        } else {
+                            $make_date   =   "";
+                            $make_time   =   "";
+                        }
+                        $is_over       = 0;
+                        $collect_count = 0;
+                        $error_count   = 0;
+                    }
+
+                    //新数组赋值
+                    $new_array[] = [
+                        'papers_id'     =>  $papers_id ,
+                        'chapter_id'    =>  $v['chapter_id'] ,
+                        'joint_id'      =>  $v['joint_id'] ,
+                        'name'          =>  $name ,
+                        'type_name'     =>  $type_name ,
+                        'type'          =>  $type ,
+                        'make_date'     =>  $make_date ,
+                        'answer_score'  =>  !empty($v['answer_score']) && $v['answer_score'] > 0 ? $v['answer_score'] : 0 ,
+                        'sum_exam_count'=>  $sum_exam ,
+                        'percentage'    =>  $percentage ,
+                        'collect_count' =>  $collect_count ,
+                        'error_count'   =>  $error_count ,
+                        'is_over'       =>  $is_over
+                    ];
+                }
+            }
+            return response()->json(['code' => 200 , 'msg' => '返回做题记录列表成功' , 'data' => ['list' => $new_array , 'page' => $page , 'pagesize' => $pagesize]]);
+        } else {
+            return response()->json(['code' => 203 , 'msg' => '暂无做题记录']);
+        }
+    }
+    
+    
+    /*
      * @param  description   章节练习/快速做题/模拟真题最新做题接口
      * @param author    dzj
      * @param ctime     2020-08-19
