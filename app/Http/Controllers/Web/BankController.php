@@ -1774,7 +1774,7 @@ class BankController extends Controller {
                     ];
                 }
             }
-            return response()->json(['code' => 200 , 'msg' => '返回做题记录列表成功' , 'data' => ['list' => $new_array , 'page' => $page , 'pagesize' => $pagesize]]);
+            return response()->json(['code' => 200 , 'msg' => '返回做题记录列表成功' , 'data' => ['list' => $new_array , 'page' => (int)$page , 'pagesize' => (int)$pagesize]]);
         } else {
             return response()->json(['code' => 203 , 'msg' => '暂无做题记录']);
         }
