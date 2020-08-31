@@ -1774,7 +1774,9 @@ class BankController extends Controller {
                     ];
                 }
             }
-            return response()->json(['code' => 200 , 'msg' => '返回做题记录列表成功' , 'data' => ['list' => $new_array , 'page' => (int)$page , 'pagesize' => (int)$pagesize]]);
+            //获取学员的做题记录总条数
+            $exam_sum_count = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->count();
+            return response()->json(['code' => 200 , 'msg' => '返回做题记录列表成功' , 'data' => ['list' => $new_array , 'count' => $exam_sum_count , 'page' => (int)$page , 'pagesize' => (int)$pagesize]]);
         } else {
             return response()->json(['code' => 203 , 'msg' => '暂无做题记录']);
         }
