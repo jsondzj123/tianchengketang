@@ -476,7 +476,8 @@ class Papers extends Model {
         //获取当前的科目
         if(!isset($body['subject_id']) || empty($body['subject_id'])){
             //获取当前的科目
-            $subject_info = QuestionSubject::select("id as subject_id")->where("admin_id" ,"=" , $admin_id)->where("bank_id" , "=" , $body['bank_id'])->where("is_del" , "=" , 0)->first();
+            //$subject_info = QuestionSubject::select("id as subject_id")->where("admin_id" ,"=" , $admin_id)->where("bank_id" , "=" , $body['bank_id'])->where("is_del" , "=" , 0)->first();
+            $subject_info = QuestionSubject::select("id as subject_id")->where("bank_id" , "=" , $body['bank_id'])->where("is_del" , "=" , 0)->first();
             //根据题库id获取第一个科目的id
             if($subject_info && !empty($subject_info)){
                 $subject_info = $subject_info->toArray();
@@ -520,7 +521,7 @@ class Papers extends Model {
             }
 
             //操作员id
-            $query->where('admin_id' , '=' , $admin_id);
+            //$query->where('admin_id' , '=' , $admin_id);
         })->count();
         
         //判断试卷数量是否为空
@@ -558,7 +559,7 @@ class Papers extends Model {
                 }
 
                 //操作员id
-                $query->where('admin_id' , '=' , $admin_id);
+                //$query->where('admin_id' , '=' , $admin_id);
             })->orderByDesc('create_at')->offset($offset)->limit($pagesize)->get()->toArray();
      
             foreach($papers_list as $k=>$v){
