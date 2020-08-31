@@ -206,7 +206,7 @@ class CourseController extends Controller {
                 $date = array_column($all, 'create_at');
                 array_multisort($date, SORT_DESC, $all);
             } else if ($sort == 2) {
-                $date = array_column($all, 'buy_num');
+                $date = array_column($all, 'watch_num');
                 array_multisort($date, SORT_DESC, $all);
             }
             $res = array_slice($all, $offset, $pagesize);
