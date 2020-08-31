@@ -1733,14 +1733,14 @@ class BankController extends Controller {
                             $percentage = round($make_over_exam / $sum_exam);
                         }
                     }
+                    
+                    //获取学员作对的道数
+                    $collect_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , 1)->count();
+                    //获取学员做错的道数
+                    $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , 2)->count();
 
                     //判断如果学员没有做完题则展示最近做题的时间
                     if($v['is_over'] == 1){
-                        //获取学员作对的道数
-                        $collect_count = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , 1)->count();
-                        //获取学员做错的道数
-                        $error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , $type)->where('is_right' , 2)->count();
-
                         $make_date   =   date('Y-m-d' ,strtotime($v['update_at']));
                         $make_time   =   date('H:i:s' ,strtotime($v['update_at']));
                         $is_over     =   1;
@@ -1754,8 +1754,6 @@ class BankController extends Controller {
                             $make_time   =   "";
                         }
                         $is_over       = 0;
-                        $collect_count = 0;
-                        $error_count   = 0;
                     }
 
                     //新数组赋值
