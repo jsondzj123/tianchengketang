@@ -121,7 +121,7 @@ class TeacherController extends Controller {
 			$data = CourseSchool::leftJoin('ld_course_teacher','ld_course_teacher.course_id','=','ld_course_school.course_id')
 						->leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_teacher.teacher_id')
 						->where(['ld_course_school.is_del'=>0,'ld_course_school.to_school_id'=>$this->school['id'],'ld_course_school.status'=>1,'ld_lecturer_educationa.id'=>$this->data['teacher_id']])
-						->select('ld_course_school.cover','ld_course_school.title','ld_course_school.pricing','ld_course_school.buy_num','ld_lecturer_educationa.id','ld_course_school.course_id','ld_course_school.sale_price')
+						->select('ld_course_school.cover','ld_course_school.title','ld_course_school.pricing','ld_course_school.buy_num','ld_lecturer_educationa.id as teacher_id','ld_course_school.course_id','ld_course_school.sale_price','ld_course_school.course_id as id')
 						->get()->toArray();
 			if(!empty($data)){
 				foreach ($data as $k => &$nature) {
@@ -133,7 +133,7 @@ class TeacherController extends Controller {
 			$data =Coures::leftJoin('ld_course_teacher','ld_course_teacher.course_id','=','ld_course.id')
 						->leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_teacher.teacher_id')
 						->where(['ld_course.is_del'=>0,'ld_course.school_id'=>$this->school['id'],'ld_course.status'=>1,'ld_lecturer_educationa.id'=>$this->data['teacher_id']])
-						->select('ld_course.cover','ld_course.title','ld_course.pricing','ld_course.buy_num','ld_lecturer_educationa.id','ld_course.id as course_id','ld_course.sale_price')
+						->select('ld_course.cover','ld_course.title','ld_course.pricing','ld_course.buy_num','ld_lecturer_educationa.id as teacher_id','ld_course.id','ld_course.sale_price','ld_course.id as course_id')
 						->get()->toArray();
 			if(!empty($data)){
 				foreach ($data as $k => &$zizeng) {
@@ -144,7 +144,7 @@ class TeacherController extends Controller {
 		if(!empty($data)){
 			foreach($data as $key=>$v){
 
-				if($v['id'] == $this->data['teacher_id']){
+				if($v['teacher_id'] == $this->data['teacher_id']){
 					$arr[] = $v;
 				}
 			}
