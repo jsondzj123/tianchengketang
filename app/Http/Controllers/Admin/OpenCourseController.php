@@ -134,7 +134,7 @@ class OpenCourseController extends Controller {
 
 	        $openCourseArr['start_at'] = strtotime($start_at);
 	        $openCourseArr['end_at'] = strtotime($end_at);
-	       print_r($openCourseArr);die;
+	      
 	        $openCourseArr['admin_id']  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
 	        $openCourseArr['describe']  = isset($openCourseArr['describe']) ?$openCourseArr['describe']:'';
 	   		$openCourseArr['create_at'] = date('Y-m-d H:i:s');
