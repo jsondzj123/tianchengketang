@@ -15,6 +15,7 @@ use App\Models\FootConfig;
 use App\Models\Admin;
 use App\Models\CouresSubject;
 use App\Models\Subject;
+use App\Models\Order;
 
 class IndexController extends Controller {
     protected $school;
