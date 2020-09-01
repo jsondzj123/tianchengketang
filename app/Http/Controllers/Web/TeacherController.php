@@ -40,12 +40,12 @@ class TeacherController extends Controller {
 				$natureCourseArr =  CourseSchool::leftJoin('ld_course_teacher','ld_course_teacher.course_id','=','ld_course_school.course_id')
 						->leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_teacher.teacher_id')
 						->where(['ld_course_school.is_del'=>0,'ld_course_school.to_school_id'=>$this->school['id'],'ld_course_school.status'=>1,'ld_lecturer_educationa.id'=>$v['id']])
-						->select('ld_course_school.course_id','ld_course_school.cover','ld_course_school.title','ld_course_school.pricing','ld_course_school.buy_num','ld_lecturer_educationa.id','ld_course_school.course_id')
+						->select('ld_course_school.id as course_id ','ld_course_school.cover','ld_course_school.title','ld_course_school.pricing','ld_course_school.buy_num','ld_lecturer_educationa.id')
 						->get()->toArray();
 				$courseIds = array_column($natureCourseArr, 'course_id');
 				$v['number'] = count($natureCourseArr);//开课数量
 				$sumNatureCourseArr = array_sum(array_column($natureCourseArr,'buy_num'));//虚拟购买量
-				$realityBuyum= Order::whereIn('class_id',$courseIds)->where(['school_id'=>$this->school['id'],'nature'=>1,'status'=>2])->whereIn('pay_status',[3,4])->count();//实际购买量
+				$realityBuyum= Order::whereIn('class_id',$courseIds)->where(['school_id'=>$this->school['id'],'nature'=>1,'status'=>2])->whereIn('pay_status',[3,4])->count();//实际购买量 （授权课程订单class_id 对应的是ld_course_school 的id ）
 				$v['student_number'] = $sumNatureCourseArr+$realityBuyum;
 				$v['grade'] =  '5.0';
 				$v['star_num'] = 5;
@@ -58,13 +58,13 @@ class TeacherController extends Controller {
 				$couresArr  = Coures::leftJoin('ld_course_teacher','ld_course_teacher.course_id','=','ld_course.id')
 					->leftJoin('ld_lecturer_educationa','ld_lecturer_educationa.id','=','ld_course_teacher.teacher_id')
 					->where(['ld_course.is_del'=>0,'ld_course.school_id'=>$this->school['id'],'ld_course.status'=>1,'ld_lecturer_educationa.id'=>$vv['id']])
-					->select('ld_course.id','ld_course.cover','ld_course.title','ld_course.pricing','ld_course.buy_num','ld_lecturer_educationa.id','ld_course.id as course_id')
+					->select('ld_course.cover','ld_course.title','ld_course.pricing','ld_course.buy_num','ld_lecturer_educationa.id','ld_course.id as course_id')
 					->get()->toArray();
 		
-				$courseIds = array_column($couresArr, 'id');
+				$courseIds = array_column($couresArr, 'course_id'); 
 				$vv['number'] = count($couresArr);//开课数量
 				$sumNatureCourseArr = array_sum(array_column($couresArr,'buy_num'));//虚拟购买量
-				$realityBuyum = Order::whereIn('class_id',$courseIds)->where(['school_id'=>$this->school['id'],'nature'=>1,'status'=>2])->whereIn('pay_status',[3,4])->count();//实际购买量
+				$realityBuyum = Order::whereIn('class_id',$courseIds)->where(['school_id'=>$this->school['id'],'nature'=>0,'status'=>2])->whereIn('pay_status',[3,4])->count();//实际购买量
 				$vv['student_number'] = $sumNatureCourseArr+$realityBuyum;
 				$vv['grade'] =  '5.0';
 				$vv['star_num'] = 5;
