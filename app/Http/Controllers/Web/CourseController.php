@@ -235,6 +235,7 @@ class CourseController extends Controller {
         //授权
         if($this->data['nature'] == 1){
             $course = CourseSchool::where(['id'=>$this->data['id'],'is_del'=>0])->first();
+            
             if(!$course){
                 return response()->json(['code' => 201 , 'msg' => '无此课程']);
             }
