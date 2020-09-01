@@ -140,7 +140,7 @@ class SchoolController extends Controller {
         }
         try{
             DB::beginTransaction();
-            $school = School::find($data['school_id']);
+            $school = School::where(['id'=>$data['school_id'],'is_del'=>1])->first();
             if($school['is_forbid'] != 1){
                 $school->is_forbid = 1; 
                 $is_forbid = 1;
@@ -166,12 +166,13 @@ class SchoolController extends Controller {
                 return response()->json(['code' => 203 , 'msg' => '更新失败']);
             }
             if(PaySet::where('school_id',$school['id'])->update(['wx_pay_state'=>$wx_pay_state,'zfb_pay_state'=>$zfb_pay_state,'hj_wx_pay_state'=>$hj_wx_pay_state,'hj_zfb_pay_state'=>$hj_zfb_pay_state,'update_at'=>date('Y-m-d H:i:s')] ) ){
+                $data['is_forbid'] = $is_forbid; //修改后的状态
                 AdminLog::insertAdminLog([
                     'admin_id'       =>   CurrentAdmin::user()['id'] ,
                     'module_name'    =>  'School' ,
                     'route_url'      =>  'admin/school/doSchoolForbid' , 
                     'operate_method' =>  'update',
-                    'content'        =>  json_encode(array_merge($data,$school)),
+                    'content'        =>  json_encode($data)),
                     'ip'             =>  $_SERVER["REMOTE_ADDR"] ,
                     'create_at'      =>  date('Y-m-d H:i:s')
                 ]);
