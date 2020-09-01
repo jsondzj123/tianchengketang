@@ -415,9 +415,9 @@ class UserController extends Controller {
         if(!empty($order)){
             foreach ($order as $k=>&$v){
                 if($v['nature'] == 1){
-                    $course = CourseSchool::select('title')->where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    $course = CourseSchool::select('title')->where(['id'=>$v['class_id'],'is_del'=>0])->first();
                 }else{
-                    $course = Coures::select('title')->where(['id'=>$v['class_id'],'is_del'=>0,'status'=>1])->first();
+                    $course = Coures::select('title')->where(['id'=>$v['class_id'],'is_del'=>0])->first();
                 }
                 $v['title'] = isset($course['title'])?$course['title']:'';
             }
