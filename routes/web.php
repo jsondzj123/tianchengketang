@@ -177,6 +177,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('getMyErrorExamList','BankController@getMyErrorExamList');      //错题本列表接口
         $router->post('getMyMakeExamList','BankController@getMyMakeExamList');        //做题记录列表接口
         $router->post('getMyMakeExamPageList','BankController@getMyMakeExamPageList'); //做题记录列表分页接口
+        $router->post('getAnalogyExamStop','BankController@getAnalogyExamStop');       //模拟真题暂停接口
         $router->post('getNewMakeExamInfo','BankController@getNewMakeExamInfo');      //章节练习/快速做题/模拟真题最新做题接口
         $router->post('getMakeExamInfo','BankController@getMakeExamInfo');            //做题记录详情接口
         $router->post('doHandInPapers','BankController@doHandInPapers');              //做题交卷接口

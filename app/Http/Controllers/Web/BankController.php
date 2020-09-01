@@ -1783,6 +1783,67 @@ class BankController extends Controller {
         }
     }
     
+    /*
+     * @param  description   模拟真题暂停接口
+     * @param author    dzj
+     * @param ctime     2020-09-01
+     * return string
+     */
+    public function getAnalogyExamStop(){
+        $bank_id      = isset(self::$accept_data['bank_id']) && self::$accept_data['bank_id'] > 0 ? self::$accept_data['bank_id'] : 0;                    //获取题库id
+        $subject_id   = isset(self::$accept_data['subject_id']) && self::$accept_data['subject_id'] > 0 ? self::$accept_data['subject_id'] : 0;           //获取科目id
+        $papers_id    = isset(self::$accept_data['papers_id']) && self::$accept_data['papers_id'] > 0 ? self::$accept_data['papers_id'] : 0;              //获取试卷id
+        $surplus_time = isset(self::$accept_data['surplus_time']) && !empty(self::$accept_data['surplus_time']) ? self::$accept_data['surplus_time'] : '';//获取试卷剩余时间
+        
+        
+        //判断题库的id是否传递合法
+        if(!$bank_id || $bank_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '题库id不合法']);
+        }
+        
+        //检验用户是否有做题权限
+        $iurisdiction = self::verifyUserExamJurisdiction($bank_id);
+        if($iurisdiction['code'] == 209){
+            return response()->json(['code' => 209 , 'msg' => $iurisdiction['msg']]);
+        }
+        
+        //判断科目的id是否传递合法
+        if(!$subject_id || $subject_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
+        }
+        
+        //判断试卷的id是否传递合法
+        if(!$papers_id || $papers_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '试卷id不合法']);
+        }
+        
+        //根据试卷的id获取试卷的信息
+        $papers_info =  Papers::where("bank_id" , $bank_id)->where('subject_id' , $subject_id)->where('id' , $papers_id)->where('is_del' , 0)->where('is_publish' , 1)->first();
+        if(!$papers_info || empty($papers_info)){
+            return response()->json(['code' => 203 , 'msg' => '该试卷不存在']);
+        }
+        
+        //获取试卷的时间
+        $sum_papers_time = $papers_info['papers_time'] * 60000;
+        
+        //判断试卷的时间是否过期了
+        $key = 'user:'.self::$accept_data['user_info']['user_id'].':bank:'.$bank_id.':subject_id:'.$subject_id.':papers:'.$papers_id;
+        
+        //判断试卷答题剩余时间是否为空
+        if($surplus_time && !empty($surplus_time)){
+            //存储试卷的答题时间
+            Redis::set($key , $surplus_time);
+            return response()->json(['code' => 200 , 'msg' => '获取数据成功' , 'data' => ['papers_time' => $sum_papers_time , 'surplus_time' => $surplus_time]]);
+        } else { 
+            //获取试卷答题剩余时间
+            $surplus_time = Redis::get($key);
+            if($surplus_time && !empty($surplus_time)){
+                return response()->json(['code' => 200 , 'msg' => '获取数据成功' , 'data' => ['papers_time' => $sum_papers_time , 'surplus_time' => $surplus_time]]);
+            } else {
+                return response()->json(['code' => 200 , 'msg' => '获取数据成功' , 'data' => ['papers_time' => $sum_papers_time , 'surplus_time' => $sum_papers_time]]);
+            }
+        }
+    }
     
     /*
      * @param  description   章节练习/快速做题/模拟真题最新做题接口
