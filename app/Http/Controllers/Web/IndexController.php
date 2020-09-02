@@ -135,10 +135,19 @@ class IndexController extends Controller {
     public function newInformation(){
 
     	$limit = !isset($this->data['limit']) || empty($this->data['limit']) || $this->data['limit']<=0 ? 4 : $this->data['limit'];
-    	$where = ['ld_article_type.school_id'=>$this->school['id'],'ld_article_type.status'=>1,'ld_article_type.is_del'=>1];
+    	$where = ['ld_article_type.school_id'=>$this->school['id'],'ld_article_type.status'=>1,'ld_article_type.is_del'=>1,'ld_article.is_recommend'=>1];
     	$news = Articletype::leftJoin('ld_article','ld_article.article_type_id','=','ld_article_type.id')
              ->where($where)
+             ->orderBy('ld_article.update_at','desc')
              ->limit($limit)->get();
+        $count = count($news);
+        if($count<$limit){
+            $where = ['ld_article_type.school_id'=>$this->school['id'],'ld_article_type.status'=>1,'ld_article_type.is_del'=>1,'ld_article.is_recommend'=>0];
+            $noRecommendNews = Articletype::leftJoin('ld_article','ld_article.article_type_id','=','ld_article_type.id')
+             ->where($where)
+             ->limit($limit-$count)->get();
+            $news = array_merge($news,$noRecommendNews);
+        }
 
         return response()->json(['code'=>200,'msg'=>'Success','data'=>$news]);
     }
