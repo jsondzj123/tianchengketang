@@ -13,6 +13,7 @@ use App\Models\StudentDoTitle;
 use App\Models\StudentCollectQuestion;
 use App\Models\StudentTabQuestion;
 use App\Models\StudentPapers;
+use App\Models\StudentError;
 use App\Models\Coures;
 use App\Models\Order;
 use App\Models\School;
@@ -362,8 +363,9 @@ class BankController extends Controller {
         $no_exam_count = $no_exam_count > 0 ? $no_exam_count : $exam_count;
         
         //错题数量
-        $error_exam_count = StudentDoTitle::select(DB::raw("any_value(exam_id) as exam_id"))->where("student_id" , self::$accept_data['user_info']['user_id'])->where('bank_id' , $bank_id)->where('subject_id' , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('type' , 1)->where('is_right' , 2)->where('answer' , '!=' , '')->groupBy('exam_id')->get()->count();
-
+        //$error_exam_count = StudentDoTitle::select(DB::raw("any_value(exam_id) as exam_id"))->where("student_id" , self::$accept_data['user_info']['user_id'])->where('bank_id' , $bank_id)->where('subject_id' , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('type' , 1)->where('is_right' , 2)->where('answer' , '!=' , '')->groupBy('exam_id')->get()->count();
+        $error_exam_count = StudentError::select(DB::raw("any_value(exam_id) as exam_id"))->where("student_id" , self::$accept_data['user_info']['user_id'])->where('bank_id' , $bank_id)->where('subject_id' , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('is_del' , 0)->groupBy('exam_id')->count();
+        
         //分类
         $type_array = [
             ['type' => 1 , 'name' => "全部题(".$exam_count.")"] ,
@@ -1320,8 +1322,27 @@ class BankController extends Controller {
                         StudentPapers::where('id' , $papers_id)->update(['answer_time' => $answer_time , 'answer_score' => $answer_score , 'is_over' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
                     }
                 }
+                
                 //更改试题中的状态
-                StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'exam_id' => $exam_id])->update(['answer' => $myanswer , 'is_right' => $is_right , 'update_at' => date('Y-m-d H:i:s')]);
+                if($is_right == 2){
+                    StudentError::insertGetId([
+                        'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                        'bank_id'      =>   $bank_id ,
+                        'subject_id'   =>   $subject_id ,
+                        'papers_id'    =>   $papers_id ,
+                        'exam_id'      =>   $exam_id ,
+                        'chapter_id'   =>   $chapter_id ,
+                        'joint_id'     =>   $joint_id ,
+                        'type'         =>   $type ,
+                        'create_at'    =>   date('Y-m-d H:i:s')
+                    ]);
+                } else if($is_right == 1) {
+                    $info = StudentError::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'exam_id' => $exam_id])->count();
+                    if($info && !empty($info)){
+                        StudentError::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'exam_id' => $exam_id])->update(['is_del' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
+                    }
+                }
+                //StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'exam_id' => $exam_id])->update(['answer' => $myanswer , 'is_right' => $is_right , 'update_at' => date('Y-m-d H:i:s')]);
                 //事务回滚
                 DB::commit();
                 return response()->json(['code' => 200 , 'msg' => '答题成功']);
@@ -1366,8 +1387,8 @@ class BankController extends Controller {
         $collect_count = StudentCollectQuestion::select(DB::raw("any_value(exam_id) as exam_id"))->where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('status' , 1)->groupBy('exam_id')->get()->count();
         
         //错题本
-        //$error_count   = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_right' , 2)->count();
-        $error_count   = StudentDoTitle::select(DB::raw("any_value(exam_id) as exam_id"))->where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_right' , 2)->where('answer' , '!=' , '')->groupBy('exam_id')->get()->count();
+        //$error_count   = StudentDoTitle::select(DB::raw("any_value(exam_id) as exam_id"))->where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_right' , 2)->where('answer' , '!=' , '')->groupBy('exam_id')->get()->count();
+        $error_count = StudentError::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_del' , 0)->count();
         
         //做题记录
         $exam_count    = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->whereIn('type' , [1,2,3])->count();
@@ -1489,7 +1510,8 @@ class BankController extends Controller {
         $exam_type_arr = [1=>'单选题',2=>'多选题',3=>'判断题',4=>'不定项',5=>'填空题',6=>'简答题'];
         
         //错题本列表
-        $student_error_list = StudentDoTitle::select(DB::raw("any_value(papers_id) as papers_id , any_value(type) as type , any_value(exam_id) as exam_id"))->where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_right' , 2)->where('answer' , '!=' , '')->groupBy('exam_id')->get();
+        //$student_error_list = StudentDoTitle::select(DB::raw("any_value(papers_id) as papers_id , any_value(type) as type , any_value(exam_id) as exam_id"))->where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_right' , 2)->where('answer' , '!=' , '')->groupBy('exam_id')->get();
+        $student_error_list = StudentError::select(DB::raw("any_value(papers_id) as papers_id , any_value(type) as type , any_value(exam_id) as exam_id"))->where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('is_del' , 0)->groupBy('exam_id')->get();
         if($student_error_list && !empty($student_error_list)){
             $student_error_list = $student_error_list->toArray();
             foreach($student_error_list as $k=>$v){
@@ -1535,7 +1557,7 @@ class BankController extends Controller {
             }
             return response()->json(['code' => 200 , 'msg' => '获取错题本列表成功' , 'data' => $exam_array]);
         } else {
-            return response()->json(['code' => 203 , 'msg' => '暂无收藏的试题']);
+            return response()->json(['code' => 203 , 'msg' => '暂无错题的试题']);
         }
     }
     
@@ -2197,7 +2219,7 @@ class BankController extends Controller {
                 if($rs && !empty($rs)){
                     StudentPapers::where('id' , $papers_id)->update(['answer_time' => $answer_time , 'is_over' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
                     //更改试题中的状态
-                    StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id])->whereIn("id" , $no_title_id)->update(['answer' => '' , 'is_right' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
+                    //StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id])->whereIn("id" , $no_title_id)->update(['answer' => '' , 'is_right' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
                     //事务回滚
                     DB::commit();
                     return response()->json(['code' => 200 , 'msg' => '交卷成功' , 'data' => ['answer_time' => $answer_time , 'answer_score' => 0]]);
@@ -2225,7 +2247,7 @@ class BankController extends Controller {
                 if($rs && !empty($rs)){
                     StudentPapers::where('id' , $papers_id)->update(['answer_time' => $answer_time , 'is_over' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
                     //更改试题中的状态
-                    StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id])->whereIn("id" , $no_title_id)->update(['answer' => '' , 'is_right' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
+                    //StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id])->whereIn("id" , $no_title_id)->update(['answer' => '' , 'is_right' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
                     //事务回滚
                     DB::commit();
                     return response()->json(['code' => 200 , 'msg' => '交卷成功' , 'data' => ['answer_time' => $answer_time , 'answer_score' => 0]]);
@@ -2292,7 +2314,7 @@ class BankController extends Controller {
                             $rs = StudentDoTitle::whereIn("id" , $no_title_id)->update(['update_at' => date('Y-m-d H:i:s') , 'is_right' => 2 , 'answer' => '']);
                             if($rs && !empty($rs)){
                                 //更改试题中的状态
-                                StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id])->whereIn("id" , $no_title_id)->update(['answer' => '' , 'is_right' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
+                                //StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id])->whereIn("id" , $no_title_id)->update(['answer' => '' , 'is_right' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
                             }
                         }
                         //事务回滚
@@ -2314,7 +2336,7 @@ class BankController extends Controller {
                         if($rs && !empty($rs)){
                             StudentPapers::where('id' , $papers_id)->update(['answer_time' => $answer_time , 'is_over' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
                             //更改试题中的状态
-                            StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id])->whereIn("id" , $no_title_id)->update(['answer' => '' , 'is_right' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
+                            //StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id])->whereIn("id" , $no_title_id)->update(['answer' => '' , 'is_right' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
                             //事务回滚
                             DB::commit();
                             return response()->json(['code' => 200 , 'msg' => '交卷成功' , 'data' => ['answer_time' => $answer_time , 'answer_score' => 0]]);
