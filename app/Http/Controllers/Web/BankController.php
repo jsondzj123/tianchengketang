@@ -1630,7 +1630,8 @@ class BankController extends Controller {
 
                     //新数组赋值
                     $new_array[] = [
-                        'papers_id'     =>  $type == 3 ? $v['papers_id'] : $v['id'] ,
+                        'papers_id'     =>  $v['id'] ,
+                        'moni_papers_id'=>  $type == 3 ? $v['papers_id'] : 0 ,
                         'chapter_id'    =>  $v['chapter_id'] ,
                         'joint_id'      =>  $v['joint_id'] ,
                         'name'          =>  $name ,
@@ -1778,7 +1779,8 @@ class BankController extends Controller {
 
                     //新数组赋值
                     $new_array[] = [
-                        'papers_id'     =>  $type == 3 ? $v['papers_id'] : $v['id'] ,
+                        'papers_id'     =>  $v['id'] ,
+                        'moni_papers_id'=>  $type == 3 ? $v['papers_id'] : 0 ,
                         'chapter_id'    =>  $v['chapter_id'] ,
                         'joint_id'      =>  $v['joint_id'] ,
                         'name'          =>  $name ,
