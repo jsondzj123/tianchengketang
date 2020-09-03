@@ -117,9 +117,9 @@ class OpenCourseController extends Controller {
 
 	        $lectTeacherId  = json_decode($openCourseArr['lect_teacher_id'],1);
 	        $time = json_decode($openCourseArr['time'],1); //时间段
-	      	$start_at = $openCourseArr['date'].$time[0];
-	      	$end_at = $openCourseArr['date'].$time[1];
-
+	      	$start_at = $openCourseArr['date']." ".$time[0];
+	      	$end_at = $openCourseArr['date']." ".$time[1];
+				
 	        unset($openCourseArr['edu_teacher_id']);
 	        unset($openCourseArr['lect_teacher_id']);
 	        unset($openCourseArr['subject']);
@@ -134,7 +134,7 @@ class OpenCourseController extends Controller {
 
 	        $openCourseArr['start_at'] = strtotime($start_at);
 	        $openCourseArr['end_at'] = strtotime($end_at);
-	       
+	      
 	        $openCourseArr['admin_id']  = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0 ;
 	        $openCourseArr['describe']  = isset($openCourseArr['describe']) ?$openCourseArr['describe']:'';
 	   		$openCourseArr['create_at'] = date('Y-m-d H:i:s');
@@ -170,6 +170,7 @@ class OpenCourseController extends Controller {
             	$openCourseData['title']= $openCourseArr['title'];
             	$openCourseData['start_at']= date('Y-m-d H:i:s',$openCourseArr['start_at']);
             	$openCourseData['end_at']= date('Y-m-d H:i:s',$openCourseArr['end_at']);
+
             	$openCourseData['teacher_id']= $lectTeacherId;
             	$openCourseData['nickname'] = Teacher::where('id',$lectTeacherId)->select('real_name')->first()['real_name'];
             	$res = $this->addLive($openCourseData,$openCourseId);
@@ -185,7 +186,7 @@ class OpenCourseController extends Controller {
 	            	]);
             		return response()->json(['code'=>203,'msg'=>'公开课创建房间未成功，请重试！']);
             	}
-            	DB::commit();
+            	DB::commit();     
             	return response()->json(['code'=>200,'msg'=>'公开课创建成功']);  
             
             
@@ -544,8 +545,8 @@ class OpenCourseController extends Controller {
 	    }
 
 	    $time = json_decode($openCourseArr['time'],1); //时间段
-     	$start_at = $openCourseArr['date'].$time[0];
-	    $end_at = $openCourseArr['date'].$time[1];
+     	$start_at = $openCourseArr['date']." ".$time[0];
+	    $end_at = $openCourseArr['date']." ".$time[1];
 	    if($data['data']['start_at'] <time() && $data['data']['end_at'] >time()){
 	    	return response()->json(['code'=>207,'msg'=>'直播中，无法修改']);
 	    }
