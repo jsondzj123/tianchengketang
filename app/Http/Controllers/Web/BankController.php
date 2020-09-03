@@ -2273,6 +2273,18 @@ class BankController extends Controller {
                     
                     //判断是否提交试卷成功
                     if($id && !empty($id)){
+                        //查询还未做完的题列表
+                        $noexam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 3)->where('is_right' , 0)->get()->toArray();
+                        if($noexam_list && !empty($noexam_list)){
+                            //将没有做得题得状态进行更新
+                            $no_title_id = array_column($noexam_list , 'id');
+                            //批量更新未做得试题
+                            $rs = StudentDoTitle::whereIn("id" , $no_title_id)->update(['update_at' => date('Y-m-d H:i:s') , 'is_right' => 2 , 'answer' => '']);
+                            if($rs && !empty($rs)){
+                                //更改试题中的状态
+                                StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id])->whereIn("id" , $no_title_id)->update(['answer' => '' , 'is_right' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
+                            }
+                        }
                         //事务回滚
                         DB::commit();
                         return response()->json(['code' => 200 , 'msg' => '交卷成功' , 'data' => ['answer_time' => $answer_time , 'answer_score' => $sum_scores]]);
@@ -2280,6 +2292,27 @@ class BankController extends Controller {
                         //事务回滚
                         DB::commit();
                         return response()->json(['code' => 203 , 'msg' => '交卷失败']);
+                    }
+                } else {
+                    //查询还未做完的题列表
+                    $noexam_list = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 3)->where('is_right' , 0)->get()->toArray();
+                    if($noexam_list && !empty($noexam_list)){
+                        //将没有做得题得状态进行更新
+                        $no_title_id = array_column($noexam_list , 'id');
+                        //批量更新未做得试题
+                        $rs = StudentDoTitle::whereIn("id" , $no_title_id)->update(['update_at' => date('Y-m-d H:i:s') , 'is_right' => 2 , 'answer' => '']);
+                        if($rs && !empty($rs)){
+                            StudentPapers::where('id' , $papers_id)->update(['answer_time' => $answer_time , 'is_over' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
+                            //更改试题中的状态
+                            StudentDoTitle::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id])->whereIn("id" , $no_title_id)->update(['answer' => '' , 'is_right' => 2 , 'update_at' => date('Y-m-d H:i:s')]);
+                            //事务回滚
+                            DB::commit();
+                            return response()->json(['code' => 200 , 'msg' => '交卷成功' , 'data' => ['answer_time' => $answer_time , 'answer_score' => 0]]);
+                        } else {
+                            //事务回滚
+                            DB::rollBack();
+                            return response()->json(['code' => 203 , 'msg' => '交卷失败']);
+                        }
                     }
                 }
             }
