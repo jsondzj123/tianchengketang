@@ -821,6 +821,7 @@ class BankController extends Controller {
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
                         'papers_id'           =>  $papersId ,
+                        'moni_papers_id'      =>  $papers_id , 
                         'exam_id'             =>  $v['exam_id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
@@ -874,6 +875,7 @@ class BankController extends Controller {
                     //试题随机展示
                     $exam_array[$exam_info['type']][] = [
                         'papers_id'           =>  $papers_id ,
+                        'moni_papers_id'      =>  $student_papers_info['papers_id'] , 
                         'exam_id'             =>  $v['exam_id'] ,
                         'exam_name'           =>  $exam_info['exam_content'] ,
                         'exam_type_name'      =>  $exam_type_name ,
