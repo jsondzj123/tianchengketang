@@ -304,7 +304,7 @@ class OrderController extends Controller {
                 if($wxpayarr['ra_Code'] == 100){
                     return response()->json(['code' => 200, 'msg' => '预支付订单生成成功','data'=>$wxpayarr['rd_Pic']]);
                 }else{
-                    return response()->json(['code' => 202, 'msg' => '生成失败，请报告总部']);
+                    return response()->json(['code' => 202, 'msg' => '暂未开通']);
                 }
             }
             //汇聚支付宝
@@ -343,7 +343,7 @@ class OrderController extends Controller {
                 if($alipayarr['ra_Code'] == 100){
                     return response()->json(['code' => 200, 'msg' => '预支付订单生成成功','data'=>$alipayarr['rd_Pic']]);
                 }else{
-                    return response()->json(['code' => 202, 'msg' => '生成失败，请报告总部']);
+                    return response()->json(['code' => 202, 'msg' => '暂未开通']);
                 }
             }
             if($this->data['pay_status'] == 5) {
@@ -369,7 +369,7 @@ class OrderController extends Controller {
                 if ($alipayarr['ra_Code'] == 100) {
                     return response()->json(['code' => 200, 'msg' => '预支付订单生成成功', 'data' => $alipayarr['rd_Pic']]);
                 } else {
-                    return response()->json(['code' => 202, 'msg' => '生成失败，请报告总部']);
+                    return response()->json(['code' => 202, 'msg' => '暂未开通']);
                 }
             }
         }
