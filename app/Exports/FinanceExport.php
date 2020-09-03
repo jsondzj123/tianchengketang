@@ -49,9 +49,9 @@ class FinanceExport implements FromCollection, WithHeadings {
             '手机号',
             '课程价格',
             '购买价格',
+            '时间',
             '课程名称',
-            '所属学科',
-            '时间'
+            '所属学科'
         ];
     }
 }
