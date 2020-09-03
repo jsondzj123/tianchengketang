@@ -500,7 +500,7 @@ class BankController extends Controller {
                         }
                     }
                 } else if($exam_type == 3){//错题
-                    $error_exam_count = StudentDoTitle::join("ld_question_exam","ld_student_do_title.exam_id","=","ld_question_exam.id")->select(DB::raw("any_value(ld_student_do_title.exam_id) as id"))->where("ld_student_do_title.student_id" , self::$accept_data['user_info']['user_id'])->where('ld_student_do_title.bank_id' , $bank_id)->where('ld_student_do_title.subject_id' , $subject_id)->where('ld_student_do_title.chapter_id' , $chapter_id)->where('ld_student_do_title.joint_id' , $joint_id)->where('ld_student_do_title.type' , 1)->where('ld_student_do_title.is_right' , 2)->where('ld_student_do_title.answer' , '!=' , '')->whereIn('ld_question_exam.type' , $question_type)->groupBy('ld_student_do_title.exam_id')->get()->count();
+                    /*$error_exam_count = StudentDoTitle::join("ld_question_exam","ld_student_do_title.exam_id","=","ld_question_exam.id")->select(DB::raw("any_value(ld_student_do_title.exam_id) as id"))->where("ld_student_do_title.student_id" , self::$accept_data['user_info']['user_id'])->where('ld_student_do_title.bank_id' , $bank_id)->where('ld_student_do_title.subject_id' , $subject_id)->where('ld_student_do_title.chapter_id' , $chapter_id)->where('ld_student_do_title.joint_id' , $joint_id)->where('ld_student_do_title.type' , 1)->where('ld_student_do_title.is_right' , 2)->where('ld_student_do_title.answer' , '!=' , '')->whereIn('ld_question_exam.type' , $question_type)->groupBy('ld_student_do_title.exam_id')->get()->count();
                     if($error_exam_count <= 0){
                         return response()->json(['code' => 203 , 'msg' => '暂无随机生成的试题']);
                     } else {
@@ -508,6 +508,12 @@ class BankController extends Controller {
                         if(!$exam_list || empty($exam_list) || count($exam_list) <= 0){
                             return response()->json(['code' => 203 , 'msg' => '暂无随机生成的试题']);
                         }
+                    }*/
+                    $error_exam_count = StudentError::where("student_id" , self::$accept_data['user_info']['user_id'])->where('bank_id' , $bank_id)->where('subject_id' , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('is_del' , 0)->count();
+                    if($error_exam_count <= 0){
+                        return response()->json(['code' => 203 , 'msg' => '暂无随机生成的试题']);
+                    } else {
+                        $exam_list = StudentError::select(DB::raw("any_value(exam_id) as id"))->where("student_id" , self::$accept_data['user_info']['user_id'])->where('bank_id' , $bank_id)->where('subject_id' , $subject_id)->where('chapter_id' , $chapter_id)->where('joint_id' , $joint_id)->where('is_del' , 0)->groupBy('exam_id')->get()->toArray();
                     }
                 }
                 
@@ -1325,20 +1331,23 @@ class BankController extends Controller {
                 
                 //更改试题中的状态
                 if($is_right == 2){
-                    StudentError::insertGetId([
-                        'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
-                        'bank_id'      =>   $bank_id ,
-                        'subject_id'   =>   $subject_id ,
-                        'papers_id'    =>   $papers_id ,
-                        'exam_id'      =>   $exam_id ,
-                        'chapter_id'   =>   $chapter_id ,
-                        'joint_id'     =>   $joint_id ,
-                        'type'         =>   $type ,
-                        'create_at'    =>   date('Y-m-d H:i:s')
-                    ]);
+                    $info = StudentError::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'exam_id' => $exam_id])->count();
+                    if(!$info || $info <= 0){
+                        StudentError::insertGetId([
+                            'student_id'   =>   self::$accept_data['user_info']['user_id'] ,
+                            'bank_id'      =>   $bank_id ,
+                            'subject_id'   =>   $subject_id ,
+                            'papers_id'    =>   $papers_id ,
+                            'exam_id'      =>   $exam_id ,
+                            'chapter_id'   =>   $chapter_id ,
+                            'joint_id'     =>   $joint_id ,
+                            'type'         =>   $type ,
+                            'create_at'    =>   date('Y-m-d H:i:s')
+                        ]);
+                    }
                 } else if($is_right == 1) {
                     $info = StudentError::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'exam_id' => $exam_id])->count();
-                    if($info && !empty($info)){
+                    if($info && $info > 0){
                         StudentError::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'exam_id' => $exam_id])->update(['is_del' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
                     }
                 }
