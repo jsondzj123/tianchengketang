@@ -963,8 +963,8 @@ class BankController extends Controller {
             
             
             //算出试卷的总得分
-            $info = PapersExam::where("subject_id" , $subject_id)->where("papers_id" , $v['id'])->where('is_del' , 0)->get()->toArray();
-            if($info && !empty($info)){
+            $papers_sum_score = PapersExam::where("subject_id" , $subject_id)->where("papers_id" , $v['id'])->where('is_del' , 0)->sum('grade');
+            /*if($info && !empty($info)){
                 foreach($info as $k1=>$v1){
                     //获取试题的详细信息
                     $exam_info = Exam::where('id' , $v1['exam_id'])->first();
@@ -983,7 +983,7 @@ class BankController extends Controller {
                     }
                     $papers_score_score[] = $score;
                 }
-            }
+            }*/
             
 
             $array[] = [
@@ -991,7 +991,7 @@ class BankController extends Controller {
                 'papers_name'  =>  $v['papers_name'] ,
                 'papers_time'  =>  $v['papers_time'] ,
                 'answer_time'  =>  $answer_time ,
-                'papers_sum_score' =>  count($papers_score_score) > 0 ?array_sum($papers_score_score) : 0 ,
+                'papers_sum_score' =>  $papers_sum_score > 0 ? $papers_sum_score : 0 ,
                 'sum_score'    =>  (float)$sum_score ,
                 'is_over'      =>  $is_over
             ];
@@ -1679,7 +1679,7 @@ class BankController extends Controller {
             }
             return response()->json(['code' => 200 , 'msg' => '返回做题记录列表成功' , 'data' => $new_array]);
         } else {
-            return response()->json(['code' => 203 , 'msg' => '暂无做题记录']);
+            return response()->json(['code' => 200 , 'msg' => '暂无做题记录' , 'data' => []]);
         }
     }
     
