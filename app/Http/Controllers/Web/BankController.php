@@ -2405,9 +2405,9 @@ class BankController extends Controller {
         //根据学员做题试卷id获取试卷得id
         $info = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 3)->where('is_over' , 0)->orderBy('create_at' , 'desc')->first();
         if($info && !empty($info)){
-            return response()->json(['code' => 200 , 'msg' => '获取信息成功' , 'data' => ['papers_id' => $info['id']]]);
+            return response()->json(['code' => 200 , 'msg' => '获取信息成功' , 'data' => $info['id']]);
         } else {
-            return response()->json(['code' => 200 , 'msg' => '暂无信息' , 'data' => []]);
+            return response()->json(['code' => 200 , 'msg' => '暂无信息' , 'data' => ""]);
         }
     }
     
