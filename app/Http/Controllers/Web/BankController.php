@@ -1653,8 +1653,8 @@ class BankController extends Controller {
                             $make_date   =   date('Y-m-d' ,strtotime($info['update_at']));
                             $make_time   =   date('H:i:s' ,strtotime($info['update_at']));
                         } else {
-                            $make_date   =   date('Y-m-d' ,strtotime($info['create_at']));
-                            $make_time   =   date('H:i:s' ,strtotime($info['create_at']));
+                            $make_date   =   date('Y-m-d');
+                            $make_time   =   date('H:i:s');
                         }
                         $is_over       = 0;
                         $collect_count = 0;
@@ -1804,8 +1804,8 @@ class BankController extends Controller {
                             $make_date   =   date('Y-m-d' ,strtotime($info['update_at']));
                             $make_time   =   date('H:i:s' ,strtotime($info['update_at']));
                         } else {
-                            $make_date   =   date('Y-m-d' ,strtotime($info['create_at']));
-                            $make_time   =   date('H:i:s' ,strtotime($info['create_at']));
+                            $make_date   =   date('Y-m-d');
+                            $make_time   =   date('H:i:s');
                         }
                         $is_over       = 0;
                     }
