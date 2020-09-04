@@ -1344,6 +1344,8 @@ class BankController extends Controller {
                             'type'         =>   $type ,
                             'create_at'    =>   date('Y-m-d H:i:s')
                         ]);
+                    } else {
+                        StudentError::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'exam_id' => $exam_id])->update(['is_del' => 0 , 'update_at' => date('Y-m-d H:i:s')]);
                     }
                 } else if($is_right == 1) {
                     $info = StudentError::where(['student_id' => self::$accept_data['user_info']['user_id'] , 'bank_id' => $bank_id , 'subject_id' => $subject_id , 'exam_id' => $exam_id])->count();
