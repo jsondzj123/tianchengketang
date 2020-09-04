@@ -2364,6 +2364,54 @@ class BankController extends Controller {
     }
     
     /*
+     * @param description   获取试卷做题记录的id接口
+     * @param $bank_id      id
+     * @param author    dzj
+     * @param ctime     2020-09-04
+     * return string
+     */
+    public function getPapersIdByMoId(){
+        $bank_id      = isset(self::$accept_data['bank_id']) && self::$accept_data['bank_id'] > 0 ? self::$accept_data['bank_id'] : 0;                    //获取题库id
+        $subject_id   = isset(self::$accept_data['subject_id']) && self::$accept_data['subject_id'] > 0 ? self::$accept_data['subject_id'] : 0;           //获取科目id
+        $papers_id    = isset(self::$accept_data['papers_id']) && self::$accept_data['papers_id'] > 0 ? self::$accept_data['papers_id'] : 0;              //获取试卷的id
+        
+        //判断题库的id是否传递合法
+        if(!$bank_id || $bank_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '题库id不合法']);
+        }
+        
+        //检验用户是否有做题权限
+        $iurisdiction = self::verifyUserExamJurisdiction($bank_id);
+        if($iurisdiction['code'] == 209){
+            return response()->json(['code' => 209 , 'msg' => $iurisdiction['msg']]);
+        }
+        
+        //判断科目的id是否传递合法
+        if(!$subject_id || $subject_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '科目id不合法']);
+        }
+        
+        //判断试卷的id是否传递合法
+        if(!$papers_id || $papers_id <= 0){
+            return response()->json(['code' => 202 , 'msg' => '试卷id不合法']);
+        }
+        
+        //判断此试卷是否存在
+        $papers_info = Papers::where("id" , $papers_id)->first();
+        if(!$papers_info || empty($papers_info)){
+            return response()->json(['code' => 203 , 'msg' => '此试卷不存在']);
+        }
+        
+        //根据学员做题试卷id获取试卷得id
+        $info = StudentPapers::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $papers_id)->where('type' , 3)->where('is_over' , 0)->orderBy('create_at' , 'desc')->first();
+        if($info && !empty($info)){
+            return response()->json(['code' => 200 , 'msg' => '获取信息成功' , 'data' => ['papers_id' => $info['id']]]);
+        } else {
+            return response()->json(['code' => 200 , 'msg' => '暂无信息' , 'data' => []]);
+        }
+    }
+    
+    /*
      * @param  description   我的题库
      * @param author    dzj
      * @param ctime     2020-07-13
