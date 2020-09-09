@@ -64,7 +64,8 @@ class CorsMiddleware
             'http://neibu.tiancheng.longde999.cn',
             'http://edu.jingluojiaoyu.com',
             'http://yantai.zhima989.com',
-            'http://zhibo.zhima989.com'
+            'http://zhibo.zhima989.com',
+            'http://neibu1.testwo.longde999.cn',
         
         ];
         $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
