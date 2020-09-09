@@ -40,7 +40,7 @@ class UserAuthToken {
             //判断是正常用户还是游客用户
             if($json_info['user_type'] && $json_info['user_type'] == 1){
                 //根据手机号获取用户详情
-                $user_info = User::where("phone" , $json_info['phone'])->first();
+                $user_info = User::where('school_id' , $json_info['school_id'])->where("phone" , $json_info['phone'])->first();
                 if(!$user_info || empty($user_info)){
                     return ['code' => 401 , 'msg' => '请登录账号'];
                 }
