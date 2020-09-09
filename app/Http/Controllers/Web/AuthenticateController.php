@@ -54,9 +54,13 @@ class AuthenticateController extends Controller {
             if(!isset($body['school_dns']) || empty($body['school_dns'])){
                 return response()->json(['code' => 201 , 'msg' => '分校域名为空']);
             }
-
+            
+            //根据分校的域名获取所属分校的id
+            $school_id = School::where('dns' , $body['school_dns'])->value('id');
+            $school_id = isset($school_id) && !empty($school_id) && $school_id > 0 ? $school_id : 1;
+            
             //验证码合法验证
-            $verify_code = Redis::get('user:register:'.$body['phone']);
+            $verify_code = Redis::get('user:register:'.$body['phone'].':'.$school_id);
             if(!$verify_code || empty($verify_code)){
                 return ['code' => 201 , 'msg' => '请先获取验证码'];
             }
@@ -65,10 +69,6 @@ class AuthenticateController extends Controller {
             if($verify_code != $body['verifycode']){
                 return ['code' => 202 , 'msg' => '验证码错误'];
             }
-            
-            //根据分校的域名获取所属分校的id
-            $school_id = School::where('dns' , $body['school_dns'])->value('id');
-            $school_id = isset($school_id) && !empty($school_id) && $school_id > 0 ? $school_id : 1;
 
             //key赋值
             $key = 'user:isregister:'.$body['phone'].':'.$school_id;
@@ -328,7 +328,7 @@ class AuthenticateController extends Controller {
             }
 
             //验证码合法验证
-            $verify_code = Redis::get('user:forget:'.$body['phone']);
+            $verify_code = Redis::get('user:forget:'.$body['phone'].':'.$school_id);
             if(!$verify_code || empty($verify_code)){
                 return ['code' => 201 , 'msg' => '请先获取短信验证码'];
             }
