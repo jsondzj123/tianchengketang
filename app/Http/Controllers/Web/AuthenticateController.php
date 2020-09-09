@@ -65,16 +65,20 @@ class AuthenticateController extends Controller {
             if($verify_code != $body['verifycode']){
                 return ['code' => 202 , 'msg' => '验证码错误'];
             }
+            
+            //根据分校的域名获取所属分校的id
+            $school_id = School::where('dns' , $body['school_dns'])->value('id');
+            $school_id = isset($school_id) && !empty($school_id) && $school_id > 0 ? $school_id : 1;
 
             //key赋值
-            $key = 'user:isregister:'.$body['phone'];
+            $key = 'user:isregister:'.$body['phone'].':'.$school_id;
 
             //判断此学员是否被请求过一次(防止重复请求,且数据信息存在)
             if(Redis::get($key)){
                 return response()->json(['code' => 205 , 'msg' => '此手机号已被注册']);
             } else {
                 //判断用户手机号是否注册过
-                $student_count = User::where("phone" , $body['phone'])->count();
+                $student_count = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->count();
                 if($student_count > 0){
                     //存储学员的手机号值并且保存60s
                     Redis::setex($key , 60 , $body['phone']);
@@ -93,16 +97,13 @@ class AuthenticateController extends Controller {
 
             //开启事务
             DB::beginTransaction();
-            
-            //根据分校的域名获取所属分校的id
-            $school_id = School::where('dns' , $body['school_dns'])->value('id');
 
             //封装成数组
             $user_data = [
                 'phone'     =>    $body['phone'] ,
                 'password'  =>    password_hash($body['password'] , PASSWORD_DEFAULT) ,
                 'nickname'  =>    $nickname ,
-                'school_id' =>    isset($school_id) && !empty($school_id) && $school_id > 0 ? $school_id : 1 ,
+                'school_id' =>    $school_id ,
                 'create_at' =>    date('Y-m-d H:i:s'),
                 'login_at'  =>    date('Y-m-d H:i:s')
             ];
@@ -113,7 +114,7 @@ class AuthenticateController extends Controller {
                 $user_info = ['user_id' => $user_id , 'user_token' => $token , 'user_type' => 1  , 'head_icon' => '' , 'real_name' => '' , 'phone' => $body['phone'] , 'nickname' => $nickname , 'sign' => '' , 'papers_type' => '' , 'papers_name' => '' , 'papers_num' => '' , 'balance' => 0 , 'school_id' => $user_data['school_id']];
                 //redis存储信息
                 Redis::hMset("user:regtoken:".$platform.":".$token , $user_info);
-                Redis::hMset("user:regtoken:".$platform.":".$body['phone'] , $user_info);
+                Redis::hMset("user:regtoken:".$platform.":".$body['phone'].":".$school_id , $user_info);
                 
                 //事务提交
                 DB::commit();
@@ -162,16 +163,23 @@ class AuthenticateController extends Controller {
             if(!isset($body['school_dns']) || empty($body['school_dns'])){
                 return response()->json(['code' => 201 , 'msg' => '分校域名为空']);
             }
+            
+            //根据分校的域名获取所属分校的id
+            $school_id = School::where('dns' , $body['school_dns'])->value('id');
+            //判断此分校是否存在
+            if(!$school_id || $school_id <= 0){
+                return response()->json(['code' => 203 , 'msg' => '此分校不存在']);
+            }
 
             //key赋值
-            $key = 'user:login:'.$body['phone'];
+            $key = 'user:login:'.$body['phone'].':'.$school_id;
 
             //判断此学员是否被请求过一次(防止重复请求,且数据信息存在)
             if(Redis::get($key)){
                 return response()->json(['code' => 204 , 'msg' => '此手机号未注册']);
             } else {
                 //判断用户手机号是否注册过
-                $student_count = User::where("phone" , $body['phone'])->count();
+                $student_count = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->count();
                 if($student_count <= 0){
                     //存储学员的手机号值并且保存60s
                     Redis::setex($key , 60 , $body['phone']);
@@ -183,7 +191,7 @@ class AuthenticateController extends Controller {
             DB::beginTransaction();
 
             //根据手机号和密码进行登录验证
-            $user_login = User::where("phone",$body['phone'])->first();
+            $user_login = User::where('school_id' , $school_id)->where("phone",$body['phone'])->first();
             if(!$user_login || empty($user_login)){
                 return response()->json(['code' => 204 , 'msg' => '此手机号未注册']);
             }
@@ -196,13 +204,6 @@ class AuthenticateController extends Controller {
             //判断此手机号是否被禁用了
             if($user_login->is_forbid == 2){
                 return response()->json(['code' => 207 , 'msg' => '账户已禁用']);
-            }
-            
-            //根据分校的域名获取所属分校的id
-            $school_id = School::where('dns' , $body['school_dns'])->value('id');
-            //判断此分校是否存在
-            if(!$school_id || $school_id <= 0){
-                return response()->json(['code' => 203 , 'msg' => '此分校不存在']);
             }
             
             //判断此用户对应得分校是否是一样得
@@ -218,7 +219,7 @@ class AuthenticateController extends Controller {
             
             //hash中的token的key值
             $token_key   = "user:regtoken:".$platform.":".$token;
-            $token_phone = "user:regtoken:".$platform.":".$body['phone'];
+            $token_phone = "user:regtoken:".$platform.":".$body['phone'].":".$school_id;
 
             //用户详细信息赋值
             $user_info = [
@@ -238,7 +239,7 @@ class AuthenticateController extends Controller {
             ];
 
             //更新token
-            $rs = User::where("phone" , $body['phone'])->update(["password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
+            $rs = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->update(["password" => password_hash($body['password'] , PASSWORD_DEFAULT) , "update_at" => date('Y-m-d H:i:s') , "login_at" => date('Y-m-d H:i:s')]);
             if($rs && !empty($rs)){
                 //事务提交
                 DB::commit();
@@ -303,6 +304,18 @@ class AuthenticateController extends Controller {
                 return response()->json(['code' => 201 , 'msg' => '请输入验证码']);
             }
             
+            //分校域名
+            if(!isset($body['school_dns']) || empty($body['school_dns'])){
+                return response()->json(['code' => 201 , 'msg' => '分校域名为空']);
+            }
+
+            //根据分校的域名获取所属分校的id
+            $school_id = School::where('dns' , $body['school_dns'])->value('id');
+            //判断此分校是否存在
+            if(!$school_id || $school_id <= 0){
+                return response()->json(['code' => 203 , 'msg' => '此分校不存在']);
+            }
+            
             //判断验证码是否合法
             $captch_code = Redis::get($body['key']);
             if(!app('captcha')->check(strtolower($body['captchacode']),$captch_code)){
@@ -326,14 +339,14 @@ class AuthenticateController extends Controller {
             }
             
             //key赋值
-            $key = 'user:login:'.$body['phone'];
+            $key = 'user:login:'.$body['phone'].':'.$school_id;
 
             //判断此学员是否被请求过一次(防止重复请求,且数据信息存在)
             if(Redis::get($key)){
                 return response()->json(['code' => 204 , 'msg' => '此手机号未注册']);
             } else {
                 //判断用户手机号是否注册过
-                $student_info = User::where("phone" , $body['phone'])->first();
+                $student_info = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->first();
                 if(!$student_info || empty($student_info)){
                     //存储学员的手机号值并且保存60s
                     Redis::setex($key , 60 , $body['phone']);
@@ -347,7 +360,7 @@ class AuthenticateController extends Controller {
             }
             
             //返回操作的redis更改密码成功标识
-            $forget_password = Redis::set('userMobileStatus'.$body['phone'] , 1);
+            $forget_password = Redis::set('userMobileStatus'.$body['phone'].':'.$school_id , 1);
             return response()->json(['code' => 200 , 'msg' => '验证成功']);
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
@@ -380,8 +393,20 @@ class AuthenticateController extends Controller {
                 return response()->json(['code' => 202 , 'msg' => '手机号不合法']);
             }
             
+            //分校域名
+            if(!isset($body['school_dns']) || empty($body['school_dns'])){
+                return response()->json(['code' => 201 , 'msg' => '分校域名为空']);
+            }
+
+            //根据分校的域名获取所属分校的id
+            $school_id = School::where('dns' , $body['school_dns'])->value('id');
+            //判断此分校是否存在
+            if(!$school_id || $school_id <= 0){
+                return response()->json(['code' => 203 , 'msg' => '此分校不存在']);
+            }
+            
             //判断是否忘记密码验证通过
-            $verify_password = Redis::get('userMobileStatus'.$body['phone']);
+            $verify_password = Redis::get('userMobileStatus'.$body['phone'].':'.$school_id);
             if(!$verify_password || empty($verify_password)){
                 return response()->json(['code' => 201 , 'msg' => '请先进行验证']);
             }
@@ -405,12 +430,12 @@ class AuthenticateController extends Controller {
             DB::beginTransaction();
 
             //将数据插入到表中
-            $update_user_password = User::where("phone" , $body['phone'])->update(['password' => password_hash($body['password'] , PASSWORD_DEFAULT) , 'update_at' => date('Y-m-d H:i:s')]);
+            $update_user_password = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->update(['password' => password_hash($body['password'] , PASSWORD_DEFAULT) , 'update_at' => date('Y-m-d H:i:s')]);
             if($update_user_password && !empty($update_user_password)){
                 //事务提交
                 DB::commit();
                 //删除旧的key值
-                Redis::del('userMobileStatus'.$body['phone']);
+                Redis::del('userMobileStatus'.$body['phone'].':'.$school_id);
                 return response()->json(['code' => 200 , 'msg' => '更新成功']);
             } else {
                 //事务回滚
@@ -465,23 +490,35 @@ class AuthenticateController extends Controller {
             return response()->json(['code' => 202 , 'msg' => '手机号不合法']);
         }
         
+        //分校域名
+        if(!isset($body['school_dns']) || empty($body['school_dns'])){
+            return response()->json(['code' => 201 , 'msg' => '分校域名为空']);
+        }
+
+        //根据分校的域名获取所属分校的id
+        $school_id = School::where('dns' , $body['school_dns'])->value('id');
+        //判断此分校是否存在
+        if(!$school_id || $school_id <= 0){
+            return response()->json(['code' => 203 , 'msg' => '此分校不存在']);
+        }
+        
         //判断是注册还是忘记密码
         if($body['verify_type'] == 1){
             //设置key值
-            $key = 'user:register:'.$body['phone'];
+            $key = 'user:register:'.$body['phone'].':'.$school_id;
             //保存时间(5分钟)
             $time= 300;
             //短信模板code码
             $template_code = 'SMS_180053367';
             
             //判断用户手机号是否注册过
-            $student_info = User::where("phone" , $body['phone'])->first();
+            $student_info = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->first();
             if($student_info && !empty($student_info)){
                 return response()->json(['code' => 205 , 'msg' => '此手机号已被注册']);
             }
         } else {
             //设置key值
-            $key = 'user:forget:'.$body['phone'];
+            $key = 'user:forget:'.$body['phone'].':'.$school_id;
             //保存时间(30分钟)
             $time= 1800;
             //短信模板code码
@@ -499,7 +536,7 @@ class AuthenticateController extends Controller {
             }
             
             //判断用户手机号是否注册过
-            $student_info = User::where("phone" , $body['phone'])->first();
+            $student_info = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->first();
             if(!$student_info || empty($student_info)){
                 return response()->json(['code' => 204 , 'msg' => '此手机号未注册']);
             }
