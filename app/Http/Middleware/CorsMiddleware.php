@@ -19,16 +19,16 @@ class CorsMiddleware
             'Access-Control-Allow-Credentials' => 'true',//允许客户端发送cookie
             'Access-Control-Max-Age' => 1728000 //该字段可选，用来指定本次预检请求的有效期，在此期间，不用发出另一条预检请求。
         ];
-        $schoolArr = $school  =  [];
-        $schoolData = School::where(['is_del'=>1,'is_forbid'=>1])->select('dns')->get();
-        if(!empty($schoolData)){
-            foreach($schoolData as $k=>&$v){
-                $v['dns'] = 'http://'.$v['dns'];
-                array_push($schoolArr,'https://'.$v['dns']);
-            }
-        }
-        $school = empty($schoolData)?$schoolData:array_merge($schoolData,$schoolArr);
-         $this->allow_origin = [
+        // $SchoolArr = $school  [];
+        // $schoolData = School::where(['is_del'=>1,'is_forbid'=>1])->select('dns')->get();
+        // if(!empty($schoolData)){
+        //     foreach($schoolData as $k=>&$v){
+        //         $v['dns'] = 'http://'.$v['dns'];
+        //         array_push($schoolArr,'https://'.$v['dns']);
+        //     }
+        // }
+        // $school = empty($schoolData)?$schoolData:array_merge($schoolData,$schoolArr);
+          $this->allow_origin = [
             'http://localhost',
             'http://localhost:8080',
             'http://localhost:8081',
@@ -78,7 +78,7 @@ class CorsMiddleware
             'http://www.bwjy999.com',
             'http://www.yx989.cn'
         
-        ];        
+        ];
         $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 
         //如果origin不在允许列表内，直接返回403
