@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Models\School;
+use App\Models\CrossSchool;
 
 class CorsMiddleware
 {
@@ -19,66 +19,11 @@ class CorsMiddleware
             'Access-Control-Allow-Credentials' => 'true',//允许客户端发送cookie
             'Access-Control-Max-Age' => 1728000 //该字段可选，用来指定本次预检请求的有效期，在此期间，不用发出另一条预检请求。
         ];
-        // $SchoolArr = $school  [];
-        // $schoolData = School::where(['is_del'=>1,'is_forbid'=>1])->select('dns')->get();
-        // if(!empty($schoolData)){
-        //     foreach($schoolData as $k=>&$v){
-        //         $v['dns'] = 'http://'.$v['dns'];
-        //         array_push($schoolArr,'https://'.$v['dns']);
-        //     }
-        // }
-        // $school = empty($schoolData)?$schoolData:array_merge($schoolData,$schoolArr);
-          $this->allow_origin = [
-            'http://localhost',
-            'http://localhost:8080',
-            'http://localhost:8081',
-            'http://192.168.1.12:8080',
-            'http://192.168.1.11:8081',
-            'http://test.admin.longde999.cn',
-            'http://admin.longde999.cn',
-            'http://testwo.admin.longde999.cn',
-            'http://pay.manage.longde99.com',
-            'http://ketang.longde999.cn',
-            'http://tiancheng.admin.longde999.cn',
-            'http://tiancheng.longde999.cn',
-            'http://qc.qcedu101.com',
-            'http://yd.bjyangde.com',
-            'http://gl.tiancheng27.com',
-            'http://hs.hongsheng369.com',
-            'http://yl.tiancheng27.com',
-            'http://scld.shanchuangpeixun.com',
-            'http://lc.lczx99.com',
-            'http://xh.xianghangedu.com',
-            'http://zz.tiancheng27.com',
-            'http://jy.jingyi989.com',
-            'http://tc.tiancheng27.com',
-            'http://edu.hxsx99.com',
-            'http://jl.jinlong567.com',
-            'http://bk.tiancheng27.com',
-            'http://dc.tiancheng27.com',
-            'http://bw.tiancheng989.com',
-            'http://bk.tiancheng989.com',
-            'http://gl.tiancheng989.com',
-            'http://yl.tiancheng989.com',
-            'http://zz.tiancheng989.com',
-            'http://ty.tiancheng989.com',
-            'http://edu.yiqijy17.com',
-            'http://gl.glteach.com',
-            'http://www.glteach.com',
-            'http://mengshu.zhima989.com',
-            'http://frontdeskresources.longde999.cn/',
-            'http://wl.wanglongzaixian.com',
-            'http://www.yilong119.com',
-            'http://neibu.testwo.longde999.cn',
-            'http://neibu.tiancheng.longde999.cn',
-            'http://edu.jingluojiaoyu.com',
-            'http://yantai.zhima989.com',
-            'http://zhibo.zhima989.com',
-            'http://neibu1.testwo.longde999.cn',
-            'http://www.bwjy999.com',
-            'http://www.yx989.cn'
-        
-        ];
+        $schoolArr = CrossSchool::where(['is_del'=>1])->select('school_dns')->get()->toArray();
+        if(!empty($schoolArr)){
+            $schoolArr = array_column($schoolArr,'school_dns');
+        }
+        $this->allow_origin = $schoolArr;
         $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 
         //如果origin不在允许列表内，直接返回403
