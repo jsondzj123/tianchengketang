@@ -860,7 +860,7 @@ class Exam extends Model {
             $exam_content  = $v[1] && !empty($v[1]) ? trim($v[1]) : '';
             $text_analysis = $v[11] && !empty($v[11]) ? trim($v[11]) : '';
             //判断此题库此科目下面此试题是否被添加过
-            $is_insert_exam = Exam::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where('exam_content' , $exam_content)->where('text_analysis' , $text_analysis)->where('is_del' , 0)->count();
+            $is_insert_exam = Exam::where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where('exam_content' , $exam_content)->where('text_analysis' , $text_analysis)->where('is_del' , 0)->count();
             if($is_insert_exam <= 0){
                 //试题类型赋值
                 $exam_type = $v[0];
@@ -889,7 +889,7 @@ class Exam extends Model {
                 //判断excel表格中章的信息是否为空
                 if($v[13] && !empty($v[13])){
                     //根据章的名称获取章的信息
-                    $chapter_info  = Chapters::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[13]))->where("type" , 0)->first();
+                    $chapter_info  = Chapters::where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[13]))->where("type" , 0)->where('is_del' , 0)->first();
 
                     //如果章不存在则插入
                     if(!$chapter_info || empty($chapter_info)){
@@ -910,7 +910,7 @@ class Exam extends Model {
                 //判断excel表格中节的信息是否为空
                 if($v[14] && !empty($v[14])){
                     //根据节的名称获取节的信息
-                    $joint_info    = Chapters::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[14]))->where("type" , 1)->first();
+                    $joint_info    = Chapters::where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[14]))->where("type" , 1)->where('is_del' , 0)->first();
 
                     //如果节不存在则插入
                     if(!$joint_info || empty($joint_info)){
@@ -931,7 +931,7 @@ class Exam extends Model {
                 //判断excel表格中考点的信息是否为空
                 if($v[15] && !empty($v[15])){
                     //根据考点的名称获取考点的信息
-                    $point_info    = Chapters::where('admin_id' , $admin_id)->where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[15]))->where("type" , 2)->first();
+                    $point_info    = Chapters::where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[15]))->where("type" , 2)->where('is_del' , 0)->first();
 
                     //如果考点不存在则插入
                     if(!$point_info || empty($point_info)){
@@ -989,7 +989,6 @@ class Exam extends Model {
                         'point_id'       =>  $v[15] && !empty($v[15]) ? $point_id > 0 ? $point_id : 0 : 0,             //考点id
                         'option_list'   =>  $option_list ? $option_list : []                          //试题选项
                     ];
-
                 }
             }
         }
