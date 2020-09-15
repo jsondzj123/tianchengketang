@@ -1001,7 +1001,7 @@ class Exam extends Model {
         //判断此excel试题是否导入过一遍了
         if(count($exam_list) == count($exam_length)){
             //返回信息数据
-            return ['code' => 200 , 'msg' => '该文件试题已被导入'];
+            return ['code' => 200 , 'msg' => '该文件试题已被导入' , 'data' => $arr];
         } else {
             //返回信息数据
             return ['code' => 200 , 'msg' => '导入试题列表成功' , 'data' => $arr];
