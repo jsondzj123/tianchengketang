@@ -26,6 +26,43 @@ use Illuminate\Http\Request;
 class TestController extends Controller
 {
 
+
+    public function insertcrosschool(){
+        $arr = [
+            'http://localhost',
+            'https://localhost',
+            'http://localhost:8080',
+            'https://localhost:8080',
+            'http://localhost:8081',
+            'https://localhost:8081',
+            'http://192.168.1.12:8080',
+            'https://192.168.1.12:8080',
+            'http://192.168.1.12:8081',
+            'https://192.168.1.12:8081',
+            'http://testwo.admin.longde999.cn',
+            'https://testwo.admin.longde999.cn',
+            'http://ketang.longde999.cn',
+            'https://ketang.longde999.cn',
+            'http://tiancheng.admin.longde999.cn',
+            'https://tiancheng.admin.longde999.cn',
+            'http://tiancheng.longde999.cn',
+            'https://tiancheng.longde999.cn',
+            'http://neibu.testwo.longde999.cn',
+            'https://neibu.testwo.longde999.cn',
+            'http://neibu.tiancheng.longde999.cn',
+            'https://neibu.tiancheng.longde999.cn',
+            'http://neibu1.testwo.longde999.cn',
+            'https://neibu1.testwo.longde999.cn',
+
+        ];
+        foreach($arr as $k=>$v){
+            $data[$k]['create_time'] = date('Y-m-d H:i:s');
+            $data[$k]['school_dns'] = $v;
+        }
+        DB::table('ld_cross_school')->insert($data);
+    }
+
+
     public function diff(){
         $bankids =[];
         $to_school_id = 8;
