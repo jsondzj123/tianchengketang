@@ -459,6 +459,7 @@ class ExamController extends Controller {
                 unlink($response_data['data']['path']);
                 return response()->json(['code' => 200 , 'msg' => '导入试题列表成功' , 'data' => $exam_list['data']]);
             } else {
+                unlink($response_data['data']['path']);
                 return response()->json(['code' => $exam_list['code'] , 'msg' => $exam_list['msg']]);
             }
         } catch (Exception $ex) {
