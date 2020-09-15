@@ -848,6 +848,9 @@ class Exam extends Model {
             return ['code' => 201 , 'msg' => '导入数据为空'];
         }
         
+        //设置试题长度
+        $exam_length = [];
+        
         //去掉试题模板中没有用的列和展示项
         $exam_list = array_slice($body['data'] , 3);
 
@@ -990,9 +993,18 @@ class Exam extends Model {
                         'option_list'   =>  $option_list ? $option_list : []                          //试题选项
                     ];
                 }
+            } else {
+                $exam_length[] = 1;
             }
         }
-        //返回信息数据
-        return ['code' => 200 , 'msg' => '导入试题列表成功' , 'data' => $arr];
+        
+        //判断此excel试题是否导入过一遍了
+        if(count($exam_list) == count($exam_length)){
+            //返回信息数据
+            return ['code' => 203 , 'msg' => '该文件试题已被导入'];
+        } else {
+            //返回信息数据
+            return ['code' => 200 , 'msg' => '导入试题列表成功' , 'data' => $arr];
+        }
     } 
 }
