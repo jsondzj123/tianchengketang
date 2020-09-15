@@ -889,7 +889,7 @@ class Exam extends Model {
                 //判断excel表格中章的信息是否为空
                 if($v[13] && !empty($v[13])){
                     //根据章的名称获取章的信息
-                    $chapter_info  = Chapters::where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[13]))->where("type" , 0)->where('is_del' , 0)->first();
+                    $chapter_info  = Chapters::where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where('parent_id' , 0)->where("name" , trim($v[13]))->where("type" , 0)->where('is_del' , 0)->first();
 
                     //如果章不存在则插入
                     if(!$chapter_info || empty($chapter_info)){
@@ -910,7 +910,7 @@ class Exam extends Model {
                 //判断excel表格中节的信息是否为空
                 if($v[14] && !empty($v[14])){
                     //根据节的名称获取节的信息
-                    $joint_info    = Chapters::where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[14]))->where("type" , 1)->where('is_del' , 0)->first();
+                    $joint_info    = Chapters::where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where('parent_id' , $chapter_id)->where("name" , trim($v[14]))->where("type" , 1)->where('is_del' , 0)->first();
 
                     //如果节不存在则插入
                     if(!$joint_info || empty($joint_info)){
@@ -931,7 +931,7 @@ class Exam extends Model {
                 //判断excel表格中考点的信息是否为空
                 if($v[15] && !empty($v[15])){
                     //根据考点的名称获取考点的信息
-                    $point_info    = Chapters::where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where("name" , trim($v[15]))->where("type" , 2)->where('is_del' , 0)->first();
+                    $point_info    = Chapters::where('bank_id' , $body['bank_id'])->where('subject_id' , $body['subject_id'])->where('parent_id' , $joint_id)->where("name" , trim($v[15]))->where("type" , 2)->where('is_del' , 0)->first();
 
                     //如果考点不存在则插入
                     if(!$point_info || empty($point_info)){
