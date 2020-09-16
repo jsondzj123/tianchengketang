@@ -341,7 +341,9 @@ class AuthenticateController extends Controller {
                     'papers_num' => $student_info->papers_num ,
                     'balance'    => $student_info->balance > 0 ? floatval($student_info->balance) : 0 ,
                     'school_id'  => $student_info->school_id ,
-                    'device'     => isset($body['device']) && !empty($body['device']) ? $body['device'] : ''
+                    'device'     => isset($body['device']) && !empty($body['device']) ? $body['device'] : '' ,
+                    'is_show_shcool' => 0 ,
+                    'school_array'   => []
                 ];
 
                 //更新token
@@ -399,7 +401,9 @@ class AuthenticateController extends Controller {
                         'papers_num' => '' ,
                         'balance'    => 0  ,
                         'school_id'  => 1  ,
-                        'device'     => isset($body['device']) && !empty($body['device']) ? $body['device'] : ''
+                        'device'     => isset($body['device']) && !empty($body['device']) ? $body['device'] : '' ,
+                        'is_show_shcool' => 0 ,
+                        'school_array'   => []
                     ];
 
                     //事务提交
