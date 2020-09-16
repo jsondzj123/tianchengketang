@@ -41,7 +41,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'age',
         'address',
         'admin_id',
-        'school_id',
         'birthday',
         'province_id' ,
         'city_id' ,

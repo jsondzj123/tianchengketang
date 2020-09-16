@@ -430,7 +430,8 @@ class AuthenticateController extends Controller {
             DB::beginTransaction();
 
             //将数据插入到表中
-            $update_user_password = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->update(['password' => password_hash($body['password'] , PASSWORD_DEFAULT) , 'update_at' => date('Y-m-d H:i:s')]);
+            //$update_user_password = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->update(['password' => password_hash($body['password'] , PASSWORD_DEFAULT) , 'update_at' => date('Y-m-d H:i:s')]);
+            $update_user_password = User::where("phone" , $body['phone'])->update(['password' => password_hash($body['password'] , PASSWORD_DEFAULT) , 'update_at' => date('Y-m-d H:i:s')]);
             if($update_user_password && !empty($update_user_password)){
                 //事务提交
                 DB::commit();
