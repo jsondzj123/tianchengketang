@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\School;
 use Validator;
 use Log;
 use JWTAuth;
@@ -152,6 +153,41 @@ class AuthenticateController extends Controller {
             if(!isset($body['password']) || empty($body['password'])){
                 return response()->json(['code' => 201 , 'msg' => '请输入密码']);
             }
+            
+            //判断用户是否多网校注册
+            $is_more_school = User::where('phone' , $body['phone'])->count();
+            if($is_more_school && $is_more_school >= 2){
+                //判断此手机号是否设置了默认的网校
+                $is_exists_school = User::where('phone' , $body['phone'])->where('is_set_school' , 1)->first();
+                if($is_exists_school && !empty($is_exists_school)){
+                    //是否显示网校弹框
+                    $is_show_shcool = 0;
+                    $school_array   = [];
+                    $is_set_school  = 1;
+                } else {
+                    //是否显示网校弹框
+                    $is_show_shcool = 1;
+                    $school_array   = [];
+                    $user_school_list   = User::where('phone' , $body['phone'])->get()->toArray();
+                    if($user_school_list && !empty($user_school_list)){
+                        foreach($user_school_list as $k=>$v){
+                            //通过网校的id获取网校的信息
+                            $school_info = School::where('id' , $v['school_id'])->first();
+                            $school_array[] = [
+                                'school_id'      =>  $school_info['id'] ,
+                                'school_name'    =>  $school_info['name'] ,
+                                'default_school' =>  $v['is_set_school']
+                            ];
+                        }
+                    }
+                    $is_set_school  = 0;
+                }
+            } else {
+                //是否显示网校弹框
+                $is_show_shcool = 0;
+                $school_array   = [];
+                $is_set_school  = 0;
+            }
 
             //key赋值
             $key = 'user:login:'.$body['phone'];
@@ -183,7 +219,7 @@ class AuthenticateController extends Controller {
             DB::beginTransaction();
 
             //根据手机号和密码进行登录验证
-            $user_login = User::where("phone",$body['phone'])->first();
+            $user_login = User::where("phone",$body['phone'])->where('is_set_school' , $is_set_school)->first();
             if(!$user_login || empty($user_login)){
                 return response()->json(['code' => 204 , 'msg' => '此手机号未注册']);
             }
@@ -212,7 +248,9 @@ class AuthenticateController extends Controller {
                 'papers_name'=> $user_login->papers_type > 0 ? parent::getPapersNameByType($user_login->papers_type) : '',
                 'papers_num' => $user_login->papers_num ,
                 'balance'    => $user_login->balance > 0 ? floatval($user_login->balance) : 0 ,
-                'school_id'  => $user_login->school_id
+                'school_id'  => $user_login->school_id ,
+                'is_show_shcool' => $is_show_shcool ,
+                'school_array'   => $school_array
             ];
 
             //更新token
