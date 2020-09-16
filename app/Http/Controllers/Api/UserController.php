@@ -152,7 +152,7 @@ class UserController extends Controller {
             }
             
             //判断是否游客模式
-            if(isset(self::$accept_data['user_info']['phone']) && !empty(self::$accept_data['user_info']['phone'])){
+            if(isset(self::$accept_data['user_info']['user_type']) && !empty(self::$accept_data['user_info']['user_type']) && self::$accept_data['user_info']['user_type'] == 1){
                 //网校数组设置
                 $school_array = [];
 
