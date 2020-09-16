@@ -150,26 +150,31 @@ class UserController extends Controller {
             if(!$body || !is_array($body)){
                 return response()->json(['code' => 202 , 'msg' => '传递数据不合法']);
             }
+            
+            //判断是否游客模式
+            if(isset(self::$accept_data['user_info']['phone']) && !empty(self::$accept_data['user_info']['phone'])){
+                //网校数组设置
+                $school_array = [];
 
-            //网校数组设置
-            $school_array = [];
-
-            //通过用户手机号获取网校列表
-            $user_school_list = Student::where('phone' , self::$accept_data['user_info']['phone'])->get()->toArray();
-            if($user_school_list && !empty($user_school_list)){
-                //获取网校的个数
-                $school_count = count($user_school_list);
-                if($school_count && $school_count >= 2){
-                    foreach($user_school_list as $k=>$v){
-                        //通过网校的id获取网校的信息
-                        $school_info = School::where('id' , $v['school_id'])->first();
-                        $school_array[] = [
-                            'school_id'      =>  $school_info['id'] ,
-                            'school_name'    =>  $school_info['name'] ,
-                            'default_school' =>  $v['is_set_school']
-                        ];
+                //通过用户手机号获取网校列表
+                $user_school_list = Student::where('phone' , self::$accept_data['user_info']['phone'])->get()->toArray();
+                if($user_school_list && !empty($user_school_list)){
+                    //获取网校的个数
+                    $school_count = count($user_school_list);
+                    if($school_count && $school_count >= 2){
+                        foreach($user_school_list as $k=>$v){
+                            //通过网校的id获取网校的信息
+                            $school_info = School::where('id' , $v['school_id'])->first();
+                            $school_array[] = [
+                                'school_id'      =>  $school_info['id'] ,
+                                'school_name'    =>  $school_info['name'] ,
+                                'default_school' =>  $v['is_set_school']
+                            ];
+                        }
+                        return response()->json(['code' => 200 , 'msg' => '获取网校列表成功' , 'data' => $school_array]);
+                    } else {
+                        return response()->json(['code' => 200 , 'msg' => '获取网校列表成功' , 'data' => []]);
                     }
-                    return response()->json(['code' => 200 , 'msg' => '获取网校列表成功' , 'data' => $school_array]);
                 } else {
                     return response()->json(['code' => 200 , 'msg' => '获取网校列表成功' , 'data' => []]);
                 }
