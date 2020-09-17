@@ -859,10 +859,11 @@ class IndexController extends Controller {
                  }
                  //授权课程   先取授权课程  通过course_id 获取讲师
                  $teacher_lesson_accredit_list = CourseSchool::join('ld_course_teacher','ld_course_teacher.course_id','=','ld_course_school.course_id')
-                 ->select('ld_course_school.id', 'admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'ld_course_school.is_del')
+                 ->select('ld_course_school.course_id as id','ld_course_school.id as school_course_id','admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'ld_course_school.is_del')
                  ->where(['ld_course_school.is_del'=> 0, 'ld_course_school.status' => 1,'ld_course_school.to_school_id' => $json_info['school_id'],'ld_course_teacher.teacher_id'=>$teacher_id])
                  ->groupBy("ld_course_school.id")
                  ->get()->toArray();
+
                  foreach($teacher_lesson_list as $k => &$v){
                      //获取授课模式
                      $v['methods'] = DB::table('ld_course')->select('method_id as id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
@@ -871,7 +872,7 @@ class IndexController extends Controller {
 
                  foreach($teacher_lesson_accredit_list as $k => &$v){
                     //获取授课模式
-                    $v['methods'] = DB::table('ld_course_school')->select('method_id as id')->join("ld_course_method","ld_course_school.course_id","=","ld_course_method.course_id")->where(['ld_course_school.id'=>$v['id']])->get();
+                    $v['methods'] = DB::table('ld_course_school')->select('method_id as id')->join("ld_course_method","ld_course_school.course_id","=","ld_course_method.course_id")->where(['ld_course_school.id'=>$v['school_course_id']])->get();
                 }
                 $teacher_lesson_list = array_merge($teacher_lesson_list,$teacher_lesson_accredit_list);
                 //数据分页
