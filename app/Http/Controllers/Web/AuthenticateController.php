@@ -71,8 +71,7 @@ class AuthenticateController extends Controller {
             }
 
             //key赋值
-            //$key = 'user:isregister:'.$body['phone'].':'.$school_id;
-            $key = 'user:isregister:'.$body['phone'];
+            $key = 'user:isregister:'.$body['phone'].':'.$school_id;
 
             //判断此学员是否被请求过一次(防止重复请求,且数据信息存在)
             if(Redis::get($key)){
@@ -514,7 +513,7 @@ class AuthenticateController extends Controller {
             $template_code = 'SMS_180053367';
             
             //判断用户手机号是否注册过
-            $student_info = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->first();
+            $student_info = User::where("phone" , $body['phone'])->first();
             if($student_info && !empty($student_info)){
                 return response()->json(['code' => 205 , 'msg' => '此手机号已被注册']);
             }
@@ -538,7 +537,7 @@ class AuthenticateController extends Controller {
             }
             
             //判断用户手机号是否注册过
-            $student_info = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->first();
+            $student_info = User::where("phone" , $body['phone'])->first();
             if(!$student_info || empty($student_info)){
                 return response()->json(['code' => 204 , 'msg' => '此手机号未注册']);
             }
