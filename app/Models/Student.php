@@ -651,11 +651,19 @@ class Student extends Model {
         //正常用户昵称
         $nickname = randstr(8);
         
+        //判断手机号是否存在
+        $is_exists_mobile = self::where("phone" , $body['phone'])->first();
+        if($is_exists_mobile && !empty($is_exists_mobile)){
+            $password = $is_exists_mobile['password'];
+        } else {
+            $password = password_hash($password , PASSWORD_DEFAULT);
+        }
+        
         //组装学员数组信息
         $student_array = [
             'phone'         =>   $body['phone'] ,
             //'password'      =>   password_hash('12345678' , PASSWORD_DEFAULT) ,
-            'password'      =>   password_hash($password , PASSWORD_DEFAULT) ,
+            'password'      =>   $password ,
             'nickname'      =>   $nickname ,
             'real_name'     =>   $body['real_name'] ,
             'sex'           =>   isset($body['sex']) && $body['sex'] == 1 ? 1 : 2 ,
@@ -924,13 +932,21 @@ class Student extends Model {
             //判断此手机号是否注册过
             $is_exists_phone = self::where('school_id' , $school_id)->where('phone' , $phone)->count();
             if($is_exists_phone <= 0){
+                //判断手机号是否存在
+                $is_exists_mobile = self::where("phone" , $phone)->first();
+                if($is_exists_mobile && !empty($is_exists_mobile)){
+                    $password = $is_exists_mobile['password'];
+                } else {
+                    $password = password_hash($password , PASSWORD_DEFAULT);
+                }
+        
                 //学员插入操作
                 $user_id = self::insertGetId([
                     'admin_id'       =>  $admin_id ,
                     'school_id'      =>  $school_id ,
                     'phone'          =>  $phone ,    
                     'nickname'       =>  $nickname ,
-                    'password'       =>  password_hash($password , PASSWORD_DEFAULT) ,
+                    'password'       =>  $password ,
                     'real_name'      =>  $real_name ,                                     
                     'sex'            =>  $sex ,                                              
                     'papers_type'    =>  $papers_type ,                        
