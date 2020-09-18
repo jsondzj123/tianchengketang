@@ -648,11 +648,15 @@ class Student extends Model {
         //手机号后八位用于密码
         $password = substr($body['phone'] , -8);
         
+        //正常用户昵称
+        $nickname = randstr(8);
+        
         //组装学员数组信息
         $student_array = [
             'phone'         =>   $body['phone'] ,
             //'password'      =>   password_hash('12345678' , PASSWORD_DEFAULT) ,
             'password'      =>   password_hash($password , PASSWORD_DEFAULT) ,
+            'nickname'      =>   $nickname ,
             'real_name'     =>   $body['real_name'] ,
             'sex'           =>   isset($body['sex']) && $body['sex'] == 1 ? 1 : 2 ,
             'papers_type'   =>   isset($body['papers_type']) && in_array($body['papers_type'] , [1,2,3,4,5,6,7]) ? $body['papers_type'] : 0 ,
@@ -894,6 +898,9 @@ class Student extends Model {
             $address        = !empty($v[20]) ? trim($v[20]) : '';
             //备注
             $remark         = !empty($v[21]) ? trim($v[21]) : '';
+            
+            //正常用户昵称
+            $nickname = randstr(8);
 
             //支付金额
             $pay_fee = !empty($v[22]) ? trim($v[22]) : 0;
@@ -921,7 +928,8 @@ class Student extends Model {
                 $user_id = self::insertGetId([
                     'admin_id'       =>  $admin_id ,
                     'school_id'      =>  $school_id ,
-                    'phone'          =>  $phone ,            
+                    'phone'          =>  $phone ,    
+                    'nickname'       =>  $nickname ,
                     'password'       =>  password_hash($password , PASSWORD_DEFAULT) ,
                     'real_name'      =>  $real_name ,                                     
                     'sex'            =>  $sex ,                                              
