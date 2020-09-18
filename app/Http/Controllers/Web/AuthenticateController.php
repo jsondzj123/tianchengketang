@@ -78,7 +78,7 @@ class AuthenticateController extends Controller {
                 return response()->json(['code' => 205 , 'msg' => '此手机号已被注册']);
             } else {
                 //判断用户手机号是否注册过
-                $student_count = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->count();
+                $student_count = User::where("phone" , $body['phone'])->count();
                 if($student_count > 0){
                     //存储学员的手机号值并且保存60s
                     Redis::setex($key , 60 , $body['phone']);
@@ -513,7 +513,7 @@ class AuthenticateController extends Controller {
             $template_code = 'SMS_180053367';
             
             //判断用户手机号是否注册过
-            $student_info = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->first();
+            $student_info = User::where("phone" , $body['phone'])->first();
             if($student_info && !empty($student_info)){
                 return response()->json(['code' => 205 , 'msg' => '此手机号已被注册']);
             }
@@ -537,7 +537,7 @@ class AuthenticateController extends Controller {
             }
             
             //判断用户手机号是否注册过
-            $student_info = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->first();
+            $student_info = User::where("phone" , $body['phone'])->first();
             if(!$student_info || empty($student_info)){
                 return response()->json(['code' => 204 , 'msg' => '此手机号未注册']);
             }
