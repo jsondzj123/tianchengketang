@@ -71,14 +71,15 @@ class AuthenticateController extends Controller {
             }
 
             //key赋值
-            $key = 'user:isregister:'.$body['phone'].':'.$school_id;
+            //$key = 'user:isregister:'.$body['phone'].':'.$school_id;
+            $key = 'user:isregister:'.$body['phone'];
 
             //判断此学员是否被请求过一次(防止重复请求,且数据信息存在)
             if(Redis::get($key)){
                 return response()->json(['code' => 205 , 'msg' => '此手机号已被注册']);
             } else {
                 //判断用户手机号是否注册过
-                $student_count = User::where('school_id' , $school_id)->where("phone" , $body['phone'])->count();
+                $student_count = User::where("phone" , $body['phone'])->count();
                 if($student_count > 0){
                     //存储学员的手机号值并且保存60s
                     Redis::setex($key , 60 , $body['phone']);
