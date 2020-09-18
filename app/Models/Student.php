@@ -541,7 +541,7 @@ class Student extends Model {
         $student_info = self::find($student_id);
         if($student_info['phone'] != $body['phone']){
             //根据手机号判断是否注册
-            $is_mobile_exists = self::where("phone" , $body['phone'])->count();
+            $is_mobile_exists = self::where('school_id' , $body['school_id'])->where("phone" , $body['phone'])->count();
             if($is_mobile_exists > 0){
                 return ['code' => 205 , 'msg' => '此手机号已存在'];
             }
@@ -648,11 +648,15 @@ class Student extends Model {
         //手机号后八位用于密码
         $password = substr($body['phone'] , -8);
         
+        //正常用户昵称
+        $nickname = randstr(8);
+        
         //组装学员数组信息
         $student_array = [
             'phone'         =>   $body['phone'] ,
             //'password'      =>   password_hash('12345678' , PASSWORD_DEFAULT) ,
             'password'      =>   password_hash($password , PASSWORD_DEFAULT) ,
+            'nickname'      =>   $nickname ,
             'real_name'     =>   $body['real_name'] ,
             'sex'           =>   isset($body['sex']) && $body['sex'] == 1 ? 1 : 2 ,
             'papers_type'   =>   isset($body['papers_type']) && in_array($body['papers_type'] , [1,2,3,4,5,6,7]) ? $body['papers_type'] : 0 ,
@@ -681,7 +685,7 @@ class Student extends Model {
         DB::beginTransaction();
         
         //根据手机号判断是否注册
-        $is_mobile_exists = self::where("phone" , $body['phone'])->count();
+        $is_mobile_exists = self::where('school_id' , $body['school_id'])->where("phone" , $body['phone'])->count();
         if($is_mobile_exists > 0){
             return ['code' => 205 , 'msg' => '此手机号已存在'];
         }
@@ -894,6 +898,9 @@ class Student extends Model {
             $address        = !empty($v[20]) ? trim($v[20]) : '';
             //备注
             $remark         = !empty($v[21]) ? trim($v[21]) : '';
+            
+            //正常用户昵称
+            $nickname = randstr(8);
 
             //支付金额
             $pay_fee = !empty($v[22]) ? trim($v[22]) : 0;
@@ -915,13 +922,14 @@ class Student extends Model {
             $password = substr($phone , -8);
             
             //判断此手机号是否注册过
-            $is_exists_phone = self::where('phone' , $phone)->count();
+            $is_exists_phone = self::where('school_id' , $school_id)->where('phone' , $phone)->count();
             if($is_exists_phone <= 0){
                 //学员插入操作
                 $user_id = self::insertGetId([
                     'admin_id'       =>  $admin_id ,
                     'school_id'      =>  $school_id ,
-                    'phone'          =>  $phone ,            
+                    'phone'          =>  $phone ,    
+                    'nickname'       =>  $nickname ,
                     'password'       =>  password_hash($password , PASSWORD_DEFAULT) ,
                     'real_name'      =>  $real_name ,                                     
                     'sex'            =>  $sex ,                                              
@@ -979,7 +987,7 @@ class Student extends Model {
                 }
             } else {
                 //通过手机号获取学员的id
-                $user_info = self::where('phone' , $phone)->first();
+                $user_info = self::where('school_id' , $school_id)->where('phone' , $phone)->first();
                 $user_id   = $user_info['id'];
                 
                 //判断此学员在报名表中是否支付类型和支付金额分校是否存在

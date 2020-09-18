@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Student;
+use App\Models\School;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -127,6 +128,146 @@ class UserController extends Controller {
                 //事务回滚
                 DB::rollBack();
                 return response()->json(['code' => 203 , 'msg' => '更新失败']);
+            }
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    
+    /*
+     * @param  description   获取用户多网校方法
+     * @param  参数说明       body包含以下参数[
+     *     phone             手机号(必传)
+     * ]
+     * @param author    dzj
+     * @param ctime     2020-09-16
+     * return string
+     */
+    public function getUserMoreSchoolList(){
+        try {
+            $body = self::$accept_data;
+            //判断传过来的数组数据是否为空
+            if(!$body || !is_array($body)){
+                return response()->json(['code' => 202 , 'msg' => '传递数据不合法']);
+            }
+            
+            //判断是否游客模式
+            if(isset(self::$accept_data['user_info']['user_type']) && !empty(self::$accept_data['user_info']['user_type']) && self::$accept_data['user_info']['user_type'] == 1){
+                //网校数组设置
+                $school_array = [];
+
+                //通过用户手机号获取网校列表
+                $user_school_list = Student::where('phone' , self::$accept_data['user_info']['phone'])->get()->toArray();
+                if($user_school_list && !empty($user_school_list)){
+                    //获取网校的个数
+                    $school_count = count($user_school_list);
+                    if($school_count && $school_count >= 2){
+                        foreach($user_school_list as $k=>$v){
+                            //通过网校的id获取网校的信息
+                            $school_info = School::where('id' , $v['school_id'])->first();
+                            $school_array[] = [
+                                'school_id'      =>  $school_info['id'] ,
+                                'school_name'    =>  $school_info['name'] ,
+                                'default_school' =>  $v['is_set_school']
+                            ];
+                        }
+                        return response()->json(['code' => 200 , 'msg' => '获取网校列表成功' , 'data' => $school_array]);
+                    } else {
+                        return response()->json(['code' => 200 , 'msg' => '获取网校列表成功' , 'data' => []]);
+                    }
+                } else {
+                    return response()->json(['code' => 200 , 'msg' => '获取网校列表成功' , 'data' => []]);
+                }
+            } else {
+                return response()->json(['code' => 200 , 'msg' => '获取网校列表成功' , 'data' => []]);
+            }
+        } catch (Exception $ex) {
+            return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);
+        }
+    }
+    
+    /*
+     * @param  description   设置默认网校的方法
+     * @param  参数说明       body包含以下参数[
+     *     phone             手机号(必传)
+     * ]
+     * @param author    dzj
+     * @param ctime     2020-09-16
+     * return string
+     */
+    public function doSetDefaultSchool(){
+        try {
+            $body = self::$accept_data;
+            //判断传过来的数组数据是否为空
+            if(!$body || !is_array($body)){
+                return response()->json(['code' => 202 , 'msg' => '传递数据不合法']);
+            }
+
+            //判断分校id是否传递
+            if(!isset($body['school_id']) || $body['school_id'] <= 0){
+                return response()->json(['code' => 202 , 'msg' => '请选择网校']);
+            }
+
+            //判断此网校id是否存在
+            $is_exists_info = School::where('id' , $body['school_id'])->count();
+            if(!$is_exists_info || $is_exists_info <= 0){
+                return response()->json(['code' => 203 , 'msg' => '此网校不存在']);
+            }
+            
+            //判断此用户手机号下面是否有此网校
+            $user_login = Student::where("phone" , self::$accept_data['user_info']['phone'])->where('school_id' , $body['school_id'])->first();
+            if(!$user_login || empty($user_login)){
+                return response()->json(['code' => 203 , 'msg' => '此手机号下面无此网校']);
+            }
+            
+            //生成随机唯一的token
+            $token = self::setAppLoginToken(self::$accept_data['user_info']['phone']);
+            
+            //用户详细信息赋值
+            $user_info = [
+                'user_id'    => $user_login->id ,
+                'user_token' => $token ,
+                'user_type'  => 1 ,
+                'head_icon'  => $user_login->head_icon ,
+                'real_name'  => $user_login->real_name ,
+                'phone'      => $user_login->phone ,
+                'nickname'   => $user_login->nickname ,
+                'sign'       => $user_login->sign ,
+                'papers_type'=> $user_login->papers_type ,
+                'papers_name'=> $user_login->papers_type > 0 ? parent::getPapersNameByType($user_login->papers_type) : '',
+                'papers_num' => $user_login->papers_num ,
+                'balance'    => $user_login->balance > 0 ? floatval($user_login->balance) : 0 ,
+                'school_id'  => $user_login->school_id ,
+                'is_show_shcool' => 0 ,
+                'school_array'   => []
+            ];
+            
+            //获取请求的平台端
+            $platform = verifyPlat() ? verifyPlat() : 'pc';
+            
+            //hash中的token的key值
+            $token_key   = "user:regtoken:".$platform.":".$token;
+            $token_phone = "user:regtoken:".$platform.":".$user_login->phone;
+            
+            //开启事务
+            DB::beginTransaction();
+
+            //更新用户默认网校
+            $update_default_school = Student::where("phone" , self::$accept_data['user_info']['phone'])->update(['is_set_school' => 0 , 'update_at' => date('Y-m-d H:i:s')]);
+            if($update_default_school && !empty($update_default_school)){
+                //更新选中的网校设为默认
+                Student::where("phone" , self::$accept_data['user_info']['phone'])->where('school_id' , $body['school_id'])->update(['is_set_school' => 1 , 'update_at' => date('Y-m-d H:i:s')]);
+                //事务提交
+                DB::commit();
+                
+                //redis存储信息
+                Redis::hMset($token_key , $user_info);
+                Redis::hMset($token_phone , $user_info);
+                return response()->json(['code' => 200 , 'msg' => '设置成功' ,'data' => ['user_info' => $user_info]]);
+            } else {
+                //事务回滚
+                DB::rollBack();
+                return response()->json(['code' => 203 , 'msg' => '设置失败']);
             }
         } catch (Exception $ex) {
             return response()->json(['code' => 500 , 'msg' => $ex->getMessage()]);

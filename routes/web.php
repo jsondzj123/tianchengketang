@@ -81,6 +81,8 @@ $router->group(['prefix' => 'api', 'namespace' => 'Api', 'middleware'=> 'user'],
         $router->post('getUserInfoById','UserController@getUserInfoById');          //APP学员详情接口
         $router->post('doUserUpdateInfo','UserController@doUserUpdateInfo');        //APP用户更新信息接口
         $router->post('doLoginOut','UserController@doLoginOut');                    //APP用户退出登录接口
+        $router->post('getUserMoreSchoolList','UserController@getUserMoreSchoolList');            //APP网校列表接口
+        $router->post('doSetDefaultSchool','UserController@doSetDefaultSchool');                  //APP设置默认网校接口
     });
     //支付
     $router->group(['prefix' => 'order'], function () use ($router) {
