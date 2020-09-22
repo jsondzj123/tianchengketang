@@ -1001,6 +1001,7 @@ class BankController extends Controller {
                 'papers_time'  =>  $v['papers_time'] ,
                 'answer_time'  =>  $answer_time ,
                 'papers_sum_score' =>  count($papers_score_score) > 0 ? array_sum($papers_score_score) : 0 ,
+                'aaaa'         =>  $papers_score_score ,
                 'sum_score'    =>  (float)$sum_score ,
                 'is_over'      =>  $is_over ,
                 'info2'        =>  $info2
