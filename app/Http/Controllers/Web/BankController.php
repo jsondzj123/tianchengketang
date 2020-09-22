@@ -990,8 +990,9 @@ class BankController extends Controller {
                     } else {
                         $score = 0;
                     }
-                    $papers_score_score[] = $score;
+                    $info2[$k1]['sum_score']  = $score;
                 }
+                $papers_sum_score  = array_sum(array_column($info2, 'sum_score'));
             }
             
 
@@ -1000,11 +1001,9 @@ class BankController extends Controller {
                 'papers_name'  =>  $v['papers_name'] ,
                 'papers_time'  =>  $v['papers_time'] ,
                 'answer_time'  =>  $answer_time ,
-                'papers_sum_score' =>  count($papers_score_score) > 0 ? array_sum($papers_score_score) : 0 ,
-                'aaaa'         =>  $papers_score_score ,
+                'papers_sum_score' =>  $papers_sum_score ,
                 'sum_score'    =>  (float)$sum_score ,
-                'is_over'      =>  $is_over ,
-                'info2'        =>  $info2
+                'is_over'      =>  $is_over
             ];
         }
         return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $array]);
