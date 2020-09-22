@@ -975,21 +975,18 @@ class BankController extends Controller {
             
             
             //算出试卷的总得分
-            $info = PapersExam::where("subject_id" , $subject_id)->where("papers_id" , $v['id'])->where('is_del' , 0)->get()->toArray();
-            if($info && !empty($info)){
-                foreach($info as $k1=>$v1){
-                    //获取试题的详细信息
-                    $exam_info = Exam::where('id' , $v1['exam_id'])->first();
-
+            $info2 = PapersExam::selectRaw("any_value(type) as type , any_value(count(type)) as t_count")->where("subject_id" , $subject_id)->where("papers_id" , $v['id'])->where('is_del' , 0)->groupBy(DB::raw('type'))->get()->toArray();
+            if($info2 && !empty($info2)){
+                foreach($info2 as $k1=>$v1){
                     //判断题型
-                    if($exam_info['type'] == 1){
-                        $score = $v['signle_score'];
-                    } elseif($exam_info['type'] == 2){
-                        $score = $v['more_score'];
-                    } elseif($exam_info['type'] == 3){
-                        $score = $v['judge_score'];
-                    } elseif($exam_info['type'] == 4){
-                        $score = $v['options_score'];
+                    if($v1['type'] == 1){
+                        $score = $v['signle_score'] * $v1['t_count'];
+                    } elseif($v1['type'] == 2){
+                        $score = $v['more_score'] * $v1['t_count'];
+                    } elseif($v1['type'] == 3){
+                        $score = $v['judge_score'] * $v1['t_count'];
+                    } elseif($v1['type'] == 4){
+                        $score = $v['options_score'] * $v1['t_count'];
                     } else {
                         $score = 0;
                     }
