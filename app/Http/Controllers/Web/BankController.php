@@ -1002,7 +1002,8 @@ class BankController extends Controller {
                 'answer_time'  =>  $answer_time ,
                 'papers_sum_score' =>  count($papers_score_score) > 0 ? array_sum($papers_score_score) : 0 ,
                 'sum_score'    =>  (float)$sum_score ,
-                'is_over'      =>  $is_over
+                'is_over'      =>  $is_over ,
+                'info2'        =>  $info2
             ];
         }
         return response()->json(['code' => 200 , 'msg' => '操作成功' , 'data' => $array]);
