@@ -290,9 +290,6 @@ class LessonController extends Controller {
                     }else{
                         $lesson['is_buy'] = 0;
                     }
-                    //学习人数   基数+订单数
-                    $ordernum = Order::where(['class_id' => $lesson['id'], 'status' => 2, 'oa_status' => 1,'nature'=>1])->count();
-                    $lesson['buy_num'] = $lesson['buy_num'] + $ordernum;
                     //课程资料
                     //获取该课程下所有的资料   直播班号 课次
                     $lesson['url'] = CourseLivesResource::join("ld_course_livecast_resource","ld_course_live_resource.resource_id","=","ld_course_livecast_resource.id")
@@ -370,9 +367,6 @@ class LessonController extends Controller {
                     }else{
                         $lesson['is_buy'] = 0;
                     }
-                    //学习人数   基数+订单数
-                    $ordernum = Order::where(['class_id' => $lesson['id'], 'status' => 2, 'oa_status' => 1,'nature'=>1])->count();
-                    $lesson['buy_num'] = $lesson['buy_num'] + $ordernum;
                     //课程资料
                     //获取该课程下所有直播的资料   直播班号 课次
                     $lesson['url'] = CourseLivesResource::join("ld_course_livecast_resource","ld_course_live_resource.resource_id","=","ld_course_livecast_resource.id")

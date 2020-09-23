@@ -1080,9 +1080,7 @@ class IndexController extends Controller {
                             }
                         }
                         foreach($lessons as $k => $v){
-
                             foreach($v['lesson'] as $kk => $vv){
-
                                 $token = isset($_REQUEST['user_token']) ? $_REQUEST['user_token'] : 0;
                                 $student = Student::where('token', $token)->first();
                                 //购买人数  基数加真是购买人数
