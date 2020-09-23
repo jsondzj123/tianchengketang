@@ -421,6 +421,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('importUser', 'StudentController@doImportUser');                    //导入学员excel功能
         $router->post('getStudentTransferSchoolList', 'StudentController@getStudentTransferSchoolList');      //学员转校列表
         $router->post('doTransferSchool', 'StudentController@doTransferSchool');                              //学员转校
+        $router->post('getStudentStudyList', 'StudentController@getStudentStudyList');           //获取学员学校进度列表
     });
 
     //讲师教务相关模块(dzj)
