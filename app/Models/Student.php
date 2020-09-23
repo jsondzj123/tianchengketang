@@ -651,11 +651,10 @@ class Student extends Model {
 
         //手机号后八位用于密码
         $password = substr($body['phone'] , -8);
-<<<<<<< HEAD
-        
+
         //正常用户昵称
         $nickname = randstr(8);
-        
+
         //判断手机号是否存在
         $is_exists_mobile = self::where("phone" , $body['phone'])->first();
         if($is_exists_mobile && !empty($is_exists_mobile)){
@@ -663,10 +662,7 @@ class Student extends Model {
         } else {
             $password = password_hash($password , PASSWORD_DEFAULT);
         }
-        
-=======
 
->>>>>>> zhangzekun
         //组装学员数组信息
         $student_array = [
             'phone'         =>   $body['phone'] ,
@@ -914,7 +910,7 @@ class Student extends Model {
             $address        = !empty($v[20]) ? trim($v[20]) : '';
             //备注
             $remark         = !empty($v[21]) ? trim($v[21]) : '';
-            
+
             //正常用户昵称
             $nickname = randstr(8);
 
@@ -947,29 +943,14 @@ class Student extends Model {
                 } else {
                     $password = password_hash($password , PASSWORD_DEFAULT);
                 }
-        
+
                 //学员插入操作
                 $user_id = self::insertGetId([
                     'admin_id'       =>  $admin_id ,
                     'school_id'      =>  $school_id ,
-<<<<<<< HEAD
-                    'phone'          =>  $phone ,    
+                    'phone'          =>  $phone ,
                     'nickname'       =>  $nickname ,
                     'password'       =>  $password ,
-                    'real_name'      =>  $real_name ,                                     
-                    'sex'            =>  $sex ,                                              
-                    'papers_type'    =>  $papers_type ,                        
-                    'papers_num'     =>  $papers_num  ,   
-                    'address_locus'  =>  $address_locus ,                      
-                    'age'            =>  $age ,     
-                    'educational'    =>  $educational ,         
-                    'family_phone'   =>  $family_phone ,             
-                    'office_phone'   =>  $office_phone ,             
-                    'contact_people' =>  $contact_people ,                 
-                    'contact_phone'  =>  $contact_phone ,    
-=======
-                    'phone'          =>  $phone ,
-                    'password'       =>  password_hash($password , PASSWORD_DEFAULT) ,
                     'real_name'      =>  $real_name ,
                     'sex'            =>  $sex ,
                     'papers_type'    =>  $papers_type ,
@@ -981,7 +962,6 @@ class Student extends Model {
                     'office_phone'   =>  $office_phone ,
                     'contact_people' =>  $contact_people ,
                     'contact_phone'  =>  $contact_phone ,
->>>>>>> zhangzekun
                     'email'          =>  $email ,
                     'qq'             =>  $qq ,
                     'wechat'         =>  $wechat ,
