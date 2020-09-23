@@ -5,12 +5,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\AdminLog;
 use App\Models\Enrolment;
 use App\Models\CourseSchool;
-use App\Models\Coures;
 use App\Models\Order;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\DB;
 use App\Tools\MTCloud;
 use App\Models\Coureschapters;
+use App\Models\Coures;
 
 
 class Student extends Model {
@@ -1054,12 +1054,27 @@ class Student extends Model {
 
         //查询学员id
         $student = self::where("phone",$data['phone'])->first();
+        //dd($student);
+        if($student['school'] == 1){
+            $course_id = $data['course_id'];
+        }else{
+            //自增
+            $res = Coures::select()->where(["id"=>$data['course_id'],"school_id"=>$student['school_id']])->first();
+            $course_id = $res['id'];
+            if(empty($res)){
+                //授权课程
+                $res = CourseSchool::select()->where(["id"=>$data['course_id'],"to_school_id"=>$student['school_id']])->first();
+                $course_id = $res['course_id'];
+            }
+        }
         $uid = $student['id'];
-        $course_id = $data['course_id'];
         //查询章
+        DB::enableQueryLog();
         $chapters =  Coureschapters::select('id', 'name', 'parent_id as pid')
-                ->where(['is_del'=> 0,'parent_id' => 0, 'course_id' => $course_id])
+                ->where([ 'course_id' => $course_id])
                 ->orderBy('create_at', 'asc')->get()->toArray();
+                $a = DB::getQueryLog();
+                //print_r($a);
         foreach ($chapters as $key => $value) {
             //查询小节
             $chapters[$key]['childs'] = Coureschapters::join("ld_course_video_resource","ld_course_chapters.resource_id","=","ld_course_video_resource.id")
