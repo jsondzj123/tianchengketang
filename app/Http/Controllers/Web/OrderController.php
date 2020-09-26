@@ -380,9 +380,10 @@ class OrderController extends Controller {
         if(empty($payinfo) || empty($payinfo['zfb_app_id']) || empty($payinfo['zfb_app_public_key'])){
             return response()->json(['code' => 202, 'msg' => '商户号为空']);
         }
-        $alipay = new AlipayFactory($this->school['id']);
+        $alipay = new AlipayFactory(7);
         $order_number = date('YmdHis', time()) . rand(1111, 9999);
         $return = $alipay->convergecreatePcPay($order_number,0.01,'开发人员测试');
+        print_r($return);die;
         if($return['alipay_trade_precreate_response']['code'] == 10000){
             require_once realpath(dirname(__FILE__).'/../../../Tools/phpqrcode/QRcode.php');
             $code = new QRcode();
