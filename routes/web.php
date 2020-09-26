@@ -99,6 +99,7 @@ $router->group(['prefix' => 'api', 'namespace' => 'Api', 'middleware'=> 'user'],
 
 //PC端路由接口
 $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($router) {
+    $router->post('csaliss', 'OrderController@csali');//订单通过学员查询
     $router->group(['prefix' => 'marketing'], function () use ($router) {
         $router->post('addMarketing','MarketingController@addMarketing');//添加营销数据
         $router->get('MarketingList','MarketingController@MarketingList');//营销数据列表
@@ -249,7 +250,6 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
 //无需任何验证 操作接口
 $router->group(['prefix' => 'admin' , 'namespace' => 'Admin'], function () use ($router) {
     $router->get('orderForExceil', 'OrderController@orderForExceil');//导出订单exceil
-    $router->post('csaliss', 'OrderController@csali');//订单通过学员查询
 });
 //后端登录注册接口
 $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'cors'], function () use ($router) {
