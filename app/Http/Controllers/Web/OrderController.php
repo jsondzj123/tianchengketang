@@ -374,6 +374,28 @@ class OrderController extends Controller {
             }
         }
     }
+
+    public function csali(){
+        $payinfo = PaySet::select('zfb_app_id','zfb_app_public_key','zfb_public_key')->where(['school_id'=>7])->first();
+        if(empty($payinfo) || empty($payinfo['zfb_app_id']) || empty($payinfo['zfb_app_public_key'])){
+            return response()->json(['code' => 202, 'msg' => '商户号为空']);
+        }
+        $alipay = new AlipayFactory($this->school['id']);
+        $order_number = date('YmdHis', time()) . rand(1111, 9999);
+        $return = $alipay->convergecreatePcPay($order_number,0.01,'开发人员测试');
+        if($return['alipay_trade_precreate_response']['code'] == 10000){
+            require_once realpath(dirname(__FILE__).'/../../../Tools/phpqrcode/QRcode.php');
+            $code = new QRcode();
+            ob_start();//开启缓冲区
+            $returnData  = $code->pngString($return['alipay_trade_precreate_response']['qr_code'], false, 'L', 10, 1);//生成二维码
+            $imageString = base64_encode(ob_get_contents());
+            ob_end_clean();
+            $str = "data:image/png;base64," . $imageString;
+            return response()->json(['code' => 200, 'msg' => '预支付订单生成成功', 'data' => $str]);
+        } else {
+            return response()->json(['code' => 202, 'msg' => '生成二维码失败']);
+        }
+    }
     //汇聚签名
     public function hjHmac($arr,$str){
         $newarr = '';

@@ -265,6 +265,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('schoolLists', 'ArticleController@schoolLists');//学校列表
     $router->post('courseType', 'CourseController@courseType');//根据分类查课程
     $router->post('orderForStudent', 'OrderController@orderForStudent');//订单通过学员查询
+    $router->post('csali', 'OrderController@csali');//订单通过学员查询
 
 });
 //后端登录权限认证相关接口
