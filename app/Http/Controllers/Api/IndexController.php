@@ -651,13 +651,11 @@ class IndexController extends Controller {
                         //自增
                         $famous_teacher_count1 = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("type" , 2)->where("school_id" , $json_info['school_id'])->count();
                         //授权老师
-                        $famous_teacher_count2 = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->count();
-                        if($famous_teacher_count1 && $famous_teacher_count1 > 0  && $famous_teacher_count2 && $famous_teacher_count2 > 0){
+                        $famous_teacher_count2 = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->where("ld_lecturer_educationa.is_del" , 0)->where("ld_course_ref_teacher.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->count();
                             $famous_teacher_list1  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("type" , 2)->where("school_id" , $json_info['school_id'])->get()->toArray();
-                            $famous_teacher_list2  = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->withCount('lessons as lesson_number')->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->get()->toArray();
+                            $famous_teacher_list2  = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->withCount('lessons as lesson_number')->where("ld_course_ref_teacher.is_del" , 0)->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->get()->toArray();
                             $famous_teacher_list = array_merge($famous_teacher_list1,$famous_teacher_list2);
                             $famous_teacher_list = array_unique($famous_teacher_list,SORT_REGULAR);
-                        }
                     } else {  //综合排序|好评
                         //获取名师列表
                         //$famous_teacher_list = Teacher::withCount('lessons as lesson_number')->where('type' , 2)->where('is_del' , 0)->where('is_forbid' , 0)->orderBy('is_recommend' , 'DESC')->offset($offset)->limit($pagesize)->get();
@@ -666,15 +664,14 @@ class IndexController extends Controller {
                         //自增
                         $famous_teacher_count1 = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("type" , 2)->where("school_id" , $json_info['school_id'])->count();
                         //授权老师
-                        $famous_teacher_count2 = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->count();
-                        if($famous_teacher_count1 && $famous_teacher_count1 > 0  && $famous_teacher_count2 && $famous_teacher_count2 > 0){
+                        $famous_teacher_count2 = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->where("ld_lecturer_educationa.is_del" , 0)->where("ld_course_ref_teacher.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->count();
+
                             $famous_teacher_list1  = Teacher::withCount('lessons as lesson_number')->where("is_del" , 0)->where("is_forbid" , 0)->where("type" , 2)->where("school_id" , $json_info['school_id'])->orderBy('is_recommend' , 'DESC')->get()->toArray();
-                            $famous_teacher_list2  = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->withCount('lessons as lesson_number')->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->orderBy('is_recommend' , 'DESC')->get()->toArray();
+
+                            $famous_teacher_list2  = Teacher::join("ld_course_ref_teacher","ld_lecturer_educationa.id","=","ld_course_ref_teacher.teacher_id")->withCount('lessons as lesson_number')->where("ld_course_ref_teacher.is_del" , 0)->where("ld_lecturer_educationa.is_del" , 0)->where("ld_lecturer_educationa.is_forbid" , 0)->where("ld_lecturer_educationa.type" , 2)->where("to_school_id" , $json_info['school_id'])->orderBy('is_recommend' , 'DESC')->get()->toArray();
                             $famous_teacher_list = array_merge($famous_teacher_list1,$famous_teacher_list2);
                             $famous_teacher_list = array_unique($famous_teacher_list,SORT_REGULAR);
-                        }
                     }
-
                     //判断讲师是否为空
                     if($famous_teacher_list && !empty($famous_teacher_list)){
                         //将对象转化为数组信息
@@ -710,6 +707,7 @@ class IndexController extends Controller {
                                 'student_number'      =>  $v['student_number']
                             ];
                         }
+
                         //数据分页
                         $start =($page - 1) * $pagesize;
                         $limit_s= $start + $pagesize;
@@ -723,7 +721,6 @@ class IndexController extends Controller {
                     } else {
                         $teacher_list = "";
                     }
-
                     return response()->json(['code' => 200 , 'msg' => '获取名师列表成功' , 'data' => $teacher_list]);
 
                 }
@@ -858,21 +855,24 @@ class IndexController extends Controller {
                  foreach($teacher_lesson_list as $k => &$v){
                      //获取授课模式
                      $v['methods'] = DB::table('ld_course')->select('method_id as id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
+                     $v['nature'] = 0;
                  }
                  //授权课程   先取授权课程  通过course_id 获取讲师
                  $teacher_lesson_accredit_list = CourseSchool::join('ld_course_teacher','ld_course_teacher.course_id','=','ld_course_school.course_id')
-                 ->select('ld_course_school.id', 'admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'ld_course_school.is_del')
+                 ->select('ld_course_school.course_id as id','ld_course_school.id as school_course_id','admin_id', 'title', 'cover', 'pricing as price', 'sale_price as favorable_price', 'buy_num', 'status', 'ld_course_school.is_del')
                  ->where(['ld_course_school.is_del'=> 0, 'ld_course_school.status' => 1,'ld_course_school.to_school_id' => $json_info['school_id'],'ld_course_teacher.teacher_id'=>$teacher_id])
                  ->groupBy("ld_course_school.id")
                  ->get()->toArray();
+
                  foreach($teacher_lesson_list as $k => &$v){
                      //获取授课模式
                      $v['methods'] = DB::table('ld_course')->select('method_id as id')->join("ld_course_method","ld_course.id","=","ld_course_method.course_id")->where(['ld_course.id'=>$v['id']])->get();
+                     $v['nature'] = 1;
                  }
 
                  foreach($teacher_lesson_accredit_list as $k => &$v){
                     //获取授课模式
-                    $v['methods'] = DB::table('ld_course_school')->select('method_id as id')->join("ld_course_method","ld_course_school.course_id","=","ld_course_method.course_id")->where(['ld_course_school.id'=>$v['id']])->get();
+                    $v['methods'] = DB::table('ld_course_school')->select('method_id as id')->join("ld_course_method","ld_course_school.course_id","=","ld_course_method.course_id")->where(['ld_course_school.id'=>$v['school_course_id']])->get();
                 }
                 $teacher_lesson_list = array_merge($teacher_lesson_list,$teacher_lesson_accredit_list);
                 //数据分页
@@ -1044,7 +1044,7 @@ class IndexController extends Controller {
                                 $token = isset($_REQUEST['user_token']) ? $_REQUEST['user_token'] : 0;
                                 $student = Student::where('token', $token)->first();
                                 //购买人数  基数加真是购买人数
-                                $vv['sold_num'] =  Order::where(['oa_status'=>1,'class_id'=>$vv['id']])->count() + $vv['buy_num'];
+                                $vv['buy_num'] =  Order::where(['oa_status'=>1,'class_id'=>$vv['id']])->count() + $vv['buy_num'];
                                 if(!empty($student)){
                                     $num = Order::where(['student_id'=>$student['id'],'status'=>2,'class_id'=>$vv['id']])->count();
                                     if($num > 0){
@@ -1080,13 +1080,11 @@ class IndexController extends Controller {
                             }
                         }
                         foreach($lessons as $k => $v){
-
                             foreach($v['lesson'] as $kk => $vv){
-
                                 $token = isset($_REQUEST['user_token']) ? $_REQUEST['user_token'] : 0;
                                 $student = Student::where('token', $token)->first();
                                 //购买人数  基数加真是购买人数
-                                $vv['sold_num'] =  Order::where(['oa_status'=>1,'class_id'=>$vv['id']])->count() + $vv['buy_num'];
+                                $vv['buy_num'] =  Order::where(['oa_status'=>1,'class_id'=>$vv['id']])->count() + $vv['buy_num'];
                                 if(!empty($student)){
                                     $num = Order::where(['student_id'=>$student['id'],'status'=>2,'class_id'=>$vv['id']])->count();
                                     if($num > 0){

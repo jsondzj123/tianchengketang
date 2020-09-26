@@ -26,43 +26,6 @@ use Illuminate\Http\Request;
 class TestController extends Controller
 {
 
-
-    public function insertcrosschool(){
-        $arr = [
-            'http://localhost',
-            'https://localhost',
-            'http://localhost:8080',
-            'https://localhost:8080',
-            'http://localhost:8081',
-            'https://localhost:8081',
-            'http://192.168.1.12:8080',
-            'https://192.168.1.12:8080',
-            'http://192.168.1.12:8081',
-            'https://192.168.1.12:8081',
-            'http://testwo.admin.longde999.cn',
-            'https://testwo.admin.longde999.cn',
-            'http://ketang.longde999.cn',
-            'https://ketang.longde999.cn',
-            'http://tiancheng.admin.longde999.cn',
-            'https://tiancheng.admin.longde999.cn',
-            'http://tiancheng.longde999.cn',
-            'https://tiancheng.longde999.cn',
-            'http://neibu.testwo.longde999.cn',
-            'https://neibu.testwo.longde999.cn',
-            'http://neibu.tiancheng.longde999.cn',
-            'https://neibu.tiancheng.longde999.cn',
-            'http://neibu1.testwo.longde999.cn',
-            'https://neibu1.testwo.longde999.cn',
-
-        ];
-        foreach($arr as $k=>$v){
-            $data[$k]['create_time'] = date('Y-m-d H:i:s');
-            $data[$k]['school_dns'] = $v;
-        }
-        DB::table('ld_cross_school')->insert($data);
-    }
-
-
     public function diff(){
         $bankids =[];
         $to_school_id = 8;
@@ -82,7 +45,7 @@ class TestController extends Controller
         // print_r($courseSubjectArr);die;
         foreach($courseSubjectArr as $key=>&$vs){
             $bankIdArr = Bank::where(['parent_id'=>$vs['parent_id'],'child_id'=>$vs['child_id'],'is_del'=>0,'school_id'=>$from_school_id])->pluck('id')->toArray();
-       
+
             if(!empty($bankIdArr)){
                 foreach($bankIdArr as $k=>$vb){
                     array_push($bankids,$vb);
@@ -100,7 +63,7 @@ class TestController extends Controller
         }
          sort($bankids);
         print_r($bankids);
-       
+
     }
 
 
@@ -115,18 +78,8 @@ class TestController extends Controller
     public function index(Request $request)
     {
 
-        $headers = array();
-        foreach ($_SERVER as $key => $value) {
-            if ('HTTP_' == substr($key, 0, 5)) {
-                $headers[str_replace('_', '-', substr($key, 5))] = $value;
-            }
-        }
-        echo '<pre>';
-        print_r($headers);
-
-die;
         $MTCloud = new MTCloud();
-        $res = $MTCloud->courseGet("1250785");
+        $res = $MTCloud->courseGet("1335591");
         dd($res);
         $data['course_id'] = $res['data']['course_id'];
         $data = [];

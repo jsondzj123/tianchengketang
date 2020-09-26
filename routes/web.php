@@ -81,6 +81,8 @@ $router->group(['prefix' => 'api', 'namespace' => 'Api', 'middleware'=> 'user'],
         $router->post('getUserInfoById','UserController@getUserInfoById');          //APP学员详情接口
         $router->post('doUserUpdateInfo','UserController@doUserUpdateInfo');        //APP用户更新信息接口
         $router->post('doLoginOut','UserController@doLoginOut');                    //APP用户退出登录接口
+        $router->post('getUserMoreSchoolList','UserController@getUserMoreSchoolList');            //APP网校列表接口
+        $router->post('doSetDefaultSchool','UserController@doSetDefaultSchool');                  //APP设置默认网校接口
     });
     //支付
     $router->group(['prefix' => 'order'], function () use ($router) {
@@ -267,6 +269,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('orderForStudent', 'OrderController@orderForStudent');//订单通过学员查询
     $router->post('csali', 'OrderController@csali');//订单通过学员查询
 
+
+
 });
 //后端登录权限认证相关接口
 $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors','api']], function () use ($router) {
@@ -418,6 +422,7 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('importUser', 'StudentController@doImportUser');                    //导入学员excel功能
         $router->post('getStudentTransferSchoolList', 'StudentController@getStudentTransferSchoolList');      //学员转校列表
         $router->post('doTransferSchool', 'StudentController@doTransferSchool');                              //学员转校
+        $router->post('getStudentStudyList', 'StudentController@getStudentStudyList');           //获取学员学校进度列表
     });
 
     //讲师教务相关模块(dzj)
@@ -670,6 +675,9 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
 
 
     //end 网校系统     lys
+
+
+
 
     //课程模块（重构）【公开课】（lys）
     $router->group(['prefix' => 'opencourse'], function () use ($router) {
