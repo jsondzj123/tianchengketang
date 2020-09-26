@@ -271,7 +271,7 @@ class CourseController extends Controller {
             $teacherlist = Couresteacher::where(['course_id' => $course['course_id'], 'is_del' => 0])->get();
             if (!empty($teacherlist)) {
                 foreach ($teacherlist as $k => $v) {
-                    $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first()->toArray();
+                    $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first();
                     array_push($teacher, $oneteacher);
                 }
             }
