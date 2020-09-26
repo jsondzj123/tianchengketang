@@ -269,8 +269,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin', 'middleware'=> 'co
     $router->post('orderForStudent', 'OrderController@orderForStudent');//订单通过学员查询
     $router->post('csali', 'OrderController@csali');//订单通过学员查询
 
-
-
 });
 //后端登录权限认证相关接口
 $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['jwt.auth', 'cors','api']], function () use ($router) {
