@@ -272,8 +272,11 @@ class CourseController extends Controller {
             if (!empty($teacherlist)) {
                 foreach ($teacherlist as $k => $v) {
                     if(!empty($v['teacher_id'])){
-                        $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first()->toArray();
-                        array_push($teacher, $oneteacher);
+                        $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first();
+                        if(!empty($oneteacher)){
+                            $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first()->toArray();
+                            array_push($teacher, $oneteacher);
+                        }
                     }
                 }
             }
@@ -318,8 +321,11 @@ class CourseController extends Controller {
             if (!empty($teacherlist)) {
                 foreach ($teacherlist as $k => $v) {
                     if(!empty($v['teacher_id'])){
-                        $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first()->toArray();
-                        array_push($teacher, $oneteacher);
+                        $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first();
+                        if(!empty($oneteacher)){
+                            $oneteacher = Teacher::where(['id' => $v['teacher_id'], 'is_del' => 0])->first()->toArray();
+                            array_push($teacher, $oneteacher);
+                        }
                     }
                 }
             }
