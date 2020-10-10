@@ -1143,6 +1143,7 @@ class Student extends Model {
         }
 
         $count = count($chapters);
+
         $total = $count;
         if($total > 0){
             $arr = array_merge($chapters);
@@ -1157,6 +1158,9 @@ class Student extends Model {
         }else{
             $chapters=[];
         }
-        return $chapters;
+        $data = [];
+        $data['chapters'] = $chapters;
+        $data['count'] = $count;
+        return $data;
     }
 }
