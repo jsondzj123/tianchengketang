@@ -224,7 +224,6 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('userPaying','OrderController@userPaying');//用户进行支付
         $router->post('webajax','OrderController@webajax');//前端轮询查询接口
         $router->post('chargeOrder','OrderController@chargeOrder');//0元购买接口
-        $router->post('scanPay','CourseController@scanPay');//扫码支付
         //汇聚扫码支付
         $router->post('scanPay', 'OrderController@scanPay');//扫码支付页面信息
         $router->post('converge', 'OrderController@converge');//汇聚扫码
@@ -242,7 +241,8 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('alinotify', 'NotifyController@alinotify');//web端直接购买支付宝 购买回调
         $router->post('convergecreateNotifyPcPay', 'NotifyController@convergecreateNotifyPcPay');//web端扫码购买支付宝 购买回调
         $router->get('hjnotify', 'NotifyController@hjnotify');//汇聚 支付回调
-
+        $router->get('ylnotify', 'NotifyController@ylnotify');//银联 支付回调
+        $router->post('yltest', 'OrderController@yltest');//银联测试支付
     });
 });
 //后台端路由接口
