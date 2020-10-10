@@ -1051,6 +1051,12 @@ class Student extends Model {
     }
     //获取学员学校进度列表
     public static function getStudentStudyList($data){
+
+        //每页显示的条数
+        $pagesize = isset($data['pagesize']) && $data['pagesize'] > 0 ? $data['pagesize'] : 10;
+        $page     = isset($data['page']) && $data['page'] > 0 ? $data['page'] : 1;
+        $offset   = ($page - 1) * $pagesize;
+
         //查询学员id
         $student = self::where("phone",$data['phone'])->first();
         //dd($student);
@@ -1136,6 +1142,21 @@ class Student extends Model {
 
         }
 
+        $count = count($chapters);
+        $total = $count;
+        if($total > 0){
+            $arr = array_merge($chapters);
+            $start=($page-1)*$pagesize;
+            $limit_s=$start+$pagesize;
+            $chapters=[];
+            for($i=$start;$i<$limit_s;$i++){
+                if(!empty($arr[$i])){
+                    array_push($chapters,$arr[$i]);
+                }
+            }
+        }else{
+            $chapters=[];
+        }
         return $chapters;
     }
 }
