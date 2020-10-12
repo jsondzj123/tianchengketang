@@ -126,6 +126,7 @@ class ArticletypeController extends Controller {
         }
         //获取excel表格中分类
         $exam_list = self::doImportExcel(new \App\Imports\UsersImport , $path);
+        print_r($exam_list);die;
         foreach ($exam_list['data'] as $k=>$v){
             if($v[0] && $v[0] > 0){
                 Articletype::insertGetId([
