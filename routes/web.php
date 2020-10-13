@@ -406,7 +406,8 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
     $router->post('doUploadOssImage', 'CommonController@doUploadOssImage');
     //上传到OSS文件接口
     $router->post('doUploadOssFile', 'CommonController@doUploadOssFile');
-
+    //上传到本地服务器接口
+    $router->post('doUploadCaFile', 'CommonController@doUploadCaFile');
     //用户学员相关模块(dzj)
     $router->group(['prefix' => 'student'], function () use ($router) {
         $router->post('doInsertStudent', 'StudentController@doInsertStudent');        //添加学员的方法
@@ -673,7 +674,6 @@ $router->group(['prefix' => 'admin' , 'namespace' => 'Admin' , 'middleware'=> ['
         $router->post('getList', 'PageSetController@getList');  //页面设置 列表
         $router->post('details', 'PageSetController@details');  //详情 （修改动作）
         $router->post('doLogoUpdate', 'PageSetController@doLogoUpdate');  //修改logo
-
     });
 
 
