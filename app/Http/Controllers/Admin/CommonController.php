@@ -365,7 +365,7 @@ class CommonController extends BaseController {
             //重置文件名
             $filename = time() . rand(1,10000) . uniqid() . substr($file['name'], stripos($file['name'], '.'));
             $path     = $file_path.$filename;
-            
+            chmod($path, 0755); // 八进制数，正确的 mode 值
             //判断文件是否是通过 HTTP POST 上传的
             if(is_uploaded_file($_FILES['file']['tmp_name'])){
                 //上传文件方法
