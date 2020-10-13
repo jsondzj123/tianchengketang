@@ -365,15 +365,15 @@ class CommonController extends BaseController {
             //重置文件名
             $filename = time() . rand(1,10000) . uniqid() . substr($file['name'], stripos($file['name'], '.'));
             $path     = $file_path.$filename;
-            chmod($file_path, 0755); // 八进制数，正确的 mode 值
+            // chmod($path, 0755); // 八进制数，正确的 mode 值
             //判断文件是否是通过 HTTP POST 上传的
             if(is_uploaded_file($_FILES['file']['tmp_name'])){
                 //上传文件方法
                 $rs =  move_uploaded_file($_FILES['file']['tmp_name'], $path);
                 if($rs && !empty($rs)){
-                    return response()->json(['code' => 200 , 'msg' => '上传图片成功' , 'data' => "/upload/ca/" .$schoolData['id']. '/'.$filename]);
+                    return response()->json(['code' => 200 , 'msg' => '上传文件成功' , 'data' => "/upload/ca/" .$schoolData['id']. '/'.$filename]);
                 } else {
-                    return response()->json(['code' => 203 , 'msg' => '上传图片失败']);
+                    return response()->json(['code' => 203 , 'msg' => '上传文件失败']);
                 }
             } else {
                 return response()->json(['code' => 202 , 'msg' => '上传方式非法']);
