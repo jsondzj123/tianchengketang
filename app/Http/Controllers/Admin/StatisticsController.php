@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
 use App\Models\Article;
+use App\Models\CourseLiveClassChild;
 use App\Models\Lecturer;
 use App\Models\Lesson;
 use App\Models\LessonTeacher;
@@ -316,6 +317,19 @@ class StatisticsController extends Controller {
             ->orderBy('ld_lecturer_educationa.id','desc')
 //           ->whereBetween('ld_lecturer_educationa.create_at', [$statetime, $endtime])
            ->offset($offset)->limit($pagesize)->get();
+       if(!empty($teacher)){
+           foreach ($teacher as $K=>&$v){
+               $time=0;
+               $live = CourseLiveClassChild::where(['nickname'=>$v['real_name']])->where(['is_del'=>0,'is_forbid'=>0])->get()->toArray();
+               if(!empty($live)){
+                    foreach ($live as $ks=>$vs){
+                        $times = floor(($vs['end_time'] - $vs['start_time']) / 60);
+                        $time = $time + $times;
+                    }
+               }
+               $v['times'] = $time;
+           }
+       }
        $num = Lecturer::where(['type'=>2,'is_del'=>0,'is_forbid'=>0])->sum('number');
        $pages=[
            'pageSize'=>$pagesize,
