@@ -234,7 +234,6 @@ class StatisticsController extends Controller {
         * return  array
         */
    public function TeacherList(){
-       echo "123456798";die;
        $data = self::$accept_data;
        //每页显示的条数
        $pagesize = (int)isset($data['pageSize']) && $data['pageSize'] > 0 ? $data['pageSize'] : 20;
