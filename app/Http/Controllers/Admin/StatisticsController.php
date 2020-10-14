@@ -294,7 +294,8 @@ class StatisticsController extends Controller {
                }
            })->where(['ld_lecturer_educationa.type'=>2,'ld_lecturer_educationa.is_del'=>0,'ld_lecturer_educationa.is_forbid'=>0])
            ->orderBy('ld_lecturer_educationa.id','desc')
-           ->whereBetween('ld_lecturer_educationa.create_at', [$statetime, $endtime])->count();
+//           ->whereBetween('ld_lecturer_educationa.create_at', [$statetime, $endtime])
+           ->count();
        $teacher = Lecturer::select('ld_lecturer_educationa.id','ld_lecturer_educationa.real_name','ld_lecturer_educationa.phone','ld_lecturer_educationa.number')
 //            ->leftJoin('ld_school','ld_school.id','=','ld_lecturer_educationa.school_id')
             ->where(function($query) use ($data) {
@@ -313,7 +314,7 @@ class StatisticsController extends Controller {
             })
             ->where(['ld_lecturer_educationa.type'=>2,'ld_lecturer_educationa.is_del'=>0,'ld_lecturer_educationa.is_forbid'=>0])
             ->orderBy('ld_lecturer_educationa.id','desc')
-           ->whereBetween('ld_lecturer_educationa.create_at', [$statetime, $endtime])
+//           ->whereBetween('ld_lecturer_educationa.create_at', [$statetime, $endtime])
            ->offset($offset)->limit($pagesize)->get();
        $num = Lecturer::where(['type'=>2,'is_del'=>0,'is_forbid'=>0])->sum('number');
        $pages=[
