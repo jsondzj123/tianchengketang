@@ -178,6 +178,7 @@ $router->group(['prefix' => 'web' , 'namespace' => 'Web'], function () use ($rou
         $router->post('getCollectErrorExamCount','BankController@getCollectErrorExamCount');  //我的收藏/错题本/做题记录数量接口
         $router->post('getMyCollectExamList','BankController@getMyCollectExamList');  //我的收藏列表接口
         $router->post('getMyErrorExamList','BankController@getMyErrorExamList');      //错题本列表接口
+        $router->post('doMyErrorExam','BankController@doMyErrorExam');            //错题本做题接口
         $router->post('getMyMakeExamList','BankController@getMyMakeExamList');        //做题记录列表接口
         $router->post('getMyMakeExamPageList','BankController@getMyMakeExamPageList'); //做题记录列表分页接口
         $router->post('getPapersIdByMoId','BankController@getPapersIdByMoId');         //获取试卷做题记录的id接口
