@@ -317,6 +317,7 @@ class StatisticsController extends Controller {
             ->orderBy('ld_lecturer_educationa.id','desc')
 //           ->whereBetween('ld_lecturer_educationa.create_at', [$statetime, $endtime])
            ->offset($offset)->limit($pagesize)->get();
+       $counttime = 0;
        if(!empty($teacher)){
            foreach ($teacher as $K=>&$v){
                $time=0;
@@ -328,15 +329,15 @@ class StatisticsController extends Controller {
                     }
                }
                $v['times'] = $time;
+               $counttime = $counttime + $time;
            }
        }
-       $num = Lecturer::where(['type'=>2,'is_del'=>0,'is_forbid'=>0])->sum('number');
        $pages=[
            'pageSize'=>$pagesize,
            'page' =>$page,
            'total'=>$count
        ];
-       return response()->json(['code'=>200,'msg'=>'获取成功','data'=>$teacher,'count'=>$num,'page'=>$pages,'schoolList'=>$schoolList[0]]);
+       return response()->json(['code'=>200,'msg'=>'获取成功','data'=>$teacher,'count'=>$counttime,'page'=>$pages,'schoolList'=>$schoolList[0]]);
    }
 
    /*
