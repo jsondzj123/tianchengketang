@@ -295,8 +295,8 @@ class StatisticsController extends Controller {
            })->where(['ld_lecturer_educationa.type'=>2,'ld_lecturer_educationa.is_del'=>0,'ld_lecturer_educationa.is_forbid'=>0])
            ->orderBy('ld_lecturer_educationa.id','desc')
            ->whereBetween('ld_lecturer_educationa.create_at', [$statetime, $endtime])->count();
-       $teacher = Lecturer::select('ld_lecturer_educationa.id','ld_lecturer_educationa.real_name','ld_lecturer_educationa.phone','ld_lecturer_educationa.number','ld_school.name')
-            ->leftJoin('ld_school','ld_school.id','=','ld_lecturer_educationa.school_id')
+       $teacher = Lecturer::select('ld_lecturer_educationa.id','ld_lecturer_educationa.real_name','ld_lecturer_educationa.phone','ld_lecturer_educationa.number')
+//            ->leftJoin('ld_school','ld_school.id','=','ld_lecturer_educationa.school_id')
             ->where(function($query) use ($data) {
                 //分校
                 if(!empty($data['school_id'])&&$data['school_id'] != ''){
