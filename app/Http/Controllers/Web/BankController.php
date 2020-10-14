@@ -1561,6 +1561,9 @@ class BankController extends Controller {
                 //根据条件获取此学生此题是否答了
                 $info = StudentDoTitle::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where("papers_id" , $v['papers_id'])->where('exam_id' , $v['exam_id'])->where('type' , $v['type'])->first();
 
+                //判断学员是否标记此题
+                $is_tab     =  StudentTabQuestion::where("student_id" , self::$accept_data['user_info']['user_id'])->where("bank_id" , $bank_id)->where("subject_id" , $subject_id)->where('papers_id' , $v['papers_id'])->where('type' , $v['type'])->where('exam_id' , $v['exam_id'])->where('status' , 1)->count();
+                    
                 //试题随机展示
                 $exam_array[$exam_info['type']][] = [
                     'papers_id'           =>  $v['papers_id'] ,
@@ -1573,6 +1576,7 @@ class BankController extends Controller {
                     'my_answer'           =>  $info && !empty($info) && !empty($info['answer']) ? $info['answer'] : '' ,
                     'is_right'            =>  $info && !empty($info) ? $info['is_right'] : 0 ,
                     'is_collect'          =>  $is_collect ? 1 : 0 ,
+                    'is_tab'              =>  $is_tab ? 1 : 0 ,
                     'type'                =>  $v['type']
                 ];
             }
