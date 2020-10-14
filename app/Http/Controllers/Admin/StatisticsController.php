@@ -299,15 +299,15 @@ class StatisticsController extends Controller {
 //            ->leftJoin('ld_school','ld_school.id','=','ld_lecturer_educationa.school_id')
             ->where(function($query) use ($data) {
                 //分校
-                if(!empty($data['school_id'])&&$data['school_id'] != ''){
+                if(isset($data['school_id'])&& !empty($data['school_id'] != '')){
                     $query->where('ld_lecturer_educationa.school_id',$data['school_id']);
                 }
                 //用户姓名
-                if(!empty($data['real_name'])&&$data['real_name'] != ''){
+                if(isset($data['real_name'])&&!empty($data['real_name'] != '')){
                     $query->where('ld_lecturer_educationa.real_name','like','%'.$data['real_name'].'%');
                 }
                 //用户手机号
-                if(!empty($data['phone'])&&$data['phone'] != ''){
+                if(isset($data['phone'])&&empty($data['phone'] != '')){
                     $query->where('ld_lecturer_educationa.phone','like','%'.$data['phone'].'%');
                 }
             })
