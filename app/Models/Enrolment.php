@@ -117,6 +117,7 @@ class Enrolment extends Model {
                 return ['code' => 202 , 'msg' => '该课程已售完'];
             }
         }
+
         //获取后端的操作员id
         $admin_id = isset(AdminLog::getAdminInfo()->admin_user->id) ? AdminLog::getAdminInfo()->admin_user->id : 0;
 
